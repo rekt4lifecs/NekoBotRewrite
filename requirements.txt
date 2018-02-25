@@ -1,0 +1,10 @@
+git+https://github.com/Rapptz/discord.py@rewrite
+git+https://github.com/pytest-dev/pytest-asyncio
+tinydb
+beautifulsoup4
+pillow
+requests
+psutil
+hurry.filesize
+matplotlib
+numpy
