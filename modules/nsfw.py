@@ -186,19 +186,50 @@ class NSFW:
         await ctx.send(embed=em)
 
     @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def gonewild(self, ctx):
+        """r/GoneWild"""
+        if not ctx.message.channel.is_nsfw():
+            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            return
+        self.counter['gonewild'] += 1
+        data = config.imgur._get_imgur(self, "gonewild", page=random.randint(1, 5))['data']
+        x =  random.choice(data)
+        em = discord.Embed(title=f"**{x['title']}**",
+                           color=0xDEADBF)
+        em.set_image(url=x['link'])
+
+        await ctx.send(embed=em)
+
+    @commands.command()
     async def nsfw(self, ctx):
         """NSFW Stats"""
-        objects = ('PGIF', '4k', 'search', 'lewd\nneko', 'Yande.re', 'Ass', 'Boobs', "Cum", "Lingerie")
-        y_pos = np.arange(len(objects))
-        performance = [self.counter["pgif"], self.counter["4k"], self.counter["phsearch"], self.counter["lewdneko"],
-                       self.counter["yandere"], self.counter["ass"], self.counter["boobs"], self.counter['cum'], self.counter['lingerie']]
-        plt.bar(y_pos, performance, align='center', alpha=0.5)
-        plt.xticks(y_pos, objects)
-        plt.ylabel('Usage')
-        plt.title('NSFW Command Usage')
-        plt.savefig("data/nsfw.png")
-        file = discord.File("data/nsfw.png")
-        await ctx.send(file=file)
+        embed = discord.Embed(color=0xDEADBF,
+                              title="NSFW Stats")
+        embed.add_field(name="PGIF", value=self.counter['pgif'])
+        embed.add_field(name="4k", value=self.counter['4k'])
+        embed.add_field(name="Lewd Neko", value=self.counter['lewdneko'])
+        embed.add_field(name="Yande.re", value=self.counter['yandere'])
+        embed.add_field(name="Ass", value=self.counter['ass'])
+        embed.add_field(name="Boobs", value=self.counter['boobs'])
+        embed.add_field(name="Cumsluts", value=self.counter['cum'])
+        embed.add_field(name="Lingerie", value=self.counter['lingerie'])
+        embed.add_field(name="GoneWild", value=self.counter['gonewild'])
+
+        await ctx.send(embed=embed)
+
+        ### TKINTER ERROR #TODO
+        # objects = ('PGIF', '4k', 'search', 'lewd\nneko', 'Yande.re', 'Ass', 'Boobs', "Cum", "Lingerie")
+        # y_pos = np.arange(len(objects))
+        # performance = [self.counter["pgif"], self.counter["4k"], self.counter["phsearch"], self.counter["lewdneko"],
+        #                self.counter["yandere"], self.counter["ass"], self.counter["boobs"], self.counter['cum'], self.counter['lingerie']]
+        # plt.bar(y_pos, performance, align='center', alpha=0.5)
+        # plt.xticks(y_pos, objects)
+        # plt.ylabel('Usage')
+        # plt.title('NSFW Command Usage')
+        # plt.savefig("data/nsfw.png")
+        # file = discord.File("data/nsfw.png")
+        # await ctx.send(file=file)
 
 
 def setup(bot):
