@@ -79,7 +79,7 @@ class Levels:
     #     await ctx.send(file=discord.File(f"data/profiles/{user.id}.png"))
 
     @commands.command()
-    async def settitle(self, ctx, title : str):
+    async def settitle(self, ctx, *, title : str):
         """Set profile title"""
         if not db.execute('SELECT 1 FROM levels WHERE userid = {}'.format(ctx.message.author.id)):
             await ctx.send("Error finding your profile.")
@@ -95,7 +95,7 @@ class Levels:
             await ctx.send("Problem updating title to database...\n`{}`".format(e))
 
     @commands.command()
-    async def setdesc(self, ctx, description : str):
+    async def setdesc(self, ctx, *, description : str):
         """Set profile description"""
         if not db.execute('SELECT 1 FROM levels WHERE userid = {}'.format(ctx.message.author.id)):
             await ctx.send("Error finding your profile.")
