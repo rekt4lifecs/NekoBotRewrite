@@ -147,7 +147,7 @@ class Moderation:
         else:
             try:
                 await user.edit(mute=False)
-                await ctx.send(f"Muted {user.name}")
+                await ctx.send(f"Unmuted {user.name}")
             except discord.Forbidden:
                 await ctx.send("I don't have the permissions to do that ;-;")
 
