@@ -105,7 +105,7 @@ class Levels:
             connection.commit()
             await ctx.send("Title Updated!")
         except Exception as e:
-            await ctx.send("Problem updating title to database...\n`{}`".format(e))
+            await ctx.send("Problem updating title to database...")
 
     @commands.command()
     async def setdesc(self, ctx, *, description : str):
@@ -130,7 +130,7 @@ class Levels:
             connection.commit()
             await ctx.send("Description Updated!")
         except Exception as e:
-            await ctx.send("Problem updating description to database...\n`{}`".format(e))
+            await ctx.send("Problem updating description to database...")
 
     @commands.command()
     @commands.cooldown(1, 30, commands.BucketType.user)
