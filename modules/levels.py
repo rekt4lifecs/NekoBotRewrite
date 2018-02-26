@@ -27,9 +27,9 @@ class Levels:
         db.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
         REP = db.fetchone()[0]
         db.execute("SELECT title FROM levels WHERE userid = {}".format(user.id))
-        title = db.fetchone()
+        title = db.fetchone()[0]
         db.execute("SELECT info FROM levels WHERE userid = {}".format(user.id))
-        desc = db.fetchone()
+        desc = db.fetchone()[0]
 
         try:
             db.execute("select balance from economy where userid = {}".format(user.id))
