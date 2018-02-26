@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, pymysql, config, time, random, math, datetime, requests
+import discord, pymysql, config, time, random, math, datetime, requests, re
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from textwrap import wrap
@@ -11,6 +11,10 @@ connection = pymysql.connect(user=config.db.user,
                              port=config.db.port,
                              database=config.db.database)
 db = connection.cursor()
+
+sqlCHAR = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f",
+           "G", "g", "H", "h", "I", "i", "j", "J", "K", "k", "L", "l", "M", "m", "N", "n", "O", "o", "P", "p", "Q", "q",
+           "R", "r", "S", "s", "T", "t", "U", "u", "V", "v", "W", "w", "X", "x", "Y", "y", "Z", "z"]
 
 class Levels:
     """Levelling System OwO"""
@@ -81,8 +85,11 @@ class Levels:
     @commands.command()
     async def settitle(self, ctx, *, title : str):
         """Set profile title"""
+        forbiddenCHAR = ["'", '"', ";"]
         if not db.execute('SELECT 1 FROM levels WHERE userid = {}'.format(ctx.message.author.id)):
             await ctx.send("Error finding your profile.")
+            return
+        if forbiddenCHAR in title:
             return
         if len(title) > 24:
             await ctx.send("Your title is over 24 characters...")
@@ -97,8 +104,11 @@ class Levels:
     @commands.command()
     async def setdesc(self, ctx, *, description : str):
         """Set profile description"""
+        forbiddenCHAR = ["'", '"', ";"]
         if not db.execute('SELECT 1 FROM levels WHERE userid = {}'.format(ctx.message.author.id)):
             await ctx.send("Error finding your profile.")
+            return
+        if forbiddenCHAR in description:
             return
         if len(description) > 50:
             await ctx.send("Your description is too long.")
@@ -117,7 +127,7 @@ class Levels:
         if user == ctx.message.author:
             await ctx.send("You can't rep yourself 😦")
             return
-        elif user == user.bot:
+        elif user.bot:
             await ctx.send("You can't rep a bot 😦")
             return
         else:
