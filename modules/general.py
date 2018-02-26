@@ -216,29 +216,36 @@ class General:
             user = ctx.message.author
         await ctx.send(user.avatar_url_as(format="png"))
 
-    # @commands.command()
-    # async def help(self, ctx):
-    #     """Help Command OwO"""
-    #     color = 0xDEADBF
-    #
-    #     embed = discord.Embed(color=color)
-    #     embed.set_author(name="NekoBot",
-    #                      icon_url="https://i.imgur.com/x2N73t0.png")
-    #
-    #     embed.add_field(name="General",
-    #                     value="`info`, `help`")
-    #
-    #     embed.add_field(name="NSFW",
-    #                     value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `ass`")
-    #
-    #     embed.add_field(name="Reactions",
-    #                     value="`hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
-    #                             "`poke`, `nom`, `lick`, `lewd`, `trap`, `owo`, `wasted`, `banghead`,"
-    #                             "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`")
-    #
-    #     await ctx.send(embed=embed)
+    @commands.command()
+    async def help(self, ctx):
+        """Help Command OwO"""
+        color = 0xDEADBF
+        # too lazy to loop kthx fiteme source stealers
+        embed = discord.Embed(color=color)
+        embed.set_author(name="NekoBot",
+                         icon_url="https://i.imgur.com/x2N73t0.png")
+
+        embed.add_field(name="General",
+                        value="`info`, `help`, `lmgtfy`, `cookie`, `serverinfo`, `userinfo`, `channelinfo`, `flip`, "
+                              "`avatar`, `urban`")
+        embed.add_field(name="Moderation", value="`kick`, `ban`, `massban`, `unban`, `rename`, `mute` (VC), `unmute` (VC)")
+        embed.add_field(name="IMGWelcomer", value="`imgwelcome`")
+        embed.add_field(name="Levels", value="`profile`, `settitle`, `setdesc`, `rep`")
+        embed.add_field(name="Fun", value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`")
+        embed.add_field(name="Economy", value="`register`, `balance`, `daily`, more soon...")
+
+        embed.add_field(name="NSFW",
+                        value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `ass`, `cumsluts`, `lingerie`,"
+                              " `nsfw`")
+
+        embed.add_field(name="Reactions",
+                        value="`hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
+                                "`poke`, `nom`, `lick`, `lewd`, `trap`, `owo`, `wasted`, `banghead`,"
+                                "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`")
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
-    # bot.remove_command('help')
+    bot.remove_command('help')
     bot.add_cog(General(bot))
