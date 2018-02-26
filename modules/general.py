@@ -225,8 +225,7 @@ class General:
         new_message = message.replace(" ", "+")
         url = f"http://api.qrserver.com/v1/create-qr-code/?data={new_message}"
 
-        embed = discord.Embed(color=0xDEADBF,
-                              title=f"{message}")
+        embed = discord.Embed(color=0xDEADBF)
         embed.set_image(url=url)
         await ctx.send(embed=embed)
 
