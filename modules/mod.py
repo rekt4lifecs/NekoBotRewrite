@@ -103,7 +103,7 @@ class Moderation:
 
     @commands.is_owner()
     @commands.command()
-    async def presence(self, ctx, changeto : str):
+    async def presence(self, ctx, *, changeto : str):
         await ctx.send("changed")
         game = discord.Game(name=changeto, url="https://www.twitch.tv/rekt4lifecs",
                             type=1)
