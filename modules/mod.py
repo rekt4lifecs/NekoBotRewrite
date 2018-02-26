@@ -151,5 +151,10 @@ class Moderation:
             except discord.Forbidden:
                 await ctx.send("I don't have the permissions to do that ;-;")
 
+    @commands.command()
+    @commands.is_owner()
+    async def say(self, ctx, *, what_to_say : str):
+        await ctx.send(what_to_say)
+
 def setup(bot):
     bot.add_cog(Moderation(bot))
