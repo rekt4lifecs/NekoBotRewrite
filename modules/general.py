@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 import sys, psutil, datetime, aiohttp, random
+from collections import Counter
 from hurry.filesize import size
 from .utils.chat_formatting import pagify
 from PIL import __version__ as pilv
@@ -13,6 +14,7 @@ class General:
 
     def __init__(self, bot):
         self.bot = bot
+        self.counter = Counter()
 
     @commands.command()
     async def lmgtfy(self, ctx, *, search_terms : str):
@@ -217,34 +219,70 @@ class General:
         await ctx.send(user.avatar_url_as(format="png"))
 
     @commands.command()
-    async def help(self, ctx):
+    async def help(self, ctx, option : str = None):
         """Help Command OwO"""
         color = 0xDEADBF
         # too lazy to loop kthx fiteme source stealers
-        embed = discord.Embed(color=color)
-        embed.set_author(name="NekoBot",
-                         icon_url="https://i.imgur.com/x2N73t0.png")
+        if option == "nsfw":
+            embed = discord.Embed(color=color,
+                                  title="NSFW Stats")
+            embed.add_field(name="PGIF", value=self.counter['pgif'])
+            embed.add_field(name="4k", value=self.counter['4k'])
+            embed.add_field(name="Lewd Neko", value=self.counter['lewdneko'])
+            embed.add_field(name="Yande.re", value=self.counter['yandere'])
+            embed.add_field(name="Ass", value=self.counter['ass'])
+            embed.add_field(name="Boobs", value=self.counter['boobs'])
+            embed.add_field(name="Cumsluts", value=self.counter['cum'])
+            embed.add_field(name="Lingerie", value=self.counter['lingerie'])
+            embed.add_field(name="GoneWild", value=self.counter['gonewild'])
+        elif option == "reactions":
+            embed = discord.Embed(color=color,
+                                  title="Reaction Stats")
+            embed.add_field(name="Hug", value=self.counter['hug'])
+            embed.add_field(name="Kiss", value=self.counter['kiss'])
+            embed.add_field(name="Pat", value=self.counter['pat'])
+            embed.add_field(name="Cuddle", value=self.counter['cuddle'])
+            embed.add_field(name="Tickle", value=self.counter['tickle'])
+            embed.add_field(name="Bite", value=self.counter['bite'])
+            embed.add_field(name="Slap", value=self.counter['slap'])
+            embed.add_field(name="Punch", value=self.counter['punch'])
+            embed.add_field(name="Nom", value=self.counter['nom'])
+            embed.add_field(name="Lick", value=self.counter['lick'])
+            embed.add_field(name="lewd", value=self.counter['lewd'])
+            embed.add_field(name="Trap", value=self.counter['trap'])
+            embed.add_field(name="OwO", value=self.counter['owo'])
+            embed.add_field(name="Wasted", value=self.counter['wasted'])
+            embed.add_field(name="Banghead", value=self.counter['banghead'])
+            embed.add_field(name="DiscordMeme", value=self.counter['discordmeme'])
+            embed.add_field(name="Stare", value=self.counter['stare'])
+            embed.add_field(name="Thinking", value=self.counter['thinking'])
+            embed.add_field(name="Dab", value=self.counter['dab'])
+            embed.add_field(name="Kemonomimi", value=self.counter['kemonomimi'])
+            embed.add_field(name="Why", value=self.counter['why'])
+        else:
+            embed = discord.Embed(color=color)
+            embed.set_author(name="NekoBot",
+                            icon_url="https://i.imgur.com/x2N73t0.png")
 
-        embed.add_field(name="General",
-                        value="`info`, `help`, `lmgtfy`, `cookie`, `serverinfo`, `userinfo`, `channelinfo`, `flip`, "
-                              "`avatar`, `urban`")
-        embed.add_field(name="Moderation", value="`kick`, `ban`, `massban`, `unban`, `rename`, `mute` (VC), `unmute` (VC)")
-        embed.add_field(name="IMGWelcomer", value="`imgwelcome`")
-        embed.add_field(name="Levels", value="`profile`, `settitle`, `setdesc`, `rep`")
-        embed.add_field(name="Fun", value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`")
-        embed.add_field(name="Economy", value="`register`, `balance`, `daily`, more soon...")
+            embed.add_field(name="General",
+                            value="`info`, `help`, `lmgtfy`, `cookie`, `serverinfo`, `userinfo`, `channelinfo`, `flip`, "
+                                 "`avatar`, `urban`")
+            embed.add_field(name="Moderation", value="`kick`, `ban`, `massban`, `unban`, `rename`, `mute` (VC), `unmute` (VC)")
+            embed.add_field(name="IMGWelcomer", value="`imgwelcome`")
+            embed.add_field(name="Levels", value="`profile`, `settitle`, `setdesc`, `rep`")
+            embed.add_field(name="Fun", value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`")
+            embed.add_field(name="Economy", value="`register`, `balance`, `daily`, more soon...")
 
-        embed.add_field(name="NSFW",
-                        value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `ass`, `cumsluts`, `lingerie`,"
+            embed.add_field(name="NSFW",
+                            value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `ass`, `cumsluts`, `lingerie`,"
                               " `gonewild`, `nsfw`")
 
-        embed.add_field(name="Reactions",
-                        value="`hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
-                                "`poke`, `nom`, `lick`, `lewd`, `trap`, `owo`, `wasted`, `banghead`,"
-                                "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`")
+            embed.add_field(name="Reactions",
+                            value="`hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
+                                    "`poke`, `nom`, `lick`, `lewd`, `trap`, `owo`, `wasted`, `banghead`,"
+                                    "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`")
 
         await ctx.send(embed=embed)
-
 
 def setup(bot):
     bot.remove_command('help')

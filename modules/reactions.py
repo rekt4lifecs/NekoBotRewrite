@@ -1,5 +1,6 @@
 from discord.ext import commands
 import discord, config, aiohttp, random
+from collections import Counter
 
 key = config.weeb
 auth = {"Authorization": "Wolke " + key}
@@ -9,11 +10,13 @@ class Reactions:
 
     def __init__(self, bot):
         self.bot = bot
+        self.counter = Counter()
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def hug(self, ctx, user: discord.Member):
         """Hug someone OwO"""
+        self.counter['hug'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=hug') as r:
                 res = await r.json()
@@ -32,6 +35,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def kiss(self, ctx, user: discord.Member):
         """Kiss someone OwO"""
+        self.counter['kiss'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=kiss') as r:
                 res = await r.json()
@@ -50,6 +54,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def pat(self, ctx, user: discord.Member):
         """Pat someone OwO"""
+        self.counter['pat'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=pat') as r:
                 res = await r.json()
@@ -68,6 +73,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def cuddle(self, ctx, user: discord.Member):
         """Cudddddduuulzzzz OWO"""
+        self.counter['cuddle'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=cuddle') as r:
                 res = await r.json()
@@ -86,6 +92,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def tickle(self, ctx, user: discord.Member):
         """Whats this OWO"""
+        self.counter['tickle'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=tickle') as r:
                 res = await r.json()
@@ -104,6 +111,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def bite(self, ctx, user: discord.Member):
         """Bite someone OwO"""
+        self.counter['bite'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=bite') as r:
                 res = await r.json()
@@ -122,6 +130,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def slap(self, ctx, user: discord.Member):
         """Ouch ;-;"""
+        self.counter['slap'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=slap') as r:
                 res = await r.json()
@@ -140,6 +149,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def punch(self, ctx, user: discord.Member):
         """Ouch ;-;"""
+        self.counter['punch'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=punch') as r:
                 res = await r.json()
@@ -157,6 +167,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def poke(self, ctx, user: discord.Member):
         """poke poke poke ^-^"""
+        self.counter['poke'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=poke') as r:
                 res = await r.json()
@@ -175,6 +186,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def nom(self, ctx, user: discord.Member):
         """noomss on someone owo"""
+        self.counter['nom'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=nom') as r:
                 res = await r.json()
@@ -193,6 +205,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def lick(self, ctx, user: discord.Member):
         """licks someone"""
+        self.counter['lick'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=lick') as r:
                 res = await r.json()
@@ -211,6 +224,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def lewd(self, ctx):
         """Leeewd!!!"""
+        self.counter['lewd'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=lewd') as r:
                 res = await r.json()
@@ -223,6 +237,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def trap(self, ctx):
         """its a trap owo"""
+        self.counter['trap'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=trap') as r:
                 res = await r.json()
@@ -234,6 +249,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def owo(self, ctx):
         """OwO Whats This"""
+        self.counter['owo'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=owo') as r:
                 res = await r.json()
@@ -245,6 +261,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def wasted(self, ctx):
         """Wastteeddd"""
+        self.counter['wasted'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=wasted') as r:
                 res = await r.json()
@@ -257,6 +274,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def banghead(self, ctx):
         """Head banging intensifys"""
+        self.counter['banghead'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=banghead') as r:
                 res = await r.json()
@@ -269,6 +287,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def discordmeme(self, ctx):
         """Discord Memes OwO"""
+        self.counter['discordmeme'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=discord_memes') as r:
                 res = await r.json()
@@ -280,6 +299,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def stare(self, ctx):
         """Stares"""
+        self.counter['stare'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=stare') as r:
                 res = await r.json()
@@ -291,6 +311,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def thinking(self, ctx):
         """THINKSSSS"""
+        self.counter['thinking'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=thinking') as r:
                 res = await r.json()
@@ -302,6 +323,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def dab(self, ctx):
         """hits a thicc dab"""
+        self.counter['dab'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=dab') as r:
                 res = await r.json()
@@ -314,6 +336,7 @@ class Reactions:
     @commands.command(pass_context=True, aliases=["neko"])
     async def kemonomimi(self, ctx):
         """Girls with animal characteristics OwO"""
+        self.counter['kemonomimi'] += 1
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=kemonomimi') as r:
                 res = await r.json()
@@ -326,6 +349,7 @@ class Reactions:
     @commands.command()
     async def why(self, ctx):
         """Why just why"""
+        self.counter['why'] += 1
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://nekos.life/api/v2/why") as r:
                 res = await r.json()
