@@ -50,7 +50,10 @@ class NekoBot(commands.AutoShardedBot):
         elif isinstance(exception, commands.DisabledCommand):
             await ctx.send('This command is disabled...')
         elif isinstance(exception, commands.CommandInvokeError):
-            await ctx.send("Error in command `{}`".format(ctx.command.qualified_name))
+            em = discord.Embed(color=0xDEADBF,
+                               title="Error",
+                               description=f"Error in command {ctx.command.qualified_name}, [Support Server](https://discord.gg/q98qeYN)")
+            await ctx.send(embed=em)
             print('In {}:'.format(ctx.command.qualified_name), file=sys.stderr)
             traceback.print_tb(exception.original.__traceback__)
             print('{}: {}'.format(exception.original.__class__.__name__, exception.original), file=sys.stderr)
