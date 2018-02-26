@@ -38,8 +38,8 @@ class Levels:
             balance = 0
 
         embed = discord.Embed(color=0xDEADBF,
-                              title=title,
-                              description=desc)
+                              title=str(title),
+                              description=str(desc))
         embed.set_author(name=f"{user.name}")
         embed.set_thumbnail(url=user.avatar_url)
         embed.add_field(name="Level", value=f"**{self._find_level(levels)}**")
