@@ -75,6 +75,7 @@ class IMGWelcome:
             db.execute(f"UPDATE imgwelcome SET background = \"NONE\" WHERE server = {ctx.message.guild.id}")
             connection.commit()
             await ctx.send("Reset to default.")
+            return 
         if img.startswith("http") and img.endswith(".jpg") or img.endswith(".jpeg") or img.endswith(".png"):
             if requests.get(img).status_code == 200:
                 db.execute(f"UPDATE imgwelcome SET background = \"{img}\" WHERE server = {ctx.message.guild.id}")
