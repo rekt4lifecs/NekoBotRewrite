@@ -66,11 +66,15 @@ class IMGWelcome:
 
     @commands.command()
     @checks.is_admin()
-    async def imgbg(self, ctx, img : str):
+    async def imgbg(self, ctx, img : str = ""):
         """Change image BG, Image must be 500x150."""
         if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
+        if img == "":
+            db.execute(f"UPDATE imgwelcome SET background = \"NONE\" WHERE server = {ctx.message.guild.id}")
+            connection.commit()
+            await ctx.send("Reset to default.")
         if img.startswith("http") and img.endswith(".jpg") or img.endswith(".jpeg") or img.endswith(".png"):
             if requests.get(img).status_code == 200:
                 db.execute(f"UPDATE imgwelcome SET background = \"{img}\" WHERE server = {ctx.message.guild.id}")
