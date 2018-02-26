@@ -1,9 +1,11 @@
 from discord.ext import commands
-import discord, pymysql, config, time, random, math, datetime, requests, re
+import discord, pymysql, config, time, random, math, datetime, requests, re, logging
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from textwrap import wrap
 from .utils import chat_formatting
+
+log = logging.getLogger("NekoBot")
 
 connection = pymysql.connect(user=config.db.user,
                              password=config.db.password,
@@ -47,7 +49,8 @@ class Levels:
         except:
             balance = 0
 
-        embed = discord.Embed(color=0xDEADBF,
+        color = user.color
+        embed = discord.Embed(color=color,
                               title=str(title),
                               description=str(desc))
         embed.set_author(name=f"{user.name}")
@@ -89,13 +92,13 @@ class Levels:
             await ctx.send("Error finding your profile.")
             return
         if '"' in title:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
             return
         elif "'" in title:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
             return
         elif ";" in title:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
             return
         if len(title) > 24:
             await ctx.send("Your title is over 24 characters...")
@@ -114,13 +117,13 @@ class Levels:
             await ctx.send("Error finding your profile.")
             return
         if '"' in description:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
             return
         elif "'" in description:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
             return
         elif ";" in description:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
             return
         if len(description) > 50:
             await ctx.send("Your description is too long.")
@@ -161,6 +164,15 @@ class Levels:
             connection.commit()
             await ctx.send(f"{ctx.message.author.name} gave {user.mention} rep!")
 
+    @commands.command()
+    @commands.is_owner()
+    async def imgbuild(self, ctx):
+        """IMG Build"""
+        user = ctx.message.author
+        color = str(user.color).replace("#", "")
+        self._build_profile(user, "hello", "hello", 5, 5000, color)
+        await ctx.send(file=discord.File(f"data/imgwelcome/{user.id}.png"))
+
     async def _handle_on_message(self, message):
         user = message.author
         text = message.content
@@ -192,7 +204,7 @@ class Levels:
                 #userid, info, title, level, rep, lastxp, lastrep
                 db.execute(f"INSERT IGNORE INTO levels VALUES ({user.id}, info, title, 0, 0, 0, 0)")
                 connection.commit()
-                print(f"Made account for {user.name} ({user.id})")
+                log.info(f"Made account for {user.name} ({user.id})")
             else:
                 pass
         except AttributeError:
@@ -210,45 +222,91 @@ class Levels:
         # this is specific to the function above
         return int((1 / 278) * (9 + math.sqrt(81 + 1112 * (total_exp))))
 
-    def _build_profile(self, user, title : str, desc : str, rep : int, xp : int):
-        img = Image.new('RGBA', (300, 300), (255, 255, 255, 255))
-        bg = Image.open("data/backgrounds/default.jpg").resize((300, 300))
-        titlebg = Image.new('RGBA', (187, 25), (100, 100, 100, 130))
-        badgebg = Image.new('RGBA', (100, 160), (80, 80, 80, 140))
-        descbg = Image.new('RGBA', (178, 170), (100, 100, 100, 130))
-        layer1 = Image.new('RGBA', (290, 180), (130, 130, 130, 130))
-        avatar = user.avatar_url
-        avatar = requests.get(avatar).content
-        avatar = Image.open(BytesIO(avatar)).convert("RGBA").resize((90, 90))
+    def _hex_to_rgb(self, hex_num: str, a: int):
+        h = hex_num.lstrip('#')
 
-        img.paste(bg)
-        img.alpha_composite(titlebg, (105, 95))
-        img.alpha_composite(layer1, (5, 120))
-        img.alpha_composite(badgebg, (10, 135))
-        img.alpha_composite(descbg, (110, 125))
-        img.paste(avatar, (15, 60))
+        # if only 3 characters are given
+        if len(str(h)) == 3:
+            expand = ''.join([x*2 for x in str(h)])
+            h = expand
+
+        colors = [int(h[i:i+2], 16) for i in (0, 2, 4)]
+        colors.append(a)
+        return tuple(colors)
+
+    def _build_profile(self, user, title : str, desc : str, rep : int, xp : int, color):
+        """v2"""
+        darken = 20
+        lighten = 20
+
+        color = self._hex_to_rgb(color, 255)
+
+        if color[0] < 127 :
+            top_color = (color[0] + lighten,
+                         color[1] + lighten,
+                         color[2] + lighten,
+                         255)
+            text_color = (255, 255, 255)
+        else:
+            top_color = (color[0] - darken,
+                         color[1] - darken,
+                         color[2] - darken,
+                         255)
+            text_color = (0, 0, 0)
+
+        img = Image.new("RGB", (362, 333), (225, 226, 225))
+        top_layer = Image.new('RGB', (362, 23), top_color)
+        bar = Image.new('RGB', (362, 65), color)
 
         draw = ImageDraw.Draw(img)
-        titlet = ImageFont.truetype("data/fonts/win10/corbel.ttf", 16)
-        rept = ImageFont.truetype("data/fonts/win10/verdana.ttf", 15)
-        desct = ImageFont.truetype("data/fonts/win10/lucon.ttf", 13)
-        levelt = ImageFont.truetype("data/fonts/win10/courbd.ttf", 40)
-        leveltt = ImageFont.truetype("data/fonts/win10/courbd.ttf", 20)
-        font1 = ImageFont.truetype("data/fonts/win10/courbd.ttf", 12)
+        text = ImageFont.truetype("data/fonts/material/Roboto-Light.ttf", 35)
 
-        desc = "\n".join(wrap(desc, 22))
-        level = self._find_level(xp)
+        img.paste(top_layer, (0, 0))
+        img.paste(bar, (0, 23))
 
-        draw.text((115, 100), title[:24], (255, 255, 255), font=titlet)
-        draw.text((30, 155), f"Rep: {rep}", (255, 255, 255), font=rept)
-        draw.line(((130, 220), (267, 220)), (200, 200, 200), 1)
-        draw.text((120, 230), desc, (255, 255, 255), font=desct)
-        draw.text((180, 150), str(level), (255, 255, 255), font=levelt)
-        draw.text((160, 190), "LEVEL", (255, 255, 255), font=leveltt)
-        draw.text((120, 130), f"{user.name}", (255, 255, 255), font=font1)
-        draw.text((120, 145), f"XP: {xp}", (255, 255, 255), font=font1)
-        print(f"Built profile {user.name} ({user.id})")
-        img.save(f"data/profiles/{user.id}.png")
+        draw.text((15, 32), f"{user.name + '#' + user.discriminator}", text_color, font=text)
+
+        img.save(f"data/imgwelcome/{user.id}.png")
+
+    # def _build_profile(self, user, title : str, desc : str, rep : int, xp : int):
+    #     img = Image.new('RGBA', (300, 300), (255, 255, 255, 255))
+    #     bg = Image.open("data/backgrounds/default.jpg").resize((300, 300))
+    #     titlebg = Image.new('RGBA', (187, 25), (100, 100, 100, 130))
+    #     badgebg = Image.new('RGBA', (100, 160), (80, 80, 80, 140))
+    #     descbg = Image.new('RGBA', (178, 170), (100, 100, 100, 130))
+    #     layer1 = Image.new('RGBA', (290, 180), (130, 130, 130, 130))
+    #     avatar = user.avatar_url
+    #     avatar = requests.get(avatar).content
+    #     avatar = Image.open(BytesIO(avatar)).convert("RGBA").resize((90, 90))
+    #
+    #     img.paste(bg)
+    #     img.alpha_composite(titlebg, (105, 95))
+    #     img.alpha_composite(layer1, (5, 120))
+    #     img.alpha_composite(badgebg, (10, 135))
+    #     img.alpha_composite(descbg, (110, 125))
+    #     img.paste(avatar, (15, 60))
+    #
+    #     draw = ImageDraw.Draw(img)
+    #     titlet = ImageFont.truetype("data/fonts/win10/corbel.ttf", 16)
+    #     rept = ImageFont.truetype("data/fonts/win10/verdana.ttf", 15)
+    #     desct = ImageFont.truetype("data/fonts/win10/lucon.ttf", 13)
+    #     levelt = ImageFont.truetype("data/fonts/win10/courbd.ttf", 40)
+    #     leveltt = ImageFont.truetype("data/fonts/win10/courbd.ttf", 20)
+    #     font1 = ImageFont.truetype("data/fonts/win10/courbd.ttf", 12)
+    #
+    #     desc = "\n".join(wrap(desc, 22))
+    #     level = self._find_level(xp)
+    #
+    #     draw.text((115, 100), title[:24], (255, 255, 255), font=titlet)
+    #     draw.text((30, 155), f"Rep: {rep}", (255, 255, 255), font=rept)
+    #     draw.line(((130, 220), (267, 220)), (200, 200, 200), 1)
+    #     draw.text((120, 230), desc, (255, 255, 255), font=desct)
+    #     draw.text((180, 150), str(level), (255, 255, 255), font=levelt)
+    #     draw.text((160, 190), "LEVEL", (255, 255, 255), font=leveltt)
+    #     draw.text((120, 130), f"{user.name}", (255, 255, 255), font=font1)
+    #     draw.text((120, 145), f"XP: {xp}", (255, 255, 255), font=font1)
+    #     print(f"Built profile {user.name} ({user.id})")
+    #     img.save(f"data/profiles/{user.id}.png")
 
 def setup(bot):
     n = Levels(bot)

@@ -1,10 +1,14 @@
 from discord.ext import commands
-import logging, traceback, sys, discord
+import logging, traceback, sys, discord, json, dbl, asyncio
 from collections import Counter
 
 import config
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('NekoBot')
+log.setLevel(logging.INFO)
+handler = logging.FileHandler(filename='NekoBot.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+log.addHandler(handler)
 
 startup_extensions = {
     'modules.general',
@@ -21,10 +25,11 @@ class NekoBot(commands.AutoShardedBot):
     """NekoBot Rewrite OwO"""
 
     def __init__(self):
-        super().__init__(command_prefix=config.prefix,
+        super().__init__(command_prefix=commands.when_mentioned_or(config.prefix),
                          description=config.description,
                          pm_help=None,
                          help_attrs=dict(hidden=True))
+        self.bot = NekoBot
         self.counter = Counter()
 
         for extension in startup_extensions:
@@ -67,6 +72,8 @@ class NekoBot(commands.AutoShardedBot):
             await ctx.send('Command is on cooldown... {:.2f}s left'.format(exception.retry_after))
         elif isinstance(exception, commands.CommandNotFound):
             pass
+        elif isinstance(exception, commands.BotMissingPermissions):
+            await ctx.send("Im missing permissions ;-;")
         else:
             log.exception(type(exception).__name__, exc_info=exception)
 
@@ -91,6 +98,30 @@ class NekoBot(commands.AutoShardedBot):
 
     def run(self):
         super().run(config.token, reconnect=True)
+
+class DiscordBotsOrgAPI:
+    """Handles interactions with the discordbots.org API"""
+
+    def __init__(self, bot):
+        self.bot = bot
+        self.token = config.dbots.key
+        self.dblpy = dbl.Client(self.bot, self.token)
+        self.bot.loop.create_task(self.update_stats())
+
+    async def update_stats(self):
+        """This function runs every 30 minutes to automatically update your server count"""
+
+        while True:
+            log.info('attempting to post server count')
+            try:
+                await self.dblpy.post_server_count()
+                log.info('posted server count ({})'.format(len(self.bot.guilds)))
+            except Exception as e:
+                log.warning('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
+            await asyncio.sleep(1800)
+
+    def setup(self, bot):
+        bot.add_cog(DiscordBotsOrgAPI(bot))
 
 def run_bot():
     bot = NekoBot()
