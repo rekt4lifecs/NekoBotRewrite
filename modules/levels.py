@@ -22,14 +22,20 @@ class Levels:
     async def profile(self, ctx, user : discord.Member = None):
         if user == None:
             user = ctx.message.author
-        db.execute("SELECT level FROM levels WHERE userid = {}".format(user.id))
-        levels = db.fetchone()[0]
-        db.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
-        REP = db.fetchone()[0]
-        db.execute("SELECT title FROM levels WHERE userid = {}".format(user.id))
-        title = db.fetchone()[0]
-        db.execute("SELECT info FROM levels WHERE userid = {}".format(user.id))
-        desc = db.fetchone()[0]
+        try:
+            db.execute("SELECT level FROM levels WHERE userid = {}".format(user.id))
+            levels = db.fetchone()[0]
+            db.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
+            REP = db.fetchone()[0]
+            db.execute("SELECT title FROM levels WHERE userid = {}".format(user.id))
+            title = db.fetchone()[0]
+            db.execute("SELECT info FROM levels WHERE userid = {}".format(user.id))
+            desc = db.fetchone()[0]
+        except:
+            levels = 0
+            REP = 0
+            title = ""
+            desc = ""
 
         try:
             db.execute("select balance from economy where userid = {}".format(user.id))
