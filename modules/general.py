@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-import sys, psutil, datetime, aiohttp, random
+import sys, psutil, datetime, aiohttp, random, requests
 from collections import Counter
 from hurry.filesize import size
 from .utils.chat_formatting import pagify
@@ -219,6 +219,18 @@ class General:
         await ctx.send(user.avatar_url_as(format="png"))
 
     @commands.command()
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def qr(self, ctx, *, message : str):
+        """Generate a QR Code"""
+        new_message = message.replace(" ", "+")
+        url = f"http://api.qrserver.com/v1/create-qr-code/?data={new_message}"
+
+        embed = discord.Embed(color=0xDEADBF,
+                              title=f"{message}")
+        embed.set_image(url=url)
+        await ctx.send(embed=embed)
+
+    @commands.command()
     async def help(self, ctx, option : str = None):
         """Help Command OwO"""
         color = 0xDEADBF
@@ -230,7 +242,7 @@ class General:
 
             embed.add_field(name="General",
                             value="`info`, `help`, `lmgtfy`, `cookie`, `serverinfo`, `userinfo`, `channelinfo`, `flip`, "
-                                 "`avatar`, `urban`")
+                                 "`avatar`, `urban`, `qr`")
             embed.add_field(name="Moderation", value="`kick`, `ban`, `massban`, `unban`, `rename`, `mute` (VC), `unmute` (VC)")
             embed.add_field(name="IMGWelcomer", value="`imgwelcome`")
             embed.add_field(name="Levels", value="`profile`, `settitle`, `setdesc`, `rep`")
