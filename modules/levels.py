@@ -18,53 +18,59 @@ class Levels:
     def __init__(self, bot):
         self.bot = bot
 
-    # @commands.command()
-    # async def profile(self, ctx, user : discord.Member = None):
-    #     if user == None:
-    #         user = ctx.message.author
-    #     db.execute("SELECT level FROM levels WHERE userid = {}".format(user.id))
-    #     levels = db.fetchone()[0]
-    #     db.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
-    #     REP = db.fetchone()[0]
-    #
-    #     try:
-    #         db.execute("select balance from economy where userid = {}".format(user.id))
-    #         balance = db.fetchone()[0]
-    #     except:
-    #         balance = 0
-    #
-    #     embed = discord.Embed(color=0xDEADBF)
-    #     embed.set_author(name=f"{user.name}")
-    #     embed.set_thumbnail(url=user.avatar_url)
-    #     embed.add_field(name="Level", value=f"**{self._find_level(levels)}**")
-    #     embed.add_field(name="Rep", value=f"**{REP}**")
-    #     embed.add_field(name="Balance", value=f"{balance}")
-    #     embed.set_footer(text=f"Total XP: {levels}, {self._level_exp(self._find_level(levels))}/{self._required_exp(self._find_level(levels))}")
-    #
-    #     await ctx.send(embed=embed)
-
     @commands.command()
-    @commands.cooldown(1, 60, commands.BucketType.user)
     async def profile(self, ctx, user : discord.Member = None):
-        """Get a users profile."""
         if user == None:
             user = ctx.message.author
+        db.execute("SELECT level FROM levels WHERE userid = {}".format(user.id))
+        levels = db.fetchone()[0]
+        db.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
+        REP = db.fetchone()[0]
+        db.execute("SELECT title FROM levels WHERE userid = {}".format(user.id))
+        title = db.fetchone()
+        db.execute("SELECT info FROM levels WHERE userid = {}".format(user.id))
+        desc = db.fetchone()
+
         try:
-            db.execute("SELECT level FROM levels WHERE userid = {}".format(user.id))
-            levels = db.fetchone()[0]
-            db.execute("SELECT info FROM levels WHERE userid = {}".format(user.id))
-            desc = db.fetchone()[0]
-            db.execute("SELECT title FROM levels WHERE userid = {}".format(user.id))
-            title = db.fetchone()[0]
-            db.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
-            rep = db.fetchone()[0]
+            db.execute("select balance from economy where userid = {}".format(user.id))
+            balance = db.fetchone()[0]
         except:
-            levels = 0
-            title = ""
-            desc = ""
-            rep = 0
-        self._build_profile(user, title, desc, rep, levels)
-        await ctx.send(file=discord.File(f"data/profiles/{user.id}.png"))
+            balance = 0
+
+        embed = discord.Embed(color=0xDEADBF,
+                              title=title,
+                              description=desc)
+        embed.set_author(name=f"{user.name}")
+        embed.set_thumbnail(url=user.avatar_url)
+        embed.add_field(name="Level", value=f"**{self._find_level(levels)}**")
+        embed.add_field(name="Rep", value=f"**{REP}**")
+        embed.add_field(name="Balance", value=f"{balance}")
+        embed.set_footer(text=f"Total XP: {levels}, {self._level_exp(self._find_level(levels))}/{self._required_exp(self._find_level(levels))}")
+
+        await ctx.send(embed=embed)
+
+    # @commands.command()
+    # @commands.cooldown(1, 60, commands.BucketType.user)
+    # async def profile(self, ctx, user : discord.Member = None):
+    #     """Get a users profile."""
+    #     if user == None:
+    #         user = ctx.message.author
+    #     try:
+    #         db.execute("SELECT level FROM levels WHERE userid = {}".format(user.id))
+    #         levels = db.fetchone()[0]
+    #         db.execute("SELECT info FROM levels WHERE userid = {}".format(user.id))
+    #         desc = db.fetchone()[0]
+    #         db.execute("SELECT title FROM levels WHERE userid = {}".format(user.id))
+    #         title = db.fetchone()[0]
+    #         db.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
+    #         rep = db.fetchone()[0]
+    #     except:
+    #         levels = 0
+    #         title = ""
+    #         desc = ""
+    #         rep = 0
+    #     self._build_profile(user, title, desc, rep, levels)
+    #     await ctx.send(file=discord.File(f"data/profiles/{user.id}.png"))
 
     @commands.command()
     async def settitle(self, ctx, title : str):
