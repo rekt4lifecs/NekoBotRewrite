@@ -1,0 +1,8 @@
+# virtualenv
+.venv
+venv/
+
+#Config
+.config.py
+config.py
+/config.py
