@@ -61,7 +61,8 @@ class General:
                                                               f"PIL {pilv}\n"
                                                               f"BeautifulSoup {bsv}")
         info.add_field(name="Links", value="<:GH:416593854368841729> - https://github.com/rekt4lifecs/NekoBotRewrite/\n"
-                                           "**Support Server** - https://discord.gg/q98qeYN")
+                                           "**Support Server** - https://discord.gg/q98qeYN\n"
+                                           "**Vote** OwO - https://discordbots.org/bot/310039170792030211/vote")
         info.set_footer(text="Bot by ReKT#0001 and was forced to use MySQL by Fox#0001 <3, user \"nsfw\" to see the NSFW usage graph owo")
         info.set_thumbnail(url=self.bot.user.avatar_url)
         await ctx.send(embed=info)
