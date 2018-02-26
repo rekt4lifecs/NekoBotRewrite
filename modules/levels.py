@@ -85,11 +85,17 @@ class Levels:
     @commands.command()
     async def settitle(self, ctx, *, title : str):
         """Set profile title"""
-        forbiddenCHAR = ["'", '"', ";"]
         if not db.execute('SELECT 1 FROM levels WHERE userid = {}'.format(ctx.message.author.id)):
             await ctx.send("Error finding your profile.")
             return
-        if forbiddenCHAR in title:
+        if '"' in title:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
+        elif "'" in title:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
+        elif ";" in title:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
             return
         if len(title) > 24:
             await ctx.send("Your title is over 24 characters...")
@@ -104,11 +110,17 @@ class Levels:
     @commands.command()
     async def setdesc(self, ctx, *, description : str):
         """Set profile description"""
-        forbiddenCHAR = ["'", '"', ";"]
         if not db.execute('SELECT 1 FROM levels WHERE userid = {}'.format(ctx.message.author.id)):
             await ctx.send("Error finding your profile.")
             return
-        if forbiddenCHAR in description:
+        if '"' in description:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
+        elif "'" in description:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
+        elif ";" in description:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
             return
         if len(description) > 50:
             await ctx.send("Your description is too long.")
