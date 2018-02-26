@@ -24,6 +24,44 @@ class Levels:
     def __init__(self, bot):
         self.bot = bot
 
+    # @commands.command()
+    # async def profile(self, ctx, user : discord.Member = None):
+    #     if user == None:
+    #         user = ctx.message.author
+    #     try:
+    #         db.execute("SELECT level FROM levels WHERE userid = {}".format(user.id))
+    #         levels = db.fetchone()[0]
+    #         db.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
+    #         REP = db.fetchone()[0]
+    #         db.execute("SELECT title FROM levels WHERE userid = {}".format(user.id))
+    #         title = db.fetchone()[0]
+    #         db.execute("SELECT info FROM levels WHERE userid = {}".format(user.id))
+    #         desc = db.fetchone()[0]
+    #     except:
+    #         levels = 0
+    #         REP = 0
+    #         title = ""
+    #         desc = ""
+    #
+    #     try:
+    #         db.execute("select balance from economy where userid = {}".format(user.id))
+    #         balance = db.fetchone()[0]
+    #     except:
+    #         balance = 0
+    #
+    #     color = user.color
+    #     embed = discord.Embed(color=color,
+    #                           title=str(title),
+    #                           description=str(desc))
+    #     embed.set_author(name=f"{user.name}")
+    #     embed.set_thumbnail(url=user.avatar_url)
+    #     embed.add_field(name="Level", value=f"**{self._find_level(levels)}**")
+    #     embed.add_field(name="Rep", value=f"**{REP}**")
+    #     embed.add_field(name="Balance", value=f"{balance}")
+    #     embed.set_footer(text=f"Total XP: {levels}, {self._level_exp(self._find_level(levels))}/{self._required_exp(self._find_level(levels))}")
+    #
+    #     await ctx.send(embed=embed)
+
     @commands.command()
     async def profile(self, ctx, user : discord.Member = None):
         if user == None:
@@ -44,46 +82,15 @@ class Levels:
             desc = ""
 
         try:
-            db.execute("select balance from economy where userid = {}".format(user.id))
+            db.execute("SELECT balance FROM economy WHERE userid = {}".format(user.id))
             balance = db.fetchone()[0]
         except:
             balance = 0
 
-        color = user.color
-        embed = discord.Embed(color=color,
-                              title=str(title),
-                              description=str(desc))
-        embed.set_author(name=f"{user.name}")
-        embed.set_thumbnail(url=user.avatar_url)
-        embed.add_field(name="Level", value=f"**{self._find_level(levels)}**")
-        embed.add_field(name="Rep", value=f"**{REP}**")
-        embed.add_field(name="Balance", value=f"{balance}")
-        embed.set_footer(text=f"Total XP: {levels}, {self._level_exp(self._find_level(levels))}/{self._required_exp(self._find_level(levels))}")
+        color = str(user.color).replace("#", "")
 
-        await ctx.send(embed=embed)
-
-    # @commands.command()
-    # @commands.cooldown(1, 60, commands.BucketType.user)
-    # async def profile(self, ctx, user : discord.Member = None):
-    #     """Get a users profile."""
-    #     if user == None:
-    #         user = ctx.message.author
-    #     try:
-    #         db.execute("SELECT level FROM levels WHERE userid = {}".format(user.id))
-    #         levels = db.fetchone()[0]
-    #         db.execute("SELECT info FROM levels WHERE userid = {}".format(user.id))
-    #         desc = db.fetchone()[0]
-    #         db.execute("SELECT title FROM levels WHERE userid = {}".format(user.id))
-    #         title = db.fetchone()[0]
-    #         db.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
-    #         rep = db.fetchone()[0]
-    #     except:
-    #         levels = 0
-    #         title = ""
-    #         desc = ""
-    #         rep = 0
-    #     self._build_profile(user, title, desc, rep, levels)
-    #     await ctx.send(file=discord.File(f"data/profiles/{user.id}.png"))
+        self._build_profile(user, title, desc, REP, levels, color, balance)
+        await ctx.send(file=discord.File(f"data/profiles/{user.id}.png"))
 
     @commands.command()
     async def settitle(self, ctx, *, title : str):
@@ -170,7 +177,8 @@ class Levels:
         """IMG Build"""
         user = ctx.message.author
         color = str(user.color).replace("#", "")
-        self._build_profile(user, "hello", "hello", 5, 5000, color)
+        fox = "The quick brown fox jumps over the lazy dog"
+        self._build_profile(user, fox, fox, 5, 500, color, 500)
         await ctx.send(file=discord.File(f"data/imgwelcome/{user.id}.png"))
 
     async def _handle_on_message(self, message):
@@ -234,12 +242,20 @@ class Levels:
         colors.append(a)
         return tuple(colors)
 
-    def _build_profile(self, user, title : str, desc : str, rep : int, xp : int, color):
-        """v2"""
+    def _build_profile(self, user, title : str, desc : str, rep : int, xp : int, color, balance : int):
+        """v2 of build profile - ReKT#0001, Hex to RGB - stackoverflow.com"""
         darken = 20
         lighten = 20
 
+        level = self._find_level(xp)
+        joined = user.created_at.strftime("%d %b %Y %H:%M")
+        title = title.title()
+        if len(title) > 22:
+            title = title[:22] + "..."
+        desc = "\n".join(wrap(desc, 35))
+
         color = self._hex_to_rgb(color, 255)
+        black = (0, 0, 0)
 
         if color[0] < 127 :
             top_color = (color[0] + lighten,
@@ -254,19 +270,42 @@ class Levels:
                          255)
             text_color = (0, 0, 0)
 
-        img = Image.new("RGB", (362, 333), (225, 226, 225))
+        if len(str(level)) > 1:
+            level_len = (145, 125)
+            level_text = (10, 90)
+        else:
+            level_len = (125, 125)
+            level_text = (40, 90)
+
+        img = Image.new("RGBA", (362, 333), (225, 226, 225, 255))
         top_layer = Image.new('RGB', (362, 23), top_color)
         bar = Image.new('RGB', (362, 65), color)
+        level_box = Image.new('RGB', level_len, (255, 255, 255))
+        level_box_shadow = Image.new('RGBA', level_len, (64, 64, 64, 220))
 
         draw = ImageDraw.Draw(img)
         text = ImageFont.truetype("data/fonts/material/Roboto-Light.ttf", 35)
+        title_font = ImageFont.truetype("data/fonts/material/Roboto-Light.ttf", 25)
+        joined_font = ImageFont.truetype("data/fonts/material/Roboto-Light.ttf", 17)
+        user_title = ImageFont.truetype("data/fonts/material/Roboto-Regular.ttf", 27)
+        user_description = ImageFont.truetype("data/fonts/material/Roboto-Light.ttf", 20)
+        level_font = ImageFont.truetype("data/fonts/material/Roboto-Thin.ttf", 125)
 
         img.paste(top_layer, (0, 0))
         img.paste(bar, (0, 23))
+        img.alpha_composite(level_box_shadow, (20, 110))
+        img.paste(level_box, (10, 100))
 
         draw.text((15, 32), f"{user.name + '#' + user.discriminator}", text_color, font=text)
+        # draw.text((20, 105), "Level", black, font=title)
+        draw.text((165, 120), f"{rep} Rep", black, font=title_font)
+        draw.text((165, 150), f"${balance}", black, font=title_font)
+        draw.text((165, 185), f"Joined on\n{joined}", black, font=joined_font)
+        draw.text((10, 240), str(title), black, font=user_title)
+        draw.text((10, 270), str(desc), black, font=user_description)
+        draw.text(level_text, str(level), black, font=level_font)
 
-        img.save(f"data/imgwelcome/{user.id}.png")
+        img.save(f"data/profiles/{user.id}.png")
 
     # def _build_profile(self, user, title : str, desc : str, rep : int, xp : int):
     #     img = Image.new('RGBA', (300, 300), (255, 255, 255, 255))

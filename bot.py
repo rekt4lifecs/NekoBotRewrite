@@ -5,7 +5,7 @@ from collections import Counter
 import config
 
 log = logging.getLogger('NekoBot')
-log.setLevel(logging.INFO)
+log.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename='NekoBot.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 log.addHandler(handler)
