@@ -40,7 +40,7 @@ class Economy:
         else:
             await ctx.send("You don't have a bank account 😦, use `register` to make one.")
 
-    @commands.command()
+    @commands.command(aliases=["payday"])
     async def daily(self, ctx):
         user = ctx.message.author
         if db.execute('select 1 from economy where userid = {}'.format(user.id)):
@@ -49,7 +49,7 @@ class Economy:
             timenow = datetime.datetime.utcfromtimestamp(time.time()).strftime("%d")
             timecheck = datetime.datetime.utcfromtimestamp(int(getdb)).strftime("%d")
             if timecheck == timenow:
-                await ctx.send("Wait another day before using payday again...")
+                await ctx.send("Wait another day before using daily again...")
                 return
             db.execute("select balance from economy where userid = {}".format(user.id))
             eco = int(db.fetchone()[0])
