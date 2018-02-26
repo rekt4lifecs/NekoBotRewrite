@@ -356,5 +356,51 @@ class Reactions:
                 embed = discord.Embed(title="WHY!!", description="{}".format(res['why']), color=0xDEADBF)
                 await ctx.send(embed=embed)
 
+    @commands.command(pass_context=True)
+    async def bang(self, ctx, user: discord.Member):
+        """~BANG~"""
+        self.counter['bang'] += 1
+        async with aiohttp.ClientSession(headers=auth) as cs:
+            async with cs.get('https://api.weeb.sh/images/random?type=bang') as r:
+                res = await r.json()
+                if user == ctx.message.author:
+                    user = "themself"
+                    text = ""
+                else:
+                    user = user.name
+                    text = "OOF"
+                em = discord.Embed(title="**{}** shot **{}**, {}".format(ctx.message.author.name, user, text),
+                                   color=0xDEADBF)
+                em.set_image(url=res['url'])
+                await ctx.send(embed=em)
+
+    @commands.command()
+    async def reactions(self, ctx):
+        embed = discord.Embed(color=0xDEADBF,
+                              title="Reaction Stats")
+        embed.add_field(name="Hug", value=self.counter['hug'])
+        embed.add_field(name="Kiss", value=self.counter['kiss'])
+        embed.add_field(name="Pat", value=self.counter['pat'])
+        embed.add_field(name="Cuddle", value=self.counter['cuddle'])
+        embed.add_field(name="Tickle", value=self.counter['tickle'])
+        embed.add_field(name="Bite", value=self.counter['bite'])
+        embed.add_field(name="Slap", value=self.counter['slap'])
+        embed.add_field(name="Punch", value=self.counter['punch'])
+        embed.add_field(name="Nom", value=self.counter['nom'])
+        embed.add_field(name="Lick", value=self.counter['lick'])
+        embed.add_field(name="lewd", value=self.counter['lewd'])
+        embed.add_field(name="Trap", value=self.counter['trap'])
+        embed.add_field(name="OwO", value=self.counter['owo'])
+        embed.add_field(name="Wasted", value=self.counter['wasted'])
+        embed.add_field(name="Banghead", value=self.counter['banghead'])
+        embed.add_field(name="DiscordMeme", value=self.counter['discordmeme'])
+        embed.add_field(name="Stare", value=self.counter['stare'])
+        embed.add_field(name="Thinking", value=self.counter['thinking'])
+        embed.add_field(name="Dab", value=self.counter['dab'])
+        embed.add_field(name="Kemonomimi", value=self.counter['kemonomimi'])
+        embed.add_field(name="Why", value=self.counter['why'])
+
+        await ctx.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(Reactions(bot))
