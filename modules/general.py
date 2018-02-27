@@ -231,6 +231,11 @@ class General:
         await ctx.send(embed=embed)
 
     @commands.command()
+    async def docs(self, ctx):
+        """Full docs MonkaS"""
+        await ctx.send("https://rekt4lifecs.github.io/NekoBotRewrite/")
+
+    @commands.command()
     async def help(self, ctx, option : str = None):
         """Help Command OwO"""
         color = 0xDEADBF
@@ -242,7 +247,7 @@ class General:
 
             embed.add_field(name="General",
                             value="`info`, `help`, `lmgtfy`, `cookie`, `serverinfo`, `userinfo`, `channelinfo`, `flip`, "
-                                 "`avatar`, `urban`, `qr`")
+                                 "`avatar`, `urban`, `qr`, `docs` (A full documentation)")
             embed.add_field(name="Moderation", value="`kick`, `ban`, `massban`, `unban`, `rename`, `mute` (VC), `unmute` (VC)")
             embed.add_field(name="IMGWelcomer", value="`imgwelcome`")
             embed.add_field(name="Levels", value="`profile`, `settitle`, `setdesc`, `rep`")
