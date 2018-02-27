@@ -70,7 +70,7 @@ class Economy:
                     connection.commit()
                     embed = discord.Embed(color=0xDEADBF,
                                           title="Daily Credits",
-                                          description="Recieved 7500 Daily credits!")
+                                          description="Recieved 2500 + 5000 Daily credits + Voter Bonus!")
                     await ctx.send(embed=embed)
                     break
             #################################################
