@@ -183,5 +183,23 @@ class Fun:
         else:
             await ctx.send(f"-- Forces {random.choice(food)} down {user.name}'s throat --")
 
+    @commands.command()
+    async def lovecalculator(self, ctx, user1 : discord.Member, user2 : discord.Member = None):
+        """Love Calculator"""
+        if user2 == None:
+            user2 = ctx.message.author
+        rnd = random.randint(1, 20)
+        l1 = (len(user1.name))
+        l2 = (len(user2.name))
+        score = 100 - (l1 * l2) - rnd
+        if score > 40:
+            heart = "❤"
+        else:
+            heart = "💔"
+        embed = discord.Embed(color=0xDEADBF,
+                              title="Love Calculator",
+                              description=f"{user1.name} {heart} {user2.name} = {score}%")
+        await ctx.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(Fun(bot))
