@@ -209,9 +209,9 @@ class NSFW:
         else:
             embed = discord.Embed(color=0xDEADBF,
                                   title="WOAH",
-                                  description="Have you voted yet >.>\n\n"
+                                  description="Have you voted yet <:smirkGuns:417969421252952085>\n"
                                               "https://discordbots.org/bot/310039170792030211/vote")
-            if ctx.message.channel.is_nsfw():
+            if not ctx.message.channel.is_nsfw():
                 embed.set_footer(text="Use in a NSFW Channel BTW...")
             await ctx.send(embed=embed)
 
