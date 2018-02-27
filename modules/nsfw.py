@@ -23,12 +23,28 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        self.counter["pgif"] += 1
-        data = random.choice(self.pgifdata)
-        embed = discord.Embed(color=0xDEADBF)
-        url = "http://37.59.36.62/pgif/" + data
-        embed.set_image(url=url)
-        await ctx.send(embed=embed)
+        self.counter['pgif'] += 1
+        data = config.imgur._get_imgur(self, "NSFW_GIF", page=random.randint(1, 5))['data']
+        x =  random.choice(data)
+        em = discord.Embed(title=f"**{x['title']}**",
+                           color=0xDEADBF)
+        em.set_image(url=x['link'])
+
+        await ctx.send(embed=em)
+
+    # @commands.command()
+    # @commands.guild_only()
+    # async def pgif(self, ctx):
+    #     """Posts a Random PrOn GIF"""
+    #     if not ctx.message.channel.is_nsfw():
+    #         await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+    #         return
+    #     self.counter["pgif"] += 1
+    #     data = random.choice(self.pgifdata)
+    #     embed = discord.Embed(color=0xDEADBF)
+    #     url = "http://37.59.36.62/pgif/" + data
+    #     embed.set_image(url=url)
+    #     await ctx.send(embed=embed)
 
     @commands.command(name="4k")
     @commands.guild_only()
@@ -133,25 +149,58 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    async def girl(self, ctx):
+        """Get a girl OwO"""
+        if not ctx.message.channel.is_nsfw():
+            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            return
+        self.counter['girl'] += 1
+        data = config.imgur._get_imgur(self, "bodyperfection", page=random.randint(1, 5))['data']
+        x =  random.choice(data)
+        em = discord.Embed(title=f"**{x['title']}**",
+                           color=0xDEADBF)
+        em.set_image(url=x['link'])
+
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.guild_only()
     async def ass(self, ctx):
         """Get Random Ass OwO"""
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        try:
-            self.counter["ass"] += 1
-            rdm = random.randint(0, 5538)
-            search = ("http://api.obutts.ru/butts/{}".format(rdm))
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(search) as r:
-                    res = await r.json()
-                    butt = random.choice(res)
-                    butt = "http://media.obutts.ru/{}".format(butt["preview"])
-                    em = discord.Embed(color=0xDEADBF)
-                    em.set_image(url=butt)
-                    await ctx.send(embed=em)
-        except Exception as e:
-            await ctx.send("**`{}`**".format(e))
+        self.counter['ass'] += 1
+        data = config.imgur._get_imgur(self, "asstastic", page=random.randint(1, 6))['data']
+        x =  random.choice(data)
+        em = discord.Embed(title=f"**{x['title']}**",
+                           color=0xDEADBF)
+        em.set_image(url=x['link'])
+
+        await ctx.send(embed=em)
+
+
+    # @commands.command()
+    # @commands.guild_only()
+    # async def ass(self, ctx):
+    #     """Get Random Ass OwO"""
+    #     if not ctx.message.channel.is_nsfw():
+    #         await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+    #         return
+    #     try:
+    #         self.counter["ass"] += 1
+    #         rdm = random.randint(0, 5538)
+    #         search = ("http://api.obutts.ru/butts/{}".format(rdm))
+    #         async with aiohttp.ClientSession() as cs:
+    #             async with cs.get(search) as r:
+    #                 res = await r.json()
+    #                 butt = random.choice(res)
+    #                 butt = "http://media.obutts.ru/{}".format(butt["preview"])
+    #                 em = discord.Embed(color=0xDEADBF)
+    #                 em.set_image(url=butt)
+    #                 await ctx.send(embed=em)
+    #     except Exception as e:
+    #         await ctx.send("**`{}`**".format(e))
 
     @commands.command(aliases=["cum"])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -171,13 +220,14 @@ class NSFW:
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def lingerie(self, ctx):
-        """Lingerie"""
+    async def thighs(self, ctx):
+        """Thighs"""
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        self.counter['lingerie'] += 1
-        data = config.imgur._get_imgur(self, "lingerie", page=random.randint(1, 5))['data']
+        sub = random.choice(["thighhighs", "stockings"])
+        self.counter['thighs'] += 1
+        data = config.imgur._get_imgur(self, sub, page=random.randint(1, 5))['data']
         x =  random.choice(data)
         em = discord.Embed(title=f"**{x['title']}**",
                            color=0xDEADBF)
@@ -238,8 +288,9 @@ class NSFW:
         embed.add_field(name="Ass", value=self.counter['ass'])
         embed.add_field(name="Boobs", value=self.counter['boobs'])
         embed.add_field(name="Cumsluts", value=self.counter['cum'])
-        embed.add_field(name="Lingerie", value=self.counter['lingerie'])
+        embed.add_field(name="Thighs", value=self.counter['thighs'])
         embed.add_field(name="GoneWild", value=self.counter['gonewild'])
+        embed.add_field(name="Girl", value=self.counter['girl'])
 
         await ctx.send(embed=embed)
 
