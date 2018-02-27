@@ -165,6 +165,23 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    async def bigboobs(self, ctx):
+        """Big Boobs"""
+        if not ctx.message.channel.is_nsfw():
+            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            return
+        self.counter['bigboobs'] += 1
+        sub = random.choice(["bigboobs", "BigBoobsGW"])
+        data = config.imgur._get_imgur(self, sub, page=random.randint(1, 5))['data']
+        x =  random.choice(data)
+        em = discord.Embed(title=f"**{x['title']}**",
+                           color=0xDEADBF)
+        em.set_image(url=x['link'])
+
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.guild_only()
     async def ass(self, ctx):
         """Get Random Ass OwO"""
         if not ctx.message.channel.is_nsfw():
@@ -291,6 +308,7 @@ class NSFW:
         embed.add_field(name="Thighs", value=self.counter['thighs'])
         embed.add_field(name="GoneWild", value=self.counter['gonewild'])
         embed.add_field(name="Girl", value=self.counter['girl'])
+        embed.add_field(name="Big Boobs", value=self.counter['bigboobs'])
 
         await ctx.send(embed=embed)
 

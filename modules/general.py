@@ -452,8 +452,8 @@ class General:
             embed.add_field(name="Economy", value="`register`, `balance`, `daily`, `roulette`, more soon...")
 
             embed.add_field(name="NSFW",
-                            value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `ass`, `cumsluts`, `lingerie`,"
-                                  " `gonewild`, `nsfw`, `doujin`")
+                            value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
+                                  " `gonewild`, `nsfw`, `doujin`, `girl`")
 
             embed.add_field(name="Reactions",
                             value="`hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
