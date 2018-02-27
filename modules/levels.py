@@ -181,6 +181,16 @@ class Levels:
         self._build_profile(user, fox, fox, 5, 500, color, 500)
         await ctx.send(file=discord.File(f"data/imgwelcome/{user.id}.png"))
 
+    @commands.command()
+    @commands.is_owner()
+    async def sql(self, ctx, *, sql: str):
+        """Inject SQL"""
+        try:
+            db.execute(sql)
+            connection.commit()
+        except Exception as e:
+            await ctx.send(f"`{e}`")
+
     async def _handle_on_message(self, message):
         user = message.author
         text = message.content
