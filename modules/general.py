@@ -404,6 +404,7 @@ class General:
                     break
                 except:
                     await ctx.send("Problem getting that channel...")
+                    break
         else:
             embed = discord.Embed(color=0xDEADBF,
                                   title="OwO Whats this",
