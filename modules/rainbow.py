@@ -8,7 +8,7 @@ connection = pymysql.connect(user=config.db.user,
                              database=config.db.database)
 db = connection.cursor()
 
-class Rainbow:
+class Rainbow: # TODO
     """Rainbow6 Stats"""
 
     def __init__(self, bot):

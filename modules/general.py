@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-import sys, psutil, datetime, aiohttp, random, requests
+import sys, psutil, datetime, aiohttp, random, requests, config
 from collections import Counter
 from hurry.filesize import size
 from .utils.chat_formatting import pagify
@@ -242,6 +242,174 @@ class General:
                               description="https://discordbots.org/bot/310039170792030211/vote")
         await ctx.send(embed=embed)
 
+    @commands.command(aliases=["perms"])
+    async def permissions(self, ctx, user : discord.Member = None, channel : str = None):
+        """Get Permissions,
+
+        Example Usage:
+            .permissions/.perms @ReKT#0001 testing
+        or
+            .permissions/.perms ReKT#0001 #testing
+        anyway doesn't matter ;p"""
+        if user == None:
+            user = ctx.message.author
+
+        if channel == None:
+            channel = ctx.message.channel
+        else:
+            channel = discord.utils.get(ctx.message.guild.channels, name=channel)
+            print(channel)
+
+        url = "https://discordbots.org/api/bots/310039170792030211/votes"
+        async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key}) as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+        for x in res:
+            if str(x['id']) == str(ctx.message.author.id):
+                try:
+                    perms = user.permissions_in(channel)
+                    if perms.create_instant_invite:
+                        create_instant_invite = "✅"
+                    else:
+                        create_instant_invite = "❌"
+                    if perms.kick_members:
+                        kick_members = "✅"
+                    else:
+                        kick_members = "❌"
+                    if perms.ban_members:
+                        ban_members = "✅"
+                    else:
+                        ban_members = "❌"
+                    if perms.administrator:
+                        administrator = "✅"
+                    else:
+                        administrator = "❌"
+                    if perms.manage_channels:
+                        manage_channels = "✅"
+                    else:
+                        manage_channels = "❌"
+                    if perms.manage_guild:
+                        manage_guild = "✅"
+                    else:
+                        manage_guild = "❌"
+                    if perms.add_reactions:
+                        add_reactions = "✅"
+                    else:
+                        add_reactions = "❌"
+                    if perms.view_audit_log:
+                        view_audit_log = "✅"
+                    else:
+                        view_audit_log = "❌"
+                    if perms.read_messages:
+                        read_messages = "✅"
+                    else:
+                        read_messages = "❌"
+                    if perms.send_messages:
+                        send_messages = "✅"
+                    else:
+                        send_messages = "❌"
+                    if perms.send_tts_messages:
+                        send_tts_messages = "✅"
+                    else:
+                        send_tts_messages = "❌"
+                    if perms.manage_messages:
+                        manage_messages = "✅"
+                    else:
+                        manage_messages = "❌"
+                    if perms.embed_links:
+                        embed_links = "✅"
+                    else:
+                        embed_links = "❌"
+                    if perms.attach_files:
+                        attach_files = "✅"
+                    else:
+                        attach_files = "❌"
+                    if perms.read_message_history:
+                        read_message_history = "✅"
+                    else:
+                        read_message_history = "❌"
+                    if perms.mention_everyone:
+                        mention_everyone = "✅"
+                    else:
+                        mention_everyone = "❌"
+                    if perms.external_emojis:
+                        external_emojis = "✅"
+                    else:
+                        external_emojis = "❌"
+                    if perms.mute_members:
+                        mute_members = "✅"
+                    else:
+                        mute_members = "❌"
+                    if perms.deafen_members:
+                        deafen_members = "✅"
+                    else:
+                        deafen_members = "❌"
+                    if perms.move_members:
+                        move_members = "✅"
+                    else:
+                        move_members = "❌"
+                    if perms.change_nickname:
+                        change_nickname = "✅"
+                    else:
+                        change_nickname = "❌"
+                    if perms.manage_roles:
+                        manage_roles = "✅"
+                    else:
+                        manage_roles = "❌"
+                    if perms.manage_webhooks:
+                        manage_webhooks = "✅"
+                    else:
+                        manage_webhooks = "❌"
+                    if perms.manage_emojis:
+                        manage_emojis = "✅"
+                    else:
+                        manage_emojis = "❌"
+                    if perms.manage_nicknames:
+                        manage_nicknames = "✅"
+                    else:
+                        manage_nicknames = "❌"
+
+                    embed = discord.Embed(color=0xDEADBF,
+                                          title=f"Permissions for {user.name} in {channel.name}",
+                                          description=f"```css\n"
+                                                  f"Administrator       {administrator}\n"
+                                                  f"View Audit Log      {view_audit_log}\n"
+                                                  f"Manage Server       {manage_guild}\n"
+                                                  f"Manage Channels     {manage_channels}\n"
+                                                  f"Kick Members        {kick_members}\n"
+                                                  f"Ban Members         {ban_members}\n"
+                                                  f"Create Invite       {create_instant_invite}\n"
+                                                  f"Change Nickname     {change_nickname}\n"
+                                                  f"Manage Nicknames    {manage_nicknames}\n"
+                                                  f"Manage Emojis       {manage_emojis}\n"
+                                                  f"Read Messages       {read_messages}\n"
+                                                  f"Read History        {read_message_history}\n"
+                                                  f"Send Messages       {send_messages}\n"
+                                                  f"Send TTS Messages   {send_tts_messages}\n"
+                                                  f"Manage Messages     {manage_messages}\n"
+                                                  f"Embed Links         {embed_links}\n"
+                                                  f"Attach Files        {attach_files}\n"
+                                                  f"Mention Everyone    {mention_everyone}\n"
+                                                  f"Use External Emotes {external_emojis}\n"
+                                                  f"Add Reactions       {add_reactions}\n"
+                                                  f"Manage Webhooks     {manage_webhooks}\n"
+                                                  f"Manage Roles        {manage_roles}\n"
+                                                  f"Mute Members        {mute_members}\n"
+                                                  f"Deafen Members      {deafen_members}\n"
+                                                  f"Move Members        {move_members}"
+                                                  f"```")
+                    if ctx.message.guild.owner_id == user.id:
+                        embed.set_footer(text="Is Owner.")
+                    await ctx.send(embed=embed)
+                    break
+                except:
+                    await ctx.send("Problem getting that channel...")
+        else:
+            embed = discord.Embed(color=0xDEADBF,
+                                  title="OwO Whats this",
+                                  description="To use this command you need to `.vote` >.<")
+            await ctx.send(embed=embed)
+
     @commands.command()
     async def help(self, ctx, option : str = None):
         """Help Command OwO"""
@@ -253,7 +421,7 @@ class General:
                             icon_url="https://i.imgur.com/x2N73t0.png")
 
             embed.add_field(name="General",
-                            value="`info`, `help`, `lmgtfy`, `cookie`, `serverinfo`, `userinfo`, `channelinfo`, `flip`, "
+                            value="`info`, `help`, `perms`, `lmgtfy`, `cookie`, `serverinfo`, `userinfo`, `channelinfo`, `flip`, "
                                  "`avatar`, `urban`, `qr`, `docs` (A full documentation)")
             embed.add_field(name="Moderation", value="`kick`, `ban`, `massban`, `unban`, `rename`, `mute` (VC), `unmute` (VC)")
             embed.add_field(name="IMGWelcomer", value="`imgwelcome`")
@@ -275,6 +443,10 @@ class General:
             await ctx.send(e)
 
         await ctx.send(embed=embed)
+        try:
+            await ctx.message.add_reaction('\u2705')
+        except:
+            pass
 
 def setup(bot):
     bot.remove_command('help')
