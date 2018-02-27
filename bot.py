@@ -19,7 +19,8 @@ startup_extensions = {
     'modules.levels',
     'modules.imgwelcome',
     'modules.fun',
-    'modules.dbl'
+    'modules.dbl',
+    'modules.osu'
 }
 
 class NekoBot(commands.AutoShardedBot):
@@ -32,6 +33,8 @@ class NekoBot(commands.AutoShardedBot):
                          help_attrs=dict(hidden=True))
         self.bot = NekoBot
         self.counter = Counter()
+        self.token = config.dbots.key
+        self.dblpy = dbl.Client(self.bot, self.token)
 
         for extension in startup_extensions:
             try:
@@ -96,6 +99,14 @@ class NekoBot(commands.AutoShardedBot):
         print(self.shard_count)
         print(f"Servers {len(self.guilds)}")
         print(f"Users {len(set(self.get_all_members()))}")
+        while True:
+            print("Attempting to update server count.")
+            try:
+                await self.dblpy.post_server_count(shard_count=self.shard_count, shard_no=self.shard_id)
+                print("Posted server count. {}".format(len(self.bot.guilds)))
+            except Exception as e:
+                print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
+            await asyncio.sleep(1800)
 
     def run(self):
         super().run(config.token, reconnect=True)
