@@ -33,8 +33,6 @@ class NekoBot(commands.AutoShardedBot):
                          help_attrs=dict(hidden=True))
         self.bot = NekoBot
         self.counter = Counter()
-        self.token = config.dbots.key
-        self.dblpy = dbl.Client(self.bot, self.token)
 
         for extension in startup_extensions:
             try:
