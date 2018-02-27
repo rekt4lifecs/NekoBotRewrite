@@ -269,8 +269,8 @@ class General:
                             value="`hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
                                     "`poke`, `nom`, `lick`, `lewd`, `trap`, `owo`, `wasted`, `banghead`,"
                                     "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`")
-            embed.add_field(name="OSU",
-                            value="`osu`")
+            embed.add_field(name="Game Stats",
+                            value="`osu`, `r6`")
         except Exception as e:
             await ctx.send(e)
 
