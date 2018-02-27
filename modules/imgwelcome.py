@@ -38,6 +38,15 @@ class IMGWelcome:
     @checks.is_admin()
     async def imgchannel(self, ctx, channel : discord.TextChannel):
         """Select a IMG Welcoming text channel"""
+        if '"' in channel:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
+        elif "'" in channel:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
+        elif ";" in channel:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
         if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
@@ -50,6 +59,15 @@ class IMGWelcome:
     @commands.command()
     @checks.is_admin()
     async def imgcontent(self, ctx, content:str=None):
+        if '"' in content:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
+        elif "'" in content:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
+        elif ";" in content:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
         if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
@@ -68,6 +86,15 @@ class IMGWelcome:
     @checks.is_admin()
     async def imgbg(self, ctx, img : str = ""):
         """Change image BG, Image must be 500x150."""
+        if '"' in img:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
+        elif "'" in img:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
+        elif ";" in img:
+            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+            return
         if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
