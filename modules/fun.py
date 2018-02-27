@@ -179,9 +179,9 @@ class Fun:
     @commands.command()
     async def feed(self, ctx, user : discord.Member):
         if user == ctx.message.author:
-            await ctx.send(f"~~{ctx.message.author.mention} eats {random.choice(food)}~~")
+            await ctx.send(f"~~ {ctx.message.author.mention} eats {random.choice(food)} ~~")
         else:
-            await ctx.send(f"~~Forces {random.choice(food)} down {user.name}'s throat~~")
+            await ctx.send(f"~~ Forces {random.choice(food)} down {user.name}'s throat ~~")
 
 def setup(bot):
     bot.add_cog(Fun(bot))
