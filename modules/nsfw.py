@@ -206,6 +206,7 @@ class NSFW:
                 em.set_image(url=x['link'])
 
                 await ctx.send(embed=em)
+                break
         else:
             embed = discord.Embed(color=0xDEADBF,
                                   title="WOAH",
