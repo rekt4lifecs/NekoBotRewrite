@@ -216,7 +216,13 @@ class NSFW:
                 embed.set_footer(text="Use in a NSFW Channel BTW...")
             await ctx.send(embed=embed)
 
-
+    @commands.command()
+    async def doujin(self, ctx):
+        """Get a Random Doujin"""
+        url = "http://nhentai.net/random/"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                await ctx.send(embed=discord.Embed(color=0xDEADBF, description=f"{r}"))
 
     @commands.command()
     async def nsfw(self, ctx):
