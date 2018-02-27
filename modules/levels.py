@@ -82,6 +82,12 @@ class Levels:
             desc = ""
 
         try:
+            db.execute(f"SELECT osu FROM osu WHERE userid = {user.id}")
+            osu = db.fetchone()[0]
+        except:
+            osu = "None"
+
+        try:
             db.execute("SELECT balance FROM economy WHERE userid = {}".format(user.id))
             balance = db.fetchone()[0]
         except:
@@ -89,7 +95,7 @@ class Levels:
 
         color = str(user.color).replace("#", "")
 
-        self._build_profile(user, title, desc, REP, levels, color, balance)
+        self._build_profile(user, title, desc, REP, levels, color, balance, osu)
         await ctx.send(file=discord.File(f"data/profiles/{user.id}.png"))
 
     @commands.command()
@@ -252,11 +258,12 @@ class Levels:
         colors.append(a)
         return tuple(colors)
 
-    def _build_profile(self, user, title : str, desc : str, rep : int, xp : int, color, balance : int):
+    def _build_profile(self, user, title : str, desc : str, rep : int, xp : int, color, balance : int, osu : str):
         """v2 of build profile - ReKT#0001, Hex to RGB - stackoverflow.com"""
         darken = 20
         lighten = 20
 
+        osu = str(osu)
         level = self._find_level(xp)
         joined = user.created_at.strftime("%d %b %Y %H:%M")
         title = title.title()
@@ -266,6 +273,7 @@ class Levels:
 
         color = self._hex_to_rgb(color, 255)
         black = (0, 0, 0)
+        white = (255, 255, 255)
 
         if color[0] < 127 :
             top_color = (color[0] + lighten,
@@ -296,6 +304,7 @@ class Levels:
         draw = ImageDraw.Draw(img)
         text = ImageFont.truetype("data/fonts/material/Roboto-Light.ttf", 35)
         title_font = ImageFont.truetype("data/fonts/material/Roboto-Light.ttf", 25)
+        unicode_font = ImageFont.truetype("data/fonts/unifont.ttf", 15)
         joined_font = ImageFont.truetype("data/fonts/material/Roboto-Light.ttf", 17)
         user_title = ImageFont.truetype("data/fonts/material/Roboto-Regular.ttf", 27)
         user_description = ImageFont.truetype("data/fonts/material/Roboto-Light.ttf", 20)
@@ -305,6 +314,13 @@ class Levels:
         img.paste(bar, (0, 23))
         img.alpha_composite(level_box_shadow, (20, 110))
         img.paste(level_box, (10, 100))
+
+        osu_dest = (301, 25)
+
+        if osu != "None":
+            draw.text((300, 25), "OSU: ✓", text_color, font=unicode_font)
+        else:
+            draw.text((300, 25), "OSU: ✖", text_color, font=unicode_font)
 
         draw.text((15, 32), f"{user.name + '#' + user.discriminator}", text_color, font=text)
         # draw.text((20, 105), "Level", black, font=title)
