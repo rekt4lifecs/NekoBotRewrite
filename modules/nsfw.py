@@ -18,13 +18,13 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
-    async def pgif(self, ctx):
-        """Posts a Random PrOn GIF"""
+    async def gonewild(self, ctx):
+        """r/gonewild"""
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        self.counter['pgif'] += 1
-        data = config.imgur._get_imgur(self, "NSFW_GIF", page=random.randint(1, 5))['data']
+        self.counter['gonewild'] += 1
+        data = config.imgur._get_imgur(self, "gonewild", page=random.randint(1, 5))['data']
         x =  random.choice(data)
         em = discord.Embed(title=f"**{x['title']}**",
                            color=0xDEADBF)
@@ -254,8 +254,8 @@ class NSFW:
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def gonewild(self, ctx):
-        """r/GoneWild"""
+    async def pgif(self, ctx):
+        """Posts a PrON GIF"""
         url = "https://discordbots.org/api/bots/310039170792030211/votes"
         async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key}) as cs:
             async with cs.get(url) as r:
@@ -265,8 +265,8 @@ class NSFW:
                 if not ctx.message.channel.is_nsfw():
                     await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
                     return
-                self.counter['gonewild'] += 1
-                data = config.imgur._get_imgur(self, "gonewild", page=random.randint(1, 5))['data']
+                self.counter['pgif'] += 1
+                data = config.imgur._get_imgur(self, "NSFW_GIF", page=random.randint(1, 5))['data']
                 x = random.choice(data)
                 em = discord.Embed(title=f"**{x['title']}**",
                                    color=0xDEADBF)
