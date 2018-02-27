@@ -211,6 +211,10 @@ class Fun:
         await ctx.send(embed=embed)
 
     @commands.command()
+    async def butts(self, ctx):
+        await ctx.send("ლ(́◉◞౪◟◉‵ლ)")
+
+    @commands.command()
     async def boom(self, ctx):
         """BOOM"""
         await ctx.message.add_reaction("🅱")

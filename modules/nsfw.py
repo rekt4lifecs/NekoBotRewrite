@@ -219,10 +219,12 @@ class NSFW:
     @commands.command()
     async def doujin(self, ctx):
         """Get a Random Doujin"""
-        url = "http://nhentai.net/random/"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                await ctx.send(embed=discord.Embed(color=0xDEADBF, description=f"{r}"))
+        if not ctx.message.channel.is_nsfw():
+            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            return
+        else:
+            url = "http://nhentai.net/random/"
+            await ctx.send(embed=discord.Embed(color=0xDEADBF, description=f"{url}"))
 
     @commands.command()
     async def nsfw(self, ctx):

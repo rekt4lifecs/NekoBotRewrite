@@ -3,6 +3,7 @@ import asyncio, config, dbl, discord, aiohttp, random
 
 messages = ["OwO Whats this", "MonkaS", "OwO", "Haiiiii", ".help", "🤔🤔🤔", "HMMM🤔"]
 
+
 class DiscordBotsOrgAPI:
     """Handles interactions with the discordbots.org API"""
 
@@ -27,7 +28,8 @@ class DiscordBotsOrgAPI:
             try:
                 async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key2}) as session:
                     url = 'https://bots.discord.pw/api/bots/310039170792030211/stats'
-                    await session.post(url, data={"shard_id": self.bot.shard_id, "shard_count": self.bot.shard_count, "server_count": len(self.bot.guilds)})
+                    await session.post(url, data={"shard_id": self.bot.shard_id, "shard_count": self.bot.shard_count,
+                                                  "server_count": len(self.bot.guilds)})
             except Exception as e:
                 print("Failed to post discord.bots.pw\n{}".format(e))
             await asyncio.sleep(1800)
@@ -55,6 +57,7 @@ class DiscordBotsOrgAPI:
     #         await ctx.send('posted server count ({})'.format(len(self.bot.guilds)))
     #     except Exception as e:
     #         await ctx.send("Failed,\n{}".format(e))
+
 
 def setup(bot):
     bot.add_cog(DiscordBotsOrgAPI(bot))
