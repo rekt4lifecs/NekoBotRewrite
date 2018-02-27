@@ -156,5 +156,12 @@ class Moderation:
     async def say(self, ctx, *, what_to_say : str):
         await ctx.send(what_to_say)
 
+    @commands.command()
+    @commands.is_owner()
+    async def shutdown(self, ctx):
+        """Shutdown Bot"""
+        await ctx.send("Baibai")
+        await self.bot.logout()
+
 def setup(bot):
     bot.add_cog(Moderation(bot))
