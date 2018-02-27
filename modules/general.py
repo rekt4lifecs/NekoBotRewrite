@@ -236,6 +236,13 @@ class General:
         await ctx.send("https://rekt4lifecs.github.io/NekoBotRewrite/")
 
     @commands.command()
+    async def vote(self, ctx):
+        embed = discord.Embed(color=0xDEADBF,
+                              title="Voting Link",
+                              description="https://discordbots.org/bot/310039170792030211/vote")
+        await ctx.send(embed=embed)
+
+    @commands.command()
     async def help(self, ctx, option : str = None):
         """Help Command OwO"""
         color = 0xDEADBF
