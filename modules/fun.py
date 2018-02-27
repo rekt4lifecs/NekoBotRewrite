@@ -218,5 +218,13 @@ class Fun:
         await ctx.message.add_reaction("💥")
         await ctx.message.add_reaction("🇲")
 
+    @commands.command()
+    async def rude(self, ctx):
+        """RUDE"""
+        await ctx.message.add_reaction("🇷")
+        await ctx.message.add_reaction("🇺")
+        await ctx.message.add_reaction("🇩")
+        await ctx.message.add_reaction("🇪")
+
 def setup(bot):
     bot.add_cog(Fun(bot))
