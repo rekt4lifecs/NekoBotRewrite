@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, pymysql, config, datetime, time, aiohttp
+import discord, pymysql, config, datetime, time, aiohttp, random, asyncio
 
 connection = pymysql.connect(user=config.db.user,
                              password=config.db.password,
@@ -39,6 +39,66 @@ class Economy:
             await ctx.send("Balance: {}".format(db.fetchone()[0]))
         else:
             await ctx.send("You don't have a bank account 😦, use `register` to make one.")
+
+    @commands.command()
+    @commands.cooldown(1, 20, commands.BucketType.user)
+    async def roulette(self, ctx, amount : int):
+        """Play Roulette"""
+        user = ctx.message.author
+        if not db.execute('SELECT 1 FROM economy WHERE userid = {}'.format(user.id)):
+            await ctx.send("You don't have a bank account 😦, use `register` to make one.")
+            return
+        url = "https://discordbots.org/api/bots/310039170792030211/votes"
+        async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key}) as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+        for x in res:
+            if str(x['id']) == str(ctx.message.author.id):
+                if amount > 25000:
+                    await ctx.send("You can't spend more than 25000 credits.")
+                    break
+                db.execute("select balance from economy where userid = {}".format(user.id))
+                eco = int(db.fetchone()[0])
+                if (eco - amount) < 0:
+                    await ctx.send("You don't have that much credits to spend ;-;")
+                    break
+                else:
+                    db.execute(f"UPDATE economy SET balance = {eco - amount} WHERE userid = {user.id}")
+                    connection.commit()
+                    await ctx.send("Spinning...")
+                    await asyncio.sleep(random.randint(3, 6))
+                    xx = random.randint(0, 1)
+                    if xx == 0:
+                        await ctx.send(f"You lost {amount} 😦")
+                        break
+                    elif xx == 1:
+                        await ctx.send(f"YOU WON {amount * 2}!!! OwO")
+                        db.execute(f"UPDATE economy SET balance = {eco + (amount * 2)} WHERE userid = {user.id}")
+                        connection.commit()
+                        break
+        else:
+            if amount > 5000:
+                await ctx.send(embed=discord.Embed(color=0xDEADBF,
+                                                   url="https://discordbots.org/bot/310039170792030211/vote",
+                                                   title="Vote",
+                                                   description="to get access to spend up to 25k at once OwO"))
+                return
+            db.execute("select balance from economy where userid = {}".format(user.id))
+            eco = int(db.fetchone()[0])
+            if (eco - amount) < 0:
+                await ctx.send("You don't have that much credits to spend ;-;")
+                return
+            db.execute(f"UPDATE economy SET balance = {eco - amount} WHERE userid = {user.id}")
+            connection.commit()
+            await ctx.send("Spinning...")
+            await asyncio.sleep(random.randint(3, 6))
+            xx = random.randint(0, 1)
+            if xx == 0:
+                await ctx.send(f"You lost {amount} 😦")
+            elif xx == 1:
+                await ctx.send(f"YOU WON {amount * 2}!!! OwO")
+                db.execute(f"UPDATE economy SET balance = {eco + (amount * 2)} WHERE userid = {user.id}")
+                connection.commit()
 
     @commands.command(aliases=["payday"])
     async def daily(self, ctx):

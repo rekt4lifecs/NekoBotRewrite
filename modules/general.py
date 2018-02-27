@@ -239,7 +239,8 @@ class General:
     async def vote(self, ctx):
         embed = discord.Embed(color=0xDEADBF,
                               title="Voting Link",
-                              description="https://discordbots.org/bot/310039170792030211/vote")
+                              description="https://discordbots.org/bot/310039170792030211/vote\n"
+                                          "`By voting you get 3 times the payday, gonewild command, permissions command and a slightly higher chance to win roulette OwO`")
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["perms"])
@@ -427,8 +428,9 @@ class General:
             embed.add_field(name="Moderation", value="`kick`, `ban`, `massban`, `unban`, `rename`, `mute` (VC), `unmute` (VC)")
             embed.add_field(name="IMGWelcomer", value="`imgwelcome`")
             embed.add_field(name="Levels", value="`profile`, `settitle`, `setdesc`, `rep`")
-            embed.add_field(name="Fun", value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`")
-            embed.add_field(name="Economy", value="`register`, `balance`, `daily`, more soon...")
+            embed.add_field(name="Fun", value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`,"
+                                              " `feed`, `lovecalculator`, `boom`")
+            embed.add_field(name="Economy", value="`register`, `balance`, `daily`, `roulette`, more soon...")
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `ass`, `cumsluts`, `lingerie`,"
@@ -439,7 +441,7 @@ class General:
                                     "`poke`, `nom`, `lick`, `lewd`, `trap`, `owo`, `wasted`, `banghead`,"
                                     "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`")
             embed.add_field(name="Game Stats",
-                            value="`osu`, `r6`")
+                            value="`osu`, ~~`r6`~~")
         except Exception as e:
             await ctx.send(e)
 

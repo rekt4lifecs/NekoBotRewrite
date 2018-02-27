@@ -19,8 +19,8 @@ startup_extensions = {
     'modules.levels',
     'modules.imgwelcome',
     'modules.fun',
-    'modules.dbl',
-    'modules.osu'
+    'modules.discordbots',
+    'modules.osu',
 }
 
 class NekoBot(commands.AutoShardedBot):

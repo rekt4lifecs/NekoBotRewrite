@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, aiohttp, requests, random, config, datetime
+import discord, aiohttp, requests, random, config, datetime, asyncio
 from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw
 from bs4 import BeautifulSoup as bs
@@ -209,6 +209,14 @@ class Fun:
                               title="Love Calculator",
                               description=f"{user1.name} {heart} {user2.name} = {score}%")
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def boom(self, ctx):
+        """BOOM"""
+        await ctx.message.add_reaction("🅱")
+        await ctx.message.add_reaction("🇴")
+        await ctx.message.add_reaction("💥")
+        await ctx.message.add_reaction("🇲")
 
 def setup(bot):
     bot.add_cog(Fun(bot))

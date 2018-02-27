@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, argparse, re, shlex, traceback, io, textwrap
+import discord, argparse, re, shlex, traceback, io, textwrap, asyncio
 from .utils import checks
 from contextlib import redirect_stdout
 from collections import Counter
@@ -7,6 +7,10 @@ from collections import Counter
 class Arguments(argparse.ArgumentParser):
     def error(self, message):
         raise RuntimeError(message)
+
+def to_emoji(c):
+    base = 0x1f1e6
+    return chr(base + c)
 
 class Moderation:
     """Moderation Tools"""
@@ -216,6 +220,47 @@ class Moderation:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
             await ctx.send('\N{OK HAND SIGN}')
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def poll(self, ctx, *, question : str):
+        """Start a poll"""
+        messages = [ctx.message]
+        answers = []
+
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel and len(m.content) <= 100
+
+        for i in range(20):
+            messages.append(await ctx.send(f'Say poll option or {ctx.prefix}cancel to publish poll.'))
+
+            try:
+                entry = await self.bot.wait_for('message', check=check, timeout=60.0)
+            except asyncio.TimeoutError:
+                break
+
+            messages.append(entry)
+
+            if entry.clean_content.startswith(f'{ctx.prefix}cancel'):
+                break
+
+            answers.append((to_emoji(i), entry.clean_content))
+
+        try:
+            await ctx.channel.delete_messages(messages)
+        except:
+            pass
+
+        answer = '\n'.join(f'{keycap}: {content}' for keycap, content in answers)
+        embed = discord.Embed(color=0xDEADBF,
+                              description=f"```\n"
+                                          f"{question}```\n\n"
+                                          f"{answer}")
+
+        actual_poll = await ctx.send(embed=embed)
+        for emoji, _ in answers:
+            await actual_poll.add_reaction(emoji)
 
     @commands.command(pass_context=True, hidden=True, name='eval')
     @commands.is_owner()
