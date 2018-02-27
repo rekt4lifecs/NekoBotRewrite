@@ -441,7 +441,7 @@ class General:
 
             embed.add_field(name="General",
                             value="`info`, `help`, `perms`, `lmgtfy`, `8ball`, `cookie`, `serverinfo`, `userinfo`, `channelinfo`, `flip`, "
-                                  "`avatar`, `urban`, `qr`, `docs` (A full documentation)")
+                                  "`avatar`, `urban`, `qr`, `botinfo`, `docs` (A full documentation)")
             embed.add_field(name="Moderation",
                             value="`kick`, `ban`, `massban`, `unban`, `rename`, `mute` (VC), `unmute` (VC)")
             embed.add_field(name="IMGWelcomer", value="`imgwelcome`")
