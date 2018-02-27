@@ -4,6 +4,49 @@ from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw
 from bs4 import BeautifulSoup as bs
 
+food = [
+    "🍪",
+    "🍣",
+    "🍟",
+    "🍕",
+    "🍚",
+    "🍇",
+    "🍓",
+    "🍔",
+    "🍰",
+    "🍄",
+    "🍡",
+    "🍛",
+    "🌵",
+    "🍜",
+    "🌽",
+    "🍶",
+    "🍆",
+    "🍌",
+    "🍬",
+    "🍋",
+    "🍹",
+    "🍝",
+    "🍮",
+    "🎂",
+    "🍏",
+    "🍈",
+    "🍠",
+    "☕",
+    "🍺",
+    "🍷",
+    "🍥",
+    "🥚",
+    "🍨",
+    "🍭",
+    "🍊",
+    "🍉",
+    "🍞",
+    "🍍",
+    "🍘",
+    "🍧"
+]
+
 class Fun:
     """Fun Commands"""
 
@@ -132,6 +175,13 @@ class Fun:
                     await ctx.send(res["data"][0]["url"])
                 else:
                     await ctx.send("No results found.")
+
+    @commands.command()
+    async def feed(self, ctx, user : discord.Member):
+        if user == ctx.message.author:
+            await ctx.send(f"~~{ctx.message.author.mention} eats {random.choice(food)}~~")
+        else:
+            await ctx.send(f"~~Forces {random.choice(food)} down {user.name}'s throat~~")
 
 def setup(bot):
     bot.add_cog(Fun(bot))
