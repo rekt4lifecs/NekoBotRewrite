@@ -445,7 +445,7 @@ class General:
 
         await ctx.send(embed=embed)
         try:
-            await ctx.message.add_reaction('\u2705')
+            await ctx.message.add_reaction(':NekoCookie:')
         except:
             pass
 
