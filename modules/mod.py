@@ -160,8 +160,40 @@ class Moderation:
     @commands.is_owner()
     async def shutdown(self, ctx):
         """Shutdown Bot"""
-        await ctx.send("Baibai")
+        await ctx.send("Bai bai")
         await self.bot.logout()
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def load(self, ctx, *, module):
+        """Loads a module."""
+        try:
+            self.bot.load_extension(module)
+        except Exception as e:
+            await ctx.send(f'```py\n{traceback.format_exc()}\n```')
+        else:
+            await ctx.send('\N{OK HAND SIGN}')
+
+    @commands.command(hidden=True)
+    async def unload(self, ctx, *, module):
+        """Unloads a module."""
+        try:
+            self.bot.unload_extension(module)
+        except Exception as e:
+            await ctx.send(f'```py\n{traceback.format_exc()}\n```')
+        else:
+            await ctx.send('\N{OK HAND SIGN}')
+
+    @commands.command(name='reload', hidden=True)
+    async def _reload(self, ctx, *, module):
+        """Reloads a module."""
+        try:
+            self.bot.unload_extension(module)
+            self.bot.load_extension(module)
+        except Exception as e:
+            await ctx.send(f'```py\n{traceback.format_exc()}\n```')
+        else:
+            await ctx.send('\N{OK HAND SIGN}')
 
 def setup(bot):
     bot.add_cog(Moderation(bot))
