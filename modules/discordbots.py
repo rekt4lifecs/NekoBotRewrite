@@ -1,5 +1,5 @@
 from discord.ext import commands
-import asyncio, config, dbl, discord
+import asyncio, config, dbl, discord, aiohttp
 
 class DiscordBotsOrgAPI:
     """Handles interactions with the discordbots.org API"""
@@ -23,6 +23,20 @@ class DiscordBotsOrgAPI:
             except Exception as e:
                 print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
             await asyncio.sleep(1800)
+
+    @commands.command()
+    @commands.is_owner()
+    async def dblcheck(self, ctx):
+        url = "https://discordbots.org/api/bots/310039170792030211/votes"
+        async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key}) as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+        for x in res:
+            if str(x['id']) == str(ctx.message.author.id):
+                await ctx.send("True")
+                break
+        else:
+            await ctx.send("False")
 
     # @commands.command()
     # @commands.is_owner()

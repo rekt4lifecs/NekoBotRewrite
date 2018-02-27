@@ -189,17 +189,33 @@ class NSFW:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def gonewild(self, ctx):
         """r/GoneWild"""
-        if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-            return
-        self.counter['gonewild'] += 1
-        data = config.imgur._get_imgur(self, "gonewild", page=random.randint(1, 5))['data']
-        x =  random.choice(data)
-        em = discord.Embed(title=f"**{x['title']}**",
-                           color=0xDEADBF)
-        em.set_image(url=x['link'])
+        url = "https://discordbots.org/api/bots/310039170792030211/votes"
+        async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key}) as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+        for x in res:
+            if str(x['id']) == str(ctx.message.author.id):
+                if not ctx.message.channel.is_nsfw():
+                    await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+                    return
+                self.counter['gonewild'] += 1
+                data = config.imgur._get_imgur(self, "gonewild", page=random.randint(1, 5))['data']
+                x = random.choice(data)
+                em = discord.Embed(title=f"**{x['title']}**",
+                                   color=0xDEADBF)
+                em.set_image(url=x['link'])
 
-        await ctx.send(embed=em)
+                await ctx.send(embed=em)
+        else:
+            embed = discord.Embed(color=0xDEADBF,
+                                  title="WOAH",
+                                  description="Have you voted yet >.>\n\n"
+                                              "https://discordbots.org/bot/310039170792030211/vote")
+            if ctx.message.channel.is_nsfw():
+                embed.set_footer(text="Use in a NSFW Channel BTW...")
+            await ctx.send(embed=embed)
+
+
 
     @commands.command()
     async def nsfw(self, ctx):

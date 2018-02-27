@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, argparse, re, shlex
+import discord, argparse, re, shlex, traceback
 from .utils import checks
 from collections import Counter
 
@@ -167,6 +167,7 @@ class Moderation:
     @commands.is_owner()
     async def load(self, ctx, *, module):
         """Loads a module."""
+        module = "modules." + module
         try:
             self.bot.load_extension(module)
         except Exception as e:
@@ -177,6 +178,7 @@ class Moderation:
     @commands.command(hidden=True)
     async def unload(self, ctx, *, module):
         """Unloads a module."""
+        module = "modules." + module
         try:
             self.bot.unload_extension(module)
         except Exception as e:
@@ -187,6 +189,7 @@ class Moderation:
     @commands.command(name='reload', hidden=True)
     async def _reload(self, ctx, *, module):
         """Reloads a module."""
+        module = "modules." + module
         try:
             self.bot.unload_extension(module)
             self.bot.load_extension(module)
