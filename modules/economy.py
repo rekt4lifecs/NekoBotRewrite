@@ -8,18 +8,46 @@ connection = pymysql.connect(user=config.db.user,
                              database=config.db.database)
 db = connection.cursor()
 
+class Bank:
+    """Bank"""
+
+    def _get_balance(self, user):
+        db.execute("SELECT balance FROM economy WHERE userid = {}".format(user.id))
+        return db.fetchone()[0]
+
+    def _has_account(self, user):
+        if db.execute('SELECT 1 FROM economy WHERE userid = {}'.format(user.id)):
+            return True
+        else:
+            return False
+
+    def _deposit(self, user, amount : int):
+        if amount <= 0:
+            return
+        db.execute(f"UPDATE economy SET balance = {self._get_balance(user) + amount} WHERE userid = {user.id}")
+        connection.commit()
+
+    def _withdraw(self, user, amount : int):
+        if amount <= 0:
+            return
+        elif (self._get_balance(user) - amount) <= 0:
+            return
+        db.execute(f"UPDATE economy SET balance = {self._get_balance(user) - amount} WHERE userid = {user.id}")
+        connection.commit()
+
+
 class Economy:
     """Economy"""
 
     def __init__(self, bot):
         self.bot = bot
+        self.bank = Bank
 
     @commands.command()
     async def register(self, ctx):
         """Register a bank account."""
-        db.execute("SELECT * FROM economy")
         user = ctx.message.author.id
-        if not db.execute('select 1 from economy where userid = {}'.format(user)):
+        if not self.bank._has_account(user):
             db.execute(f"insert ignore into economy VALUES ({user}, 3500, 0)")
             connection.commit()
             embed = discord.Embed(color=0xDEADBF,
@@ -34,16 +62,13 @@ class Economy:
     async def balance(self, ctx):
         """Check your bank balance."""
         user = ctx.message.author
-        if db.execute('select 1 from economy where userid = {}'.format(user.id)):
-            db.execute("select balance from economy where userid = {}".format(user.id))
-            await ctx.send("Balance: {}".format(db.fetchone()[0]))
-        else:
-            await ctx.send("You don't have a bank account 😦, use `register` to make one.")
+        if self.bank._has_account(user):
+            await ctx.send("Balance: {}".format(self.bank._get_balance(user)))
 
     @commands.command(aliases=["payday"])
     async def daily(self, ctx):
         user = ctx.message.author
-        if db.execute('select 1 from economy where userid = {}'.format(user.id)):
+        if self.bank._has_account(user):
             db.execute(f"SELECT payday FROM economy WHERE userid = {user.id}")
             getdb = db.fetchone()[0]
             timenow = datetime.datetime.utcfromtimestamp(time.time()).strftime("%d")
@@ -51,13 +76,10 @@ class Economy:
             if timecheck == timenow:
                 await ctx.send("Wait another day before using daily again...")
                 return
-            db.execute("select balance from economy where userid = {}".format(user.id))
-            eco = int(db.fetchone()[0])
-            db.execute(f"UPDATE economy SET balance = {eco + 2500} WHERE userid = {user.id}")
-            connection.commit()
+            self.bank._deposit(user, 2500)
             db.execute(f"UPDATE economy SET payday = {int(time.time())} WHERE userid = {user.id}")
             connection.commit()
-            await ctx.send("Received 2500 credits!")
+            await ctx.send(f"Received 2500 credits! {self.bank._get_balance(user)} total!")
         else:
             await ctx.send("You don't have a bank account 😦, use `register` to make one.")
 
