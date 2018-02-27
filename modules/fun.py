@@ -177,6 +177,15 @@ class Fun:
                     await ctx.send("No results found.")
 
     @commands.command()
+    async def cat(self, ctx):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get('https://random.cat/meow') as r:
+                res = await r.json()
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=res['file'])
+        await ctx.send(embed=em)
+
+    @commands.command()
     async def feed(self, ctx, user : discord.Member):
         if user == ctx.message.author:
             await ctx.send(f"-- {ctx.message.author.mention} eats {random.choice(food)} --")
