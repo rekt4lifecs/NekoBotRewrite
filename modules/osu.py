@@ -47,10 +47,12 @@ class OSU:
             await ctx.send("Added user!")
 
     @osu.command()
-    async def stats(self, ctx):
+    async def stats(self, ctx, user : discord.Member = None):
         """Show player stats"""
-        if not db.execute('SELECT 1 FROM osu WHERE userid = {}'.format(ctx.message.author.id)):
-            await ctx.send("You don't have a OSU user attached to your account. Use `.osu add` to add a user.")
+        if user == None:
+            user = ctx.message.author
+        if not db.execute('SELECT 1 FROM osu WHERE userid = {}'.format(user.id)):
+            await ctx.send("That user doesn't have a OSU user attached to your account. Use `.osu add` to add a user.")
         else:
             db.execute(f"SELECT osu FROM osu WHERE userid = {ctx.message.author.id}")
             username = db.fetchone()[0]
