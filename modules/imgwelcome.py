@@ -51,7 +51,7 @@ class IMGWelcome:
             await ctx.send("Use `imgwelcome` to initialize.")
             return
         else:
-            db.execute(f"UPDATE imgwelcome SET channel = {channel.id} WHERE server = {ctx.message.guild.id}")
+            db.execute(f"UPDATE imgwelcome SET channel = \"{channel.id}\" WHERE server = {ctx.message.guild.id}")
             connection.commit()
             await ctx.send(f"Updated imgwelcome to {channel.name}")
             print(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - Channel to {channel.name} ({channel.id})")
