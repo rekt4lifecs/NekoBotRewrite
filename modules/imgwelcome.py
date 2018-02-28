@@ -38,15 +38,6 @@ class IMGWelcome:
     @checks.is_admin()
     async def imgchannel(self, ctx, channel : discord.TextChannel):
         """Select a IMG Welcoming text channel"""
-        if '"' in channel:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif "'" in channel:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif ";" in channel:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
         if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
@@ -59,28 +50,26 @@ class IMGWelcome:
     @commands.command()
     @checks.is_admin()
     async def imgcontent(self, ctx, content:str=None):
-        if '"' in content:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif "'" in content:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif ";" in content:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
-            await ctx.send("Use `imgwelcome` to initialize.")
-            return
+        if content == None:
+            content = "Welcome user to server"
+            await ctx.send('Content reset to default "Welcome user to server"')
         else:
-            if content == None:
-                content = "Welcome user to server"
-                await ctx.send('Content reset to default "Welcome user to server"')
-            else:
-                await ctx.send(f"Updated content to \"{content}\"")
-            db.execute(f"UPDATE imgwelcome SET content = \"{content}\" WHERE server = {ctx.message.guild.id}")
-            connection.commit()
+            if '"' in content:
+                print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+                return
+            elif "'" in content:
+                print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+                return
+            elif ";" in content:
+                print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
+                return
+            if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
+                await ctx.send("Use `imgwelcome` to initialize.")
+                return
             await ctx.send(f"Updated content to {content}")
-            print(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - Content to {content}")
+        db.execute(f"UPDATE imgwelcome SET content = \"{content}\" WHERE server = {ctx.message.guild.id}")
+        connection.commit()
+        print(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - Content to {content}")
 
     @commands.command()
     @checks.is_admin()
