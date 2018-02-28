@@ -35,29 +35,6 @@ class DiscordBotsOrgAPI:
             await asyncio.sleep(1800)
 
     @commands.command()
-    async def botinfo(self, ctx, bot_user : int = None):
-        """Get Bot Info"""
-        if bot_user == None:
-            bot_user = config.botid
-        url = "https://discordbots.org/api/bots/310039170792030211"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                bot = await r.json()
-
-        em = discord.Embed(color=0xDEADBF, title=bot['username'] + bot['discriminator'], description=bot['shortdesc'])
-        em.add_field(name="Prefix", value=bot['prefix'])
-        em.add_field(name="Lib", value=bot['lib'])
-        em.add_field(name="Owners", value=f"<@{bot['owners'][0]}>")
-        em.add_field(name="Votes", value=bot['points'])
-        em.add_field(name="Server Count", value=bot['server_count'])
-        em.add_field(name="ID", value=bot['id'])
-        em.add_field(name="Certified", value=bot['certifiedBot'])
-        em.add_field(name="GitHub", value=bot['github'])
-        em.add_field(name="Website", value=bot['website'])
-
-        await ctx.send(embed=em)
-
-    @commands.command()
     @commands.is_owner()
     async def dblcheck(self, ctx):
         url = "https://discordbots.org/api/bots/310039170792030211/votes"

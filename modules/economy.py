@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, pymysql, config, datetime, time, aiohttp, random, asyncio
+import discord, pymysql, config, datetime, time, aiohttp, random, asyncio, string
 
 connection = pymysql.connect(user=config.db.user,
                              password=config.db.password,
@@ -31,9 +31,10 @@ class Economy:
             await ctx.send(embed=embed)
 
     @commands.command()
-    async def balance(self, ctx):
+    async def balance(self, ctx, user : discord.Member = None):
         """Check your bank balance."""
-        user = ctx.message.author
+        if user == None:
+            user = ctx.message.author
         if db.execute('select 1 from economy where userid = {}'.format(user.id)):
             db.execute("select balance from economy where userid = {}".format(user.id))
             await ctx.send("Balance: {}".format(db.fetchone()[0]))
@@ -44,6 +45,9 @@ class Economy:
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def roulette(self, ctx, amount : int):
         """Play Roulette"""
+        if amount <= 0:
+            await ctx.send("Amount must be higher than 0.")
+            return
         user = ctx.message.author
         if not db.execute('SELECT 1 FROM economy WHERE userid = {}'.format(user.id)):
             await ctx.send("You don't have a bank account 😦, use `register` to make one.")
@@ -72,7 +76,8 @@ class Economy:
                         await ctx.send(f"You lost {amount} 😦")
                         break
                     elif xx == 1:
-                        await ctx.send(f"YOU WON {amount * 2}!!! OwO")
+                        await ctx.send(f"YOU WON {amount * 2}!!! OwO\n"
+                                       f"💯🔥<:flipped_ok_nko:418245464530485258>😂👌🔥💯")
                         db.execute(f"UPDATE economy SET balance = {eco + (amount * 2)} WHERE userid = {user.id}")
                         connection.commit()
                         break
@@ -96,9 +101,43 @@ class Economy:
             if xx == 0:
                 await ctx.send(f"You lost {amount} 😦")
             elif xx == 1:
-                await ctx.send(f"YOU WON {amount * 2}!!! OwO")
+                await ctx.send(f"YOU WON {amount * 2}!!! OwO\n"
+                               f"💯🔥<:flipped_ok_nko:418245464530485258>😂👌🔥💯")
                 db.execute(f"UPDATE economy SET balance = {eco + (amount * 2)} WHERE userid = {user.id}")
                 connection.commit()
+
+    @commands.command()
+    async def transfer(self, ctx, user : discord.Member, amount : int):
+        """Transfer Credits to a User"""
+        author = ctx.message.author
+        if user == author:
+            await ctx.send("You can't send money to yourself.")
+            return
+        if amount <= 0:
+            await ctx.send("Transfer amount can't be 0 or under 0.")
+            return
+        if not db.execute('select 1 from economy where userid = {}'.format(author.id)):
+            await ctx.send("You don't have a bank account 😦, use `register` to make one.")
+            return
+        elif not db.execute('select 1 from economy where userid = {}'.format(user.id)):
+            await ctx.send(f"The user you are sending credits too doesn't have a bank account 😦")
+            return
+        db.execute("SELECT balance FROM economy WHERE userid = {}".format(user.id))
+        user_account = int(db.fetchone()[0])
+        db.execute("SELECT balance FROM economy WHERE userid = {}".format(author.id))
+        author_account = int(db.fetchone()[0])
+        if (int(author_account) - amount) < 0:
+            await ctx.send("You don't have that amount of credit to send...")
+            return
+        db.execute(f"UPDATE economy SET balance = {author_account - amount} WHERE userid = {author.id}")
+        connection.commit()
+        db.execute(f"UPDATE economy SET balance = {user_account + amount} WHERE userid = {user.id}")
+        embed = discord.Embed(color=0xDEADBF,
+                              title="Transfer Confirmation",
+                              description=f"RECEIPT:    {pin}\n"
+                                          f"TO:         {user.name}\n"
+                                          f"AMOUNT:     {amount}")
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=["payday"])
     async def daily(self, ctx):
@@ -130,7 +169,7 @@ class Economy:
                     connection.commit()
                     embed = discord.Embed(color=0xDEADBF,
                                           title="Daily Credits",
-                                          description="Recieved 2500 + 5000 Daily credits + Voter Bonus!")
+                                          description="Recieved 2500 + 5000 Daily credits - Voter Bonus!")
                     await ctx.send(embed=embed)
                     break
             #################################################

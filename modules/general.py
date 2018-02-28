@@ -42,13 +42,15 @@ class General:
     @commands.command(aliases=['version'])
     async def info(self, ctx):
         servers = len(self.bot.guilds)
+        latency = "%.4f" % self.bot.latencies[0][1]
         info = discord.Embed(title="**Info**",
                              color=0xDEADBF,
                              description=f"Servers: {servers}\n"
                                          f"Members {len(set(self.bot.get_all_members()))}\n"
                                          f"Bot Commands: {str(len(self.bot.commands))}\n"
                                          f"Channels: {len(set(self.bot.get_all_channels()))}\n"
-                                         f"Shards: {self.bot.shard_count}")
+                                         f"Shards: {self.bot.shard_count}\n"
+                                         f"Latency: {latency}")
         info.add_field(name="Messages Read", value=self.bot.counter['messages_read'])
         info.add_field(name="Processed Commands", value=self.bot.counter['commands'])
         info.add_field(name="CPU %", value=psutil.cpu_percent())
@@ -59,7 +61,8 @@ class General:
                        value=datetime.datetime.fromtimestamp(psutil.boot_time()).strftime('%Y-%m-%d %H:%M:%S'))
         info.add_field(name=f"Python {sys.version[0]}", value=f"Discord.py {discord.__version__}\n"
                                                               f"PIL {pilv}\n"
-                                                              f"BeautifulSoup {bsv}")
+                                                              f"BeautifulSoup {bsv}\n"
+                                                              f"psutil {psutil.__version__}")
         info.add_field(name="Links", value="<:GH:416593854368841729> - https://github.com/rekt4lifecs/NekoBotRewrite/\n"
                                            "**Support Server** - https://discord.gg/q98qeYN\n"
                                            "**Vote** OwO - https://discordbots.org/bot/310039170792030211/vote")
@@ -428,6 +431,58 @@ class General:
                    "<:dnd:313956276893646850> My reply is no", "<:dnd:313956276893646850> My sources say no",
                    "<:dnd:313956276893646850> Outlook not so good", "<:dnd:313956276893646850> Very doubtful"]
         await ctx.send(embed=discord.Embed(title=random.choice(answers), color=0xDEADBF))
+
+    @commands.command()
+    async def botinfo(self, ctx, bot_user : int = None):
+        """Get Bot Info"""
+        if bot_user == None:
+            bot_user = config.botid
+        url = f"https://discordbots.org/api/bots/{bot_user}"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                bot = await r.json()
+
+        em = discord.Embed(color=0xDEADBF, title=bot['username'] + "#" + bot['discriminator'], description=bot['shortdesc'])
+        try:
+            em.add_field(name="Prefix", value=bot['prefix'])
+        except:
+            pass
+        try:
+            em.add_field(name="Lib", value=bot['lib'])
+        except:
+            pass
+        try:
+            em.add_field(name="Owners", value=f"<@{bot['owners'][0]}>")
+        except:
+            pass
+        try:
+            em.add_field(name="Votes", value=bot['points'])
+        except:
+            pass
+        try:
+            em.add_field(name="Server Count", value=bot['server_count'])
+        except:
+            pass
+        try:
+            em.add_field(name="ID", value=bot['id'])
+        except:
+            pass
+        try:
+            em.add_field(name="Certified", value=bot['certifiedBot'])
+        except:
+            pass
+        try:
+            em.add_field(name="Links", value=f"[GitHub]({bot['github']}) - [Invite]({bot['invite']})")
+        except:
+            pass
+        try:
+        #em.add_field(name="Invite", value=)
+        #em.add_field(name="Website", value=bot['website'])
+            em.set_thumbnail(url=f"https://images.discordapp.net/avatars/{bot['id']}/{bot['avatar']}")
+        except:
+            pass
+
+        await ctx.send(embed=em)
 
     @commands.command()
     async def help(self, ctx, option: str = None):
