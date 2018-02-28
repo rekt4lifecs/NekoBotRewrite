@@ -448,7 +448,7 @@ class General:
             embed.add_field(name="Levels", value="`profile`, `settitle`, `setdesc`, `rep`")
             embed.add_field(name="Fun",
                             value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`,"
-                                  " `feed`, `lovecalculator`, `boom`")
+                                  " `feed`, `lovecalculator`, `boom`, `bitconnect`")
             embed.add_field(name="Economy", value="`register`, `balance`, `daily`, `roulette`, more soon...")
 
             embed.add_field(name="NSFW",
