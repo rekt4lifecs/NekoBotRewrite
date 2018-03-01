@@ -91,15 +91,18 @@ class General:
         embed.add_field(name="Status", value=user.status)
         embed.add_field(name="Color", value=user.color)
 
-        roles = [x.name for x in user.roles if x.name != "@everyone"]
+        try:
+            roles = [x.name for x in user.roles if x.name != "@everyone"]
 
-        if roles:
-            roles = sorted(roles, key=[x.name for x in server.role_hierarchy
-                                       if x.name != "@everyone"].index)
-            roles = ", ".join(roles)
-        else:
-            roles = "None"
-        embed.add_field(name="Roles", value=roles)
+            if roles:
+                roles = sorted(roles, key=[x.name for x in server.role_hierarchy
+                                           if x.name != "@everyone"].index)
+                roles = ", ".join(roles)
+            else:
+                roles = "None"
+            embed.add_field(name="Roles", value=roles)
+        except:
+            pass
 
         await ctx.send(embed=embed)
 
@@ -108,11 +111,6 @@ class General:
     async def serverinfo(self, ctx):
         """Display Server Info"""
         server = ctx.message.guild
-
-        if server.mfa_level == 1:
-            twofac = True
-        else:
-            twofac = False
 
         verif = server.verification_level
 
@@ -126,29 +124,24 @@ class General:
             features = str(server.features).replace("[", "").replace("]", "")
 
         embed = discord.Embed(color=0xDEADBF)
-        embed.add_field(name="Name", value=server.name)
+        embed.add_field(name="Name", value=f"**{server.name}**\n({server.id})")
+        embed.add_field(name="Owner", value=server.owner)
+        embed.add_field(name="Online", value=f"**{online}/{len(server.members)}**")
+        embed.add_field(name="Created at", value=server.created_at.strftime("%d %b %Y %H:%M"))
+        embed.add_field(name="Channels", value=f"Text Channels: **{len(server.text_channels)}**\n"
+                                               f"Voice Channels: **{len(server.voice_channels)}**\n"
+                                               f"Categories: **{len(server.categories)}**\n"
+                                               f"AFK Channel: **{server.afk_channel}**")
         embed.add_field(name="Roles", value=len(server.roles))
         embed.add_field(name="Emojis", value=f"{len(server.emojis)}/100")
-        embed.add_field(name="Region", value=server.region)
-        embed.add_field(name="AFK Timeout", value=server.afk_timeout)
-        embed.add_field(name="AFK Channel", value=server.afk_channel)
-        embed.set_thumbnail(url=server.icon_url)
-        embed.add_field(name="ID", value=server.id)
-        embed.add_field(name="Owner", value=server.owner)
-        embed.add_field(name="F2A", value=str(twofac))
-        embed.add_field(name="Verification Level", value=verif)
-        embed.add_field(name="<:online:313956277808005120> Online", value=f"{online}/{len(server.members)}")
-        embed.add_field(name="Content Filter", value=server.explicit_content_filter)
-        embed.add_field(name="Features", value=features)
-        embed.add_field(name="Channels", value=len(server.channels))
-        embed.add_field(name="Large Guild", value=str(server.large))
-        embed.add_field(name="Voice Channels", value=len(server.voice_channels))
-        embed.add_field(name="Text Channels", value=len(server.text_channels))
-        embed.add_field(name="Categories", value=len(server.categories))
-        embed.add_field(name="System Channel", value=server.system_channel)
-        embed.add_field(name="Shard ID", value=server.shard_id)
-        embed.add_field(name="Created at", value=server.created_at.strftime("%d %b %Y %H:%M"))
-        embed.set_footer(text="Thats a lot of info V(=^･ω･^=)v")
+        embed.add_field(name="Region", value=str(server.region).title())
+        embed.add_field(name="Security", value=f"Verification Level: **{verif}**\n"
+                                               f"Content Filter: **{server.explicit_content_filter}**")
+
+        try:
+            embed.set_thumbnail(url=server.icon_url)
+        except:
+            pass
 
         await ctx.send(embed=embed)
 
