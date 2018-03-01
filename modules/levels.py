@@ -199,7 +199,6 @@ class Levels:
 
     async def _handle_on_message(self, message):
         user = message.author
-        text = message.content
         userinfo = user.id
         await self._create_user(user)
         curr_time = time.time()
