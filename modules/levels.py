@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, aiomysql, config, time, random, math, datetime, requests, re, logging
+import discord, pymysql, config, time, random, math, datetime, requests, re, logging
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from textwrap import wrap
@@ -7,11 +7,11 @@ from .utils import chat_formatting
 
 log = logging.getLogger("NekoBot")
 
-connection = aiomysql.connect(user=config.db.user,
+connection = pymysql.connect(user=config.db.user,
                              password=config.db.password,
                              host=config.db.host,
                              port=config.db.port,
-                             db=config.db.database)
+                             database=config.db.database)
 db = connection.cursor()
 
 sqlCHAR = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f",
