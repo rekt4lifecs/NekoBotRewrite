@@ -100,6 +100,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def lewdneko(self, ctx):
         """Posts a Lewd Neko OwO"""
         if not ctx.message.channel.is_nsfw():
