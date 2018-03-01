@@ -1,12 +1,12 @@
 from discord.ext import commands
-import discord, pymysql, config, datetime, time, aiohttp, random, asyncio, string
+import discord, aiomysql, config, datetime, time, aiohttp, random, asyncio, string
 from datetime import timedelta
 
-connection = pymysql.connect(user=config.db.user,
+connection = aiomysql.connect(user=config.db.user,
                              password=config.db.password,
                              host=config.db.host,
                              port=config.db.port,
-                             database=config.db.database)
+                             db=config.db.database)
 db = connection.cursor()
 
 class Economy:
