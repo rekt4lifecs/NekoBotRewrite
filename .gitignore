@@ -8,3 +8,4 @@ config.py
 /config.py
 
 .idea/
+*.sql
