@@ -112,6 +112,7 @@ class NSFW:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['neko'])
+                em.set_footer(text="nekos.life owo")
                 await ctx.send(embed=em)
 
     @commands.command()
