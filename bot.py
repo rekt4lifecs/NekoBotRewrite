@@ -93,10 +93,13 @@ class NekoBot(commands.AutoShardedBot):
         await self.session.close()
 
     async def on_ready(self):
-        print("Ready OwO")
-        print(self.shard_count)
-        print(f"Servers {len(self.guilds)}")
-        print(f"Users {len(set(self.get_all_members()))}")
+        print("Ready OwO\n\n")
+        print(f"Info:\n"
+              f"    - Shards: {self.shard_count}\n"
+              f"    - Servers: {len(self.guilds)}\n"
+              f"    - Members: {len(set(self.get_all_members()))}\n"
+              f"    - Owner: {self.owner_id}\n"
+              f"    - Prefix: {self.command_prefix}")
 
     def run(self):
         super().run(config.token, reconnect=True)
