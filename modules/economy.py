@@ -1,5 +1,6 @@
 from discord.ext import commands
 import discord, pymysql, config, datetime, time, aiohttp, random, asyncio, string
+from datetime import timedelta
 
 connection = pymysql.connect(user=config.db.user,
                              password=config.db.password,
@@ -151,7 +152,11 @@ class Economy:
             timenow = datetime.datetime.utcfromtimestamp(time.time()).strftime("%d")
             timecheck = datetime.datetime.utcfromtimestamp(int(getdb)).strftime("%d")
             if timecheck == timenow:
-                await ctx.send("Wait another day before using daily again...")
+                tomorrow = datetime.datetime.replace(datetime.datetime.now() + datetime.timedelta(days=1),
+                                                     hour=0, minute=0, second=0)
+                delta = tomorrow - datetime.datetime.now()
+                timeleft = time.strftime("%H", time.gmtime(delta.seconds))
+                await ctx.send(f"Wait another {timeleft} hours before using daily again...")
                 return
             db.execute("select balance from economy where userid = {}".format(user.id))
             eco = int(db.fetchone()[0])

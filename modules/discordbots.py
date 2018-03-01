@@ -1,7 +1,7 @@
 from discord.ext import commands
 import asyncio, config, dbl, discord, aiohttp, random
 
-messages = ["OwO Whats this", "MonkaS", "OwO", "Haiiiii", ".help", "🤔🤔🤔", "HMMM🤔"]
+messages = ["OwO Whats this", "MonkaS", "OwO", "Haiiiii", ".help", "🤔🤔🤔", "HMMM🤔", "USE n! WEW", "n!HELP REE"]
 
 
 class DiscordBotsOrgAPI:
@@ -21,7 +21,7 @@ class DiscordBotsOrgAPI:
             try:
                 await self.dblpy.post_server_count(shard_count=self.bot.shard_count, shard_no=self.bot.shard_id)
                 print("Posted server count. {}".format(len(self.bot.guilds)))
-                game = discord.Game(type=1, url="https://www.twitch.tv/rekt4lifecs", name=random.choice(messages))
+                game = discord.Game(type=1, url="https://www.twitch.tv/rekt4lifecs", name="🤔 n!help 🤔") #random.choice(messages)
                 await self.bot.change_presence(game=game)
             except Exception as e:
                 print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))

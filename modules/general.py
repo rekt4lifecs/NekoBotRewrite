@@ -39,6 +39,28 @@ class General:
         else:
             await ctx.send("**Tails**", file=discord.File("data/tails.png"))
 
+    @commands.command()
+    @commands.is_owner()
+    async def startnsfw(self, ctx):
+        """Start NSFW Channel Check"""
+        ass     =   375490325801598980
+        asian   =   390698118267535390
+        puss    =   389124912578691072
+        boobs   =   376813293337182210
+        feet    =   375878004477526017
+        thigh   =   376005606324174848
+        amateur =   310399587846455297
+        pro     =   361279235714711552
+        gay     =   394562513527635968
+        lesbian =   310473315204595714
+        bdsm    =   310475303673921536
+        femdom  =   393236010697490432
+        maledom =   406847829051703296
+        ebony   =   397888812996362261
+        await ctx.send("Starting Loop...")
+        while True:
+            break
+
     @commands.command(aliases=['version'])
     async def info(self, ctx):
         servers = len(self.bot.guilds)
@@ -483,7 +505,10 @@ class General:
         color = 0xDEADBF
         # too lazy to loop kthx fiteme source stealers
         try:
-            embed = discord.Embed(color=color)
+            latency = "%.4f" % self.bot.latencies[0][1]
+            embed = discord.Embed(color=color,
+                                  title=f"Prefix: When Mentioned or 'n!'",
+                                  description=f"Latency: {latency}")
             embed.set_author(name="NekoBot",
                              icon_url="https://i.imgur.com/x2N73t0.png")
 
