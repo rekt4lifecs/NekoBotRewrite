@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-import sys, psutil, datetime, aiohttp, random, requests, config
+import sys, psutil, datetime, aiohttp, random, requests, config, asyncio
 from collections import Counter
 from hurry.filesize import size
 from .utils.chat_formatting import pagify
@@ -43,23 +43,79 @@ class General:
     @commands.is_owner()
     async def startnsfw(self, ctx):
         """Start NSFW Channel Check"""
-        ass     =   375490325801598980
-        asian   =   390698118267535390
-        puss    =   389124912578691072
-        boobs   =   376813293337182210
-        feet    =   375878004477526017
-        thigh   =   376005606324174848
-        amateur =   310399587846455297
-        pro     =   361279235714711552
-        gay     =   394562513527635968
-        lesbian =   310473315204595714
-        bdsm    =   310475303673921536
-        femdom  =   393236010697490432
-        maledom =   406847829051703296
-        ebony   =   397888812996362261
+        ass     =   self.bot.get_channel(375490325801598980)
+        asian   =   self.bot.get_channel(390698118267535390)
+        puss    =   self.bot.get_channel(389124912578691072)
+        boobs   =   self.bot.get_channel(376813293337182210)
+        feet    =   self.bot.get_channel(375878004477526017)
+        thigh   =   self.bot.get_channel(376005606324174848)
+        amateur =   self.bot.get_channel(310399587846455297)
+        pro     =   self.bot.get_channel(361279235714711552)
+        gay     =   self.bot.get_channel(394562513527635968)
+        lesbian =   self.bot.get_channel(310473315204595714)
+        bdsm    =   self.bot.get_channel(310475303673921536)
+        femdom  =   self.bot.get_channel(393236010697490432)
+        maledom =   self.bot.get_channel(406847829051703296)
+        ebony   =   self.bot.get_channel(397888812996362261)
         await ctx.send("Starting Loop...")
         while True:
-            break
+            print("Posting Images...")
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "ass", page=random.randint(1, 5))['data'])
+            await ass.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "AsiansGoneWild", page=random.randint(1, 5))['data'])
+            await asian.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "pussy", page=random.randint(1, 5))['data'])
+            await puss.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "boobs", page=random.randint(1, 5))['data'])
+            await boobs.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "feet", page=random.randint(1, 5))['data'])
+            await feet.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "thighhighs", page=random.randint(1, 5))['data'])
+            await thigh.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "Amateur", page=random.randint(1, 5))['data'])
+            await amateur.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "nsfw", page=random.randint(1, 5))['data'])
+            await pro.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "gaynsfw", page=random.randint(1, 5))['data'])
+            await gay.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "lesbians", page=random.randint(1, 5))['data'])
+            await lesbian.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "bdsm", page=random.randint(1, 5))['data'])
+            await bdsm.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "Femdom", page=random.randint(1, 5))['data'])
+            await femdom.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "maledom", page=random.randint(1, 5))['data'])
+            await maledom.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
+            ##########################################################################################################
+            x = random.choice(config.imgur._get_imgur(self, "Ebony", page=random.randint(1, 5))['data'])
+            await ebony.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
+            await asyncio.sleep(386)###################################################################################
 
     @commands.command(aliases=['version'])
     async def info(self, ctx):
