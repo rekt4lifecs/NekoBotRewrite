@@ -115,7 +115,7 @@ class IMGWelcome:
         content = db.fetchone()[0]
         await self._build_member_join(member, channel, bg, content, server)
         chan = self.bot.get_channel(int(channel))
-        content = str(content).replace("user", f"{member.name}").replace("server", f"{member.guild}")
+        content = str(content).replace("user", f"{member.mention}").replace("server", f"{member.guild}")
         await chan.send(file=discord.File(f"data/imgwelcome/{server.id}.png"), content=content)
         #await ctx.send(file=discord.File(f"data/img/{server.id}.png"))
 
