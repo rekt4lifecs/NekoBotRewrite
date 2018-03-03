@@ -483,7 +483,7 @@ class General:
         else:
             embed = discord.Embed(color=0xDEADBF,
                                   title="OwO Whats this",
-                                  description="To use this command you need to `.vote` >.<")
+                                  description="To use this command you need to `n!vote` >.<")
             await ctx.send(embed=embed)
 
     @commands.command(aliases=["8"], name="8ball")

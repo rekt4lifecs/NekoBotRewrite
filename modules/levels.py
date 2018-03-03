@@ -1,18 +1,11 @@
 from discord.ext import commands
-import discord, pymysql, config, time, random, math, datetime, requests, re, logging
+import discord, pymysql, config, time, random, math, datetime, requests, re, logging, aiomysql
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from textwrap import wrap
 from .utils import chat_formatting
 
 log = logging.getLogger("NekoBot")
-
-connection = pymysql.connect(user=config.db.user,
-                             password=config.db.password,
-                             host=config.db.host,
-                             port=config.db.port,
-                             database=config.db.database)
-db = connection.cursor()
 
 sqlCHAR = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "a", "B", "b", "C", "c", "D", "d", "E", "e", "F", "f",
            "G", "g", "H", "h", "I", "i", "j", "J", "K", "k", "L", "l", "M", "m", "N", "n", "O", "o", "P", "p", "Q", "q",
@@ -24,84 +17,80 @@ class Levels:
     def __init__(self, bot):
         self.bot = bot
 
-    # @commands.command()
-    # async def profile(self, ctx, user : discord.Member = None):
-    #     if user == None:
-    #         user = ctx.message.author
-    #     try:
-    #         db.execute("SELECT level FROM levels WHERE userid = {}".format(user.id))
-    #         levels = db.fetchone()[0]
-    #         db.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
-    #         REP = db.fetchone()[0]
-    #         db.execute("SELECT title FROM levels WHERE userid = {}".format(user.id))
-    #         title = db.fetchone()[0]
-    #         db.execute("SELECT info FROM levels WHERE userid = {}".format(user.id))
-    #         desc = db.fetchone()[0]
-    #     except:
-    #         levels = 0
-    #         REP = 0
-    #         title = ""
-    #         desc = ""
-    #
-    #     try:
-    #         db.execute("select balance from economy where userid = {}".format(user.id))
-    #         balance = db.fetchone()[0]
-    #     except:
-    #         balance = 0
-    #
-    #     color = user.color
-    #     embed = discord.Embed(color=color,
-    #                           title=str(title),
-    #                           description=str(desc))
-    #     embed.set_author(name=f"{user.name}")
-    #     embed.set_thumbnail(url=user.avatar_url)
-    #     embed.add_field(name="Level", value=f"**{self._find_level(levels)}**")
-    #     embed.add_field(name="Rep", value=f"**{REP}**")
-    #     embed.add_field(name="Balance", value=f"{balance}")
-    #     embed.set_footer(text=f"Total XP: {levels}, {self._level_exp(self._find_level(levels))}/{self._required_exp(self._find_level(levels))}")
-    #
-    #     await ctx.send(embed=embed)
+    async def database(self, datab: str, item: str, userid: int):
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        db = await connection.cursor()
+        try:
+            await db.execute(f"SELECT {item} FROM {datab} WHERE userid = {userid}")
+            return await db.fetchone()[0]
+        except:
+            return None
+
+    async def usercheck(self, datab: str, userid: int):
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        db = await connection.cursor()
+        if not await db.execute(f'SELECT 1 FROM {datab} WHERE userid = {userid}'):
+            return False
+        else:
+            return True
 
     @commands.command()
     async def profile(self, ctx, user : discord.Member = None):
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
         if user == None:
             user = ctx.message.author
-        try:
-            db.execute("SELECT level FROM levels WHERE userid = {}".format(user.id))
-            levels = db.fetchone()[0]
-            db.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
-            REP = db.fetchone()[0]
-            db.execute("SELECT title FROM levels WHERE userid = {}".format(user.id))
-            title = db.fetchone()[0]
-            db.execute("SELECT info FROM levels WHERE userid = {}".format(user.id))
-            desc = db.fetchone()[0]
-        except:
-            levels = 0
-            REP = 0
-            title = ""
-            desc = ""
-
-        try:
-            db.execute(f"SELECT osu FROM osu WHERE userid = {user.id}")
-            osu = db.fetchone()[0]
-        except:
-            osu = "None"
-
-        try:
-            db.execute("SELECT balance FROM economy WHERE userid = {}".format(user.id))
-            balance = db.fetchone()[0]
-        except:
-            balance = 0
+        if await self.usercheck("levels", user.id) is False:
+            return
+        async with connection.cursor() as cur:
+            await cur.execute(f"SELECT level FROM levels WHERE userid = {user.id}")
+            levels = await cur.fetchone()
+            levels = levels[0]
+            await cur.execute(f"SELECT rep FROM levels WHERE userid = {user.id}")
+            rep = await cur.fetchone()
+            rep = rep[0]
+            await cur.execute(f"SELECT title FROM levels WHERE userid = {user.id}")
+            title = await cur.fetchone()
+            title = title[0]
+            await cur.execute(f"SELECT info FROM levels WHERE userid = {user.id}")
+            desc = await cur.fetchone()
+            desc = desc[0]
+            if await self.usercheck("osu", user.id) is True:
+                osu = True
+            else:
+                osu = False
+            if await self.usercheck("economy", user.id) is True:
+                await cur.execute(f"SELECT balance FROM economy WHERE userid = {user.id}")
+                balance = await cur.fetchone()
+                balance = balance[0]
+            else:
+                balance = 0
 
         color = str(user.color).replace("#", "")
 
-        self._build_profile(user, title, desc, REP, levels, color, balance, osu)
+        self._build_profile(user, title, desc, rep, levels, color, balance, osu)
         await ctx.send(file=discord.File(f"data/profiles/{user.id}.png"))
 
     @commands.command()
     async def settitle(self, ctx, *, title : str):
         """Set profile title"""
-        if not db.execute('SELECT 1 FROM levels WHERE userid = {}'.format(ctx.message.author.id)):
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        if await self.usercheck("levels", ctx.message.author.id) is False:
             await ctx.send("Error finding your profile.")
             return
         if '"' in title:
@@ -117,8 +106,9 @@ class Levels:
             await ctx.send("Your title is over 24 characters...")
             return
         try:
-            db.execute(f"UPDATE levels SET title = \"{title}\" WHERE userid = {ctx.message.author.id}")
-            connection.commit()
+            async with connection.cursor() as cur:
+                await cur.execute(f"UPDATE levels SET title = \"{title}\" WHERE userid = {ctx.message.author.id}")
+                await connection.commit()
             await ctx.send("Title Updated!")
         except Exception as e:
             await ctx.send("Problem updating title to database...")
@@ -126,7 +116,12 @@ class Levels:
     @commands.command()
     async def setdesc(self, ctx, *, description : str):
         """Set profile description"""
-        if not db.execute('SELECT 1 FROM levels WHERE userid = {}'.format(ctx.message.author.id)):
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        if await self.usercheck("levels", ctx.message.author.id) is False:
             await ctx.send("Error finding your profile.")
             return
         if '"' in description:
@@ -142,8 +137,9 @@ class Levels:
             await ctx.send("Your description is too long.")
             return
         try:
-            db.execute(f"UPDATE levels SET info = \"{description}\" WHERE userid = {ctx.message.author.id}")
-            connection.commit()
+            async with connection.cursor() as cur:
+                await cur.execute(f"UPDATE levels SET info = \"{description}\" WHERE userid = {ctx.message.author.id}")
+                await connection.commit()
             await ctx.send("Description Updated!")
         except Exception as e:
             await ctx.send("Problem updating description to database...")
@@ -152,82 +148,126 @@ class Levels:
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def rep(self, ctx, user : discord.Member):
         """Rep a user."""
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
         if user == ctx.message.author:
             await ctx.send("You can't rep yourself 😦")
             return
-        elif user.bot:
+        elif user.bot is True:
             await ctx.send("You can't rep a bot 😦")
             return
         else:
-            if not db.execute('SELECT 1 FROM levels WHERE userid = {}'.format(user.id)):
+            if await self.usercheck("levels", user.id) is False:
                 await ctx.send("That user doesn't have an account yet")
                 return
-            db.execute(f"SELECT lastrep FROM levels WHERE userid = {ctx.message.author.id}")
-            getdb = db.fetchone()[0]
+            async with connection.cursor() as cur:
+                await cur.execute(f"SELECT lastrep FROM levels WHERE userid = {ctx.message.author.id}")
+                getdb = await cur.fetchone()
+                getdb = getdb[0]
             timenow = datetime.datetime.utcfromtimestamp(time.time()).strftime("%d")
             timecheck = datetime.datetime.utcfromtimestamp(int(getdb)).strftime("%d")
             if timecheck == timenow:
                 await ctx.send("You already used your rep today 😦")
                 return
-            db.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
-            rep_curr = int(db.fetchone()[0])
-            db.execute(f"UPDATE levels SET rep = {rep_curr + 1} WHERE userid = {user.id}")
-            connection.commit()
-            db.execute(f"UPDATE levels SET lastrep = {int(time.time())} WHERE userid = {ctx.message.author.id}")
-            connection.commit()
+            async with connection.cursor() as cur:
+                await cur.execute("SELECT rep FROM levels WHERE userid = {}".format(user.id))
+                rep_curr = await cur.fetchone()
+                rep_curr = int(rep_curr[0])
+                await cur.execute(f"UPDATE levels SET rep = {rep_curr + 1} WHERE userid = {user.id}")
+                await connection.commit()
+                await cur.execute(f"UPDATE levels SET lastrep = {int(time.time())} WHERE userid = {ctx.message.author.id}")
+                await connection.commit()
             await ctx.send(f"{ctx.message.author.name} gave {user.mention} rep!")
 
-    @commands.command()
-    @commands.is_owner()
-    async def imgbuild(self, ctx):
-        """IMG Build"""
-        user = ctx.message.author
-        color = str(user.color).replace("#", "")
-        fox = "The quick brown fox jumps over the lazy dog"
-        self._build_profile(user, fox, fox, 5, 500, color, 500)
-        await ctx.send(file=discord.File(f"data/imgwelcome/{user.id}.png"))
-
+    # @commands.command()
+    # @commands.is_owner()
+    # async def imgbuild(self, ctx):
+    #     """IMG Build"""
+    #     user = ctx.message.author
+    #     color = str(user.color).replace("#", "")
+    #     fox = "The quick brown fox jumps over the lazy dog"
+    #     self._build_profile(user, fox, fox, 5, 500, color, 500)
+    #     await ctx.send(file=discord.File(f"data/imgwelcome/{user.id}.png"))
+    #
     @commands.command()
     @commands.is_owner()
     async def sql(self, ctx, *, sql: str):
         """Inject SQL"""
         try:
-            db.execute(sql)
-            connection.commit()
+            connection = await aiomysql.connect(user=config.db.user,
+                                                password=config.db.password,
+                                                host=config.db.host,
+                                                port=config.db.port,
+                                                db=config.db.database)
+            async with connection.cursor() as cur:
+                await cur.execute(sql)
+                await connection.commit()
+                await ctx.send("Done!")
         except Exception as e:
             await ctx.send(f"`{e}`")
 
     async def _handle_on_message(self, message):
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
         user = message.author
         userinfo = user.id
         await self._create_user(user)
         curr_time = time.time()
-        db.execute(f"SELECT lastxp FROM levels WHERE userid = {user.id}")
-        if float(curr_time) - float(db.fetchone()[0]) >= 120:
+        async with connection.cursor() as cur:
+            await cur.execute(f"SELECT lastxp FROM levels WHERE userid = {user.id}")
+            lastxp = await cur.fetchone()
+        if float(curr_time) - float(lastxp[0]) >= 120:
             await self._process_exp(message, userinfo, random.randint(15, 20))
             #await self._give_chat_credit(user)
-            db.execute(f"UPDATE levels SET lastxp = {time.time()} WHERE userid = {userinfo}")
-            connection.commit()
+            async with connection.cursor() as cur:
+                await cur.execute(f"UPDATE levels SET lastxp = {time.time()} WHERE userid = {userinfo}")
+                await connection.commit()
 
     async def _process_exp(self, message, userinfo, exp : int):
-        db.execute("SELECT level FROM levels WHERE userid = {}".format(userinfo))
-        levels = db.fetchone()[0]
-        db.execute(f"UPDATE levels SET level = {levels + exp} WHERE userid = {userinfo}")
-        connection.commit()
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        async with connection.cursor() as cur:
+            await cur.execute("SELECT level FROM levels WHERE userid = {}".format(userinfo))
+            levels = await cur.fetchone()
+            levels = levels[0]
+            await cur.execute(f"UPDATE levels SET level = {levels + exp} WHERE userid = {userinfo}")
+            await connection.commit()
 
-    # async def _give_chat_credit(self, user):
-    #     db.execute("select balance from economy where userid = {}".format(user.id))
-    #     eco = int(db.fetchone())
-    #     db.execute(f"UPDATE economy SET balance = {eco + 100} WHERE userid = {user.id}")
-    #     connection.commit()
+    async def _give_chat_credit(self, user):
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        async with connection.cursor() as cur:
+            await cur.execute("select balance from economy where userid = {}".format(user.id))
+            eco = await cur.fetchone()
+            eco = int(eco[0])
+            await cur.execute(f"UPDATE economy SET balance = {eco + 100} WHERE userid = {user.id}")
+            await connection.commit()
 
     async def _create_user(self, user):
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
         try:
-            if not db.execute('SELECT 1 FROM levels WHERE userid = {}'.format(user.id)):
-                #userid, info, title, level, rep, lastxp, lastrep
-                db.execute(f"INSERT IGNORE INTO levels VALUES ({user.id}, info, title, 0, 0, 0, 0)")
-                connection.commit()
-                log.info(f"Made account for {user.name} ({user.id})")
+            if await self.usercheck("levels", user.id) is True:
+                #userid, info, title, level, rep, lastxp,
+                async with connection.cursor() as cur:
+                    await cur.execute(f"INSERT IGNORE INTO levels VALUES ({user.id}, info, title, 0, 0, 0, 0)")
+                    await connection.commit()
+                    log.info(f"Made account for {user.name} ({user.id})")
             else:
                 pass
         except AttributeError:
@@ -257,12 +297,11 @@ class Levels:
         colors.append(a)
         return tuple(colors)
 
-    def _build_profile(self, user, title : str, desc : str, rep : int, xp : int, color, balance : int, osu : str):
+    def _build_profile(self, user, title : str, desc : str, rep : int, xp : int, color, balance : int, osu : bool):
         """v2 of build profile - ReKT#0001, Hex to RGB - stackoverflow.com"""
         darken = 20
         lighten = 20
 
-        osu = str(osu)
         level = self._find_level(xp)
         joined = user.created_at.strftime("%d %b %Y %H:%M")
         title = title.title()
@@ -316,7 +355,7 @@ class Levels:
 
         osu_dest = (301, 25)
 
-        if osu != "None":
+        if osu is True:
             draw.text((300, 25), "OSU: ✓", text_color, font=unicode_font)
         else:
             draw.text((300, 25), "OSU: ✖", text_color, font=unicode_font)
@@ -374,5 +413,5 @@ class Levels:
 
 def setup(bot):
     n = Levels(bot)
-    bot.add_listener(n._handle_on_message, "on_message")
+    #bot.add_listener(n._handle_on_message, "on_message")
     bot.add_cog(n)

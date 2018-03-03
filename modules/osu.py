@@ -21,8 +21,8 @@ class OSU:
         if not ctx.invoked_subcommand or None:
             embed = discord.Embed(color=0xDEADBF,
                                   title="OSU",
-                                  description=".osu add - **Add player profile**\n"
-                                              ".osu stats - **Show player stats**")
+                                  description="n!osu add - **Add player profile**\n"
+                                              "n!osu stats - **Show player stats**")
             await ctx.send(embed=embed)
 
     @osu.command()
@@ -52,7 +52,7 @@ class OSU:
         if user == None:
             user = ctx.message.author
         if not db.execute('SELECT 1 FROM osu WHERE userid = {}'.format(user.id)):
-            await ctx.send("That user doesn't have a OSU user attached to your account. Use `.osu add` to add a user.")
+            await ctx.send("That user doesn't have a OSU user attached to your account. Use `n!osu add` to add a user.")
         else:
             db.execute(f"SELECT osu FROM osu WHERE userid = {ctx.message.author.id}")
             username = db.fetchone()[0]
