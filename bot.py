@@ -1,5 +1,5 @@
 from discord.ext import commands
-import logging, traceback, sys, discord, json, dbl, asyncio
+import logging, traceback, sys, discord, json, dbl, asyncio, aiomysql
 from collections import Counter
 
 import config
@@ -16,18 +16,19 @@ startup_extensions = {
     'modules.economy',
     'modules.reactions',
     'modules.nsfw',
-    'modules.levels',
+    'modules.levels',   
     'modules.imgwelcome',
     'modules.fun',
     'modules.discordbots',
     'modules.osu',
+    'modules.steam'
 }
 
 class NekoBot(commands.AutoShardedBot):
     """NekoBot Rewrite OwO"""
 
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or(config.prefix),
+        super().__init__(command_prefix=commands.when_mentioned_or("n!"),
                          description=config.description,
                          pm_help=None,
                          help_attrs=dict(hidden=True))
@@ -81,25 +82,44 @@ class NekoBot(commands.AutoShardedBot):
 
     async def on_message(self, message):
         self.counter["messages_read"] += 1
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        async with connection.cursor() as cur:
+            await cur.execute(f"SELECT amount FROM stats WHERE type = \"messages\"")
+            messages = await cur.fetchone()
+            messages = int(messages[0])
+            await cur.execute(f"UPDATE stats SET amount = {messages + 1} WHERE type = \"messages\"")
+            await connection.commit()
         if message.author.bot:
             return
         await self.process_commands(message)
 
     async def on_command(self, command):
         self.counter["commands"] += 1
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        async with connection.cursor() as cur:
+            await cur.execute(f"SELECT amount FROM stats WHERE type = \"commands\"")
+            commands = await cur.fetchone()
+            commands = int(commands[0])
+            await cur.execute(f"UPDATE stats SET amount = {commands + 1} WHERE type = \"commands\"")
+            await connection.commit()
 
     async def close(self):
         await super().close()
         await self.session.close()
 
     async def on_ready(self):
-        print("Ready OwO\n\n")
-        print(f"Info:\n"
-              f"    - Shards: {self.shard_count}\n"
-              f"    - Servers: {len(self.guilds)}\n"
-              f"    - Members: {len(set(self.get_all_members()))}\n"
-              f"    - Owner: {self.owner_id}\n"
-              f"    - Prefix: {self.command_prefix}")
+        print("Ready OwO")
+        print(self.shard_count)
+        print(f"Servers {len(self.guilds)}")
+        print(f"Users {len(set(self.get_all_members()))}")
 
     def run(self):
         super().run(config.token, reconnect=True)

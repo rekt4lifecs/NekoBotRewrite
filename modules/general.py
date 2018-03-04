@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-import sys, psutil, datetime, aiohttp, random, requests, config, asyncio
+import sys, psutil, datetime, aiohttp, random, requests, config, asyncio, aiomysql
 from collections import Counter
 from hurry.filesize import size
 from .utils.chat_formatting import pagify
@@ -61,59 +61,59 @@ class General:
         while True:
             print("Posting Images...")
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "ass", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "ass", page=random.randint(1, 3))['data'])
             await ass.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "AsiansGoneWild", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "AsiansGoneWild", page=random.randint(1, 3))['data'])
             await asian.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "pussy", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "pussy", page=random.randint(1, 3))['data'])
             await puss.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "boobs", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "boobs", page=random.randint(1, 3))['data'])
             await boobs.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "feet", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "feet", page=random.randint(1, 3))['data'])
             await feet.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "thighhighs", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "thighhighs", page=random.randint(1, 3))['data'])
             await thigh.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "Amateur", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "Amateur", page=random.randint(1, 3))['data'])
             await amateur.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "nsfw", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "nsfw", page=random.randint(1, 3))['data'])
             await pro.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "gaynsfw", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "gaynsfw", page=random.randint(1, 3))['data'])
             await gay.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "lesbians", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "lesbians", page=random.randint(1, 3))['data'])
             await lesbian.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "bdsm", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "bdsm", page=random.randint(1, 3))['data'])
             await bdsm.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "Femdom", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "Femdom", page=random.randint(1, 3))['data'])
             await femdom.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "maledom", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "maledom", page=random.randint(1, 3))['data'])
             await maledom.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
             ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "Ebony", page=random.randint(1, 5))['data'])
+            x = random.choice(config.imgur._get_imgur(self, "Ebony", page=random.randint(1, 3))['data'])
             await ebony.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
 
@@ -121,6 +121,18 @@ class General:
     async def info(self, ctx):
         servers = len(self.bot.guilds)
         latency = "%.4f" % self.bot.latencies[0][1]
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        async with connection.cursor() as cur:
+            await cur.execute(f"SELECT amount FROM stats WHERE type = \"messages\"")
+            messages = await cur.fetchone()
+            messages_read = int(messages[0])
+            await cur.execute(f"SELECT amount FROM stats WHERE type = \"commands\"")
+            commands = await cur.fetchone()
+            commands_done = int(commands[0])
         info = discord.Embed(title="**Info**",
                              color=0xDEADBF,
                              description=f"Servers: {servers}\n"
@@ -129,8 +141,8 @@ class General:
                                          f"Channels: {len(set(self.bot.get_all_channels()))}\n"
                                          f"Shards: {self.bot.shard_count}\n"
                                          f"Latency: {latency}")
-        info.add_field(name="Messages Read", value=self.bot.counter['messages_read'])
-        info.add_field(name="Processed Commands", value=self.bot.counter['commands'])
+        info.add_field(name="Messages Read", value=f"Since Restart: {self.bot.counter['messages_read']},\nTotal: {messages_read}")
+        info.add_field(name="Processed Commands", value=f"Since Restart: {self.bot.counter['commands']},\nTotal: {commands_done}")
         info.add_field(name="CPU %", value=psutil.cpu_percent())
         info.add_field(name="Virtual Memory", value=f"{size(psutil.virtual_memory().available)}")
         info.add_field(name="Disk",
@@ -145,7 +157,7 @@ class General:
                                            "**Support Server** - https://discord.gg/q98qeYN\n"
                                            "**Vote** OwO - https://discordbots.org/bot/310039170792030211/vote")
         info.set_footer(
-            text="Bot by ReKT#0001 and was forced to use MySQL by Fox#0001 <3, user \"nsfw\" to see the NSFW usage graph owo")
+            text="Bot by ReKT#0001 and was forced to use MySQL by Fox#0001 <3")
         info.set_thumbnail(url=self.bot.user.avatar_url)
         await ctx.send(embed=info)
 
@@ -313,8 +325,7 @@ class General:
     async def vote(self, ctx):
         embed = discord.Embed(color=0xDEADBF,
                               title="Voting Link",
-                              description="https://discordbots.org/bot/310039170792030211/vote\n"
-                                          "`By voting you get 3 times the payday, gonewild command, permissions command and a slightly higher chance to win roulette OwO`")
+                              description="https://discordbots.org/bot/310039170792030211/vote")
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["perms"])
@@ -569,16 +580,16 @@ class General:
                              icon_url="https://i.imgur.com/x2N73t0.png")
 
             embed.add_field(name="General",
-                            value="`info`, `help`, `perms`, `lmgtfy`, `8ball`, `cookie`, `serverinfo`, `userinfo`, `channelinfo`, `flip`, "
-                                  "`avatar`, `urban`, `qr`, `botinfo`, `docs` (A full documentation)")
+                            value="`lmgtfy`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
+                                  " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`")
             embed.add_field(name="Moderation",
-                            value="`kick`, `ban`, `massban`, `unban`, `rename`, `mute` (VC), `unmute` (VC)")
+                            value="`kick`, `ban`, `massban`, `unban`, `rename`, `poll`, `purge`")
             embed.add_field(name="IMGWelcomer", value="`imgwelcome`")
             embed.add_field(name="Levels", value="`profile`, `settitle`, `setdesc`, `rep`")
             embed.add_field(name="Fun",
-                            value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`,"
-                                  " `feed`, `lovecalculator`, `boom`, `bitconnect`")
-            embed.add_field(name="Economy", value="`register`, `balance`, `daily`, `roulette`, more soon...")
+                            value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, "
+                                  "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`")
+            embed.add_field(name="Economy", value="`register`, `balance`, `daily`, `roulette`, `transfer`")
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
@@ -589,7 +600,7 @@ class General:
                                   "`poke`, `nom`, `lick`, `lewd`, `trap`, `owo`, `wasted`, `banghead`,"
                                   "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`")
             embed.add_field(name="Game Stats",
-                            value="`osu`, ~~`r6`~~")
+                            value="`osu`")
         except Exception as e:
             await ctx.send(e)
 

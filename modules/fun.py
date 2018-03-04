@@ -245,5 +245,19 @@ class Fun:
         await ctx.message.add_reaction("🇩")
         await ctx.message.add_reaction("🇪")
 
+    @commands.command(aliases=['fite', 'rust'])
+    async def fight(self, ctx, user1: discord.Member, user2: discord.Member = None):
+        """Fite sum1"""
+        if user2 == None:
+            user2 = ctx.message.author
+
+        map = "https://vignette.wikia.nocookie.net/callofduty/images/3/33/Rust.jpg"
+        em = discord.Embed(color=0xDEADBF,
+                           title="Intense Rust 1v1")
+        em.set_image(url=map)
+        em.add_field(name=f"Round | {user1.name} vs {user2.name}",
+                     value=f"***pew pew*** {random.choice([user1.name, user2.name])} got the first hit and won OwO")
+        await ctx.send(embed=em)
+
 def setup(bot):
     bot.add_cog(Fun(bot))

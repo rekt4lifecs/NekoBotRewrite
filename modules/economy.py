@@ -72,80 +72,61 @@ class Economy:
         else:
             await ctx.send("You don't have an account. Use `n!register` to make one.")
 
-    # @commands.command()
-    # @commands.cooldown(1, 20, commands.BucketType.user)
-    # async def roulette(self, ctx, amount : int):
-    #     """Play Roulette"""
-    #     connection = await aiomysql.connect(user=config.db.user,
-    #                                         password=config.db.password,
-    #                                         host=config.db.host,
-    #                                         port=config.db.port,
-    #                                         db=config.db.database)
-    #     if amount <= 0:
-    #         await ctx.send("Amount must be higher than 0.")
-    #         return
-    #     user = ctx.message.author
-    #     if await self.usercheck("economy", user.id) is False:
-    #         await ctx.send("You don't have a bank account 😦, use `register` to make one.")
-    #         return
-    #     url = "https://discordbots.org/api/bots/310039170792030211/votes"
-    #     async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key}) as cs:
-    #         async with cs.get(url) as r:
-    #             res = await r.json()
-    #     for x in res:
-    #         if str(x['id']) == str(ctx.message.author.id):
-    #             if amount > 25000:
-    #                 await ctx.send("You can't spend more than 25000 credits.")
-    #                 break
-    #             eee = await self.database("economy", "balance", user.id)
-    #             eco = int(eee[0])
-    #             if (eco - amount) < 0:
-    #                 await ctx.send("You don't have that much credits to spend ;-;")
-    #                 break
-    #             else:
-    #                 async with connection.cursor() as cur:
-    #                     await cur.execute(f"UPDATE economy SET balance = {eco - amount} WHERE userid = {user.id}")
-    #                     await connection.commit()
-    #                 await ctx.send("Spinning...")
-    #                 await asyncio.sleep(random.randint(3, 6))
-    #                 xx = random.randint(0, 1)
-    #                 if xx == 0:
-    #                     await ctx.send(f"You lost {amount} 😦")
-    #                     break
-    #                 elif xx == 1:
-    #                     await ctx.send(f"YOU WON {amount * 2}!!! OwO\n"
-    #                                    f"💯🔥<:flipped_ok_nko:418245464530485258>😂👌🔥💯")
-    #                     async with connection.cursor() as cur:
-    #                         await cur.execute(f"UPDATE economy SET balance = {eco + (amount * 2)} WHERE userid = {user.id}")
-    #                         await connection.commit()
-    #                     break
-    #     else:
-    #         if amount > 5000:
-    #             await ctx.send(embed=discord.Embed(color=0xDEADBF,
-    #                                                url="https://discordbots.org/bot/310039170792030211/vote",
-    #                                                title="Vote",
-    #                                                description="to get access to spend up to 25k at once OwO"))
-    #             return
-    #         eee = await self.database("economy", "balance", user.id)
-    #         eco = int(eee[0])
-    #         if (eco - amount) < 0:
-    #             await ctx.send("You don't have that much credits to spend ;-;")
-    #             return
-    #         async with connection.cursor() as cur:
-    #             await cur.execute(f"UPDATE economy SET balance = {eco - amount} WHERE userid = {user.id}")
-    #             await connection.commit()
-    #         await ctx.send("Spinning...")
-    #         await asyncio.sleep(random.randint(3, 6))
-    #         xx = random.randint(0, 1)
-    #         if xx == 0:
-    #             await ctx.send(f"You lost {amount} 😦")
-    #         elif xx == 1:
-    #             await ctx.send(f"YOU WON {amount * 2}!!! OwO\n"
-    #                            f"💯🔥<:flipped_ok_nko:418245464530485258>😂👌🔥💯")
-    #             async with connection.cursor() as cur:
-    #                 await cur.execute(f"UPDATE economy SET balance = {eco + (amount * 2)} WHERE userid = {user.id}")
-    #                 await connection.commit()
-    #
+    @commands.command()
+    async def roulette(self, ctx, amount : int = 500):
+        """Play Roulette"""
+        user = ctx.message.author
+        connection = await aiomysql.connect(user=config.db.user, password=config.db.password, host=config.db.host,
+                                            port=config.db.port, db=config.db.database)
+        if await self.usercheck("economy", user.id) is False:
+            await ctx.send("You don't have a bank account. Use `n!register` to make one.")
+        else:
+            async with connection.cursor() as cur:
+                await cur.execute(f"SELECT balance FROM economy WHERE userid = {user.id}")
+                balance = await cur.fetchone()
+                balance = int(balance[0])
+            if (balance - amount) < 0:
+                await ctx.send("You don't have that much to spend...")
+            elif amount > 20000:
+                await ctx.send("You can't spend more than 20000.")
+            else:
+                async with connection.cursor() as cur:
+                    await cur.execute(f"UPDATE economy SET balance = {balance - amount} WHERE userid = {user.id}")
+                    await connection.commit()
+                    xx = random.randint(1, 2)
+                    await cur.execute(f"SELECT amount FROM stats WHERE type = \"roulette_spent\"")
+                    spent = await cur.fetchone()
+                    spent = int(spent[0])
+                    await cur.execute(f"UPDATE stats SET amount = {spent + amount} WHERE type = \"roulette_spent\"")
+                    await connection.commit()
+                    await cur.execute(f"SELECT amount FROM stats WHERE type = \"roulette_count\"")
+                    count = await cur.fetchone()
+                    count = int(count[0])
+                    await cur.execute(f"UPDATE stats SET amount = {count + 1} WHERE type = \"roulette_count\"")
+                    await connection.commit()
+                    await cur.execute(f"SELECT amount FROM stats WHERE type = \"roulette_count\"")
+                    count = await cur.fetchone()
+                    count = int(count[0])
+                    await ctx.send("Spinning...")
+                    await asyncio.sleep(random.randint(2, 5))
+                    if xx == 1:
+                        lost = discord.Embed(color=0xDEADBF,
+                                             title="You Lost",
+                                             description=f"Previous Amount: **{balance}**\n"
+                                                         f"New Amount: **{balance - amount}**")
+                        lost.set_footer(text=f"Roulette Game: {count}, total spent: {spent}")
+                        await ctx.send(embed=lost)
+                    else:
+                        won = discord.Embed(color=0xDEADBF,
+                                            title="YOU WON!",
+                                            description=f"Previews Amount: **{balance}**\n"
+                                                        f"New Amount: **{balance + (amount * 2)}**")
+                        won.set_footer(text=f"Roulette Game: {count}, total spent: {spent}")
+                        await ctx.send(embed=won)
+                        await cur.execute(f"UPDATE economy SET balance = {balance + (amount * 2)}")
+                        await connection.commit()
+
+
     @commands.command()
     async def transfer(self, ctx, user : discord.Member, amount : int):
         """Transfer Credits to a User"""
