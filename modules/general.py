@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-import sys, psutil, datetime, aiohttp, random, requests, config, asyncio, aiomysql
+import sys, psutil, datetime, aiohttp, random, requests, config, asyncio, aiomysql, math
 from collections import Counter
 from hurry.filesize import size
 from .utils.chat_formatting import pagify
@@ -8,6 +8,14 @@ from PIL import __version__ as pilv
 from bs4 import __version__ as bsv
 from urllib.parse import quote_plus
 
+
+def millify(n):
+    millnames = ['', 'k', 'M', ' Billion', ' Trillion']
+    n = float(n)
+    millidx = max(0, min(len(millnames) - 1,
+                         int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
+
+    return '{:.0f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
 
 class General:
     """General Commands"""
@@ -133,32 +141,35 @@ class General:
             await cur.execute(f"SELECT amount FROM stats WHERE type = \"commands\"")
             commands = await cur.fetchone()
             commands_done = int(commands[0])
+            await cur.execute(f"SELECT amount FROM stats WHERE type = \"bans\"")
+            bans = await cur.fetchone()
+            bans = int(bans[0])
+            await cur.execute(f"SELECT amount FROM stats WHERE type = \"kicks\"")
+            kicks = await cur.fetchone()
+            kicks = int(kicks[0])
         info = discord.Embed(title="**Info**",
                              color=0xDEADBF,
-                             description=f"Servers: {servers}\n"
-                                         f"Members {len(set(self.bot.get_all_members()))}\n"
-                                         f"Bot Commands: {str(len(self.bot.commands))}\n"
-                                         f"Channels: {len(set(self.bot.get_all_channels()))}\n"
-                                         f"Shards: {self.bot.shard_count}\n"
-                                         f"Latency: {latency}")
-        info.add_field(name="Messages Read", value=f"Since Restart: {self.bot.counter['messages_read']},\nTotal: {messages_read}")
-        info.add_field(name="Processed Commands", value=f"Since Restart: {self.bot.counter['commands']},\nTotal: {commands_done}")
-        info.add_field(name="CPU %", value=psutil.cpu_percent())
-        info.add_field(name="Virtual Memory", value=f"{size(psutil.virtual_memory().available)}")
-        info.add_field(name="Disk",
-                       value=f"Free Space {size(psutil.disk_usage(psutil.disk_partitions()[0].device).free)}")
-        info.add_field(name="Boot Time",
-                       value=datetime.datetime.fromtimestamp(psutil.boot_time()).strftime('%Y-%m-%d %H:%M:%S'))
-        info.add_field(name=f"Python {sys.version[0]}", value=f"Discord.py {discord.__version__}\n"
-                                                              f"PIL {pilv}\n"
-                                                              f"BeautifulSoup {bsv}\n"
-                                                              f"psutil {psutil.__version__}")
-        info.add_field(name="Links", value="<:GH:416593854368841729> - https://github.com/rekt4lifecs/NekoBotRewrite/\n"
-                                           "**Support Server** - https://discord.gg/q98qeYN\n"
-                                           "**Vote** OwO - https://discordbots.org/bot/310039170792030211/vote")
+                             description=f"Servers: **{millify(servers)} ({servers})**\n"
+                                         f"Members **{millify(len(set(self.bot.get_all_members())))}**\n"
+                                         f"Bot Commands: **{str(len(self.bot.commands))}**\n"
+                                         f"Channels: **{millify(len(set(self.bot.get_all_channels())))}**\n"
+                                         f"Shards: **{self.bot.shard_count}**\n"
+                                         f"Latency: **{latency}**\n"
+                                         f"Kicks with bot: **{kicks}**\n"
+                                         f"Bans with bot: **{bans}**")
+        info.add_field(name="Messages Read", value=f"Since Restart: **{millify(self.bot.counter['messages_read'])}**,\nTotal: **{millify(messages_read)}**")
+        info.add_field(name="Processed Commands", value=f"Since Restart: **{millify(self.bot.counter['commands'])}**,\nTotal: **{millify(commands_done)}**")
+        info.add_field(name="System:", value=f"CPU %: **{psutil.cpu_percent()}%**\n"
+                                             f"Virtual Memory: **{size(psutil.virtual_memory().available)}**\n"
+                                             f"Free Space: **{size(psutil.disk_usage(psutil.disk_partitions()[1].device).free)}**\n"
+                                             f"Boot Time: **{datetime.datetime.fromtimestamp(psutil.boot_time()).strftime('%Y-%m-%d %H:%M:%S')}**\n"
+                                             f"**Discord.py** {discord.__version__} | **PIL** {pilv} | **BeautifulSoup** {bsv} | **psutil** {psutil.__version__} | **aiomysql** {aiomysql.__version__} | **aiohttp** {aiohttp.__version__}")
+        info.add_field(name="Links", value="<:GH:416593854368841729> - [GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) |"
+                                           " [Support Server](https://discord.gg/q98qeYN) | "
+                                           "[Vote OwO](https://discordbots.org/bot/310039170792030211/vote)")
         info.set_footer(
             text="Bot by ReKT#0001 and was forced to use MySQL by Fox#0001 <3")
-        info.set_thumbnail(url=self.bot.user.avatar_url)
+        info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
         await ctx.send(embed=info)
 
     @commands.command()
@@ -567,6 +578,25 @@ class General:
         await ctx.send(embed=em)
 
     @commands.command()
+    @commands.is_owner()
+    async def todo(self, ctx, *, todo:str=None):
+        """What to do"""
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        async with connection.cursor() as cur:
+            if todo is not None:
+                await cur.execute(f"update stats set amount = \"{todo}\" where type = \"todo\"")
+                await connection.commit()
+                await ctx.send(f"Added {todo}")
+            else:
+                await cur.execute(f"SELECT amount FROM stats WHERE type = \"todo\"")
+                todo_list = await cur.fetchone()
+                await ctx.send(todo_list[0])
+
+    @commands.command()
     async def help(self, ctx, option: str = None):
         """Help Command OwO"""
         color = 0xDEADBF
@@ -585,11 +615,11 @@ class General:
             embed.add_field(name="Moderation",
                             value="`kick`, `ban`, `massban`, `unban`, `rename`, `poll`, `purge`")
             embed.add_field(name="IMGWelcomer", value="`imgwelcome`")
-            embed.add_field(name="Levels", value="`profile`, `settitle`, `setdesc`, `rep`")
+            embed.add_field(name="Levels", value="`profile`, `settitle`, `setdesc`, `rep`, `top`")
             embed.add_field(name="Fun",
                             value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, "
                                   "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`")
-            embed.add_field(name="Economy", value="`register`, `balance`, `daily`, `roulette`, `transfer`")
+            embed.add_field(name="Economy", value="`register`, `balance`, `daily`, `roulette`, `transfer`, `steal`, `work`")
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
@@ -598,7 +628,7 @@ class General:
             embed.add_field(name="Reactions",
                             value="`hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
                                   "`poke`, `nom`, `lick`, `lewd`, `trap`, `owo`, `wasted`, `banghead`,"
-                                  "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`")
+                                  "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`, `rem`, `poi`, `greet`")
             embed.add_field(name="Game Stats",
                             value="`osu`")
         except Exception as e:

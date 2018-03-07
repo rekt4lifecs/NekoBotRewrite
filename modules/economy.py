@@ -33,6 +33,91 @@ class Economy:
         else:
             return True
 
+    # @commands.command()
+    # @commands.cooldown(1, 120, commands.BucketType.user)
+    # async def steal(self, ctx, user : discord.Member):
+    #     """Steal $$$ from some1"""
+    #     connection = await aiomysql.connect(user=config.db.user,
+    #                                         password=config.db.password,
+    #                                         host=config.db.host,
+    #                                         port=config.db.port,
+    #                                         db=config.db.database)
+    #     if user == ctx.message.author:
+    #         await ctx.send("You can't steal from yourself 😦")
+    #         return
+    #     elif user.bot is True:
+    #         await ctx.send("You can't steal from bots 😦")
+    #         return
+    #     elif await self.usercheck('economy', user.id) is False:
+    #         await ctx.send("That user doesn't have an account.")
+    #         return
+    #     elif await self.usercheck('economy', ctx.message.author.id) is False:
+    #         await ctx.send("You don't have a bank account 😦, use `register`")
+    #     async with connection.cursor() as cur:
+    #         await cur.execute(f"SELECT balance FROM economy WHERE userid = {user.id}")
+    #         user_balance = await cur.fetchone()
+    #         user_balance = int(user_balance[0])
+    #         await cur.execute(f"SELECT balance FROM economy WHERE userid = {ctx.message.author.id}")
+    #         author_balance = await cur.fetchone()
+    #         author_balance = int(author_balance[0])
+    #         if user_balance < 5000:
+    #             await ctx.send("That user is too poor to steal from ;-;")
+    #             return
+    #         if user_balance <= 1500:
+    #             await ctx.send("That user is too poor to steal from 😦")
+    #             return
+    #         else:
+    #             x = random.randint(1, 4)
+    #             stolen_amount = random.randint(1, 1500)
+    #             if x == 1:
+    #                 await ctx.send(f"Stolen **{stolen_amount}** from **{user.name}** successfully!")
+    #                 await cur.execute(f"UPDATE economy SET balance = {user_balance - stolen_amount} WHERE userid = {user.id}")
+    #                 await connection.commit()
+    #                 await cur.execute(f"UPDATE economy SET balance = {author_balance + stolen_amount} WHERE userid = {ctx.message.author.id}")
+    #                 await connection.commit()
+    #             else:
+    #                 if (author_balance - stolen_amount) < 0:
+    #                     steal_bal = 0
+    #                 else:
+    #                     steal_bal = author_balance - stolen_amount
+    #                 await ctx.send(f"Failed to steal from **{user.name}** and lost **{stolen_amount}**")
+    #                 await cur.execute(f"UPDATE economy SET balance = {author_balance - steal_bal} WHERE userid = {ctx.message.author.id}")
+    #                 await connection.commit()
+
+    @commands.command()
+    @commands.cooldown(1, 1200, commands.BucketType.user)
+    async def work(self, ctx, seconds: int = 30):
+        """Work for $$$ OwO"""
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        author = ctx.message.author
+        if await self.usercheck('economy', author.id) is False:
+            await ctx.send("You don't have a bank account 😦, use `register`")
+            return
+        else:
+            async with connection.cursor() as cur:
+                await cur.execute(f"SELECT balance FROM economy WHERE userid = {author.id}")
+                balance = await cur.fetchone()
+                balance = int(balance[0])
+                if seconds > 600:
+                    seconds = 600
+                elif seconds <= 0:
+                    seconds = 30
+                await ctx.send(f"Working for {seconds} seconds")
+                await asyncio.sleep(int(seconds/2))
+                try:
+                    await ctx.author.send(f"{int(seconds/2)}s left to work...")
+                except:
+                    pass
+                await asyncio.sleep(int(seconds/2))
+                end_amount = int(seconds * 2.25)
+                await ctx.send(f"{author.mention}, worked for {seconds} and got {end_amount} credits!")
+                await cur.execute(f"UPDATE economy SET balance = {balance + end_amount} WHERE userid = {author.id}")
+                await connection.commit()
+
     @commands.command()
     async def register(self, ctx):
         """Register a bank account."""

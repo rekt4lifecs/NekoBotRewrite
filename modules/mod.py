@@ -1,8 +1,9 @@
 from discord.ext import commands
-import discord, argparse, re, shlex, traceback, io, textwrap, asyncio
+import discord, argparse, re, shlex, traceback, io, textwrap, asyncio, aiomysql, config
 from .utils import checks
 from contextlib import redirect_stdout
 from collections import Counter
+from .utils.chat_formatting import pagify
 
 class Arguments(argparse.ArgumentParser):
     def error(self, message):
@@ -27,9 +28,6 @@ class Moderation:
 
         # remove `foo`
         return content.strip('` \n')
-
-    async def __local_check(self, ctx):
-        return await self.bot.is_owner(ctx.author)
 
     def get_syntax_error(self, e):
         if e.text is None:
@@ -76,10 +74,33 @@ class Moderation:
             return ret
 
     @commands.command()
+    @commands.is_owner()
+    async def servers(self, ctx):
+        """Show all servers"""
+        servers = sorted(list(self.bot.guilds), key=lambda s: s.name.lower())
+        msg = ""
+        for i, server in enumerate(servers):
+            msg += "**{}** | ".format(server.name)
+
+        for page in pagify(msg, ['\n']):
+            await ctx.send(page)
+
+    @commands.command()
     @commands.guild_only()
     @checks.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: ActionReason = None):
         """Kicks a member from the server."""
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        async with connection.cursor() as cur:
+            await cur.execute(f"SELECT amount FROM stats WHERE type = \"kicks\"")
+            kicks = await cur.fetchone()
+            kicks = int(kicks[0])
+            await cur.execute(f"UPDATE stats SET amount = {kicks + 1} WHERE type = \"kicks\"")
+            await connection.commit()
         if reason is None:
             reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
@@ -91,6 +112,17 @@ class Moderation:
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: MemberID, *, reason: ActionReason = None):
         """Bans a member from the server."""
+        connection = await aiomysql.connect(user=config.db.user,
+                                            password=config.db.password,
+                                            host=config.db.host,
+                                            port=config.db.port,
+                                            db=config.db.database)
+        async with connection.cursor() as cur:
+            await cur.execute(f"SELECT amount FROM stats WHERE type = \"bans\"")
+            bans = await cur.fetchone()
+            bans = int(bans[0])
+            await cur.execute(f"UPDATE stats SET amount = {bans + 1} WHERE type = \"bans\"")
+            await connection.commit()
         if reason is None:
             reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
@@ -223,7 +255,7 @@ class Moderation:
 
     @commands.command()
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_messages=True)
     async def poll(self, ctx, *, question : str):
         """Start a poll"""
         messages = [ctx.message]
@@ -312,7 +344,6 @@ class Moderation:
 
     @commands.group(aliases=['remove'])
     @commands.guild_only()
-    @checks.has_permissions(manage_messages=True)
     async def purge(self, ctx):
         """Removes messages that meet a criteria.""" # RoboDanny <3
 
@@ -366,26 +397,31 @@ class Moderation:
             await ctx.send(to_send, delete_after=10)
 
     @purge.command()
+    @commands.has_permissions(manage_messages=True)
     async def embeds(self, ctx, search=100):
         """Removes messages that have embeds in them."""
         await self.do_removal(ctx, search, lambda e: len(e.embeds))
 
     @purge.command()
+    @commands.has_permissions(manage_messages=True)
     async def files(self, ctx, search=100):
         """Removes messages that have attachments in them."""
         await self.do_removal(ctx, search, lambda e: len(e.attachments))
 
     @purge.command(name='all')
+    @commands.has_permissions(manage_messages=True)
     async def _remove_all(self, ctx, search=100):
         """Removes all messages."""
         await self.do_removal(ctx, search, lambda e: True)
 
     @purge.command()
+    @commands.has_permissions(manage_messages=True)
     async def user(self, ctx, member: discord.Member, search=100):
         """Removes all messages by the member."""
         await self.do_removal(ctx, search, lambda e: e.author == member)
 
     @purge.command()
+    @commands.has_permissions(manage_messages=True)
     async def contains(self, ctx, *, substr: str):
         """Removes all messages containing a substring."""
         if len(substr) < 3:
@@ -394,6 +430,7 @@ class Moderation:
             await self.do_removal(ctx, 100, lambda e: substr in e.content)
 
     @purge.command(name='bot')
+    @commands.has_permissions(manage_messages=True)
     async def _bot(self, ctx, prefix=None, search=100):
         """Removes a bot user's messages and messages with their optional prefix."""
 
@@ -403,6 +440,7 @@ class Moderation:
         await self.do_removal(ctx, search, predicate)
 
     @purge.command(name='emoji')
+    @commands.has_permissions(manage_messages=True)
     async def _emoji(self, ctx, search=100):
         """Removes all messages containing custom emoji."""
         custom_emoji = re.compile(r'<:(\w+):(\d+)>')
@@ -412,6 +450,7 @@ class Moderation:
         await self.do_removal(ctx, search, predicate)
 
     @purge.command(name='reactions')
+    @commands.has_permissions(manage_messages=True)
     async def _reactions(self, ctx, search=100):
         """Removes all reactions from messages that have them."""
 
@@ -427,6 +466,7 @@ class Moderation:
         await ctx.send(f'Successfully removed {total_reactions} reactions.')
 
     @purge.command()
+    @commands.has_permissions(manage_messages=True)
     async def custom(self, ctx, *, args: str):
         """A more advanced purge command.
 

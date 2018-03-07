@@ -3,7 +3,6 @@ import asyncio, config, dbl, discord, aiohttp, random
 
 messages = ["OwO Whats this", "MonkaS", "OwO", "Haiiiii", ".help", "🤔🤔🤔", "HMMM🤔", "USE n! WEW", "n!HELP REE"]
 
-
 class DiscordBotsOrgAPI:
     """Handles interactions with the discordbots.org API"""
 
@@ -19,9 +18,11 @@ class DiscordBotsOrgAPI:
         while True:
             print("Attempting to update server count.")
             try:
+                stats2 = [f"Servers: {len(self.bot.guilds)}", f"Users: {len(set(self.bot.get_all_members()))}",
+                          "OwO whats n!help", "🤔🤔🤔"]
                 await self.dblpy.post_server_count(shard_count=self.bot.shard_count, shard_no=self.bot.shard_id)
                 print("Posted server count. {}".format(len(self.bot.guilds)))
-                game = discord.Game(type=1, url="https://www.twitch.tv/rekt4lifecs", name="🤔 n!help 🤔") #random.choice(messages)
+                game = discord.Game(type=1, url="https://www.twitch.tv/rekt4lifecs", name=random.choice(stats2))
                 await self.bot.change_presence(game=game)
             except Exception as e:
                 print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))

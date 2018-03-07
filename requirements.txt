@@ -8,4 +8,5 @@ hurry.filesize
 matplotlib
 numpy
 pymysql
+dblpy
 aiomysql

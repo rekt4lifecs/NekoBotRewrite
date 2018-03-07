@@ -1,6 +1,7 @@
 from discord.ext import commands
-import discord, config, aiohttp, random
+import discord, config, aiohttp, random, requests
 from collections import Counter
+from io import BytesIO
 
 key = config.weeb
 auth = {"Authorization": "Wolke " + key}
@@ -222,6 +223,24 @@ class Reactions:
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
+    async def greet(self, ctx, user: discord.Member):
+        self.counter['greet'] += 1
+        async with aiohttp.ClientSession(headers=auth) as cs:
+            async with cs.get('https://api.weeb.sh/images/random?type=greet') as r:
+                res = await r.json()
+                if user == ctx.message.author:
+                    user = " themself"
+                    text = ""
+                else:
+                    user = user.name
+                    text = " UwU"
+                em = discord.Embed(title="**{}** greets **{}**{}".format(ctx.message.author.name, user, text),
+                                   color=0xDEADBF)
+                em.set_image(url=res['url'])
+                await ctx.send(embed=em)
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.command(pass_context=True)
     async def lewd(self, ctx):
         """Leeewd!!!"""
         self.counter['lewd'] += 1
@@ -346,6 +365,30 @@ class Reactions:
                 await ctx.send(embed=em)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.command(pass_context=True)
+    async def rem(self, ctx):
+        self.counter['rem'] += 1
+        async with aiohttp.ClientSession(headers=auth) as cs:
+            async with cs.get('https://api.weeb.sh/images/random?type=rem') as r:
+                res = await r.json()
+                em = discord.Embed(
+                                   color=0xDEADBF)
+                em.set_image(url=res['url'])
+                await ctx.send(embed=em)
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.command(pass_context=True)
+    async def poi(self, ctx):
+        self.counter['poi'] += 1
+        async with aiohttp.ClientSession(headers=auth) as cs:
+            async with cs.get('https://api.weeb.sh/images/random?type=poi') as r:
+                res = await r.json()
+                em = discord.Embed(
+                                   color=0xDEADBF)
+                em.set_image(url=res['url'])
+                await ctx.send(embed=em)
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
     async def why(self, ctx):
         """Why just why"""
@@ -375,6 +418,12 @@ class Reactions:
                 await ctx.send(embed=em)
 
     @commands.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    async def insultwaifu(self, ctx, user : discord.Member):
+        """Insult Waifu"""
+
+
+    @commands.command()
     async def reactions(self, ctx):
         embed = discord.Embed(color=0xDEADBF,
                               title="Reaction Stats")
@@ -399,6 +448,9 @@ class Reactions:
         embed.add_field(name="Dab", value=self.counter['dab'])
         embed.add_field(name="Kemonomimi", value=self.counter['kemonomimi'])
         embed.add_field(name="Why", value=self.counter['why'])
+        embed.add_field(name="Greet", value=self.counter['greet'])
+        embed.add_field(name="Poi", value=self.counter['poi'])
+        embed.add_field(name="Rem", value=self.counter['rem'])
 
         await ctx.send(embed=embed)
 
