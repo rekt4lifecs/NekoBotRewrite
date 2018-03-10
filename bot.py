@@ -13,10 +13,8 @@ log.addHandler(handler)
 startup_extensions = {
     'modules.general',
     'modules.mod',
-    'modules.economy',
     'modules.reactions',
     'modules.nsfw',
-    'modules.levels',   
     'modules.imgwelcome',
     'modules.fun',
     'modules.discordbots',
@@ -82,28 +80,38 @@ class NekoBot(commands.AutoShardedBot):
 
     async def on_message(self, message):
         self.counter["messages_read"] += 1
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         async with connection.cursor() as cur:
             await cur.execute(f"SELECT amount FROM stats WHERE type = \"messages\"")
             messages = await cur.fetchone()
             messages = int(messages[0])
             await cur.execute(f"UPDATE stats SET amount = {messages + 1} WHERE type = \"messages\"")
             await connection.commit()
+            if not await cur.execute(f'SELECT 1 FROM stalk WHERE userid = {message.author.id}'):
+                await cur.execute(f"INSERT INTO stalk VALUES ({message.author.id}, 0)")
+                await connection.commit()
+            else:
+                await cur.execute(f"SELECT messages FROM stalk WHERE userid = {message.author.id}")
+                usermsg = await cur.fetchone()
+                usermsg = int(usermsg[0])
+                await cur.execute(f"UPDATE stalk SET messages = {usermsg + 1} WHERE userid = {message.author.id}")
+                await connection.commit()
+
         if message.author.bot:
             return
         await self.process_commands(message)
 
     async def on_command(self, command):
         self.counter["commands"] += 1
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         async with connection.cursor() as cur:
             await cur.execute(f"SELECT amount FROM stats WHERE type = \"commands\"")
             commands = await cur.fetchone()
@@ -114,6 +122,9 @@ class NekoBot(commands.AutoShardedBot):
     async def close(self):
         await super().close()
         await self.session.close()
+
+    async def on_connect(self):
+        print("Shard Connected...")
 
     async def on_ready(self):
         print("Ready OwO")

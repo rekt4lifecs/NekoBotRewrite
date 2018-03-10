@@ -86,15 +86,26 @@ class Moderation:
             await ctx.send(page)
 
     @commands.command()
+    @commands.is_owner()
+    async def emotes(self, ctx):
+        emotes = sorted(list(self.bot.emojis), key=lambda s: s.name.lower())
+        msg = ""
+        for i, emote in enumerate(emotes):
+            msg += "**{}** | ".format(emote)
+
+        for page in pagify(msg, ['\n']):
+            await ctx.send(page)
+
+    @commands.command()
     @commands.guild_only()
     @checks.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: ActionReason = None):
         """Kicks a member from the server."""
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         async with connection.cursor() as cur:
             await cur.execute(f"SELECT amount FROM stats WHERE type = \"kicks\"")
             kicks = await cur.fetchone()
@@ -112,11 +123,11 @@ class Moderation:
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: MemberID, *, reason: ActionReason = None):
         """Bans a member from the server."""
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         async with connection.cursor() as cur:
             await cur.execute(f"SELECT amount FROM stats WHERE type = \"bans\"")
             bans = await cur.fetchone()
@@ -158,10 +169,10 @@ class Moderation:
 
     @commands.is_owner()
     @commands.command()
-    async def presence(self, ctx, *, changeto : str):
+    async def presence(self, ctx, type: int, *, changeto : str):
         await ctx.send("changed")
         game = discord.Game(name=changeto, url="https://www.twitch.tv/rekt4lifecs",
-                            type=1)
+                            type=type)
         await self.bot.change_presence(game=game)
 
     @commands.command()

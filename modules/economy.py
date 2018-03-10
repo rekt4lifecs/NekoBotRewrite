@@ -9,11 +9,11 @@ class Economy:
         self.bot = bot
 
     async def database(self, datab: str, item: str, userid: int):
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         db = await connection.cursor()
         try:
             await db.execute(f"SELECT {item} FROM {datab} WHERE userid = {userid}")
@@ -22,11 +22,11 @@ class Economy:
             return None
 
     async def usercheck(self, datab: str, userid: int):
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         db = await connection.cursor()
         if not await db.execute(f'SELECT 1 FROM {datab} WHERE userid = {userid}'):
             return False
@@ -88,11 +88,11 @@ class Economy:
     @commands.cooldown(1, 1200, commands.BucketType.user)
     async def work(self, ctx, seconds: int = 30):
         """Work for $$$ OwO"""
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         author = ctx.message.author
         if await self.usercheck('economy', author.id) is False:
             await ctx.send("You don't have a bank account 😦, use `register`")
@@ -123,13 +123,13 @@ class Economy:
         """Register a bank account."""
         user = ctx.message.author.id
         if await self.usercheck("economy", user) is False:
-            connection = await aiomysql.connect(user=config.db.user,
-                                                password=config.db.password,
-                                                host=config.db.host,
-                                                port=config.db.port,
-                                                db=config.db.database)
+            connection = await aiomysql.connect(user='root',
+                                                password=config.dbpass,
+                                                host='localhost',
+                                                port=3306,
+                                                db='nekobot')
             async with connection.cursor() as cur:
-                await cur.execute(f"insert ignore into economy VALUES ({user}, 3500, 0)")
+                await cur.execute(f"insert into economy VALUES ({user}, 3500, 0)")
                 await connection.commit()
             embed = discord.Embed(color=0xDEADBF,
                                   description="Made a bank account OwO.")
@@ -145,11 +145,11 @@ class Economy:
         if user == None:
             user = ctx.message.author
         if await self.usercheck("economy", user.id) is not False:
-            connection = await aiomysql.connect(user=config.db.user,
-                                                password=config.db.password,
-                                                host=config.db.host,
-                                                port=config.db.port,
-                                                db=config.db.database)
+            connection = await aiomysql.connect(user='root',
+                                                password=config.dbpass,
+                                                host='localhost',
+                                                port=3306,
+                                                db='nekobot')
             async with connection.cursor() as cur:
                 await cur.execute(f"SELECT balance FROM economy WHERE userid = {user.id}")
                 balance = await cur.fetchone()
@@ -157,59 +157,62 @@ class Economy:
         else:
             await ctx.send("You don't have an account. Use `n!register` to make one.")
 
-    @commands.command()
-    async def roulette(self, ctx, amount : int = 500):
-        """Play Roulette"""
-        user = ctx.message.author
-        connection = await aiomysql.connect(user=config.db.user, password=config.db.password, host=config.db.host,
-                                            port=config.db.port, db=config.db.database)
-        if await self.usercheck("economy", user.id) is False:
-            await ctx.send("You don't have a bank account. Use `n!register` to make one.")
-        else:
-            async with connection.cursor() as cur:
-                await cur.execute(f"SELECT balance FROM economy WHERE userid = {user.id}")
-                balance = await cur.fetchone()
-                balance = int(balance[0])
-            if (balance - amount) < 0:
-                await ctx.send("You don't have that much to spend...")
-            elif amount > 20000:
-                await ctx.send("You can't spend more than 20000.")
-            else:
-                async with connection.cursor() as cur:
-                    await cur.execute(f"UPDATE economy SET balance = {balance - amount} WHERE userid = {user.id}")
-                    await connection.commit()
-                    xx = random.randint(1, 2)
-                    await cur.execute(f"SELECT amount FROM stats WHERE type = \"roulette_spent\"")
-                    spent = await cur.fetchone()
-                    spent = int(spent[0])
-                    await cur.execute(f"UPDATE stats SET amount = {spent + amount} WHERE type = \"roulette_spent\"")
-                    await connection.commit()
-                    await cur.execute(f"SELECT amount FROM stats WHERE type = \"roulette_count\"")
-                    count = await cur.fetchone()
-                    count = int(count[0])
-                    await cur.execute(f"UPDATE stats SET amount = {count + 1} WHERE type = \"roulette_count\"")
-                    await connection.commit()
-                    await cur.execute(f"SELECT amount FROM stats WHERE type = \"roulette_count\"")
-                    count = await cur.fetchone()
-                    count = int(count[0])
-                    await ctx.send("Spinning...")
-                    await asyncio.sleep(random.randint(2, 5))
-                    if xx == 1:
-                        lost = discord.Embed(color=0xDEADBF,
-                                             title="You Lost",
-                                             description=f"Previous Amount: **{balance}**\n"
-                                                         f"New Amount: **{balance - amount}**")
-                        lost.set_footer(text=f"Roulette Game: {count}, total spent: {spent}")
-                        await ctx.send(embed=lost)
-                    else:
-                        won = discord.Embed(color=0xDEADBF,
-                                            title="YOU WON!",
-                                            description=f"Previews Amount: **{balance}**\n"
-                                                        f"New Amount: **{balance + (amount * 2)}**")
-                        won.set_footer(text=f"Roulette Game: {count}, total spent: {spent}")
-                        await ctx.send(embed=won)
-                        await cur.execute(f"UPDATE economy SET balance = {balance + (amount * 2)}")
-                        await connection.commit()
+    # @commands.command()
+    # async def roulette(self, ctx, amount : int = 500):
+    #     """Play Roulette"""
+    #     user = ctx.message.author
+    #     connection = await aiomysql.connect(user='root',
+    #                                         password=config.dbpass,
+    #                                         host='localhost',
+    #                                         port=3306,
+    #                                         db='nekobot')
+    #     if await self.usercheck("economy", user.id) is False:
+    #         await ctx.send("You don't have a bank account. Use `n!register` to make one.")
+    #     else:
+    #         async with connection.cursor() as cur:
+    #             await cur.execute(f"SELECT balance FROM economy WHERE userid = {user.id}")
+    #             balance = await cur.fetchone()
+    #             balance = int(balance[0])
+    #         if (balance - amount) < 0:
+    #             await ctx.send("You don't have that much to spend...")
+    #         elif amount > 20000:
+    #             await ctx.send("You can't spend more than 20000.")
+    #         else:
+    #             async with connection.cursor() as cur:
+    #                 await cur.execute(f"UPDATE economy SET balance = {balance - amount} WHERE userid = {user.id}")
+    #                 await connection.commit()
+    #                 xx = random.randint(1, 2)
+    #                 await cur.execute(f"SELECT amount FROM stats WHERE type = \"roulette_spent\"")
+    #                 spent = await cur.fetchone()
+    #                 spent = int(spent[0])
+    #                 await cur.execute(f"UPDATE stats SET amount = {spent + amount} WHERE type = \"roulette_spent\"")
+    #                 await connection.commit()
+    #                 await cur.execute(f"SELECT amount FROM stats WHERE type = \"roulette_count\"")
+    #                 count = await cur.fetchone()
+    #                 count = int(count[0])
+    #                 await cur.execute(f"UPDATE stats SET amount = {count + 1} WHERE type = \"roulette_count\"")
+    #                 await connection.commit()
+    #                 await cur.execute(f"SELECT amount FROM stats WHERE type = \"roulette_count\"")
+    #                 count = await cur.fetchone()
+    #                 count = int(count[0])
+    #                 await ctx.send("Spinning...")
+    #                 await asyncio.sleep(random.randint(2, 5))
+    #                 if xx == 1:
+    #                     lost = discord.Embed(color=0xDEADBF,
+    #                                          title="You Lost",
+    #                                          description=f"Previous Amount: **{balance}**\n"
+    #                                                      f"New Amount: **{balance - amount}**")
+    #                     lost.set_footer(text=f"Roulette Game: {count}, total spent: {spent}")
+    #                     await ctx.send(embed=lost)
+    #                 else:
+    #                     won = discord.Embed(color=0xDEADBF,
+    #                                         title="YOU WON!",
+    #                                         description=f"Previews Amount: **{balance}**\n"
+    #                                                     f"New Amount: **{balance + (amount * 2)}**")
+    #                     won.set_footer(text=f"Roulette Game: {count}, total spent: {spent}")
+    #                     await ctx.send(embed=won)
+    #                     await cur.execute(f"UPDATE economy SET balance = {balance + (amount * 2)}")
+    #                     await connection.commit()
 
 
     @commands.command()
@@ -228,11 +231,11 @@ class Economy:
         elif await self.usercheck("economy", user.id) is False:
             await ctx.send(f"The user you are sending credits too doesn't have a bank account 😦")
             return
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         async with connection.cursor() as cur:
             await cur.execute(f"SELECT balance FROM economy WHERE userid = {user.id}")
             user_account = await cur.fetchone()
@@ -259,11 +262,11 @@ class Economy:
 
     @commands.command(aliases=["payday"])
     async def daily(self, ctx):
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         user = ctx.message.author
         if await self.usercheck("economy", user.id) is False:
             await ctx.send("You don't have a bank account 😦, use `register` to make one.")

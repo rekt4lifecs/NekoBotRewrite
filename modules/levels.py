@@ -18,11 +18,11 @@ class Levels:
         self.bot = bot
 
     async def database(self, datab: str, item: str, userid: int):
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         db = await connection.cursor()
         try:
             await db.execute(f"SELECT {item} FROM {datab} WHERE userid = {userid}")
@@ -31,11 +31,11 @@ class Levels:
             return None
 
     async def usercheck(self, datab: str, userid: int):
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         db = await connection.cursor()
         if not await db.execute(f'SELECT 1 FROM {datab} WHERE userid = {userid}'):
             return False
@@ -44,11 +44,11 @@ class Levels:
 
     @commands.command()
     async def profile(self, ctx, user : discord.Member = None):
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         if user == None:
             user = ctx.message.author
         if await self.usercheck("levels", user.id) is False:
@@ -85,11 +85,11 @@ class Levels:
     @commands.command()
     async def settitle(self, ctx, *, title : str):
         """Set profile title"""
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         if await self.usercheck("levels", ctx.message.author.id) is False:
             await ctx.send("Error finding your profile.")
             return
@@ -116,11 +116,11 @@ class Levels:
     @commands.command()
     async def setdesc(self, ctx, *, description : str):
         """Set profile description"""
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         if await self.usercheck("levels", ctx.message.author.id) is False:
             await ctx.send("Error finding your profile.")
             return
@@ -148,11 +148,11 @@ class Levels:
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def rep(self, ctx, user : discord.Member):
         """Rep a user."""
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         if user == ctx.message.author:
             await ctx.send("You can't rep yourself 😦")
             return
@@ -190,11 +190,11 @@ class Levels:
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def top(self, ctx):
         """Show top of the top NekoBot users."""
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         async with connection.cursor() as cur:
             await cur.execute("SELECT userid, level FROM levels ORDER BY level DESC LIMIT 10")
             top_users = await cur.fetchall()
@@ -212,11 +212,11 @@ class Levels:
     @commands.command()
     @commands.is_owner()
     async def setlvl(self, ctx, id: int, xp : int = 0):
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         async with connection.cursor() as cur:
             await cur.execute(f"UPDATE levels SET level = {xp} WHERE userid = {id}")
             await connection.commit()
@@ -225,11 +225,11 @@ class Levels:
     @commands.command(aliases=['del'])
     @commands.is_owner()
     async def delete(self, ctx, id : int):
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         async with connection.cursor() as cur:
             await cur.execute(f"DELETE FROM levels WHERE userid = {id}")
             await connection.commit()
@@ -249,11 +249,11 @@ class Levels:
     async def sql(self, ctx, *, sql: str):
         """Inject SQL"""
         try:
-            connection = await aiomysql.connect(user=config.db.user,
-                                                password=config.db.password,
-                                                host=config.db.host,
-                                                port=config.db.port,
-                                                db=config.db.database)
+            connection = await aiomysql.connect(user='root',
+                                                password=config.dbpass,
+                                                host='localhost',
+                                                port=3306,
+                                                db='nekobot')
             async with connection.cursor() as cur:
                 await cur.execute(sql)
                 await connection.commit()
@@ -262,11 +262,11 @@ class Levels:
             await ctx.send(f"`{e}`")
 
     async def _handle_on_message(self, message):
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         user = message.author
         if await self.usercheck("levels", user.id) is False:
             await self._create_user(user)
@@ -284,11 +284,11 @@ class Levels:
                     await connection.commit()
 
     async def _process_exp(self, message, userinfo, exp : int):
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         async with connection.cursor() as cur:
             await cur.execute("SELECT level FROM levels WHERE userid = {}".format(userinfo))
             levels = await cur.fetchone()
@@ -297,11 +297,11 @@ class Levels:
             await connection.commit()
 
     async def _give_chat_credit(self, user):
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         async with connection.cursor() as cur:
             await cur.execute("select balance from economy where userid = {}".format(user.id))
             eco = await cur.fetchone()
@@ -310,11 +310,11 @@ class Levels:
             await connection.commit()
 
     async def _create_user(self, user):
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         try:
             #userid, info, title, level, rep, lastxp,
             async with connection.cursor() as cur:

@@ -4,11 +4,11 @@ from io import BytesIO
 from .utils import checks
 from PIL import Image, ImageFont, ImageOps, ImageDraw
 
-connection = pymysql.connect(user=config.db.user,
-                             password=config.db.password,
-                             host=config.db.host,
-                             port=config.db.port,
-                             database=config.db.database)
+connection = pymysql.connect(user='root',
+                             password=config.dbpass,
+                             host='localhost',
+                             port=3306,
+                             database='nekobot')
 db = connection.cursor()
 
 class IMGWelcome:
@@ -104,20 +104,22 @@ class IMGWelcome:
             await ctx.send("That is not a valid Image URL")
 
     async def on_member_join(self, member):
-        server = member.guild
-        if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(server.id)):
-            return
-        db.execute("SELECT channel FROM imgwelcome WHERE server = {}".format(server.id))
-        channel = db.fetchone()[0]
-        db.execute("SELECT background FROM imgwelcome WHERE server = {}".format(server.id))
-        bg = db.fetchone()[0]
-        db.execute("SELECT content FROM imgwelcome WHERE server = {}".format(server.id))
-        content = db.fetchone()[0]
-        await self._build_member_join(member, channel, bg, content, server)
-        chan = self.bot.get_channel(int(channel))
-        content = str(content).replace("user", f"{member.mention}").replace("server", f"{member.guild}")
-        await chan.send(file=discord.File(f"data/imgwelcome/{server.id}.png"), content=content)
-        #await ctx.send(file=discord.File(f"data/img/{server.id}.png"))
+        try:
+            server = member.guild
+            if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(server.id)):
+                return
+            db.execute("SELECT channel FROM imgwelcome WHERE server = {}".format(server.id))
+            channel = db.fetchone()[0]
+            db.execute("SELECT background FROM imgwelcome WHERE server = {}".format(server.id))
+            bg = db.fetchone()[0]
+            db.execute("SELECT content FROM imgwelcome WHERE server = {}".format(server.id))
+            content = db.fetchone()[0]
+            await self._build_member_join(member, channel, bg, content, server)
+            chan = self.bot.get_channel(int(channel))
+            content = str(content).replace("user", f"{member.mention}").replace("server", f"{member.guild}")
+            await chan.send(file=discord.File(f"data/imgwelcome/{server.id}.png"), content=content)
+            #await ctx.send(file=discord.File(f"data/img/{server.id}.png"))
+        except: pass
 
     async def _build_member_join(self, user, channel, bg, content, server):
         if bg == "NONE":

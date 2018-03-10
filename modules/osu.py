@@ -1,11 +1,11 @@
 from discord.ext import commands
 import discord, pymysql, config, aiohttp
 
-connection = pymysql.connect(user=config.db.user,
-                             password=config.db.password,
-                             host=config.db.host,
-                             port=config.db.port,
-                             database=config.db.database)
+connection = pymysql.connect(user='root',
+                             password=config.dbpass,
+                             host='localhost',
+                             port=3306,
+                             database='nekobot')
 db = connection.cursor()
 
 class OSU:

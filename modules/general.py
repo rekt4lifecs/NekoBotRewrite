@@ -129,11 +129,11 @@ class General:
     async def info(self, ctx):
         servers = len(self.bot.guilds)
         latency = "%.4f" % self.bot.latencies[0][1]
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         async with connection.cursor() as cur:
             await cur.execute(f"SELECT amount FROM stats WHERE type = \"messages\"")
             messages = await cur.fetchone()
@@ -157,13 +157,18 @@ class General:
                                          f"Latency: **{latency}**\n"
                                          f"Kicks with bot: **{kicks}**\n"
                                          f"Bans with bot: **{bans}**")
-        info.add_field(name="Messages Read", value=f"Since Restart: **{millify(self.bot.counter['messages_read'])}**,\nTotal: **{millify(messages_read)}**")
-        info.add_field(name="Processed Commands", value=f"Since Restart: **{millify(self.bot.counter['commands'])}**,\nTotal: **{millify(commands_done)}**")
-        info.add_field(name="System:", value=f"CPU %: **{psutil.cpu_percent()}%**\n"
+        info.add_field(name="Messages Read", value=f"Since Restart: **{millify(self.bot.counter['messages_read'])}**,\nTotal: **{millify(messages_read)}** (Total put on freeze atm)")
+        info.add_field(name="Processed Commands", value=f"Since Restart: **{millify(self.bot.counter['commands'])}**,\nTotal: **{millify(commands_done)}** (Total put on freeze atm)")
+        try:
+            info.add_field(name="System:", value=f"CPU %: **{psutil.cpu_percent()}%**\n"
                                              f"Virtual Memory: **{size(psutil.virtual_memory().available)}**\n"
                                              f"Free Space: **{size(psutil.disk_usage(psutil.disk_partitions()[1].device).free)}**\n"
                                              f"Boot Time: **{datetime.datetime.fromtimestamp(psutil.boot_time()).strftime('%Y-%m-%d %H:%M:%S')}**\n"
                                              f"**Discord.py** {discord.__version__} | **PIL** {pilv} | **BeautifulSoup** {bsv} | **psutil** {psutil.__version__} | **aiomysql** {aiomysql.__version__} | **aiohttp** {aiohttp.__version__}")
+        except:
+            pass
+        info.add_field(name="lul", value="<:online:313956277808005120> ETH: 0xB19cB458e80b1b34E829A6F07a72Dd66a6068847\n"
+                                         "<:online:313956277808005120> BTC: 39MVfpw9EzVDkNScgPXm4fLamFvHSaTYSZ")
         info.add_field(name="Links", value="<:GH:416593854368841729> - [GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) |"
                                            " [Support Server](https://discord.gg/q98qeYN) | "
                                            "[Vote OwO](https://discordbots.org/bot/310039170792030211/vote)")
@@ -581,11 +586,11 @@ class General:
     @commands.is_owner()
     async def todo(self, ctx, *, todo:str=None):
         """What to do"""
-        connection = await aiomysql.connect(user=config.db.user,
-                                            password=config.db.password,
-                                            host=config.db.host,
-                                            port=config.db.port,
-                                            db=config.db.database)
+        connection = await aiomysql.connect(user='root',
+                                            password=config.dbpass,
+                                            host='localhost',
+                                            port=3306,
+                                            db='nekobot')
         async with connection.cursor() as cur:
             if todo is not None:
                 await cur.execute(f"update stats set amount = \"{todo}\" where type = \"todo\"")
@@ -615,20 +620,21 @@ class General:
             embed.add_field(name="Moderation",
                             value="`kick`, `ban`, `massban`, `unban`, `rename`, `poll`, `purge`")
             embed.add_field(name="IMGWelcomer", value="`imgwelcome`")
-            embed.add_field(name="Levels", value="`profile`, `settitle`, `setdesc`, `rep`, `top`")
+            embed.add_field(name="Levels", value="Fixing Up...") # `profile`, `settitle`, `setdesc`, `rep`, `top`
             embed.add_field(name="Fun",
                             value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, "
                                   "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`")
-            embed.add_field(name="Economy", value="`register`, `balance`, `daily`, `roulette`, `transfer`, `steal`, `work`")
+            embed.add_field(name="Economy", value="Fixing up...") # `register`, `balance`, `daily`, ~~`roulette`~~, `transfer`, `work`
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
-                                  " `gonewild`, `nsfw`, `doujin`, `girl`")
+                                  " `gonewild`, `nsfw`, `doujin`, `girl`, `hentai`")
 
             embed.add_field(name="Reactions",
                             value="`hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
                                   "`poke`, `nom`, `lick`, `lewd`, `trap`, `owo`, `wasted`, `banghead`,"
-                                  "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`, `rem`, `poi`, `greet`")
+                                  "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`, `rem`, `poi`, `greet`, "
+                                  "`insultwaifu`, `foxgirl`")
             embed.add_field(name="Game Stats",
                             value="`osu`")
         except Exception as e:
