@@ -128,7 +128,8 @@ class General:
     @commands.command(aliases=['version'])
     async def info(self, ctx):
         servers = len(self.bot.guilds)
-        latency = "%.4f" % self.bot.latencies[0][1]
+        latency1 = "%.4f" % self.bot.latencies[0][1]
+        latency2 = "%.4f" % self.bot.latencies[1][1]
         connection = await aiomysql.connect(user='root',
                                             password=config.dbpass,
                                             host='localhost',
@@ -154,11 +155,13 @@ class General:
                                          f"Bot Commands: **{str(len(self.bot.commands))}**\n"
                                          f"Channels: **{millify(len(set(self.bot.get_all_channels())))}**\n"
                                          f"Shards: **{self.bot.shard_count}**\n"
-                                         f"Latency: **{latency}**\n"
+                                         f"Latency - Shard 1: **{latency1}** Shard 2: **{latency2}**\n"
                                          f"Kicks with bot: **{kicks}**\n"
                                          f"Bans with bot: **{bans}**")
-        info.add_field(name="Messages Read", value=f"Since Restart: **{millify(self.bot.counter['messages_read'])}**,\nTotal: **{millify(messages_read)}** (Total put on freeze atm)")
-        info.add_field(name="Processed Commands", value=f"Since Restart: **{millify(self.bot.counter['commands'])}**,\nTotal: **{millify(commands_done)}** (Total put on freeze atm)")
+        info.add_field(name="Messages Read", value=f"Since Restart: **{millify(self.bot.counter['messages_read'])}**,")
+                                                   #f"\nTotal: **{millify(messages_read)}** (**{messages_read}**)")
+        info.add_field(name="Processed Commands", value=f"Since Restart: **{millify(self.bot.counter['commands'])}**,")
+                                                        #f"\nTotal: **{millify(commands_done)}** (**{commands_done}**)")
         try:
             info.add_field(name="System:", value=f"CPU %: **{psutil.cpu_percent()}%**\n"
                                              f"Virtual Memory: **{size(psutil.virtual_memory().available)}**\n"
@@ -602,6 +605,27 @@ class General:
                 await ctx.send(todo_list[0])
 
     @commands.command()
+    async def calc(self, ctx, num1 : int, operator : str, num2 : int):
+        """Calculator, +, -, *, /"""
+        try:
+            if operator == "+":
+                i = num1 + num2
+            elif operator == "-":
+                i = num1 - num2
+            elif operator == "*":
+                i = num1 * num2
+            elif operator == '/':
+                i = num1 / num2
+            else:
+                await ctx.send("Not a valid operator.")
+                return
+            await ctx.send(i)
+        except Exception as e:
+            await ctx.send(embed=discord.Embed(color=0xDEADBF, title="⛔ Error", description=f"```\n"
+                                                                                      f"{e}\n"
+                                                                                      f"```"))
+
+    @commands.command()
     async def help(self, ctx, option: str = None):
         """Help Command OwO"""
         color = 0xDEADBF
@@ -616,33 +640,36 @@ class General:
 
             embed.add_field(name="General",
                             value="`lmgtfy`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
-                                  " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`")
+                                  " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`", inline=False)
             embed.add_field(name="Moderation",
-                            value="`kick`, `ban`, `massban`, `unban`, `rename`, `poll`, `purge`")
-            embed.add_field(name="IMGWelcomer", value="`imgwelcome`")
-            embed.add_field(name="Levels", value="Fixing Up...") # `profile`, `settitle`, `setdesc`, `rep`, `top`
+                            value="`kick`, `ban`, `massban`, `unban`, `rename`, `poll`, `purge`, `mute`, `unmute`", inline=False)
+            embed.add_field(name="IMGWelcomer", value="`imgwelcome`", inline=False)
+            embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `top`, `ecotop`, `transfer`, "
+                                                           "`coinflip`", inline=False)
             embed.add_field(name="Fun",
-                            value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, "
-                                  "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`")
-            embed.add_field(name="Economy", value="Fixing up...") # `register`, `balance`, `daily`, ~~`roulette`~~, `transfer`, `work`
+                            value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
+                                  "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `gachiBASS`, `joke`, "
+                                  "`b64`, `md5`", inline=False)
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
-                                  " `gonewild`, `nsfw`, `doujin`, `girl`, `hentai`")
+                                  " `gonewild`, `nsfw`, `doujin`, `girl`, `hentai`", inline=False)
 
             embed.add_field(name="Reactions",
                             value="`hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
                                   "`poke`, `nom`, `lick`, `lewd`, `trap`, `owo`, `wasted`, `banghead`,"
                                   "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`, `rem`, `poi`, `greet`, "
-                                  "`insultwaifu`, `foxgirl`")
+                                  "`insultwaifu`, `foxgirl`", inline=False)
             embed.add_field(name="Game Stats",
-                            value="`osu`")
+                            value="`osu`, `overwatch`", inline=False)
+            embed.add_field(name="Marriage", value="`marry`, `divorce`", inline=False)
         except Exception as e:
             await ctx.send(e)
 
         await ctx.send(embed=embed)
         try:
-            await ctx.message.add_reaction(':NekoCookie:')
+            emoji = self.bot.get_emoji(408672929379909632)
+            await ctx.message.add_reaction(emoji)
         except:
             pass
 

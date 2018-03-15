@@ -37,13 +37,15 @@ class DiscordBotsOrgAPI:
 
     @commands.command()
     @commands.is_owner()
-    async def dblcheck(self, ctx):
+    async def dblcheck(self, ctx, userid : int = None):
+        if userid is None:
+            userid == ctx.message.author.id
         url = "https://discordbots.org/api/bots/310039170792030211/votes"
         async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key}) as cs:
             async with cs.get(url) as r:
                 res = await r.json()
         for x in res:
-            if str(x['id']) == str(ctx.message.author.id):
+            if str(x['id']) == str(userid):
                 await ctx.send("True")
                 break
         else:

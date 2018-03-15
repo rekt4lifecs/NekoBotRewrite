@@ -116,9 +116,9 @@ class Moderation:
             reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
         await member.kick(reason=reason)
-        await ctx.send(f'{member.name} has been kicked uwu')
+        await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{user.mention} has been kicked."))
 
-    @commands.command()
+    @commands.command(aliases=['dabonhater'])
     @commands.guild_only()
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: MemberID, *, reason: ActionReason = None):
@@ -138,7 +138,7 @@ class Moderation:
             reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
         await ctx.guild.ban(discord.Object(id=member), reason=reason)
-        await ctx.send(f'{member.name} has been banned uwu')
+        await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{user.name} has been banned."))
 
     @commands.command()
     @commands.guild_only()
@@ -185,9 +185,39 @@ class Moderation:
             nickname = None
         try:
             await user.edit(nick=nickname)
-            await ctx.send("Done!")
+            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{user.name} has been renamed."))
         except discord.Forbidden:
-            await ctx.send("I don't have the permissions to do that.")
+            e = discord.Embed(color=0xff5630, title="⚠ Error",
+                              description="I don't have the permissions to do that.")
+            await ctx.send(embed=e)
+
+    @commands.command()
+    @commands.has_permissions(manage_roles=True)
+    async def mute(self, ctx, *, member: discord.Member):
+        """Mutes a user from the channel."""
+
+        reason = f'Muted by {ctx.author} (ID: {ctx.author.id})'
+
+        try:
+            await ctx.channel.set_permissions(member, send_messages=False, reason=reason)
+        except:
+            await ctx.send("Failed to mute.")
+        else:
+            await ctx.send('Muted user.')
+
+    @commands.command()
+    @commands.has_permissions(manage_roles=True)
+    async def unmute(self, ctx, *, member: discord.Member):
+        """Unmutes a user from the channel."""
+
+        reason = f'Unmuted by {ctx.author} (ID: {ctx.author.id})'
+
+        try:
+            await ctx.channel.set_permissions(member, send_messages=True, reason=reason)
+        except:
+            await ctx.send("Failed to unmute.")
+        else:
+            await ctx.send('Unmuted user.')
 
     # @commands.command()
     # @commands.guild_only()
@@ -370,7 +400,6 @@ class Moderation:
                                               "**purge emoji** - Removes all messages containing custom emoji.\n"
                                               "**purge reactions** - Removes all reactions from messages that have them.\n"
                                               "**purge custom** - A more advanced purge command.")
-            embed.set_footer(text="By R.Danny")
             await ctx.send(embed=embed)
 
     async def do_removal(self, ctx, limit, predicate, *, before=None, after=None):
@@ -403,7 +432,8 @@ class Moderation:
         to_send = '\n'.join(messages)
 
         if len(to_send) > 2000:
-            await ctx.send(f'Successfully removed {deleted} messages.', delete_after=10)
+            e = discord.Embed(color=0x87ff8f, description=f'Successfully removed {deleted} messages.')
+            await ctx.send(embed=e, delete_after=10)
         else:
             await ctx.send(to_send, delete_after=10)
 
@@ -474,7 +504,8 @@ class Moderation:
                 total_reactions += sum(r.count for r in message.reactions)
                 await message.clear_reactions()
 
-        await ctx.send(f'Successfully removed {total_reactions} reactions.')
+        await ctx.send(embed=discord.Embed(color=0x87ff8f,
+                                           description=f'Successfully removed {total_reactions} reactions.'))
 
     @purge.command()
     @commands.has_permissions(manage_messages=True)

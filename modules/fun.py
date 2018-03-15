@@ -1,8 +1,57 @@
 from discord.ext import commands
-import discord, aiohttp, requests, random, config, datetime, asyncio
+import discord, aiohttp, requests, random, config, datetime, asyncio, youtube_dl, base64, hashlib
 from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw
 from bs4 import BeautifulSoup as bs
+
+youtube_dl.utils.bug_reports_message = lambda: ''
+
+
+ytdl_format_options = {
+    'format': 'bestaudio/best',
+    'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
+    'restrictfilenames': True,
+    'noplaylist': True,
+    'nocheckcertificate': True,
+    'ignoreerrors': False,
+    'logtostderr': False,
+    'quiet': True,
+    'no_warnings': True,
+    'default_search': 'auto',
+    'source_address': '0.0.0.0' # ipv6 addresses cause issues sometimes
+}
+
+ffmpeg_options = {
+    'before_options': '-nostdin',
+    'options': '-vn'
+}
+
+ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+
+
+class YTDLSource(discord.PCMVolumeTransformer):
+    def __init__(self, source, *, data, volume=0.5):
+        super().__init__(source, volume)
+
+        self.data = data
+
+        self.title = data.get('title')
+        self.url = data.get('url')
+
+    @classmethod
+    async def from_url(cls, url, *, loop=None):
+        loop = loop or asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, ytdl.extract_info, url)
+
+        if 'entries' in data:
+            # take first item from a playlist
+            data = data['entries'][0]
+
+        filename = ytdl.prepare_filename(data)
+        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+
+key = config.weeb
+auth = {"Authorization": "Wolke " + key}
 
 food = [
     "🍪",
@@ -52,6 +101,103 @@ class Fun:
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command(name="b64", aliases=['b64encode', 'base64encode'])
+    async def base_encode(self, ctx, *, encode_to: str):
+        """Encode with Base64"""
+        try:
+            encoded = base64.b64encode(encode_to.encode())
+            await ctx.send(embed=discord.Embed(color=0xDEADBF, title=f"{encode_to}",
+                                               description=f"```\n{encoded}\n```"))
+        except Exception as e:
+            await ctx.send(f"Could not encode.\n`{e}`")
+
+    @commands.command(name="md5")
+    async def md_five(self, ctx, *, encode_to: str):
+        """Encode with Base64"""
+        try:
+            encoded = hashlib.md5(encode_to.encode('utf-8')).hexdigest()
+            await ctx.send(embed=discord.Embed(color=0xDEADBF, title=f"{encode_to}",
+                                               description=f"```\n{encoded}\n```"))
+        except Exception as e:
+            await ctx.send(f"Could not encode.\n`{e}`")
+
+    @commands.command()
+    async def clyde(self, ctx, *, text : str = None):
+        if text is None:
+            text = "ReKT is best bot maker"
+
+        img = Image.open("data/clyde.png")
+
+        draw = ImageDraw.Draw(img)
+        font = ImageFont.truetype("data/fonts/Whitney.ttf", 20)
+
+        draw.text((120, 80), text, (255, 255, 255), font=font)
+        num = random.randint(1, 10)
+        img.save(f"data/clyde{num}.png")
+
+        await ctx.send(file=discord.File(f"data/clyde{num}.png"))
+
+    @commands.command()
+    async def monkaS(self, ctx):
+        try:
+            emoji = self.bot.get_emoji(385481793853194240)
+            await ctx.message.add_reaction(emoji)
+        except:
+            pass
+
+    @commands.command()
+    async def gachiBASS(self, ctx, song : str = None):
+        try:
+            emoji = self.bot.get_emoji(393591272021164042)
+            await ctx.message.add_reaction(emoji)
+            emoji = self.bot.get_emoji(393591279067463682)
+            await ctx.message.add_reaction(emoji)
+            emoji = self.bot.get_emoji(393591271773700101)
+            await ctx.message.add_reaction(emoji)
+            emoji = self.bot.get_emoji(393591644764504064)
+            await ctx.message.add_reaction(emoji)
+        except:
+            pass
+
+        if song is None:
+            song = random.choice(["https://www.youtube.com/watch?v=J1Q0rgkFrA0",
+                                  "https://www.youtube.com/watch?v=J9poH0Q4k6A",
+                                  "https://www.youtube.com/watch?v=roqUWBibQ_o",
+                                  "https://www.youtube.com/watch?v=bwPLwX9aluY",
+                                  "https://www.youtube.com/watch?v=y3YHnkCDnKY",
+                                  "https://www.youtube.com/watch?v=gq3JxkARYRk",
+                                  "https://www.youtube.com/watch?v=kOCxHu_F5xo",
+                                  "https://www.youtube.com/watch?v=cPJNEGqf_jw"])
+
+        if ctx.voice_client is None:
+            try:
+                if ctx.author.voice.channel:
+                        await ctx.author.voice.channel.connect()
+                else:
+                    return
+            except:
+                return
+
+        if ctx.voice_client.is_playing():
+            ctx.voice_client.stop()
+
+        player = await YTDLSource.from_url(song, loop=self.bot.loop)
+        ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+
+        ctx.voice_client.source.volume = 150
+        await ctx.send('Now playing: **`{}`**'.format(player.title))
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def joke(self, ctx):
+        """Sends a Joke OwO"""
+        async with aiohttp.ClientSession(headers={"Accept": "application/json"}) as cs:
+            async with cs.get('https://icanhazdadjoke.com/') as r:
+                res = await r.json()
+                e = discord.Embed(color=0xDEADBF, description=f"**{res['joke']}**")\
+                    .set_thumbnail(url="https://vignette.wikia.nocookie.net/2b2t8261/images/e/ed/LUL.png")
+                await ctx.send(embed=e)
 
     @commands.command(pass_context=True)
     async def ship(self, ctx, user : discord.Member, user2 : discord.Member):
@@ -133,8 +279,10 @@ class Fun:
         await ctx.send(embed=em)
 
     @commands.command(pass_context=True)
-    async def jpeg(self, ctx, user : discord.Member):
+    async def jpeg(self, ctx, user : discord.Member = None):
         """OwO Whats This"""
+        if user is None:
+            user = ctx.message.author
         try:
             url = user.avatar_url
             response = requests.get(url)
@@ -145,7 +293,7 @@ class Fun:
         final = BytesIO()
         img.save('data/JPEG.jpg', quality=1)
         final.seek(0)
-        await ctx.send(file=discord.File("data/JPEG.jpg"))
+        await ctx.send(file=discord.File(fp='data/JPEG.jpg'))
 
     @commands.command()
     async def isnowillegal(self, ctx, legal : str):
@@ -178,12 +326,21 @@ class Fun:
 
     @commands.command()
     async def cat(self, ctx):
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get('https://random.cat/meow') as r:
+        async with aiohttp.ClientSession(headers=auth) as cs:
+            async with cs.get('https://api.weeb.sh/images/random?type=animal_cat') as r:
                 res = await r.json()
-        em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=res['file'])
-        await ctx.send(embed=em)
+                em = discord.Embed(color=0xDEADBF)
+                em.set_image(url=res['url'])
+                await ctx.send(embed=em)
+
+    @commands.command()
+    async def dog(self, ctx):
+        async with aiohttp.ClientSession(headers=auth) as cs:
+            async with cs.get('https://api.weeb.sh/images/random?type=animal_dog') as r:
+                res = await r.json()
+                em = discord.Embed(color=0xDEADBF)
+                em.set_image(url=res['url'])
+                await ctx.send(embed=em)
 
     @commands.command()
     async def bitconnect(self, ctx):

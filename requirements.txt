@@ -10,3 +10,4 @@ numpy
 pymysql
 dblpy
 aiomysql
+youtube_dl
