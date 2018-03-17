@@ -12,7 +12,21 @@ handler = logging.FileHandler(filename=f'NekoBot_{date}.log', encoding='utf-8', 
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 log.addHandler(handler)
 
+# 'modules.discordbots',
+# 'modules.fun',
+# 'modules.games',
+# 'modules.general',
+# 'modules.imgwelcome',
+# 'modules.mod',
+# 'modules.nsfw',
+# 'modules.reactions',
+# 'modules.eco',
+# 'modules.marriage',
+# 'modules.crypto',
+
 startup_extensions = {
+    'modules.devtools',
+    'modules.mod',
     'modules.discordbots',
     'modules.fun',
     'modules.games',
@@ -22,7 +36,9 @@ startup_extensions = {
     'modules.nsfw',
     'modules.reactions',
     'modules.eco',
-    'modules.marriage'
+    'modules.marriage',
+    'modules.crypto',
+
 }
 
 class NekoBot(commands.AutoShardedBot):
