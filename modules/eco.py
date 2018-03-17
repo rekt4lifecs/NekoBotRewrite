@@ -480,43 +480,43 @@ class economy:
                         await user.send(f"{ctx.message.author.name} has sent you ${amount}.")
                     except:
                         pass
-
-    async def _handle_on_message(self, message):
-        user = message.author
-        if user.bot:
-            return
-        if await self.usercheck("levels", user) is False:
-            await self._create_user(user)
-            return
-        else:
-            await asyncio.sleep(1)
-            curr_time = time.time()
-            db.execute(f"SELECT lastxp FROM levels WHERE userid = {user.id}")
-            lastxp = db.fetchone()
-            if lastxp is None:
-                pass
-            elif float(curr_time) - float(lastxp[0]) >= 120:
-                await self._process_exp(user.id, random.randint(15, 20))
-                db.execute(f"UPDATE levels SET lastxp = {time.time()} WHERE userid = {user.id}")
-                connection.commit()
-
-    async def _create_user(self, user):
-        try:
-            #userid, info, title, level, rep, lastxp,
-            db.execute(f"INSERT INTO levels VALUES ({user.id}, info, title, 0, 0, 0, 0)")
-            connection.commit()
-            log.info(f"Made account for {user.name} ({user.id})")
-        except AttributeError:
-            pass
-
-    async def _process_exp(self, userinfo, exp : int):
-        await asyncio.sleep(random.randint(2, 6))
-        db.execute("SELECT level FROM levels WHERE userid = {}".format(userinfo))
-        levels = db.fetchone()[0]
-        db.execute(f"UPDATE levels SET level = {levels + exp} WHERE userid = {userinfo}")
-        connection.commit()
+    #
+    # async def _handle_on_message(self, message):
+    #     user = message.author
+    #     if user.bot:
+    #         return
+    #     if await self.usercheck("levels", user) is False:
+    #         await self._create_user(user)
+    #         return
+    #     else:
+    #         await asyncio.sleep(1)
+    #         curr_time = time.time()
+    #         db.execute(f"SELECT lastxp FROM levels WHERE userid = {user.id}")
+    #         lastxp = db.fetchone()
+    #         if lastxp is None:
+    #             pass
+    #         elif float(curr_time) - float(lastxp[0]) >= 120:
+    #             await self._process_exp(user.id, random.randint(15, 20))
+    #             db.execute(f"UPDATE levels SET lastxp = {time.time()} WHERE userid = {user.id}")
+    #             connection.commit()
+    #
+    # async def _create_user(self, user):
+    #     try:
+    #         #userid, info, title, level, rep, lastxp,
+    #         db.execute(f"INSERT INTO levels VALUES ({user.id}, info, title, 0, 0, 0, 0)")
+    #         connection.commit()
+    #         log.info(f"Made account for {user.name} ({user.id})")
+    #     except AttributeError:
+    #         pass
+    #
+    # async def _process_exp(self, userinfo, exp : int):
+    #     await asyncio.sleep(random.randint(2, 6))
+    #     db.execute("SELECT level FROM levels WHERE userid = {}".format(userinfo))
+    #     levels = db.fetchone()[0]
+    #     db.execute(f"UPDATE levels SET level = {levels + exp} WHERE userid = {userinfo}")
+    #     connection.commit()
 
 def setup(bot):
     n = economy(bot)
-    bot.add_listener(n._handle_on_message, "on_message")
+    # bot.add_listener(n._handle_on_message, "on_message")
     bot.add_cog(n)
