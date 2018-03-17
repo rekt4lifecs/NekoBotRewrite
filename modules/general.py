@@ -180,7 +180,7 @@ class General:
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
         await ctx.send(embed=info)
 
-    @commands.command()
+    @commands.command(aliases=['user'])
     @commands.guild_only()
     async def userinfo(self, ctx, user: discord.Member = None):
         """Get a users info."""
@@ -215,7 +215,7 @@ class General:
 
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(aliases=['server'])
     @commands.guild_only()
     async def serverinfo(self, ctx):
         """Display Server Info"""
@@ -254,11 +254,12 @@ class General:
 
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(aliases=['channel'])
     @commands.guild_only()
     async def channelinfo(self, ctx, channel: discord.TextChannel = None):
         """Get Channel Info"""
-        channel = ctx.message.channel
+        if channel is None:
+            channel = ctx.message.channel
 
         embed = discord.Embed(color=0xDEADBF,
                               description=channel.mention)
@@ -647,9 +648,9 @@ class General:
             embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `top`, `ecotop`, `transfer`, "
                                                            "`coinflip`", inline=False)
             embed.add_field(name="Fun",
-                            value="`ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
+                            value="`food`, `ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
                                   "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `gachiBASS`, `joke`, "
-                                  "`b64`, `md5`", inline=False)
+                                  "`b64`, `md5`, `genderize`, `circulation`", inline=False)
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
@@ -661,8 +662,9 @@ class General:
                                   "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`, `rem`, `poi`, `greet`, "
                                   "`insultwaifu`, `foxgirl`", inline=False)
             embed.add_field(name="Game Stats",
-                            value="`osu`, `overwatch`", inline=False)
+                            value="`osu`, `overwatch`, `fortnite`", inline=False)
             embed.add_field(name="Marriage", value="`marry`, `divorce`", inline=False)
+            embed.add_field(name="Cryptocurrency", value="`crypto`", inline=False)
         except Exception as e:
             await ctx.send(e)
 
