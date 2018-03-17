@@ -116,7 +116,7 @@ class Moderation:
             reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
         await member.kick(reason=reason)
-        await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{user.mention} has been kicked."))
+        await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{member.name} has been kicked."))
 
     @commands.command(aliases=['dabonhater'])
     @commands.guild_only()
@@ -387,6 +387,10 @@ class Moderation:
     @commands.guild_only()
     async def purge(self, ctx):
         """Removes messages that meet a criteria.""" # RoboDanny <3
+        
+        if ctx.message.author.id == 137487801498337280:
+            await ctx.send("😠")
+            return
 
         if ctx.invoked_subcommand is None:
             embed = discord.Embed(color=0xDEADBF,
