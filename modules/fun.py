@@ -325,23 +325,69 @@ class Fun:
             user2 = ctx.message.author
 
         await ctx.trigger_typing()
-        async with aiohttp.ClientSession() as session:
-            async with session.post('https://api.weeb.sh/auto-image/love-ship',
-                                    headers={'Authorization': f'Wolke {config.weeb}'},
-                                    data={'targetOne': user1.avatar_url, 'targetTwo': user2.avatar_url}) as response:
-                t = await response.read()
-                numx = random.randint(1, 5)
-                with open(f"ship{numx}.png", "wb") as f:
-                    f.write(t)
-                rnd = random.randint(1, 20)
-                l1 = (len(user1.name))
-                l2 = (len(user2.name))
-                score = 100 - (l1 * l2) - rnd
-                filled_progbar = round(score / 100 * 10)
-                counter_ = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
-                e = discord.Embed(color=0xDEADBF, title=f'{user1.name} ❤ {user2.name}', description=f"**Love %**\n"
-                                                                                                                    f"`{counter_}` **{score}%**")
-                await ctx.send(file=discord.File(fp=f'ship{numx}.png'), embed=e.set_image(url=f'attachment://ship{numx}.png'))
+        ranxd = random.randint(1, 2)
+        if ranxd == 1:
+            async with aiohttp.ClientSession() as session:
+                async with session.post('https://api.weeb.sh/auto-image/love-ship',
+                                        headers={'Authorization': f'Wolke {config.weeb}'},
+                                        data={'targetOne': user1.avatar_url, 'targetTwo': user2.avatar_url}) as response:
+                    t = await response.read()
+                    numx = random.randint(1, 5)
+                    with open(f"ship{numx}.png", "wb") as f:
+                        f.write(t)
+                    rnd = random.randint(1, 20)
+                    l1 = (len(user1.name))
+                    l2 = (len(user2.name))
+                    score = 100 - (l1 * l2) - rnd
+                    filled_progbar = round(score / 100 * 10)
+                    counter_ = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
+
+                    self_length = len(user1.name)
+                    first_length = round(self_length / 2)
+                    first_half = user1.name[0:first_length]
+                    usr_length = len(user2.name)
+                    second_length = round(usr_length / 2)
+                    second_half = user2.name[second_length:]
+                    finalName = first_half + second_half
+                    e = discord.Embed(color=0xDEADBF, title=f'{user1.name} ❤ {user2.name}', description=f"**Love %**\n"
+                                                                                        f"`{counter_}` **{score}%**\n\n"
+                                                                                        f"{finalName}")
+                    await ctx.send(file=discord.File(fp=f'ship{numx}.png'), embed=e.set_image(url=f'attachment://ship{numx}.png'))
+        elif ranxd == 2:
+            user2url = user2.avatar_url
+            user1url = user1.avatar_url
+            # Yes ik I use requests when this is async gitgud ;-;
+            r1 = requests.get(user1url)
+            r2 = requests.get(user2url)
+            img = Image.open("data/ship/ship.jpg")
+            user1img = Image.open(BytesIO(r1.content))
+            user2img = Image.open(BytesIO(r2.content))
+
+            user1img = user1img.resize((int(250), int(250)))
+            user2img = user2img.resize((int(225), int(225)))
+            img.paste(user1img, (280, 210))
+            img.paste(user2img, (620, 130))
+
+            self_length = len(user1.name)
+            first_length = round(self_length / 2)
+            first_half = user1.name[0:first_length]
+            usr_length = len(user2.name)
+            second_length = round(usr_length / 2)
+            second_half = user2.name[second_length:]
+            finalName = first_half + second_half
+
+            img.save(f"data/ship/ship-{user1.id}.png")
+            rnd = random.randint(1, 20)
+            l1 = (len(user1.name))
+            l2 = (len(user2.name))
+            score = 100 - (l1 * l2) - rnd
+            filled_progbar = round(score / 100 * 10)
+            counter_ = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
+            e = discord.Embed(color=0xDEADBF, title=f'{user1.name} ❤ {user2.name}', description=f"**Love %**\n"
+                                                                                                f"`{counter_}` **{score}%**\n\n"
+                                                                                                f"{finalName}")
+            await ctx.send(file=discord.File(f'data/ship/ship-{user1.id}.png'), content="{}".format(finalName),
+                           embed=e.set_image(url=f'attachment://ship-{user1.id}.png'))
 
     @commands.command()
     @commands.cooldown(1, 30, commands.BucketType.user)
