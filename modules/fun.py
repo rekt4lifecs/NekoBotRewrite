@@ -102,6 +102,68 @@ class Fun:
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def genderize(self, ctx, name: str):
+        """Guess a gender"""
+        url = "https://api.genderize.io/?name=" + name
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+                e = discord.Embed(color=0xDEADBF, title=f"{name.title()}",description=f"Name: {res['name']}\n"
+                                                                                      f"Gender: {res['gender']}")
+                await ctx.send(embed=e)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def food(self, ctx):
+        """Grabs Random Food Recipes"""
+        url = "https://www.themealdb.com/api/json/v1/1/random.php"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+                res = res['meals'][0]
+        meal = res['strMeal']
+        meal_type = res['strCategory']
+        instructions = res['strInstructions']
+        thumb = res['strMealThumb']
+
+        ingredient1 = res['strIngredient1']
+        ingredient2 = res['strIngredient2']
+        ingredient3 = res['strIngredient3']
+        ingredient4 = res['strIngredient4']
+        ingredient5 = res['strIngredient5']
+        ingredient6 = res['strIngredient6']
+        ingredient7 = res['strIngredient7']
+        ingredient8 = res['strIngredient8']
+        ingredient9 = res['strIngredient9']
+        ingredient10 = res['strIngredient10']
+        ingredient11 = res['strIngredient11']
+        ingredient12 = res['strIngredient12']
+        ingredient13 = res['strIngredient13']
+        ingredient14 = res['strIngredient14']
+        ingredient15 = res['strIngredient15']
+        ingredient16 = res['strIngredient16']
+        ingredient17 = res['strIngredient17']
+        ingredient18 = res['strIngredient18']
+        ingredient19 = res['strIngredient19']
+        ingredient20 = res['strIngredient20']
+        for x in range(20):
+            if 'ingredient%x' % x is '' or 'null':
+                'ingredient%x' % x == "Nothing"
+
+        e = discord.Embed(color=0xDEADBF,
+                          title=f"{meal} | {meal_type}",
+                          description=instructions)
+        e.add_field(name="Ingredients:", value=f"{ingredient1} {ingredient2} {ingredient3} {ingredient4} {ingredient5}"
+                                               f" {ingredient6} {ingredient7} {ingredient8} {ingredient9} {ingredient10}"
+                                               f" {ingredient11} {ingredient12} {ingredient13} {ingredient14} {ingredient15}"
+                                               f" {ingredient16} {ingredient17} {ingredient18} {ingredient19} {ingredient20}")
+
+        e.set_image(url=thumb)
+
+        await ctx.send(embed=e)
+
     @commands.command(name="b64", aliases=['b64encode', 'base64encode'])
     async def base_encode(self, ctx, *, encode_to: str):
         """Encode with Base64"""
@@ -189,6 +251,34 @@ class Fun:
         await ctx.send('Now playing: **`{}`**'.format(player.title))
 
     @commands.command()
+    async def circulation(self, ctx):
+        try:
+            emoji = self.bot.get_emoji(388367971371712512)
+            await ctx.message.add_reaction(emoji)
+        except:
+            pass
+
+        song = "https://www.youtube.com/watch?v=uKxyLmbOc0Q"
+
+        if ctx.voice_client is None:
+            try:
+                if ctx.author.voice.channel:
+                        await ctx.author.voice.channel.connect()
+                else:
+                    return
+            except:
+                return
+
+        if ctx.voice_client.is_playing():
+            ctx.voice_client.stop()
+
+        player = await YTDLSource.from_url(song, loop=self.bot.loop)
+        ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+
+        ctx.voice_client.source.volume = 150
+        await ctx.send('Now playing: **`{}`**'.format(player.title))
+
+    @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def joke(self, ctx):
         """Sends a Joke OwO"""
@@ -199,33 +289,59 @@ class Fun:
                     .set_thumbnail(url="https://vignette.wikia.nocookie.net/2b2t8261/images/e/ed/LUL.png")
                 await ctx.send(embed=e)
 
-    @commands.command(pass_context=True)
-    async def ship(self, ctx, user : discord.Member, user2 : discord.Member):
-        """Ship someone UwU"""
-        user2url = user2.avatar_url
-        user1url = user.avatar_url
-        #Yes ik I use requests when this is async gitgud ;-;
-        r1 = requests.get(user1url)
-        r2 = requests.get(user2url)
-        img = Image.open("data/ship/ship.jpg")
-        user1img = Image.open(BytesIO(r1.content))
-        user2img = Image.open(BytesIO(r2.content))
+    # @commands.command(pass_context=True)
+    # async def ship(self, ctx, user : discord.Member, user2 : discord.Member):
+    #     """Ship someone UwU"""
+    #     user2url = user2.avatar_url
+    #     user1url = user.avatar_url
+    #     #Yes ik I use requests when this is async gitgud ;-;
+    #     r1 = requests.get(user1url)
+    #     r2 = requests.get(user2url)
+    #     img = Image.open("data/ship/ship.jpg")
+    #     user1img = Image.open(BytesIO(r1.content))
+    #     user2img = Image.open(BytesIO(r2.content))
+    #
+    #     user1img = user1img.resize((int(250), int(250)))
+    #     user2img = user2img.resize((int(225), int(225)))
+    #     img.paste(user1img, (280, 210))
+    #     img.paste(user2img, (620, 130))
+    #
+    #     self_length = len(user.name)
+    #     first_length = round(self_length / 2)
+    #     first_half = user.name[0:first_length]
+    #     usr_length = len(user2.name)
+    #     second_length = round(usr_length / 2)
+    #     second_half = user2.name[second_length:]
+    #     finalName = first_half + second_half
+    #
+    #     img.save(f"data/ship/ship-{user.id}.png")
+    #     await ctx.send(file=discord.File(f'data/ship/ship-{user.id}.png'), content="{}".format(finalName))
 
-        user1img = user1img.resize((int(250), int(250)))
-        user2img = user2img.resize((int(225), int(225)))
-        img.paste(user1img, (280, 210))
-        img.paste(user2img, (620, 130))
+    @commands.command()
+    @commands.cooldown(1, 15, commands.BucketType.user)
+    async def ship(self, ctx, user1: discord.Member, user2: discord.Member = None):
+        """Ship OwO"""
+        if user2 is None:
+            user2 = ctx.message.author
 
-        self_length = len(user.name)
-        first_length = round(self_length / 2)
-        first_half = user.name[0:first_length]
-        usr_length = len(user2.name)
-        second_length = round(usr_length / 2)
-        second_half = user2.name[second_length:]
-        finalName = first_half + second_half
-
-        img.save(f"data/ship/ship-{user.id}.png")
-        await ctx.send(file=discord.File(f'data/ship/ship-{user.id}.png'), content="{}".format(finalName))
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as session:
+            async with session.post('https://api.weeb.sh/auto-image/love-ship',
+                                    headers={'Authorization': f'Wolke {config.weeb}'},
+                                    data={'targetOne': user1.avatar_url, 'targetTwo': user2.avatar_url}) as response:
+                t = await response.read()
+                numx = random.randint(1, 5)
+                with open(f"ship{numx}.png", "wb") as f:
+                    f.write(t)
+                rnd = random.randint(1, 20)
+                l1 = (len(user1.name))
+                l2 = (len(user2.name))
+                score = 100 - (l1 * l2) - rnd
+                filled_progbar = round(score / 100 * 10)
+                counter_ = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
+                e = discord.Embed(color=0xDEADBF, title=f'{user1.name} ❤ {user2.name}', description=f"**Love %**\n"
+                                                                                                                    f"`{counter_}` **{score}%**")
+                await ctx.send(file=discord.File(fp=f'ship{numx}.png'), embed=e.set_image(url=f'attachment://ship{numx}.png'))
 
     @commands.command()
     @commands.cooldown(1, 30, commands.BucketType.user)
