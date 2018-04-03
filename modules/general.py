@@ -7,7 +7,7 @@ from .utils.chat_formatting import pagify
 from PIL import __version__ as pilv
 from bs4 import __version__ as bsv
 from urllib.parse import quote_plus
-
+import uuid, string
 
 def millify(n):
     millnames = ['', 'k', 'M', ' Billion', ' Trillion']
@@ -125,6 +125,39 @@ class General:
             await ebony.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
             await asyncio.sleep(386)###################################################################################
 
+    def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
+        return ''.join(random.choice(chars) for _ in range(size))
+
+    @commands.command(name='upload')
+    async def owner_upload(self, ctx):
+        """File Uploader"""
+        author = ctx.message.author
+
+        if author.id not in [270133511325876224, 102165107244539904, 205379510139486208, 178189410871803904]:
+            return
+
+        await ctx.send("**Send an image/file to upload.**")
+
+        def check(m):
+            return m.author == author and m.channel == ctx.message.channel
+
+        msg = await self.bot.wait_for('message', check=check)
+
+        try:
+            randomnum = self.id_generator()
+            url = msg.attachments[0].url
+            attachment = str(url).rpartition('.')[2]
+            if attachment in ['exe']:
+                return await ctx.send("**File type is forbiddon.**")
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    t = await response.read()
+                    with open(f"/home/www/{randomnum}.{attachment}", "wb") as f:
+                        f.write(t)
+            await ctx.send(f"https://nekobot.xyz/{randomnum}.{attachment}")
+        except Exception as e:
+            return await ctx.send(f"**Error uploading file**")
+
     @commands.command(aliases=['version'])
     async def info(self, ctx):
         servers = len(self.bot.guilds)
@@ -170,11 +203,9 @@ class General:
                                              f"**Discord.py** {discord.__version__} | **PIL** {pilv} | **BeautifulSoup** {bsv} | **psutil** {psutil.__version__} | **aiomysql** {aiomysql.__version__} | **aiohttp** {aiohttp.__version__}")
         except:
             pass
-        info.add_field(name="lul", value="<:online:313956277808005120> ETH: 0xB19cB458e80b1b34E829A6F07a72Dd66a6068847\n"
-                                         "<:online:313956277808005120> BTC: 39MVfpw9EzVDkNScgPXm4fLamFvHSaTYSZ")
         info.add_field(name="Links", value="<:GH:416593854368841729> - [GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) |"
                                            " [Support Server](https://discord.gg/q98qeYN) | "
-                                           "[Vote OwO](https://discordbots.org/bot/310039170792030211/vote)")
+                                           "[Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | <:nkotreon:430733839003025409> [Patreon](https://www.patreon.com/NekoBot)")
         info.set_footer(
             text="Bot by ReKT#0001 and was forced to use MySQL by Fox#0001 <3")
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
@@ -186,6 +217,10 @@ class General:
         """Get a users info."""
         if user == None:
             user = ctx.message.author
+        try:
+            playinggame = user.activity.title
+        except:
+            playinggame = None
         server = ctx.message.guild
         embed = discord.Embed(color=0xDEADBF)
         embed.set_author(name=user.name,
@@ -196,7 +231,7 @@ class General:
         embed.add_field(name="Created", value=user.created_at.strftime("%d %b %Y %H:%M"))
         embed.add_field(name="Joined", value=user.joined_at.strftime("%d %b %Y %H:%M"))
         embed.add_field(name="Animated Avatar", value=str(user.is_avatar_animated()))
-        embed.add_field(name="Playing", value=user.game)
+        embed.add_field(name="Playing", value=playinggame)
         embed.add_field(name="Status", value=user.status)
         embed.add_field(name="Color", value=user.color)
 
@@ -317,6 +352,22 @@ class General:
             await ctx.send("There is no definition #{}".format(pos + 1))
         except Exception as e:
             await ctx.send(f"Error. {e}")
+
+    @commands.command()
+    async def verify(self, ctx, user : discord.Member = None):
+        """Verify Server."""
+        server = ctx.message.guild
+        if server.id == 310037773786677258:
+            if user is None:
+                user = ctx.message.author
+            try:
+                emoji = self.bot.get_emoji(408672929379909632)
+                await ctx.message.add_reaction(emoji)
+            except:
+                pass
+            await user.send(f"Verification link: https://captcha.nayami.party/?sid={server.id}&u={user.id}")
+        else:
+            return
 
     @commands.command()
     async def avatar(self, ctx, user: discord.Member = None):
@@ -644,13 +695,14 @@ class General:
                                   " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`", inline=False)
             embed.add_field(name="Moderation",
                             value="`kick`, `ban`, `massban`, `unban`, `rename`, `poll`, `purge`, `mute`, `unmute`", inline=False)
+            embed.add_field(name="Roleplay", value="`card`")
             embed.add_field(name="IMGWelcomer", value="`imgwelcome`", inline=False)
             embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `top`, `ecotop`, `transfer`, "
-                                                           "`coinflip`", inline=False)
+                                                           "`coinflip`, `blackjack`", inline=False)
             embed.add_field(name="Fun",
                             value="`food`, `ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
-                                  "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `gachiBASS`, `joke`, "
-                                  "`b64`, `md5`, `genderize`, `circulation`", inline=False)
+                                  "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `gachiBASS`, `disconnect`, `joke`, "
+                                  "`b64`, `md5`, `circulation`, `kannagen`, `iphonex`", inline=False)
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
@@ -665,10 +717,10 @@ class General:
                             value="`osu`, `overwatch`, `fortnite`", inline=False)
             embed.add_field(name="Marriage", value="`marry`, `divorce`", inline=False)
             embed.add_field(name="Cryptocurrency", value="`crypto`", inline=False)
-        except Exception as e:
-            await ctx.send(e)
 
-        await ctx.send(embed=embed)
+            await ctx.send(embed=embed)
+        except:
+            await ctx.send("I can't send embeds.")
         try:
             emoji = self.bot.get_emoji(408672929379909632)
             await ctx.message.add_reaction(emoji)

@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, argparse, re, shlex, traceback, io, textwrap, asyncio, aiomysql, config
+import discord, argparse, re, shlex, traceback, io, textwrap, asyncio, pymysql, config, os
 from .utils import checks
 from contextlib import redirect_stdout
 from collections import Counter
@@ -101,44 +101,49 @@ class Moderation:
     @checks.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: ActionReason = None):
         """Kicks a member from the server."""
-        connection = await aiomysql.connect(user='root',
-                                            password=config.dbpass,
-                                            host='localhost',
-                                            port=3306,
-                                            db='nekobot')
-        async with connection.cursor() as cur:
-            await cur.execute(f"SELECT amount FROM stats WHERE type = \"kicks\"")
-            kicks = await cur.fetchone()
-            kicks = int(kicks[0])
-            await cur.execute(f"UPDATE stats SET amount = {kicks + 1} WHERE type = \"kicks\"")
-            await connection.commit()
-        if reason is None:
-            reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        db.execute(f"SELECT amount FROM stats WHERE type = \"kicks\"")
+        kicks = db.fetchone()
+        kicks = int(kicks[0])
+        db.execute(f"UPDATE stats SET amount = {kicks + 1} WHERE type = \"kicks\"")
+        connection.commit()
+        try:
+            if reason is None:
+                reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
+            await member.kick(reason=reason)
+            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{member.name} has been kicked."))
+        except:
+            await ctx.send("I couldn't kick that user, either I dont have permissions or my role is too low.")
 
-        await member.kick(reason=reason)
-        await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{member.name} has been kicked."))
-
-    @commands.command(aliases=['dabonhater'])
+    @commands.command()
     @commands.guild_only()
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: MemberID, *, reason: ActionReason = None):
         """Bans a member from the server."""
-        connection = await aiomysql.connect(user='root',
-                                            password=config.dbpass,
-                                            host='localhost',
-                                            port=3306,
-                                            db='nekobot')
-        async with connection.cursor() as cur:
-            await cur.execute(f"SELECT amount FROM stats WHERE type = \"bans\"")
-            bans = await cur.fetchone()
-            bans = int(bans[0])
-            await cur.execute(f"UPDATE stats SET amount = {bans + 1} WHERE type = \"bans\"")
-            await connection.commit()
-        if reason is None:
-            reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        db.execute(f"SELECT amount FROM stats WHERE type = \"bans\"")
+        bans = db.fetchone()
+        bans = int(bans[0])
+        db.execute(f"UPDATE stats SET amount = {bans + 1} WHERE type = \"bans\"")
+        connection.commit()
+        try:
+            if reason is None:
+                reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
-        await ctx.guild.ban(discord.Object(id=member), reason=reason)
-        await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{user.name} has been banned."))
+            await ctx.guild.ban(discord.Object(id=member), reason=reason)
+            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{member.name} has been banned."))
+        except:
+            await ctx.send("I couldn't ban that user, either I dont have permissions or my role is too low.")
 
     @commands.command()
     @commands.guild_only()
@@ -146,11 +151,13 @@ class Moderation:
     async def massban(self, ctx, reason: ActionReason, *members: MemberID):
         """Mass bans multiple members from the server."""
 
-        for member_id in members:
-            await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
+        try:
+            for member_id in members:
+                await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
 
-        await ctx.send('\N{OK HAND SIGN}')
-
+            await ctx.send('\N{OK HAND SIGN}')
+        except:
+            await ctx.send("I couldn't ban that user, either I dont have permissions or my role is too low.")
 
     @commands.command()
     @commands.guild_only()
@@ -173,7 +180,7 @@ class Moderation:
         await ctx.send("changed")
         game = discord.Game(name=changeto, url="https://www.twitch.tv/rekt4lifecs",
                             type=type)
-        await self.bot.change_presence(game=game)
+        await self.bot.change_presence(activity=game)
 
     @commands.command()
     @commands.guild_only()
@@ -186,9 +193,9 @@ class Moderation:
         try:
             await user.edit(nick=nickname)
             await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{user.name} has been renamed."))
-        except discord.Forbidden:
+        except:
             e = discord.Embed(color=0xff5630, title="⚠ Error",
-                              description="I don't have the permissions to do that.")
+                              description="I couldn't rename that user.")
             await ctx.send(embed=e)
 
     @commands.command()
@@ -334,6 +341,12 @@ class Moderation:
         actual_poll = await ctx.send(embed=embed)
         for emoji, _ in answers:
             await actual_poll.add_reaction(emoji)
+
+    @commands.command(name='exec', hidden=True)
+    @commands.is_owner()
+    async def _exec(self, ctx, *, code: str):
+        """Exec code"""
+        await ctx.send(os.system(code))
 
     @commands.command(pass_context=True, hidden=True, name='eval')
     @commands.is_owner()

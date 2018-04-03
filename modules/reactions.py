@@ -89,8 +89,8 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def tickle(self, ctx, user: discord.Member):
         """Whats this OWO"""
         self.counter['tickle'] += 1
@@ -108,8 +108,8 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def bite(self, ctx, user: discord.Member):
         """Bite someone OwO"""
         self.counter['bite'] += 1
@@ -166,6 +166,7 @@ class Reactions:
                 await ctx.send(embed=em)
 
     @commands.command(pass_context=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def poke(self, ctx, user: discord.Member):
         """poke poke poke ^-^"""
         self.counter['poke'] += 1
@@ -365,6 +366,19 @@ class Reactions:
                 await ctx.send(embed=em)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.command(pass_context=True, aliases=['foxgirls'])
+    async def foxgirl(self, ctx):
+        """Fox Girls OwO"""
+        self.counter['fox_girl'] += 1
+        async with aiohttp.ClientSession(headers=auth) as cs:
+            async with cs.get('https://nekos.life/api/v2/img/fox_girl') as r:
+                res = await r.json()
+                em = discord.Embed(
+                                   color=0xDEADBF)
+                em.set_image(url=res['url'])
+                await ctx.send(embed=em)
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def rem(self, ctx):
         self.counter['rem'] += 1
@@ -400,6 +414,7 @@ class Reactions:
                 await ctx.send(embed=embed)
 
     @commands.command(pass_context=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def bang(self, ctx, user: discord.Member):
         """~BANG~"""
         self.counter['bang'] += 1
@@ -418,12 +433,23 @@ class Reactions:
                 await ctx.send(embed=em)
 
     @commands.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
-    async def insultwaifu(self, ctx, user : discord.Member):
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def insultwaifu(self, ctx, user : discord.Member = None):
         """Insult Waifu"""
-
+        if user is None:
+            user = ctx.message.author
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as session:
+            async with session.post('https://api.weeb.sh/auto-image/waifu-insult',
+                                    headers={'Authorization': f'Wolke {config.weeb}'},
+                                    data={'avatar': user.avatar_url}) as response:
+                t = await response.read()
+                with open("res.png", "wb") as f:
+                    f.write(t)
+                await ctx.send(file=discord.File(fp='res.png'))
 
     @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def reactions(self, ctx):
         embed = discord.Embed(color=0xDEADBF,
                               title="Reaction Stats")
@@ -451,6 +477,7 @@ class Reactions:
         embed.add_field(name="Greet", value=self.counter['greet'])
         embed.add_field(name="Poi", value=self.counter['poi'])
         embed.add_field(name="Rem", value=self.counter['rem'])
+        embed.add_field(name="Fox Girls", value=self.counter['fox_girl'])
 
         await ctx.send(embed=embed)
 

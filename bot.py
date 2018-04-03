@@ -1,9 +1,12 @@
 from discord.ext import commands
-import logging, traceback, sys, discord, json, dbl, asyncio, aiomysql
+import logging, traceback, sys, discord
 from datetime import date
 from collections import Counter
+import raven
 
 import config
+
+sentry = raven.Client(config.sentry)
 
 log = logging.getLogger('NekoBot')
 log.setLevel(logging.DEBUG)
@@ -12,52 +15,45 @@ handler = logging.FileHandler(filename=f'NekoBot_{date}.log', encoding='utf-8', 
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 log.addHandler(handler)
 
+# 'modules.devtools',
+# 'modules.mod',
 # 'modules.discordbots',
 # 'modules.fun',
 # 'modules.games',
 # 'modules.general',
 # 'modules.imgwelcome',
-# 'modules.mod',
 # 'modules.nsfw',
 # 'modules.reactions',
 # 'modules.eco',
 # 'modules.marriage',
-# 'modules.crypto',
+# 'modules.crypto'
 
 startup_extensions = {
-    'modules.devtools',
-    'modules.mod',
+    'modules.cardgame',
+    'modules.chatbot',
+    'modules.crypto',
     'modules.discordbots',
+    'modules.eco',
     'modules.fun',
     'modules.games',
     'modules.general',
     'modules.imgwelcome',
+    'modules.marriage',
     'modules.mod',
     'modules.nsfw',
-    'modules.reactions',
-    'modules.eco',
-    'modules.marriage',
-    'modules.crypto',
-
+    'modules.reactions'
 }
 
 class NekoBot(commands.AutoShardedBot):
     """NekoBot Rewrite OwO"""
 
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or("n!"),
+        super().__init__(command_prefix=commands.when_mentioned_or('n!'),
                          description=config.description,
                          pm_help=None,
                          help_attrs=dict(hidden=True))
         self.bot = NekoBot
         self.counter = Counter()
-
-        for extension in startup_extensions:
-            try:
-                self.load_extension(extension)
-            except Exception as e:
-                print("Failed to load {}.".format(extension), file=sys.stderr)
-                traceback.print_exc()
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
@@ -78,6 +74,7 @@ class NekoBot(commands.AutoShardedBot):
             em = discord.Embed(color=0xDEADBF,
                                title="Error",
                                description=f"Error in command {ctx.command.qualified_name}, [Support Server](https://discord.gg/q98qeYN)")
+            sentry.captureMessage(f'Error in command {ctx.command.qualified_name}, {exception.original}')
             try:
                 owner = self.bot.get_user(270133511325876224)
                 await owner.send(f"Error in `{ctx.command.qualified_name}`\n```\n{exception}\n```")
@@ -98,51 +95,19 @@ class NekoBot(commands.AutoShardedBot):
         elif isinstance(exception, commands.CommandNotFound):
             pass
         elif isinstance(exception, commands.BotMissingPermissions):
-            await ctx.send("Im missing permissions ;-;")
+            await ctx.send(f"Im missing permissions ;-;\nPermissions I need:\n{exception.missing_perms}")
         else:
             log.exception(type(exception).__name__, exc_info=exception)
+            sentry.captureMessage(exception)
 
     async def on_message(self, message):
         self.counter["messages_read"] += 1
-        # connection = await aiomysql.connect(user='root',
-        #                                     password='rektdiscord',
-        #                                     host='localhost',
-        #                                     port=3306,
-        #                                     db='nekobot')
-        # async with connection.cursor() as cur:
-        #     await cur.execute(f"SELECT amount FROM stats WHERE type = \"messages\"")
-        #     messages = await cur.fetchone()
-        #     messages = int(messages[0])
-        #     await cur.execute(f"UPDATE stats SET amount = {messages + 1} WHERE type = \"messages\"")
-        #     await connection.commit()
-        #     if not await cur.execute(f'SELECT 1 FROM stalk WHERE userid = {message.author.id}'):
-        #         await cur.execute(f"INSERT INTO stalk VALUES ({message.author.id}, 0)")
-        #         await connection.commit()
-        #     else:
-        #         await cur.execute(f"SELECT messages FROM stalk WHERE userid = {message.author.id}")
-        #         usermsg = await cur.fetchone()
-        #         usermsg = int(usermsg[0])
-        #         await cur.execute(f"UPDATE stalk SET messages = {usermsg + 1} WHERE userid = {message.author.id}")
-        #         await connection.commit()
-
         if message.author.bot:
             return
         await self.process_commands(message)
 
     async def on_command(self, command):
         self.counter["commands"] += 1
-        self.counter[commands] += 1
-        # connection = await aiomysql.connect(user='root',
-        #                                     password='rektdiscord',
-        #                                     host='localhost',
-        #                                     port=3306,
-        #                                     db='nekobot')
-        # async with connection.cursor() as cur:
-        #     await cur.execute(f"SELECT amount FROM stats WHERE type = \"commands\"")
-        #     commands = await cur.fetchone()
-        #     commands = int(commands[0])
-        #     await cur.execute(f"UPDATE stats SET amount = {commands + 1} WHERE type = \"commands\"")
-        #     await connection.commit()
 
     async def close(self):
         await super().close()
@@ -152,13 +117,29 @@ class NekoBot(commands.AutoShardedBot):
         print("Shard Connected...")
 
     async def on_ready(self):
+        print("             _         _           _   \n"
+              "            | |       | |         | |  \n"
+              "  _ __   ___| | _____ | |__   ___ | |_ \n"
+              " | '_ \ / _ \ |/ / _ \| '_ \ / _ \| __|\n"
+              " | | | |  __/   < (_) | |_) | (_) | |_ \n"
+              " |_| |_|\___|_|\_\___/|_.__/ \___/ \__|\n"
+              "                                       \n"
+              "                                       ")
         print("Ready OwO")
-        print(self.shard_count)
+        print(f"Shards: {self.shard_count}")
         print(f"Servers {len(self.guilds)}")
         print(f"Users {len(set(self.get_all_members()))}")
+        await self.change_presence(status=discord.Status.idle)
+        for extension in startup_extensions:
+            try:
+                self.load_extension(extension)
+            except Exception as e:
+                print("Failed to load {}.".format(extension), file=sys.stderr)
+                traceback.print_exc()
+                sentry.captureException()
 
     def run(self):
-        super().run(config.token, reconnect=True)
+        super().run(config.token)
 
 def run_bot():
     bot = NekoBot()

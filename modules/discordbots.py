@@ -1,5 +1,12 @@
 from discord.ext import commands
-import asyncio, config, dbl, discord, aiohttp, random
+import asyncio, config, dbl, discord, aiohttp, random, pymysql
+
+connection = pymysql.connect(host="localhost",
+                             user="root",
+                             password="rektdiscord",
+                             db="nekobot",
+                             port=3306)
+db = connection.cursor()
 
 messages = ["OwO Whats this", "MonkaS", "OwO", "Haiiiii", ".help", "🤔🤔🤔", "HMMM🤔", "USE n! WEW", "n!HELP REE"]
 
@@ -18,12 +25,20 @@ class DiscordBotsOrgAPI:
         while True:
             print("Attempting to update server count.")
             try:
+                db.execute("SELECT amount FROM stats WHERE type = \"messages\"")
+                messages = int(db.fetchone()[0])
+                db.execute(f"UPDATE stats SET amount = {int(self.bot.counter['messages_read'] + messages)} WHERE type = \"messages\"")
+                db.execute("SELECT amount FROM stats WHERE type = \"commands\"")
+                commands = int(db.fetchone()[0])
+                db.execute(
+                    f"UPDATE stats SET amount = {int(self.bot.counter['commands'] + commands)} WHERE type = \"messages\"")
+                self.bot.counter['commands'] = 0
                 stats2 = [f"Servers: {len(self.bot.guilds)}", f"Users: {len(set(self.bot.get_all_members()))}",
                           "OwO whats n!help", "🤔🤔🤔"]
                 await self.dblpy.post_server_count(shard_count=self.bot.shard_count, shard_no=self.bot.shard_id)
                 print("Posted server count. {}".format(len(self.bot.guilds)))
-                game = discord.Game(type=1, url="https://www.twitch.tv/rekt4lifecs", name=random.choice(stats2))
-                await self.bot.change_presence(game=game)
+                game = discord.Streaming(name=random.choice(stats2), url="https://www.twitch.tv/rekt4lifecs")
+                await self.bot.change_presence(activity=game)
             except Exception as e:
                 print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
             try:
@@ -34,22 +49,6 @@ class DiscordBotsOrgAPI:
             except Exception as e:
                 print("Failed to post discord.bots.pw\n{}".format(e))
             await asyncio.sleep(1800)
-
-    @commands.command()
-    @commands.is_owner()
-    async def dblcheck(self, ctx, userid : int = None):
-        if userid is None:
-            userid == ctx.message.author.id
-        url = "https://discordbots.org/api/bots/310039170792030211/votes"
-        async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key}) as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
-        for x in res:
-            if str(x['id']) == str(userid):
-                await ctx.send("True")
-                break
-        else:
-            await ctx.send("False")
 
     # @commands.command()
     # @commands.is_owner()

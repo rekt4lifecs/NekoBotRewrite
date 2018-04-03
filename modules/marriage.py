@@ -1,19 +1,18 @@
 from discord.ext import commands
 import discord, asyncio, pymysql, random
 
-connection = pymysql.connect(host="localhost",
-                             user="root",
-                             password="rektdiscord",
-                             db="nekobot",
-                             port=3306)
-db = connection.cursor()
-
 class Marriage:
 
     def __init__(self, bot):
         self.bot = bot
 
     async def userexists(self, datab : str, user : discord.Member):
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         user = user.id
         if not db.execute(f'SELECT 1 FROM {datab} WHERE userid = {user}'):
             return False
@@ -24,6 +23,12 @@ class Marriage:
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def marry(self, ctx, user : discord.Member):
         """Marry someone OwO"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         author = ctx.message.author
 
         if user == author:
@@ -58,6 +63,12 @@ class Marriage:
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def divorce(self, ctx, user : discord.Member):
         """Divorce ;-;"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         author = ctx.message.author
 
         if user == author:

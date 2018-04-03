@@ -1,14 +1,9 @@
 from discord.ext import commands
-import discord, aiohttp, pymysql, asyncio, time, datetime, config, random, math, logging
-
-connection = pymysql.connect(host="localhost",
-                             user="root",
-                             password="rektdiscord",
-                             db="nekobot",
-                             port=3306)
-db = connection.cursor()
+import discord, aiohttp, pymysql, asyncio, time, datetime, config, random, math, logging, raven
 
 log = logging.getLogger("NekoBot")
+
+sentry = raven.Client(config.sentry)
 
 class economy:
     """Economy"""
@@ -17,6 +12,12 @@ class economy:
         self.bot = bot
 
     async def usercheck(self, datab : str, user : discord.Member):
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         user = user.id
         if not db.execute(f'SELECT 1 FROM {datab} WHERE userid = {user}'):
             return False
@@ -34,10 +35,34 @@ class economy:
     def _find_level(self, total_exp):
         return int((1 / 278) * (9 + math.sqrt(81 + 1112 * (total_exp))))
 
+    async def _create_user(self, user_id):
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        try:
+            db.execute(f"INSERT INTO levels VALUES ({user_id}, 0, 0, 0, 0, 0, 0)")
+            connection.commit()
+        except:
+            pass
+
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def bank(self, ctx):
         """Bank info"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        try:
+            if await self.usercheck('levels', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
         db.execute("SELECT balance FROM economy")
 
         total = 0
@@ -59,7 +84,19 @@ class economy:
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def register(self, ctx):
         """Register a bank account"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         user = ctx.message.author
+
+        try:
+            if await self.usercheck('levels', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
 
         if await self.usercheck('economy', user) is False:
             await ctx.send("Registered a bank account!")
@@ -73,8 +110,19 @@ class economy:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def profile(self, ctx, user : discord.Member = None):
         """Get user's profile"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         if user == None:
             user = ctx.message.author
+        try:
+            if await self.usercheck('levels', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
         if await self.usercheck('levels', user) is False:
             rep = 0
             level = 0
@@ -113,7 +161,18 @@ class economy:
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def daily(self, ctx):
         """Receive your daily bonus"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         user = ctx.message.author
+        try:
+            if await self.usercheck('levels', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
         if await self.usercheck('economy', user) is False:
             await ctx.send("You don't have a bank account...")
             return
@@ -134,21 +193,16 @@ class economy:
                 balance = int(db.fetchone()[0])
 
                 # Voter Bonus
-                url = "https://discordbots.org/api/bots/310039170792030211/votes"
-                async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key}) as cs:
-                    async with cs.get(url) as r:
-                        res = await r.json()
-                for x in res:
-                    if str(x['id']) == str(ctx.message.author.id):
-                        db.execute(f"UPDATE economy SET balance = {balance + 7500} WHERE userid = {user.id}")
-                        connection.commit()
-                        db.execute(f"UPDATE economy SET payday = {int(time.time())} WHERE userid = {user.id}")
-                        connection.commit()
-                        embed = discord.Embed(color=0xDEADBF,
-                                              title="Daily Credits",
-                                              description="Recieved 2500 + 5000 Daily credits - Voter Bonus!")
-                        await ctx.send(embed=embed)
-                        break
+                amount = db.execute(f'SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"')
+                if amount != 0:
+                    db.execute(f"UPDATE economy SET balance = {balance + 7500} WHERE userid = {user.id}")
+                    connection.commit()
+                    db.execute(f"UPDATE economy SET payday = {int(time.time())} WHERE userid = {user.id}")
+                    connection.commit()
+                    embed = discord.Embed(color=0xDEADBF,
+                                          title="Daily Credits",
+                                          description="Recieved 2500 + 5000 Daily credits - Voter Bonus!")
+                    await ctx.send(embed=embed)
                 else:
                     db.execute(f"UPDATE economy SET balance = {balance + 2500} WHERE userid = {user.id}")
                     connection.commit()
@@ -164,7 +218,18 @@ class economy:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def rep(self, ctx, user : discord.Member):
         """Give user reputation"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         author = ctx.message.author
+        try:
+            if await self.usercheck('levels', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
         if user == author:
             await ctx.send("You can't give yourself rep <:nkoDed:422666465238319107>")
             return
@@ -173,29 +238,44 @@ class economy:
             return
         else:
             if await self.usercheck("levels", user) is False:
-                await ctx.send("That user doesn't have an account yet")
+                log.info("Creating account...")
+
+            db.execute(f"SELECT lastrep FROM levels WHERE userid = {author.id}")
+            lastrep = db.fetchone()[0]
+            timenow = datetime.datetime.utcfromtimestamp(time.time()).strftime("%d")
+            timecheck = datetime.datetime.utcfromtimestamp(int(lastrep)).strftime("%d")
+            if timecheck == timenow:
+                await ctx.send("You already used your rep today 😦")
                 return
             else:
-                db.execute(f"SELECT lastrep FROM levels WHERE userid = {author.id}")
-                lastrep = db.fetchone()[0]
-                timenow = datetime.datetime.utcfromtimestamp(time.time()).strftime("%d")
-                timecheck = datetime.datetime.utcfromtimestamp(int(lastrep)).strftime("%d")
-                if timecheck == timenow:
-                    await ctx.send("You already used your rep today 😦")
-                    return
+                db.execute(f"SELECT rep FROM levels WHERE userid = {user.id}")
+                current_rep = int(db.fetchone()[0])
+                patrons = [102165107244539904, 270133511325876224]
+                if user.id in patrons:
+                    newrep = 2
                 else:
-                    db.execute(f"SELECT rep FROM levels WHERE userid = {user.id}")
-                    current_rep = int(db.fetchone()[0])
-                    db.execute(f"UPDATE levels SET rep = {current_rep + 1} WHERE userid = {user.id}")
-                    connection.commit()
-                    db.execute(f"UPDATE levels SET lastrep = {int(time.time())} WHERE userid = {author.id}")
-                    connection.commit()
-                    await ctx.send(f"{ctx.message.author.name} gave {user.mention} rep! 🎉🎉🎉")
+                    newrep = 1
+                db.execute(f"UPDATE levels SET rep = {current_rep + newrep} WHERE userid = {user.id}")
+                connection.commit()
+                db.execute(f"UPDATE levels SET lastrep = {int(time.time())} WHERE userid = {author.id}")
+                connection.commit()
+                await ctx.send(f"{ctx.message.author.name} gave {user.mention} rep! 🎉🎉🎉")
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def setdesc(self, ctx, *, desc : str):
         """Set profile description"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        try:
+            if await self.usercheck('levels', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
         if await self.usercheck("levels", ctx.message.author) is False:
             await ctx.send("Error finding your profile.")
             return
@@ -223,7 +303,7 @@ class economy:
         elif "\%'" in desc:
             log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
             return
-        if len(desc) > 25:
+        if len(desc) > 500:
             await ctx.send("Over character limit.")
             return
         else:
@@ -234,6 +314,12 @@ class economy:
     @commands.command(aliases=['del'])
     @commands.is_owner()
     async def poof(self, ctx, id : int):
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         db.execute(f"DELETE FROM levels WHERE userid = {id}")
         connection.commit()
         ctx.send(f"Deleted {id}")
@@ -242,6 +328,12 @@ class economy:
     @commands.is_owner()
     async def sql(self, ctx, *, sql: str):
         """Inject SQL"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         try:
             db.execute(sql)
             connection.commit()
@@ -253,12 +345,23 @@ class economy:
     @commands.cooldown(1, 900, commands.BucketType.user)
     async def coinflip(self, ctx, amount : int):
         """Coinflip OwO"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         user = ctx.message.author
+        try:
+            if await self.usercheck('levels', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
         if amount <= 0:
             await ctx.send("Your amount is too low <:nkoDed:422666465238319107>")
             return
-        elif amount > 5000:
-            await ctx.send("You can't go past 5,000")
+        elif amount > 100000:
+            await ctx.send("You can't go past 100,000")
             return
         if await self.usercheck('economy', user) is False:
             await ctx.send("You don't have a bank account.")
@@ -295,12 +398,24 @@ class economy:
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def top(self, ctx):
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         # await self.bot.get_user_info(310039170792030211)
+        try:
+            if await self.usercheck('levels', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
         msg = await ctx.send(embed=discord.Embed(color=0xDEADBF, title="Top Users", description="Loading..."))
         starttime = int(time.time())
         msg
         db.execute("SELECT userid, level FROM levels ORDER BY level DESC LIMIT 10")
         all_users = db.fetchall()
+        all_bot_users = await self.bot.get_all_members()
         try:
             user1 = await self.bot.get_user_info(int(all_users[0][0]))
         except:
@@ -370,6 +485,17 @@ class economy:
     @commands.command()
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def ecotop(self, ctx):
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        try:
+            if await self.usercheck('levels', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
         # await self.bot.get_user_info(310039170792030211)
         msg = await ctx.send(embed=discord.Embed(color=0xDEADBF, title="Top Users | Economy", description="Loading..."))
         starttime = int(time.time())
@@ -446,6 +572,17 @@ class economy:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def transfer(self, ctx, amount : int, user : discord.Member):
         """Transfer Credits to Users"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        try:
+            if await self.usercheck('levels', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
         if amount < 10:
             await ctx.send("Minimum send price is $10")
             return
@@ -480,43 +617,421 @@ class economy:
                         await user.send(f"{ctx.message.author.name} has sent you ${amount}.")
                     except:
                         pass
-    #
-    # async def _handle_on_message(self, message):
-    #     user = message.author
-    #     if user.bot:
-    #         return
-    #     if await self.usercheck("levels", user) is False:
-    #         await self._create_user(user)
-    #         return
-    #     else:
-    #         await asyncio.sleep(1)
-    #         curr_time = time.time()
-    #         db.execute(f"SELECT lastxp FROM levels WHERE userid = {user.id}")
-    #         lastxp = db.fetchone()
-    #         if lastxp is None:
-    #             pass
-    #         elif float(curr_time) - float(lastxp[0]) >= 120:
-    #             await self._process_exp(user.id, random.randint(15, 20))
-    #             db.execute(f"UPDATE levels SET lastxp = {time.time()} WHERE userid = {user.id}")
-    #             connection.commit()
-    #
-    # async def _create_user(self, user):
-    #     try:
-    #         #userid, info, title, level, rep, lastxp,
-    #         db.execute(f"INSERT INTO levels VALUES ({user.id}, info, title, 0, 0, 0, 0)")
-    #         connection.commit()
-    #         log.info(f"Made account for {user.name} ({user.id})")
-    #     except AttributeError:
-    #         pass
-    #
-    # async def _process_exp(self, userinfo, exp : int):
-    #     await asyncio.sleep(random.randint(2, 6))
-    #     db.execute("SELECT level FROM levels WHERE userid = {}".format(userinfo))
-    #     levels = db.fetchone()[0]
-    #     db.execute(f"UPDATE levels SET level = {levels + exp} WHERE userid = {userinfo}")
-    #     connection.commit()
+
+    @commands.command(aliases=['bj'])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def blackjack(self, ctx, betting_amount: int):
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        try:
+            if await self.usercheck('levels', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
+        cards = {
+            "2C": "<:2C:424587135463456778>",
+            "2D": "<:2D:424587135383764993>",
+            "2H": "<:2H:424587135346147329>",
+            "2S": "<:2S:424587135341821954>",
+            "3C": "<:3C:424587163737522176>",
+            "3D": "<:3D:424587162437156874>",
+            "3H": "<:3H:424587162579763202>",
+            "3S": "<:3S:424587163745779712>",
+            "4C": "<:4C:424587171232743425>",
+            "4D": "<:4D:424587163737391104>",
+            "4H": "<:4H:424587169865138176>",
+            "4S": "<:4S:424587170028978186>",
+            "5C": "<:5C:424587178933223425>",
+            "5D": "<:5D:424587173111529482>",
+            "5H": "<:5H:424587174348980225>",
+            "5S": "<:5S:424587172994088970>",
+            "6C": "<:6C:424587180938231808>",
+            "6D": "<:6D:424587177717137419>",
+            "6H": "<:6H:424587178392158208>",
+            "6S": "<:6S:424587177360621586>",
+            "7C": "<:7C:424587184650059779>",
+            "7D": "<:7D:424587179134681090>",
+            "7H": "<:7H:424587179109515266>",
+            "7S": "<:7S:424587177565880331>",
+            "8C": "<:8C:424587186160271400>",
+            "8D": "<:8D:424587181970161667>",
+            "8H": "<:8H:424587182377009152>",
+            "8S": "<:8S:424587182330871808>",
+            "9C": "<:9C:424587184717168640>",
+            "9D": "<:9D:424587183035252757>",
+            "9H": "<:9H:424587181978419221>",
+            "9S": "<:9S:424587182146191362>",
+            "10C": "<:10C:424587186055151617>",
+            "10D": "<:10D:424587182234140672>",
+            "10H": "<:10H:424587182360100874>",
+            "10S": "<:10S:424587182070693889>",
+            "AC": "<:AC:424587167864717313>",
+            "AD": "<:AD:424587167965118465>",
+            "AH": "<:AH:424587168183222272>",
+            "AS": "<:AS:424587182297317376>",
+            "KC": "<:KC:424587233182351362>",
+            "KD": "<:KD:424587236651171840>",
+            "KH": "<:KH:424587237968314370>",
+            "KS": "<:KS:424587238068715541>",
+            "QC": "<:QC:424587235715973130>",
+            "QD": "<:QD:424587237943148555>",
+            "QH": "<:QH:424587080824389653>",
+            "QS": "<:QS:424587085538787348>",
+            "JC": "<:JC:424587235673767966>",
+            "JD": "<:JD:424587237590827018>",
+            "JH": "<:JH:424587239419281431>",
+            "JS": "<:JS:424587238308052992>",
+        }
+        lst = []
+        for card in cards:
+            lst.append(card)
+
+        author = ctx.message.author
+
+        if await self.usercheck('economy', author) is False:
+            await ctx.send("You don't have a bank account...")
+            return
+
+        db.execute(f"SELECT balance FROM economy WHERE userid = {author.id}")
+        author_balance = db.fetchone()
+        author_balance = int(author_balance[0])
+
+        if betting_amount <= 0:
+            await ctx.send("You can't bet that low...")
+            return
+        if (author_balance - betting_amount) < 0:
+            await ctx.send("You don't have that much to bet...")
+            return
+        if betting_amount > 50000:
+            await ctx.send("You can't bet past 50k")
+            return
+
+        # Take users moneylol
+        db.execute(f"UPDATE economy SET balance = {author_balance - betting_amount} WHERE userid = {author.id}")
+        connection.commit()
+
+        # Get New Author Balance
+        db.execute(f"SELECT balance FROM economy WHERE userid = {author.id}")
+        author_balance = db.fetchone()
+        author_balance = int(author_balance[0])
+
+        card_choice1 = cards[random.choice(lst)]
+        card_choice2 = cards[random.choice(lst)]
+
+        bot_choice1 = cards[random.choice(lst)]
+        bot_choice2 = cards[random.choice(lst)]
+
+        amount1 = card_choice1[2]
+        amount2 = card_choice2[2]
+        amount3 = bot_choice1[2]
+        amount4 = bot_choice2[2]
+
+        if amount1 is "Q" or amount1 is "K" or amount1 is "J":
+            amount1 = 10
+        if amount2 is "Q" or amount2 is "K" or amount2 is "J":
+            amount2 = 10
+        if amount3 is "Q" or amount3 is "K" or amount3 is "J":
+            amount3 = 10
+        if amount4 is "Q" or amount4 is "K" or amount4 is "J":
+            amount4 = 10
+
+        if amount1 is "A":
+            amount1 = 11
+        if amount2 is "A":
+            amount2 = 11
+        if amount3 is "A":
+            amount3 = 11
+        if amount4 is "A":
+            amount4 = 11
+
+        e = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` to hit or wait 7s to end")
+        e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2)}", value=f"{amount1}{card_choice1}| {amount2}{card_choice2}", inline=True)
+        e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ?", inline=True)
+
+        msg = await ctx.send(embed=e)
+        msg
+
+        def check(m):
+            return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
+
+        try:
+            await self.bot.wait_for('message', check=check, timeout=7.5)
+        except:
+            if (int(amount1) + int(amount2)) > (int(amount3) + int(amount4)):
+                winner = author.name
+                color = 0xDEADBF
+                db.execute(f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
+                connection.commit()
+            else:
+                winner = self.bot.user.name
+                color = 0xff5630
+            await msg.edit(embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
+            return
+
+        # 2nd screen #
+
+        card_choice3 = cards[random.choice(lst)]
+
+        bot_choice3 = cards[random.choice(lst)]
+
+        amount5 = card_choice3[2]
+        amount6 = bot_choice3[2]
+
+        if amount5 is "Q" or amount5 is "K" or amount5 is "J":
+            amount5 = 10
+        if amount6 is "Q" or amount6 is "K" or amount6 is "J":
+            amount6 = 10
+
+        if amount5 is "A":
+            amount5 = 11
+        if amount6 is "A":
+            amount6 = 11
+
+        if (int(amount1) + int(amount2) + int(amount5)) > 21:
+            e = discord.Embed(color=0xff5630, title="Blackjack", description=f"{author.name} went over 21 and {self.bot.user.name} won!")
+            e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
+                        value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}",
+                        inline=True)
+            e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
+                        value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount5}{bot_choice3}",
+                        inline=True)
+            await msg.edit(embed=e)
+            return
+        elif (int(amount3) + int(amount4) + int(amount6)) > 21:
+            db.execute(
+                f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
+            connection.commit()
+            e = discord.Embed(color=0xff5630, title="Blackjack",
+                              description=f"{self.bot.user.name} went over 21 and {author.name} won!")
+            e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
+                        value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}",
+                        inline=True)
+            e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
+                        value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount6}{bot_choice3}",
+                        inline=True)
+            await msg.edit(embed=e)
+            return
+
+        e = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` to hit or wait 7s to end")
+        e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
+                    value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}|{card_choice3}", inline=True)
+        e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ? | ?", inline=True)
+
+        msg = await ctx.send(embed=e)
+        msg
+
+        def check(m):
+            return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
+
+        try:
+            await self.bot.wait_for('message', check=check, timeout=7.5)
+        except:
+            if (int(amount1) + int(amount2) + int(amount5)) > (int(amount3) + int(amount4) + int(amount6)):
+                winner = author.name
+                color = 0xDEADBF
+                db.execute(
+                    f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
+                connection.commit()
+            else:
+                winner = self.bot.user.name
+                color = 0xff5630
+            await msg.edit(
+                embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
+            return
+
+        # 3rd screen #
+
+        card_choice4 = cards[random.choice(lst)]
+
+        bot_choice4 = cards[random.choice(lst)]
+
+        amount7 = card_choice3[2]
+        amount8 = bot_choice3[2]
+
+        if amount7 is "Q" or amount7 is "K" or amount7 is "J":
+            amount7 = 10
+        if amount8 is "Q" or amount8 is "K" or amount8 is "J":
+            amount8 = 10
+
+        if amount7 is "A":
+            amount7 = 11
+        if amount8 is "A":
+            amount8 = 11
+
+        if (int(amount1) + int(amount2) + int(amount5) + int(amount7)) > 21:
+            e = discord.Embed(color=0xff5630, title="Blackjack",
+                              description=f"{author.name} went over 21 and {self.bot.user.name} won!")
+            e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
+                        value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}",
+                        inline=True)
+            e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
+                        value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount5}{bot_choice3}",
+                        inline=True)
+            await msg.edit(embed=e)
+            return
+        elif (int(amount3) + int(amount4) + int(amount6) + int(amount8)) > 21:
+            db.execute(
+                f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
+            connection.commit()
+            e = discord.Embed(color=0xff5630, title="Blackjack",
+                              description=f"{self.bot.user.name} went over 21 and {author.name} won!")
+            e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
+                        value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}| {amount7}{card_choice4}",
+                        inline=True)
+            e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
+                        value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount6}{bot_choice3}| {amount8}{bot_choice4}",
+                        inline=True)
+            await msg.edit(embed=e)
+            return
+
+        e = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` to hit or wait 7s to end")
+        e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount7)}",
+                    value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}|{card_choice3}| {amount7}{card_choice4}", inline=True)
+        e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ? | ? | ?", inline=True)
+
+        msg = await ctx.send(embed=e)
+        msg
+
+        def check(m):
+            return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
+
+        try:
+            await self.bot.wait_for('message', check=check, timeout=7.5)
+        except:
+            if (int(amount1) + int(amount2) + int(amount5) + int(amount7)) > (int(amount3) + int(amount4) + int(amount6) + int(amount8)):
+                winner = author.name
+                color = 0xDEADBF
+                db.execute(
+                    f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
+                connection.commit()
+            else:
+                winner = self.bot.user.name
+                color = 0xff5630
+            await msg.edit(
+                embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
+            return
+
+        # 3rd screen #
+
+        card_choice5 = cards[random.choice(lst)]
+
+        bot_choice5 = cards[random.choice(lst)]
+
+        amount9 = card_choice3[2]
+        amount10 = bot_choice3[2]
+
+        if amount9 is "Q" or amount9 is "K" or amount9 is "J":
+            amount9 = 10
+        if amount10 is "Q" or amount10 is "K" or amount10 is "J":
+            amount10 = 10
+
+        if amount9 is "A":
+            amount9 = 11
+        if amount10 is "A":
+            amount10 = 11
+
+        if (int(amount1) + int(amount2) + int(amount5) + int(amount9) + int(amount7)) > 21:
+            e = discord.Embed(color=0xff5630, title="Blackjack",
+                              description=f"{author.name} went over 21 and {self.bot.user.name} won!")
+            e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount7)}",
+                        value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}| {amount7}{card_choice5}",
+                        inline=True)
+            e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)}",
+                        value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount5}{bot_choice3}| {amount10}{bot_choice3}",
+                        inline=True)
+            await msg.edit(embed=e)
+            return
+        elif (int(amount3) + int(amount4) + int(amount6) + int(amount10) + int(amount8)) > 21:
+            db.execute(
+                f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
+            connection.commit()
+            e = discord.Embed(color=0xff5630, title="Blackjack",
+                              description=f"{self.bot.user.name} went over 21 and {author.name} won!")
+            e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)}",
+                        value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}| {amount9}{card_choice5}| {amount7}|{card_choice4}",
+                        inline=True)
+            e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
+                        value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount6}{bot_choice3}| {amount10}{bot_choice5}| {amount8}{bot_choice4}",
+                        inline=True)
+            await msg.edit(embed=e)
+            return
+
+        e = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` to hit or wait 7s to end")
+        e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount9) + int(amount7)}",
+                    value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}|{card_choice3}| {amount7}{card_choice4}| {amount9}{card_choice5}", inline=True)
+        e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ? | ? | ? | ?", inline=True)
+
+        msg = await ctx.send(embed=e)
+        msg
+
+        def check(m):
+            return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
+
+        try:
+            await self.bot.wait_for('message', check=check, timeout=7.5)
+        except:
+            if (int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)) > (int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)):
+                winner = author.name
+                color = 0xDEADBF
+                db.execute(
+                    f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
+                connection.commit()
+            else:
+                winner = self.bot.user.name
+                color = 0xff5630
+            await msg.edit(
+                embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
+            return
+
+        if (int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)) > (
+                int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)):
+            winner = author.name
+            color = 0xDEADBF
+            db.execute(
+                f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
+            connection.commit()
+        else:
+            winner = self.bot.user.name
+            color = 0xff5630
+        await msg.edit(
+            embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
+
+    @commands.command()
+    @commands.is_owner()
+    async def messagexpcheck(self, ctx):
+        """Message XP Check"""
+        user = ctx.message.author
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f'http://37.59.36.62:8092/userxp?user={user.id}',
+                                        headers={'Authorization': f'{config.nekoapi}'}) as response:
+                    t = await response.text()
+                    await ctx.send(t)
+        except Exception as e:
+            await ctx.send(e)
+    
+    async def _handle_on_message(self, message):
+        user = message.author
+        if user.bot:
+            return
+        choice = random.randint(1, 20)
+        if choice == 1:
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(f'http://37.59.36.62:8092/userxp?user={user.id}',
+                                            headers={'Authorization': f'{config.nekoapi}'}) as response:
+                        t = await response.text()
+                        log.info(t)
+            except:
+                return
+        else:
+            return
 
 def setup(bot):
     n = economy(bot)
-    # bot.add_listener(n._handle_on_message, "on_message")
+    bot.add_listener(n._handle_on_message, "on_message")
     bot.add_cog(n)
