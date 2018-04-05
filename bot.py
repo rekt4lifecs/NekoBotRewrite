@@ -49,7 +49,7 @@ class NekoBot(commands.AutoShardedBot):
 
     def __init__(self):
         super().__init__(command_prefix=commands.when_mentioned_or('n!'),
-                         description=config.description,
+                         description="NekoBot",
                          pm_help=None,
                          help_attrs={'hidden': True})
         self.counter = Counter()
