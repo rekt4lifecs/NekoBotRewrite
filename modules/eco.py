@@ -1,9 +1,7 @@
 from discord.ext import commands
-import discord, aiohttp, pymysql, asyncio, time, datetime, config, random, math, logging, raven
+import discord, aiohttp, pymysql, asyncio, time, datetime, config, random, math, logging
 
 log = logging.getLogger("NekoBot")
-
-sentry = raven.Client(config.sentry)
 
 class economy:
     """Economy"""
