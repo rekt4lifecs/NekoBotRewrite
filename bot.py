@@ -72,7 +72,8 @@ class NekoBot(commands.AutoShardedBot):
         elif isinstance(exception, commands.CommandInvokeError):
             em = discord.Embed(color=0xDEADBF,
                                title="Error",
-                               description=f"Error in command {ctx.command.qualified_name}, [Support Server](https://discord.gg/q98qeYN)")
+                               description=f"Error in command {ctx.command.qualified_name}, "
+                                           f"[Support Server](https://discord.gg/q98qeYN)")
             try:
                 owner = self.owner_id
                 await owner.send(f"Error in `{ctx.command.qualified_name}`\n```\n{exception}\n```")
@@ -104,7 +105,7 @@ class NekoBot(commands.AutoShardedBot):
         await self.process_commands(message)
 
     async def on_command(self, command):
-        self.counter["commands"] += 1
+        self.counter[command.name] += 1
 
     async def close(self):
         await super().close()
@@ -130,7 +131,7 @@ class NekoBot(commands.AutoShardedBot):
         for extension in startup_extensions:
             try:
                 self.load_extension(extension)
-            except Exception as e:
+            except:
                 print("Failed to load {}.".format(extension), file=sys.stderr)
                 traceback.print_exc()
 

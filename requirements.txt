@@ -10,7 +10,6 @@ numpy
 pymysql
 dblpy
 aiomysql
-raven
 youtube_dl
 owo
 webhooks==3.4
