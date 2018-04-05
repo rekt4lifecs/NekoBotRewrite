@@ -41,25 +41,7 @@ class DiscordBotsOrgAPI:
                 await self.bot.change_presence(activity=game)
             except Exception as e:
                 print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
-            try:
-                async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key2}) as session:
-                    url = 'https://bots.discord.pw/api/bots/310039170792030211/stats'
-                    await session.post(url, data={"shard_id": self.bot.shard_id, "shard_count": self.bot.shard_count,
-                                                  "server_count": len(self.bot.guilds)})
-            except Exception as e:
-                print("Failed to post discord.bots.pw\n{}".format(e))
             await asyncio.sleep(1800)
-
-    # @commands.command()
-    # @commands.is_owner()
-    # async def updatedbl(self, ctx):
-    #     await ctx.send("Attempting to update...")
-    #     try:
-    #         await self.dblpy.post_server_count()
-    #         await ctx.send('posted server count ({})'.format(len(self.bot.guilds)))
-    #     except Exception as e:
-    #         await ctx.send("Failed,\n{}".format(e))
-
 
 def setup(bot):
     bot.add_cog(DiscordBotsOrgAPI(bot))
