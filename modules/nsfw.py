@@ -3,13 +3,6 @@ import discord, random, aiohttp, config, requests, json, os, pymysql
 from bs4 import BeautifulSoup as bs
 from collections import Counter
 
-import matplotlib.pyplot as plt;
-
-plt.rcdefaults()
-import numpy as np
-import matplotlib.pyplot as plt
-
-
 class NSFW:
     """NSFW Commands OwO"""
 
