@@ -51,8 +51,7 @@ class NekoBot(commands.AutoShardedBot):
         super().__init__(command_prefix=commands.when_mentioned_or('n!'),
                          description=config.description,
                          pm_help=None,
-                         help_attrs=dict(hidden=True))
-        self.bot = NekoBot
+                         help_attrs={'hidden': True})
         self.counter = Counter()
 
     async def send_cmd_help(self, ctx):
