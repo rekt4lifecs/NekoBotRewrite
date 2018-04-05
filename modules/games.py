@@ -58,7 +58,7 @@ class Games:
             await ctx.send(f"Getting results for \"{username}\"")
             try:
                 async with aiohttp.ClientSession() as cs:
-                    async with cs.get(f"http://osu.ppy.sh/api/get_user?k={config.osu.key}&u={username}") as r:
+                    async with cs.get(f"http://osu.ppy.sh/api/get_user?k={config.osu_key}&u={username}") as r:
                         osu = await r.json()
                         if osu == []:
                             await ctx.send("Incorrect Username.")
