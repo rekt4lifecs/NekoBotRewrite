@@ -15,39 +15,8 @@ class NSFW:
 
     def __init__(self, bot):
         self.bot = bot
-        self.fourk = config.fourkdata
         self.pgifdata = config.pgifdata
         self.counter = Counter()
-
-    # @commands.command()
-    # @commands.cooldown(1, 5, commands.BucketType.user)
-    # async def pgif(self, ctx):
-    #     """Posts a Random PrOn GIF"""
-    #     url = "https://discordbots.org/api/bots/310039170792030211/votes"
-    #     async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key}) as cs:
-    #         async with cs.get(url) as r:
-    #             res = await r.json()
-    #     for x in res:
-    #         if str(x['id']) == str(ctx.message.author.id):
-    #             if not ctx.message.channel.is_nsfw():
-    #                 await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-    #                 return
-    #             self.counter['pgif'] += 1
-    #             data = config.imgur._get_imgur(self, "NSFW_GIF", page=random.randint(1, 3))['data']
-    #             x = random.choice(data)
-    #             em = discord.Embed(color=0xDEADBF)
-    #             em.set_image(url=x['link'])
-    #
-    #             await ctx.send(embed=em)
-    #             break
-    #     else:
-    #         embed = discord.Embed(color=0xDEADBF,
-    #                               title="WOAH",
-    #                               description="Have you voted yet <:smirkGuns:417969421252952085>\n"
-    #                                           "https://discordbots.org/bot/310039170792030211/vote")
-    #         if not ctx.message.channel.is_nsfw():
-    #             embed.set_footer(text="Use in a NSFW Channel BTW...")
-    #         await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
@@ -165,20 +134,6 @@ class NSFW:
                 embed.set_footer(text="Use in a NSFW Channel BTW...")
             await ctx.send(embed=embed)
 
-    # @commands.command()
-    # @commands.guild_only()
-    # async def pgif(self, ctx):
-    #     """Posts a Random PrOn GIF"""
-    #     if not ctx.message.channel.is_nsfw():
-    #         await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-    #         return
-    #     self.counter["pgif"] += 1
-    #     data = random.choice(self.pgifdata)
-    #     embed = discord.Embed(color=0xDEADBF)
-    #     url = "http://37.59.36.62/pgif/" + data
-    #     embed.set_image(url=url)
-    #     await ctx.send(embed=embed)
-
     @commands.command(name="4k")
     @commands.guild_only()
     async def _fourk(self, ctx):
@@ -187,7 +142,11 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         self.counter["4k"] += 1
-        data = random.choice(self.fourk)
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("http://37.59.36.62:10000/4kdata") as r:
+                res = await r.json()
+                fourkdata = res['msg']
+        data = random.choice(fourkdata)
         embed = discord.Embed(color=0xDEADBF)
         url = "http://37.59.36.62/4k/" + data
         embed.set_image(url=url)
@@ -338,28 +297,6 @@ class NSFW:
 
         await ctx.send(embed=em)
 
-    # @commands.command()
-    # @commands.guild_only()
-    # async def ass(self, ctx):
-    #     """Get Random Ass OwO"""
-    #     if not ctx.message.channel.is_nsfw():
-    #         await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-    #         return
-    #     try:
-    #         self.counter["ass"] += 1
-    #         rdm = random.randint(0, 5538)
-    #         search = ("http://api.obutts.ru/butts/{}".format(rdm))
-    #         async with aiohttp.ClientSession() as cs:
-    #             async with cs.get(search) as r:
-    #                 res = await r.json()
-    #                 butt = random.choice(res)
-    #                 butt = "http://media.obutts.ru/{}".format(butt["preview"])
-    #                 em = discord.Embed(color=0xDEADBF)
-    #                 em.set_image(url=butt)
-    #                 await ctx.send(embed=em)
-    #     except Exception as e:
-    #         await ctx.send("**`{}`**".format(e))
-
     @commands.command(aliases=["cum"])
     @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -409,37 +346,6 @@ class NSFW:
         em.set_image(url=x['link'])
 
         await ctx.send(embed=em)
-    #
-    # @commands.command()
-    # @commands.cooldown(1, 5, commands.BucketType.user)
-    # async def gonewild(self, ctx):
-    #     """r/GoneWild"""
-    #     url = "https://discordbots.org/api/bots/310039170792030211/votes"
-    #     async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key}) as cs:
-    #         async with cs.get(url) as r:
-    #             res = await r.json()
-    #     for x in res:
-    #         if str(x['id']) == str(ctx.message.author.id):
-    #             if not ctx.message.channel.is_nsfw():
-    #                 await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-    #                 return
-    #             self.counter['gonewild'] += 1
-    #             data = config.imgur._get_imgur(self, "gonewild", page=random.randint(1, 5))['data']
-    #             x = random.choice(data)
-    #             em = discord.Embed(title=f"**{x['title']}**",
-    #                                color=0xDEADBF)
-    #             em.set_image(url=x['link'])
-    #
-    #             await ctx.send(embed=em)
-    #             break
-    #     else:
-    #         embed = discord.Embed(color=0xDEADBF,
-    #                               title="WOAH",
-    #                               description="Have you voted yet <:smirkGuns:417969421252952085>\n"
-    #                                           "https://discordbots.org/bot/310039170792030211/vote")
-    #         if not ctx.message.channel.is_nsfw():
-    #             embed.set_footer(text="Use in a NSFW Channel BTW...")
-    #         await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
@@ -451,51 +357,6 @@ class NSFW:
         else:
             url = "http://nhentai.net/random/"
             await ctx.send(embed=discord.Embed(color=0xDEADBF, description=f"{url}"))
-
-    # @commands.command()
-    # @commands.cooldown(200, 20, commands.BucketType.user)
-    # async def hentai(self, ctx):
-    #     url = "https://discordbots.org/api/bots/310039170792030211/votes"
-    #     async with aiohttp.ClientSession(headers={"Authorization": config.dbots.key}) as cs:
-    #         async with cs.get(url) as r:
-    #             res = await r.json()
-    #     for x in res:
-    #         if str(x['id']) == str(ctx.message.author.id):
-    #             if not ctx.message.channel.is_nsfw():
-    #                 await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-    #                 return
-    #             self.counter['hentai'] += 1
-    #             x = random.choice(['bj', 'cum', 'Random_hentai_gif', 'boobs', 'pussy', 'anal'])
-    #             async with aiohttp.ClientSession() as cs:
-    #                 async with cs.get(f'https://nekos.life/api/v2/img/{x}') as r:
-    #                     res = await r.json()
-    #                     em = discord.Embed(color=0xDEADBF)
-    #                     em.set_image(url=res['url'])
-    #                     await ctx.send(embed=em)
-    #             break
-    #     else:
-    #         embed = discord.Embed(color=0xDEADBF,
-    #                               title="WOAH",
-    #                               description="Have you voted yet <:smirkGuns:417969421252952085>\n"
-    #                                           "https://discordbots.org/bot/310039170792030211/vote\n"
-    #                                           "Once you vote you can use this unlimited times without cooldown OwO")
-    #         if not ctx.message.channel.is_nsfw():
-    #             embed.set_footer(text="Use in a NSFW Channel BTW...")
-    #         await ctx.send(embed=embed)
-
-    # @commands.command()
-    # async def hentai(self, ctx):
-    #     if not ctx.message.channel.is_nsfw():
-    #         await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-    #         return
-    #     self.counter['hentai'] += 1
-    #     x = random.choice(['bj', 'cum', 'Random_hentai_gif', 'boobs', 'pussy', 'anal'])
-    #     async with aiohttp.ClientSession() as cs:
-    #         async with cs.get(f'https://nekos.life/api/v2/img/{x}') as r:
-    #             res = await r.json()
-    #             em = discord.Embed(color=0xDEADBF)
-    #             em.set_image(url=res['url'])
-    #             await ctx.send(embed=em)
 
     @commands.command()
     @commands.guild_only()
