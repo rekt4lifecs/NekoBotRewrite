@@ -163,8 +163,8 @@ class General:
                                          f"Bans with bot: **{bans}**")
         info.add_field(name="Messages Read", value=f"Since Restart: **{millify(self.bot.counter['messages_read'])}**,")
                                                    #f"\nTotal: **{millify(messages_read)}** (**{messages_read}**)")
-        info.add_field(name="Processed Commands", value=f"Since Restart: **{millify(self.bot.counter['commands'])}**,")
-                                                        #f"\nTotal: **{millify(commands_done)}** (**{commands_done}**)")
+        # info.add_field(name="Processed Commands", value=f"Since Restart: **{millify(self.bot.counter['commands'])}**,")
+        #                                                 #f"\nTotal: **{millify(commands_done)}** (**{commands_done}**)")
         try:
             info.add_field(name="System:", value=f"CPU %: **{psutil.cpu_percent()}%**\n"
                                              f"Virtual Memory: **{size(psutil.virtual_memory().available)}**\n"

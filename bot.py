@@ -106,9 +106,6 @@ class NekoBot(commands.AutoShardedBot):
             return
         await self.process_commands(message)
 
-    async def on_command(self, command):
-        self.counter[command.name] += 1
-
     async def close(self):
         await super().close()
         await self.close()
