@@ -128,36 +128,6 @@ class General:
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
 
-    @commands.command(name='upload')
-    async def owner_upload(self, ctx):
-        """File Uploader"""
-        author = ctx.message.author
-
-        if author.id not in [270133511325876224, 102165107244539904, 205379510139486208, 178189410871803904]:
-            return
-
-        await ctx.send("**Send an image/file to upload.**")
-
-        def check(m):
-            return m.author == author and m.channel == ctx.message.channel
-
-        msg = await self.bot.wait_for('message', check=check)
-
-        try:
-            randomnum = self.id_generator()
-            url = msg.attachments[0].url
-            attachment = str(url).rpartition('.')[2]
-            if attachment in ['exe']:
-                return await ctx.send("**File type is forbiddon.**")
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    t = await response.read()
-                    with open(f"/home/www/{randomnum}.{attachment}", "wb") as f:
-                        f.write(t)
-            await ctx.send(f"https://nekobot.xyz/{randomnum}.{attachment}")
-        except Exception as e:
-            return await ctx.send(f"**Error uploading file**")
-
     @commands.command(aliases=['version'])
     async def info(self, ctx):
         servers = len(self.bot.guilds)
