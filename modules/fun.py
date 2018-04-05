@@ -283,34 +283,6 @@ class Fun:
                     .set_thumbnail(url="https://vignette.wikia.nocookie.net/2b2t8261/images/e/ed/LUL.png")
                 await ctx.send(embed=e)
 
-    # @commands.command(pass_context=True)
-    # async def ship(self, ctx, user : discord.Member, user2 : discord.Member):
-    #     """Ship someone UwU"""
-    #     user2url = user2.avatar_url
-    #     user1url = user.avatar_url
-    #     #Yes ik I use requests when this is async gitgud ;-;
-    #     r1 = requests.get(user1url)
-    #     r2 = requests.get(user2url)
-    #     img = Image.open("data/ship/ship.jpg")
-    #     user1img = Image.open(BytesIO(r1.content))
-    #     user2img = Image.open(BytesIO(r2.content))
-    #
-    #     user1img = user1img.resize((int(250), int(250)))
-    #     user2img = user2img.resize((int(225), int(225)))
-    #     img.paste(user1img, (280, 210))
-    #     img.paste(user2img, (620, 130))
-    #
-    #     self_length = len(user.name)
-    #     first_length = round(self_length / 2)
-    #     first_half = user.name[0:first_length]
-    #     usr_length = len(user2.name)
-    #     second_length = round(usr_length / 2)
-    #     second_half = user2.name[second_length:]
-    #     finalName = first_half + second_half
-    #
-    #     img.save(f"data/ship/ship-{user.id}.png")
-    #     await ctx.send(file=discord.File(f'data/ship/ship-{user.id}.png'), content="{}".format(finalName))
-
     @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def ship(self, ctx, user1: discord.Member, user2: discord.Member = None):
@@ -390,8 +362,10 @@ class Fun:
     @commands.cooldown(1, 45, commands.BucketType.user)
     async def shitpost(self, ctx):
         """Shitpost ofc"""
-        shitpost = config.shitpost
-        await ctx.send(embed=discord.Embed(description=random.choice(shitpost),
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("http://37.59.36.62:10000/shitpost") as r:
+                res = await r.json()
+        await ctx.send(embed=discord.Embed(description=random.choice(res['msg']),
                                            color=0xDEADBF))
 
     @commands.command()
