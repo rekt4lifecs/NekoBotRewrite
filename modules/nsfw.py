@@ -8,7 +8,6 @@ class NSFW:
 
     def __init__(self, bot):
         self.bot = bot
-        self.pgifdata = config.pgifdata
         self.counter = Counter()
 
     @commands.command()
