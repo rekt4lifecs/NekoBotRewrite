@@ -15,7 +15,7 @@ class DiscordBotsOrgAPI:
 
     def __init__(self, bot):
         self.bot = bot
-        self.token = config.dbots.key
+        self.token = config.dbots_key
         self.dblpy = dbl.Client(self.bot, self.token)
 
     @commands.command()
