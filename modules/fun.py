@@ -458,7 +458,7 @@ class Fun:
             return
 
         url = ("http://api.giphy.com/v1/gifs/search?&api_key={}&q={}&rating=g"
-               "".format(config.giphy.key, keywords))
+               "".format(config.giphy_key, keywords))
 
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
