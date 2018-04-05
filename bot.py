@@ -30,7 +30,9 @@ log.addHandler(handler)
 
 startup_extensions = {
     'modules.cardgame',
+    'modules.donator',
     'modules.chatbot',
+    'modules.devtools',
     'modules.crypto',
     'modules.discordbots',
     'modules.eco',
