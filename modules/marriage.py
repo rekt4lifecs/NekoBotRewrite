@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, asyncio, pymysql, random
+import discord, asyncio, pymysql
 
 class Marriage:
 

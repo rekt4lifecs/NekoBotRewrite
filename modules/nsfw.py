@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, random, aiohttp, config, requests, json, os, pymysql
+import discord, random, aiohttp, config, requests, pymysql
 from bs4 import BeautifulSoup as bs
 from collections import Counter
 

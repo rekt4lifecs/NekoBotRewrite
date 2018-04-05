@@ -1,8 +1,7 @@
 from discord.ext import commands
-import discord, aiohttp, requests, random, config, datetime, asyncio, youtube_dl, base64, hashlib, textwrap, uuid
+import discord, aiohttp, random, config, datetime, asyncio, youtube_dl, base64, hashlib, textwrap, uuid
 from io import BytesIO
-from PIL import Image, ImageFont, ImageDraw, ImageEnhance, ImageOps, ImageFilter
-from bs4 import BeautifulSoup as bs
+from PIL import Image, ImageFont, ImageDraw
 
 youtube_dl.utils.bug_reports_message = lambda: ''
 
@@ -325,12 +324,15 @@ class Fun:
         elif ranxd == 2:
             user2url = user2.avatar_url
             user1url = user1.avatar_url
-            # Yes ik I use requests when this is async gitgud ;-;
-            r1 = requests.get(user1url)
-            r2 = requests.get(user2url)
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(user1url) as r:
+                    resx = await r.read()
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(user2url) as r:
+                    resz = await r.read()
             img = Image.open("data/ship/ship.jpg")
-            user1img = Image.open(BytesIO(r1.content))
-            user2img = Image.open(BytesIO(r2.content))
+            user1img = Image.open(BytesIO(resx))
+            user2img = Image.open(BytesIO(resz))
 
             user1img = user1img.resize((int(250), int(250)))
             user2img = user2img.resize((int(225), int(225)))
@@ -423,8 +425,10 @@ class Fun:
             user = ctx.message.author
         try:
             url = user.avatar_url
-            response = requests.get(url)
-            img = Image.open(BytesIO(response.content)).convert('RGB')
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(url) as r:
+                    res = await r.read()
+            img = Image.open(BytesIO(res)).convert('RGB')
         except:
             await ctx.send('Error getting image!')
             return
@@ -544,8 +548,10 @@ class Fun:
         bg = Image.new('RGBA', (360, 722), (0, 0, 0, 0))
         img = Image.open("data/iphonex.png").convert('RGBA')
         try:
-            url = requests.get(url)
-            url = Image.open(BytesIO(url.content)).convert('RGBA').resize((315, 682))
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(url) as r:
+                    res = await r.read()
+            url = Image.open(BytesIO(res)).convert('RGBA').resize((315, 682))
         except:
             return await ctx.send("**There was an error receiving that image url.**")
         bg.alpha_composite(url, (20, 20))

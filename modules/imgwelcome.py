@@ -1,8 +1,8 @@
 from discord.ext import commands
-import discord, pymysql, config, requests, shutil, random
+import discord, pymysql, config, requests
 from io import BytesIO
 from .utils import checks
-from PIL import Image, ImageFont, ImageOps, ImageDraw
+from PIL import Image, ImageFont, ImageDraw
 
 connection = pymysql.connect(user='root',
                              password=config.dbpass,

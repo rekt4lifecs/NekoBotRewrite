@@ -1,13 +1,13 @@
 from discord.ext import commands
 import discord
-import sys, psutil, datetime, aiohttp, random, requests, config, asyncio, aiomysql, math
+import psutil, datetime, aiohttp, random, config, asyncio, aiomysql, math
 from collections import Counter
 from hurry.filesize import size
 from .utils.chat_formatting import pagify
 from PIL import __version__ as pilv
 from bs4 import __version__ as bsv
 from urllib.parse import quote_plus
-import uuid, string
+import string
 
 def millify(n):
     millnames = ['', 'k', 'M', ' Billion', ' Trillion']

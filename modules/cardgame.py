@@ -10,6 +10,12 @@ class CardGame:
 
     async def usercheck(self, datab : str, user : discord.Member):
         user = user.id
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
         if not db.execute(f'SELECT 1 FROM {datab} WHERE userid = {user}'):
             return False
         else:
@@ -17,6 +23,12 @@ class CardGame:
 
     async def _create_user(self, user_id: int, datab: str = "roleplay"):
         try:
+            connection = pymysql.connect(host="localhost",
+                                         user="root",
+                                         password="rektdiscord",
+                                         db="nekobot",
+                                         port=3306)
+            db = connection.cursor()
             # userid, cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 lastdaily, key
             db.execute(f"INSERT INTO {datab} VALUES ({user_id}, 0, 0, 0, 0, 0, 0, 0)")
             connection.commit()
