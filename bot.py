@@ -2,12 +2,8 @@ from discord.ext import commands
 import logging, traceback, sys, discord
 from datetime import date
 from collections import Counter
-import raven
 
 import config
-
-sentry = raven.Client(config.sentry)
-
 log = logging.getLogger('NekoBot')
 log.setLevel(logging.DEBUG)
 date = f"{date.today().timetuple()[0]}_{date.today().timetuple()[1]}_{date.today().timetuple()[2]}"
@@ -73,9 +69,8 @@ class NekoBot(commands.AutoShardedBot):
             em = discord.Embed(color=0xDEADBF,
                                title="Error",
                                description=f"Error in command {ctx.command.qualified_name}, [Support Server](https://discord.gg/q98qeYN)")
-            sentry.captureMessage(f'Error in command {ctx.command.qualified_name}, {exception.original}')
             try:
-                owner = self.bot.get_user(270133511325876224)
+                owner = self.owner_id
                 await owner.send(f"Error in `{ctx.command.qualified_name}`\n```\n{exception}\n```")
             except:
                 pass
@@ -97,7 +92,6 @@ class NekoBot(commands.AutoShardedBot):
             await ctx.send(f"Im missing permissions ;-;\nPermissions I need:\n{exception.missing_perms}")
         else:
             log.exception(type(exception).__name__, exc_info=exception)
-            sentry.captureMessage(exception)
 
     async def on_message(self, message):
         self.counter["messages_read"] += 1
@@ -135,7 +129,6 @@ class NekoBot(commands.AutoShardedBot):
             except Exception as e:
                 print("Failed to load {}.".format(extension), file=sys.stderr)
                 traceback.print_exc()
-                sentry.captureException()
 
     def run(self):
         super().run(config.token)
