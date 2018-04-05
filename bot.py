@@ -109,7 +109,7 @@ class NekoBot(commands.AutoShardedBot):
 
     async def close(self):
         await super().close()
-        await self.session.close()
+        await self.close()
 
     async def on_shard_ready(self, shard_id):
         print(f"Shard {shard_id} Connected...")
