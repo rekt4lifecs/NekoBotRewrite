@@ -5,24 +5,28 @@ from collections import Counter
 
 import config
 log = logging.getLogger('NekoBot')
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 date = f"{date.today().timetuple()[0]}_{date.today().timetuple()[1]}_{date.today().timetuple()[2]}"
 handler = logging.FileHandler(filename=f'NekoBot_{date}.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 log.addHandler(handler)
 
+# ------Default------
+# 'modules.cardgame',
+# 'modules.donator',
+# 'modules.chatbot',
 # 'modules.devtools',
-# 'modules.mod',
+# 'modules.crypto',
 # 'modules.discordbots',
+# 'modules.eco',
 # 'modules.fun',
 # 'modules.games',
 # 'modules.general',
 # 'modules.imgwelcome',
-# 'modules.nsfw',
-# 'modules.reactions',
-# 'modules.eco',
 # 'modules.marriage',
-# 'modules.crypto'
+# 'modules.mod',
+# 'modules.nsfw',
+# 'modules.reactions'
 
 startup_extensions = {
     'modules.cardgame',
@@ -106,8 +110,8 @@ class NekoBot(commands.AutoShardedBot):
         await super().close()
         await self.session.close()
 
-    async def on_connect(self):
-        print("Shard Connected...")
+    async def on_shard_ready(self, shard_id):
+        print(f"Shard {shard_id} Connected...")
 
     async def on_ready(self):
         print("             _         _           _   \n"
