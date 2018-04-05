@@ -12,4 +12,4 @@ dblpy
 aiomysql
 youtube_dl
 owo
-webhooks==3.4
+websockets==3.4
