@@ -2,7 +2,6 @@ from discord.ext import commands
 import asyncio, config, dbl, discord, random, aiohttp
 
 messages = ["OwO Whats this", "MonkaS", "OwO", "Haiiiii", ".help", "🤔🤔🤔", "HMMM🤔", "USE n! WEW", "n!HELP REE"]
-stats2 = [f"Servers: {len(self.bot.guilds)}", f"Users: {len(set(self.bot.get_all_members()))}", "OwO whats n!help", "🤔🤔🤔"]
 
 class DiscordBotsOrgAPI:
     """Handles interactions with the discordbots.org API"""
@@ -15,6 +14,8 @@ class DiscordBotsOrgAPI:
     @commands.command()
     @commands.is_owner()
     async def startdbl(self, ctx):
+        stats2 = [f"Servers: {len(self.bot.guilds)}", f"Users: {len(set(self.bot.get_all_members()))}",
+                  "OwO whats n!help", "🤔🤔🤔"]
         await ctx.send("Starting DBL...")
         while True:
             print("Attempting to update server count.")

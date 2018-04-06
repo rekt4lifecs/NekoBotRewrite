@@ -694,6 +694,8 @@ class Moderation:
         await channel.send(embed=embed)
 
     async def on_guild_join(self, guild):
+        if not guild.large:
+            return
         channel = self.bot.get_channel(431887286246834178)
         owner = self.bot.get_user(guild.owner_id)
         embed = discord.Embed(color=0xDEADBF, title="Guild Join",
@@ -713,6 +715,8 @@ class Moderation:
         await channel.send(embed=embed)
 
     async def on_guild_remove(self, guild):
+        if not guild.large:
+            return
         channel = self.bot.get_channel(431887286246834178)
         owner = self.bot.get_user(guild.owner_id)
         embed = discord.Embed(color=0xDEADBF, title="Guild Leave",
