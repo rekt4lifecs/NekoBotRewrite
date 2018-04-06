@@ -12,7 +12,11 @@ class Audio:
         self.bot = bot
 
         if not hasattr(bot, 'lavalink'):
-            lavalink.Client(bot=bot, password=config.lavalink['password'], loop=self.bot.loop, log_level=logging.INFO)
+            lavalink.Client(bot=bot,
+                            host="uplinkd.cf",
+                            ws_port=8080,
+                            password=config.lavalink['password'],
+                            loop=self.bot.loop, log_level=logging.INFO)
             self.bot.lavalink.register_hook(self.track_hook)
 
     async def track_hook(self, event):
