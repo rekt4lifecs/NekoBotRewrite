@@ -11,13 +11,6 @@ class NSFW:
         self.bot = bot
         self.counter = Counter()
 
-    async def _get_imgur(self, subreddit : str, type : str = "hot", page : int = 1):
-        headers = {"Authorization": f"Client-ID {config.imgur}"}
-        url = f'https://api.imgur.com/3/gallery/r/{subreddit}/{type}/{page}'
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url, headers=headers) as r:
-                return await r.json()
-
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(200, 20, commands.BucketType.user)
@@ -256,7 +249,12 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         self.counter['girl'] += 1
-        data = await self._get_imgur("bodyperfection", page=random.randint(1, 5))['data']
+        headers = {"Authorization": f"Client-ID {config.imgur}"}
+        url = f'https://api.imgur.com/3/gallery/r/bodyperfection/hot/{random.randint(1, 5)}'
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url, headers=headers) as r:
+                res =  await r.json()
+        data = res['data']
         x = random.choice(data)
         em = discord.Embed(title=f"**{x['title']}**",
                            color=0xDEADBF)
@@ -273,8 +271,12 @@ class NSFW:
             return
         self.counter['bigboobs'] += 1
         sub = random.choice(["bigboobs", "BigBoobsGW"])
-        data = await self._get_imgur(sub, page=random.randint(1, 5))['data']
-        x = random.choice(data)
+        headers = {"Authorization": f"Client-ID {config.imgur}"}
+        url = f'https://api.imgur.com/3/gallery/r/{sub}/hot/{random.randint(1, 5)}'
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url, headers=headers) as r:
+                res = await r.json()
+        x = random.choice(res['data'])
         em = discord.Embed(title=f"**{x['title']}**",
                            color=0xDEADBF)
         em.set_image(url=x['link'])
@@ -289,8 +291,12 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         self.counter['ass'] += 1
-        data = await self._get_imgur("asstastic", page=random.randint(1, 6))['data']
-        x = random.choice(data)
+        headers = {"Authorization": f"Client-ID {config.imgur}"}
+        url = f'https://api.imgur.com/3/gallery/r/asstastic/hot/{random.randint(1, 5)}'
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url, headers=headers) as r:
+                res = await r.json()
+        x = random.choice(res['data'])
         em = discord.Embed(title=f"**{x['title']}**",
                            color=0xDEADBF)
         em.set_image(url=x['link'])
@@ -306,8 +312,12 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         self.counter['cum'] += 1
-        data = await self._get_imgur("cumsluts")['data']
-        x = random.choice(data)
+        headers = {"Authorization": f"Client-ID {config.imgur}"}
+        url = f'https://api.imgur.com/3/gallery/r/cumsluts/hot/{random.randint(1, 5)}'
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url, headers=headers) as r:
+                res = await r.json()
+        x = random.choice(res['data'])
         embed = discord.Embed(color=0xDEADBF,
                               title=f"**{x['title']}**")
         embed.set_image(url=x['link'])
@@ -324,8 +334,12 @@ class NSFW:
             return
         sub = random.choice(["thighhighs", "stockings"])
         self.counter['thighs'] += 1
-        data = await self._get_imgur(sub, page=random.randint(1, 5))['data']
-        x = random.choice(data)
+        headers = {"Authorization": f"Client-ID {config.imgur}"}
+        url = f'https://api.imgur.com/3/gallery/r/{sub}/hot/{random.randint(1, 5)}'
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url, headers=headers) as r:
+                res = await r.json()
+        x = random.choice(res['data'])
         em = discord.Embed(title=f"**{x['title']}**",
                            color=0xDEADBF)
         em.set_image(url=x['link'])
@@ -340,8 +354,12 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         self.counter['gonewild'] += 1
-        data = await self._get_imgur("gonewild", page=random.randint(1, 5))['data']
-        x = random.choice(data)
+        headers = {"Authorization": f"Client-ID {config.imgur}"}
+        url = f'https://api.imgur.com/3/gallery/r/gonewild/hot/{random.randint(1, 5)}'
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url, headers=headers) as r:
+                res = await r.json()
+        x = random.choice(res['data'])
         em = discord.Embed(title=f"**{x['title']}**", color=0xDEADBF)
         em.set_image(url=x['link'])
 
