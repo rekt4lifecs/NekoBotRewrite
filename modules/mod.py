@@ -351,7 +351,7 @@ class Moderation:
             result = await run_cmd(command)
             if len(result) >= 1500:
                 pa = await hastebin(result)
-                await ctx.send(f'`{command}`: Too long for Discord! {pa}')
+                await ctx.send(f'`{command}`: {pa}')
             else:
                 await ctx.send(f"`{command}`: ```{result}```\n")
 

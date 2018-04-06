@@ -191,21 +191,6 @@ class Audio:
         await ctx.send('🔁 | Repeat ' + ('enabled' if player.repeat else 'disabled'))
 
     @commands.command()
-    async def remove(self, ctx, index: int):
-        player = self.bot.lavalink.players.get(ctx.guild.id)
-
-        if not player.queue:
-            return await ctx.send('Nothing queued.')
-
-        if index > len(player.queue) or index < 1:
-            return await ctx.send('Index has to be >=1 and <=queue size')
-
-        index = index - 1
-        removed = player.queue.pop(index)
-
-        await ctx.send('Removed **' + removed.title + '** from the queue.')
-
-    @commands.command()
     async def find(self, ctx, *, query):
         if not query.startswith('ytsearch:') and not query.startswith('scsearch:'):
             query = 'ytsearch:' + query
