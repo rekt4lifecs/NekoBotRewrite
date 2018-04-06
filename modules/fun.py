@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord, aiohttp, random, config, datetime, asyncio, base64, hashlib, textwrap, uuid
 from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw
+import os, time
 
 key = config.weeb
 auth = {"Authorization": "Wolke " + key}
@@ -174,6 +175,7 @@ class Fun:
         await ctx.trigger_typing()
         ranxd = random.randint(1, 2)
         if ranxd == 1:
+
             async with aiohttp.ClientSession() as session:
                 async with session.post('https://api.weeb.sh/auto-image/love-ship',
                                         headers={'Authorization': f'Wolke {config.weeb}'},
@@ -182,10 +184,7 @@ class Fun:
                     numx = random.randint(1, 5)
                     with open(f"ship{numx}.png", "wb") as f:
                         f.write(t)
-                    rnd = random.randint(1, 20)
-                    l1 = (len(user1.name))
-                    l2 = (len(user2.name))
-                    score = 100 - (l1 * l2) - rnd
+                    score = random.randint(0, 100)
                     filled_progbar = round(score / 100 * 10)
                     counter_ = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
 
@@ -227,10 +226,7 @@ class Fun:
             finalName = first_half + second_half
 
             img.save(f"data/ship/ship-{user1.id}.png")
-            rnd = random.randint(1, 20)
-            l1 = (len(user1.name))
-            l2 = (len(user2.name))
-            score = 100 - (l1 * l2) - rnd
+            score = random.randint(0, 100)
             filled_progbar = round(score / 100 * 10)
             counter_ = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
             e = discord.Embed(color=0xDEADBF, title=f'{user1.name} ❤ {user2.name}', description=f"**Love %**\n"
@@ -300,21 +296,25 @@ class Fun:
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def jpeg(self, ctx, user : discord.Member = None):
         """OwO Whats This"""
+        starttime = int(time.time())
         if user is None:
             user = ctx.message.author
-        try:
-            url = user.avatar_url
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    res = await r.read()
-            img = Image.open(BytesIO(res)).convert('RGB')
-        except:
-            await ctx.send('Error getting image!')
-            return
-        final = BytesIO()
-        img.save('data/JPEG.jpg', quality=1)
-        final.seek(0)
-        await ctx.send(file=discord.File(fp='data/JPEG.jpg'))
+        if not os.path.isfile(f"data/jpeg/{user.id}.jpg"):
+            try:
+                url = user.avatar_url
+                async with aiohttp.ClientSession() as cs:
+                    async with cs.get(url) as r:
+                        res = await r.read()
+                img = Image.open(BytesIO(res)).convert('RGB')
+            except:
+                await ctx.send('Error getting image!')
+                return
+            final = BytesIO()
+            img.save(f'data/jpeg/{user.id}.jpg', quality=1)
+            final.seek(0)
+        await ctx.send(file=discord.File(fp=f'data/jpeg/{user.id}.jpg'),
+                       embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.jpg')
+                       .set_footer(text=f"Time Taken: {int(time.time()) - starttime}"))
 
     @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)

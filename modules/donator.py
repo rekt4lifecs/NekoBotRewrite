@@ -38,6 +38,13 @@ class Donator:
                 t = await response.json()
                 await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=t['url']))
 
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def donate(self, ctx):
+        """Donate"""
+        return await ctx.send(embed=discord.Embed(color=0xff5630, title="OwO Whats This",
+                                                  description="Come donate on [Patreon](https://www.patreon.com/NekoBot) to get access to special features OwO"))
+
     @commands.command(name='upload')
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def owner_upload(self, ctx):
