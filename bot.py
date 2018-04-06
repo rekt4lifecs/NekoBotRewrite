@@ -29,7 +29,7 @@ log.addHandler(handler)
 # 'modules.reactions'
 
 startup_extensions = {
-    'modules.cardgame'
+    'modules.cardgame',
     'modules.chatbot',
     'modules.discordbots',
     'modules.donator',
