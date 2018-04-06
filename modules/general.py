@@ -9,6 +9,9 @@ from bs4 import __version__ as bsv
 from urllib.parse import quote_plus
 import string
 
+from .utils.paginator import HelpPaginator, CannotPaginate
+from .utils import chat_formatting
+
 def millify(n):
     millnames = ['', 'k', 'M', ' Billion', ' Trillion']
     n = float(n)
@@ -46,84 +49,6 @@ class General:
             await ctx.send("**Heads**", file=discord.File("data/heads.png"))
         else:
             await ctx.send("**Tails**", file=discord.File("data/tails.png"))
-
-    @commands.command()
-    @commands.is_owner()
-    async def startnsfw(self, ctx):
-        """Start NSFW Channel Check"""
-        ass     =   self.bot.get_channel(375490325801598980)
-        asian   =   self.bot.get_channel(390698118267535390)
-        puss    =   self.bot.get_channel(389124912578691072)
-        boobs   =   self.bot.get_channel(376813293337182210)
-        feet    =   self.bot.get_channel(375878004477526017)
-        thigh   =   self.bot.get_channel(376005606324174848)
-        amateur =   self.bot.get_channel(310399587846455297)
-        pro     =   self.bot.get_channel(361279235714711552)
-        gay     =   self.bot.get_channel(394562513527635968)
-        lesbian =   self.bot.get_channel(310473315204595714)
-        bdsm    =   self.bot.get_channel(310475303673921536)
-        femdom  =   self.bot.get_channel(393236010697490432)
-        maledom =   self.bot.get_channel(406847829051703296)
-        ebony   =   self.bot.get_channel(397888812996362261)
-        await ctx.send("Starting Loop...")
-        while True:
-            print("Posting Images...")
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "ass", page=random.randint(1, 3))['data'])
-            await ass.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "AsiansGoneWild", page=random.randint(1, 3))['data'])
-            await asian.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "pussy", page=random.randint(1, 3))['data'])
-            await puss.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "boobs", page=random.randint(1, 3))['data'])
-            await boobs.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "feet", page=random.randint(1, 3))['data'])
-            await feet.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "thighhighs", page=random.randint(1, 3))['data'])
-            await thigh.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "Amateur", page=random.randint(1, 3))['data'])
-            await amateur.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "nsfw", page=random.randint(1, 3))['data'])
-            await pro.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "gaynsfw", page=random.randint(1, 3))['data'])
-            await gay.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "lesbians", page=random.randint(1, 3))['data'])
-            await lesbian.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "bdsm", page=random.randint(1, 3))['data'])
-            await bdsm.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "Femdom", page=random.randint(1, 3))['data'])
-            await femdom.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "maledom", page=random.randint(1, 3))['data'])
-            await maledom.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
-            ##########################################################################################################
-            x = random.choice(config.imgur._get_imgur(self, "Ebony", page=random.randint(1, 3))['data'])
-            await ebony.send(embed=discord.Embed(color=0xDEADBF).set_image(url=x['link']))
-            await asyncio.sleep(386)###################################################################################
 
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
@@ -671,8 +596,8 @@ class General:
                                                            "`coinflip`, `blackjack`", inline=False)
             embed.add_field(name="Fun",
                             value="`food`, `ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
-                                  "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `gachiBASS`, `disconnect`, `joke`, "
-                                  "`b64`, `md5`, `circulation`, `kannagen`, `iphonex`", inline=False)
+                                  "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `joke`, "
+                                  "`b64`, `md5`, `kannagen`, `iphonex`", inline=False)
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
@@ -696,6 +621,106 @@ class General:
             await ctx.message.add_reaction(emoji)
         except:
             pass
+
+    @commands.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    async def crypto(self, ctx, crypto: str):
+        """Get cryptocurrency info"""
+        coin = "USD,EUR,GBP,JPY,CHF,AUD,CAD,INR,IDR,NZD,ZAR,SEK,SGD,KRW,NOK,MXN,BRL,HKD,RUB,MYR,THB,"
+        tsyms = coin + "BTC,BCH,ETH,ETC,LTC,XMR,DASH,ZEC,DOGE,DCR"
+        url = f"https://min-api.cryptocompare.com/data/price?fsym={crypto.upper()}&tsyms={tsyms}"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+        try:
+            USD  = res['USD']
+            EUR  = res['EUR']
+            GBP  = res['GBP']
+            JPY  = res['JPY']
+            CHF  = res['CHF']
+            AUD  = res['AUD']
+            CAD  = res['CAD']
+            INR  = res['INR']
+            IDR  = res['IDR']
+            NZD  = res['NZD']
+            ZAR  = res['ZAR']
+            SEK  = res['SEK']
+            SGD  = res['SGD']
+            KRW  = res['KRW']
+            NOK  = res['NOK']
+            MXN  = res['MXN']
+            BRL  = res['BRL']
+            HKD  = res['HKD']
+            RUB  = res['RUB']
+            MYR  = res['MYR']
+            THB  = res['THB']
+
+            BTC  = res['BTC']
+            BCH  = res['BCH']
+            ETH  = res['ETH']
+            LTC  = res['LTC']
+            XMR  = res['XMR']
+            DASH = res['DASH']
+            ZEC  = res['ZEC']
+            DOGE = res['DOGE']
+            DCR  = res['DCR']
+
+            e = discord.Embed(color=0xDEADBF, title=f"{crypto.upper()} Conversion",
+                              description=f"🇺🇸 US Dollar: **${USD}**\n"
+                                          f"🇪🇺 Euro: **€{EUR}**\n"
+                                          f"🇬🇧 British Pound: **£{GBP}**\n"
+                                          f"🇯🇵 Japanese Yen: **¥{JPY}**\n"
+                                          f"🇨🇭 Swiss Franc: **Fr.{CHF}**\n"
+                                          f"🇦🇺 Australian Dollar: **${AUD}**\n"
+                                          f"🇨🇦 Canadian Dollar: **${CAD}**\n"
+                                          f"🇮🇳 Indian Rupee: **₹{INR}**\n"
+                                          f"🇮🇩 Indonesian Rupiah: **IDR {IDR}**\n"
+                                          f"🇳🇿 New Zealand Dollar: **${NZD}**\n"
+                                          f"🇿🇦 South African Rand: **R{ZAR}**\n"
+                                          f"🇸🇪 Swedish Krona: **kr {SEK}**\n"
+                                          f"🇸🇬 Singapore Dollar: **${SGD}**\n"
+                                          f"🇰🇷 South Korean Won: **₩{KRW}**\n"
+                                          f"🇳🇴 Norwegian Krone: **kr {NOK}**\n"
+                                          f"🇲🇽 Mexican Peso: **Mex${MXN}**\n"
+                                          f"🇧🇷 Brazilian Real: **R${BRL}**\n"
+                                          f"🇭🇰 Hong Kong Dollar: **HK${HKD}**\n"
+                                          f"🇷🇺 Russian Ruble: **₽{RUB}**\n"
+                                          f"🇲🇾 Malaysian Ringgit: **RM {MYR}**\n"
+                                          f"🇹🇭 Thai Baht: **฿ {THB}**")
+            e.add_field(name="Cryptocurrency",
+                        value=f"<:bitcoin:423859742281302036> Bitcoin: **₿{BTC}**\n"
+                              f"<:bitcoincash:423863215840034817> Bitcoin Cash: {BCH}**\n"
+                              f"<:eth:423859767211982858> Ethereum: ♦{ETH}**\n"
+                              f"<:ltc:423859753698197507> Litecoin: Ł{LTC}**\n"
+                              f"<:monero:423859744936034314> Monero: ɱ{XMR}**\n"
+                              f"<:dash:423859742520377346> Dash: {DASH}**\n"
+                              f"<:yellowzcashlogo:423859752045379594> Zcash: ⓩ{ZEC}**\n"
+                              f"<:dogecoin:423859755384045569> Dogecoin: Đ{DOGE}**\n"
+                              f"<:decred:423859744361676801> Decred: {DCR}**", inline=True)
+        except:
+            e = discord.Embed(color=0xDEADBF, title="⚠ Error", description="Not a valid currency format.")
+        await ctx.send(embed=e)
+
+    # @commands.command()
+    # async def help(self, ctx, *, command: str = None):
+    #     """Show's help"""
+    #     try:
+    #         if command is None:
+    #             p = await HelpPaginator.from_bot(ctx)
+    #         else:
+    #             entity = self.bot.get_cog(command) or self.bot.get_command(command)
+    #
+    #             if entity is None:
+    #                 clean = command.replace('@', '@\u200b')
+    #                 return await ctx.send(f'Command or category "{clean}" not found.')
+    #             elif isinstance(entity, commands.Command):
+    #                 p = await HelpPaginator.from_command(ctx, entity)
+    #             else:
+    #                 p = await HelpPaginator.from_cog(ctx, entity)
+    #
+    #         await p.paginate()
+    #     except Exception as e:
+    #         return await ctx.send(chat_formatting.bold(e))
 
 
 def setup(bot):

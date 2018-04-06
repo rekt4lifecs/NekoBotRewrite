@@ -4,6 +4,7 @@ from .utils import checks
 from contextlib import redirect_stdout
 from collections import Counter
 from .utils.chat_formatting import pagify
+from .utils.hastebin import post as hastebin
 
 class Arguments(argparse.ArgumentParser):
     def error(self, message):
@@ -12,6 +13,12 @@ class Arguments(argparse.ArgumentParser):
 def to_emoji(c):
     base = 0x1f1e6
     return chr(base + c)
+
+async def run_cmd(cmd: str) -> str:
+    """Runs a subprocess and returns the output."""
+    process = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    results = await process.communicate()
+    return "".join(x.decode("utf-8") for x in results)
 
 class Moderation:
     """Moderation Tools"""
@@ -302,6 +309,53 @@ class Moderation:
             await ctx.send('\N{OK HAND SIGN}')
 
     @commands.command()
+    @commands.is_owner()
+    async def latency(self, ctx):
+        latency1 = round(self.bot.latencies[0][1] * 1000)
+        latency2 = round(self.bot.latencies[1][1] * 1000)
+        latency3 = round(self.bot.latencies[2][1] * 1000)
+        latency4 = round(self.bot.latencies[3][1] * 1000)
+        latency5 = round(self.bot.latencies[4][1] * 1000)
+        latency6 = round(self.bot.latencies[5][1] * 1000)
+        latency7 = round(self.bot.latencies[6][1] * 1000)
+        msg = await ctx.send(f"Shard1: {latency1}ms\n"
+                             f"Shard2: {latency2}ms\n"
+                             f"Shard3: {latency3}ms\n"
+                             f"Shard4: {latency4}ms\n"
+                             f"Shard5: {latency5}ms\n"
+                             f"Shard6: {latency6}ms\n"
+                             f"Shard7: {latency7}ms")
+        for x in range(5):
+            await asyncio.sleep(10)
+            latency1 = round(self.bot.latencies[0][1] * 1000)
+            latency2 = round(self.bot.latencies[1][1] * 1000)
+            latency3 = round(self.bot.latencies[2][1] * 1000)
+            latency4 = round(self.bot.latencies[3][1] * 1000)
+            latency5 = round(self.bot.latencies[4][1] * 1000)
+            latency6 = round(self.bot.latencies[5][1] * 1000)
+            latency7 = round(self.bot.latencies[6][1] * 1000)
+            await msg.edit(content=f"Shard1: {latency1}ms\n"
+                                   f"Shard2: {latency2}ms\n"
+                                   f"Shard3: {latency3}ms\n"
+                                   f"Shard4: {latency4}ms\n"
+                                   f"Shard5: {latency5}ms\n"
+                                   f"Shard6: {latency6}ms\n"
+                                   f"Shard7: {latency7}ms")
+
+    @commands.command(hidden=True, aliases=['exec'])
+    @commands.is_owner()
+    async def shell(self, ctx, *, command: str):
+        """Run stuff"""
+        with ctx.typing():
+            command = self.cleanup_code(command)
+            result = await run_cmd(command)
+            if len(result) >= 1500:
+                pa = await hastebin(result)
+                await ctx.send(f'`{command}`: Too long for Discord! {pa}')
+            else:
+                await ctx.send(f"`{command}`: ```{result}```\n")
+
+    @commands.command()
     @commands.guild_only()
     @commands.has_permissions(manage_messages=True)
     async def poll(self, ctx, *, question : str):
@@ -341,12 +395,6 @@ class Moderation:
         actual_poll = await ctx.send(embed=embed)
         for emoji, _ in answers:
             await actual_poll.add_reaction(emoji)
-
-    @commands.command(name='exec', hidden=True)
-    @commands.is_owner()
-    async def _exec(self, ctx, *, code: str):
-        """Exec code"""
-        await ctx.send(os.system(code))
 
     @commands.command(pass_context=True, hidden=True, name='eval')
     @commands.is_owner()

@@ -1,53 +1,7 @@
 from discord.ext import commands
-import discord, aiohttp, random, config, datetime, asyncio, youtube_dl, base64, hashlib, textwrap, uuid
+import discord, aiohttp, random, config, datetime, asyncio, base64, hashlib, textwrap, uuid
 from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw
-
-youtube_dl.utils.bug_reports_message = lambda: ''
-
-
-ytdl_format_options = {
-    'format': 'bestaudio/best',
-    'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
-    'restrictfilenames': True,
-    'noplaylist': True,
-    'nocheckcertificate': True,
-    'ignoreerrors': False,
-    'logtostderr': False,
-    'quiet': True,
-    'no_warnings': True,
-    'default_search': 'auto',
-    'source_address': '0.0.0.0' # ipv6 addresses cause issues sometimes
-}
-
-ffmpeg_options = {
-    'before_options': '-nostdin',
-    'options': '-vn'
-}
-
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
-
-
-class YTDLSource(discord.PCMVolumeTransformer):
-    def __init__(self, source, *, data, volume=0.5):
-        super().__init__(source, volume)
-
-        self.data = data
-
-        self.title = data.get('title')
-        self.url = data.get('url')
-
-    @classmethod
-    async def from_url(cls, url, *, loop=None):
-        loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, ytdl.extract_info, url)
-
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
-
-        filename = ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 key = config.weeb
 auth = {"Authorization": "Wolke " + key}
@@ -200,78 +154,6 @@ class Fun:
             pass
 
     @commands.command()
-    @commands.cooldown(1, 15, commands.BucketType.user)
-    async def gachiBASS(self, ctx, song : str = None):
-        try:
-            emoji = self.bot.get_emoji(393591272021164042)
-            await ctx.message.add_reaction(emoji)
-            emoji = self.bot.get_emoji(393591279067463682)
-            await ctx.message.add_reaction(emoji)
-            emoji = self.bot.get_emoji(393591271773700101)
-            await ctx.message.add_reaction(emoji)
-            emoji = self.bot.get_emoji(393591644764504064)
-            await ctx.message.add_reaction(emoji)
-        except:
-            pass
-
-        if song is None:
-            song = random.choice(["https://www.youtube.com/watch?v=J1Q0rgkFrA0",
-                                  "https://www.youtube.com/watch?v=J9poH0Q4k6A",
-                                  "https://www.youtube.com/watch?v=roqUWBibQ_o",
-                                  "https://www.youtube.com/watch?v=bwPLwX9aluY",
-                                  "https://www.youtube.com/watch?v=y3YHnkCDnKY",
-                                  "https://www.youtube.com/watch?v=gq3JxkARYRk",
-                                  "https://www.youtube.com/watch?v=kOCxHu_F5xo",
-                                  "https://www.youtube.com/watch?v=cPJNEGqf_jw"])
-
-        if ctx.voice_client is None:
-            try:
-                if ctx.author.voice.channel:
-                        await ctx.author.voice.channel.connect()
-                else:
-                    return
-            except:
-                return
-
-        if ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
-
-        player = await YTDLSource.from_url(song, loop=self.bot.loop)
-        ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-
-        ctx.voice_client.source.volume = 100
-        await ctx.send('Now playing: **`{}`**'.format(player.title))
-
-    @commands.command()
-    @commands.cooldown(1, 15, commands.BucketType.user)
-    async def circulation(self, ctx):
-        try:
-            emoji = self.bot.get_emoji(388367971371712512)
-            await ctx.message.add_reaction(emoji)
-        except:
-            pass
-
-        song = "https://www.youtube.com/watch?v=uKxyLmbOc0Q"
-
-        if ctx.voice_client is None:
-            try:
-                if ctx.author.voice.channel:
-                        await ctx.author.voice.channel.connect()
-                else:
-                    return
-            except:
-                return
-
-        if ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
-
-        player = await YTDLSource.from_url(song, loop=self.bot.loop)
-        ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-
-        ctx.voice_client.source.volume = 150
-        await ctx.send('Now playing: **`{}`**'.format(player.title))
-
-    @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def joke(self, ctx):
         """Sends a Joke OwO"""
@@ -313,9 +195,6 @@ class Fun:
                     usr_length = len(user2.name)
                     second_length = round(usr_length / 2)
                     second_half = user2.name[second_length:]
-                    if user1 == 178189410871803904:
-                        counter_ = "#################"
-                        score = 100
                     finalName = first_half + second_half
                     e = discord.Embed(color=0xDEADBF, title=f'{user1.name} ❤ {user2.name}', description=f"**Love %**\n"
                                                                                         f"`{counter_}` **{score}%**\n\n"
@@ -530,16 +409,6 @@ class Fun:
                               title="Love Calculator",
                               description=f"{user1.name} {heart} {user2.name} = {score}%")
         await ctx.send(embed=embed)
-
-    @commands.command(name='disconnect')
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def vc_disconnect(self, ctx):
-        """Disconnect from vc"""
-        try:
-            await ctx.voice_client.disconnect()
-            await ctx.send("Disconnected from voice channel")
-        except:
-            await ctx.send("Bot is not in a voice channel.")
 
     @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
