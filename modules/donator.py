@@ -2,6 +2,8 @@ from discord.ext import commands
 import discord, aiohttp
 import random, string, json
 
+import config
+
 class Donator:
 
     def __init__(self, bot):
@@ -23,7 +25,7 @@ class Donator:
 
         async with aiohttp.ClientSession() as session:
             url = f"http://37.59.36.62:10000/trapcard" \
-                  f"?authorization=EO2NWyDYqEJbZBN7e8SOvzdxbc3znE9Qccyb4JKqOt0a5D7cwBlPRmPOwBQoo5Jx" \
+                  f"?authorization={config.donator}" \
                   f"&name={user.name}" \
                   f"&author={author.name}" \
                   f"&image={user.avatar_url_as(format='png')}"
