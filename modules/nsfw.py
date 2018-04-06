@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord, random, aiohttp, config, requests, pymysql
 from bs4 import BeautifulSoup as bs
 from collections import Counter
+import config
 
 class NSFW:
     """NSFW Commands OwO"""
@@ -9,6 +10,13 @@ class NSFW:
     def __init__(self, bot):
         self.bot = bot
         self.counter = Counter()
+
+    async def _get_imgur(self, subreddit : str, type : str = "hot", page : int = 1):
+        headers = {"Authorization": f"Client-ID {config.imgur}"}
+        url = f'https://api.imgur.com/3/gallery/r/{subreddit}/{type}/{page}'
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url, headers=headers) as r:
+                return await r.json()
 
     @commands.command()
     @commands.guild_only()
@@ -248,7 +256,7 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         self.counter['girl'] += 1
-        data = config.imgur._get_imgur(self, "bodyperfection", page=random.randint(1, 5))['data']
+        data = await self._get_imgur("bodyperfection", page=random.randint(1, 5))['data']
         x = random.choice(data)
         em = discord.Embed(title=f"**{x['title']}**",
                            color=0xDEADBF)
@@ -265,7 +273,7 @@ class NSFW:
             return
         self.counter['bigboobs'] += 1
         sub = random.choice(["bigboobs", "BigBoobsGW"])
-        data = config.imgur._get_imgur(self, sub, page=random.randint(1, 5))['data']
+        data = await self._get_imgur(sub, page=random.randint(1, 5))['data']
         x = random.choice(data)
         em = discord.Embed(title=f"**{x['title']}**",
                            color=0xDEADBF)
@@ -281,7 +289,7 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         self.counter['ass'] += 1
-        data = config.imgur._get_imgur(self, "asstastic", page=random.randint(1, 6))['data']
+        data = await self._get_imgur("asstastic", page=random.randint(1, 6))['data']
         x = random.choice(data)
         em = discord.Embed(title=f"**{x['title']}**",
                            color=0xDEADBF)
@@ -298,7 +306,7 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         self.counter['cum'] += 1
-        data = config.imgur._get_imgur(self, "cumsluts")['data']
+        data = await self._get_imgur("cumsluts")['data']
         x = random.choice(data)
         embed = discord.Embed(color=0xDEADBF,
                               title=f"**{x['title']}**")
@@ -316,7 +324,7 @@ class NSFW:
             return
         sub = random.choice(["thighhighs", "stockings"])
         self.counter['thighs'] += 1
-        data = config.imgur._get_imgur(self, sub, page=random.randint(1, 5))['data']
+        data = await self._get_imgur(sub, page=random.randint(1, 5))['data']
         x = random.choice(data)
         em = discord.Embed(title=f"**{x['title']}**",
                            color=0xDEADBF)
@@ -332,7 +340,7 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         self.counter['gonewild'] += 1
-        data = config.imgur._get_imgur(self, "gonewild", page=random.randint(1, 5))['data']
+        data = await self._get_imgur("gonewild", page=random.randint(1, 5))['data']
         x = random.choice(data)
         em = discord.Embed(title=f"**{x['title']}**", color=0xDEADBF)
         em.set_image(url=x['link'])
