@@ -671,5 +671,62 @@ class Moderation:
         args.search = max(0, min(2000, args.search)) # clamp from 0-2000
         await self.do_removal(ctx, args.search, predicate, before=args.before, after=args.after)
 
+    @commands.command()
+    @commands.is_owner()
+    async def guildcheck(self, ctx):
+        guild = ctx.message.guild
+        channel = self.bot.get_channel(431887286246834178)
+        owner = self.bot.get_user(guild.owner_id)
+        embed = discord.Embed(color=0xDEADBF, title="Guild Join",
+                              description=f"```\n"
+                                          f"Name:       {guild.name}\n"
+                                          f"Members:    {len(set(guild.members))}\n"
+                                          f"Roles:      {len(guild.roles)}\n"
+                                          f"Emojis:     {len(guild.emojis)}\n"
+                                          f"Region:     {guild.region}\n"
+                                          f"ID:         {guild.id}```\n"
+                                          f"Owner: **{owner.name}** ({owner.id})")
+        try:
+            embed.set_thumbnail(url=guild.icon_url)
+        except:
+            pass
+        await channel.send(embed=embed)
+
+    async def on_guild_join(self, guild):
+        channel = self.bot.get_channel(431887286246834178)
+        owner = self.bot.get_user(guild.owner_id)
+        embed = discord.Embed(color=0xDEADBF, title="Guild Join",
+                              description=f"```\n"
+                                          f"Name:       {guild.name}\n"
+                                          f"Members:    {len(set(guild.members))}\n"
+                                          f"Roles:      {len(guild.roles)}\n"
+                                          f"Emojis:     {len(guild.emojis)}\n"
+                                          f"Region:     {guild.region}\n"
+                                          f"ID:         {guild.id}```\n"
+                                          f"Owner: **{owner.name}** ({owner.id})")
+        try:
+            embed.set_thumbnail(url=guild.icon_url)
+        except:
+            pass
+        await channel.send(embed=embed)
+
+    async def on_guild_remove(self, guild):
+        channel = self.bot.get_channel(431887286246834178)
+        owner = self.bot.get_user(guild.owner_id)
+        embed = discord.Embed(color=0xDEADBF, title="Guild Leave",
+                              description=f"```\n"
+                                          f"Name:       {guild.name}\n"
+                                          f"Members:    {len(set(guild.members))}\n"
+                                          f"Roles:      {len(guild.roles)}\n"
+                                          f"Emojis:     {len(guild.emojis)}\n"
+                                          f"Region:     {guild.region}\n"
+                                          f"ID:         {guild.id}```\n"
+                                          f"Owner: **{owner.name}** ({owner.id})")
+        try:
+            embed.set_thumbnail(url=guild.icon_url)
+        except:
+            pass
+        await channel.send(embed=embed)
+
 def setup(bot):
     bot.add_cog(Moderation(bot))

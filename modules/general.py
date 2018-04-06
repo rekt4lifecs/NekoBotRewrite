@@ -587,7 +587,8 @@ class General:
 
             embed.add_field(name="General",
                             value="`lmgtfy`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
-                                  " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`", inline=False)
+                                  " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`", inline=False)
+            embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`")
             embed.add_field(name="Moderation",
                             value="`kick`, `ban`, `massban`, `unban`, `rename`, `poll`, `purge`, `mute`, `unmute`", inline=False)
             embed.add_field(name="Roleplay", value="`card`")
@@ -611,7 +612,6 @@ class General:
             embed.add_field(name="Game Stats",
                             value="`osu`, `overwatch`, `fortnite`", inline=False)
             embed.add_field(name="Marriage", value="`marry`, `divorce`", inline=False)
-            embed.add_field(name="Cryptocurrency", value="`crypto`", inline=False)
 
             await ctx.send(embed=embed)
         except:
