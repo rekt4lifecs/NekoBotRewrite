@@ -8,6 +8,11 @@ class Donator:
 
     def __init__(self, bot):
         self.bot = bot
+        self.donators = ["178189410871803904",
+                             "205379510139486208",
+                             "102165107244539904",
+                             "270133511325876224",
+                             "266277541646434305"]
 
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
@@ -19,7 +24,7 @@ class Donator:
 
         author = ctx.message.author
 
-        if author.id not in json.load(open('patrons.json')):
+        if author.id not in self.donators:
             return await ctx.send(embed=discord.Embed(color=0xff5630, title="Error",
                                                       description="You need to be a [donator](https://www.patreon.com/NekoBot) to use this command."))
 
@@ -39,7 +44,7 @@ class Donator:
         """File Uploader"""
         author = ctx.message.author
 
-        if author.id not in json.load(open('patrons.json')):
+        if author.id not in self.donators:
             return await ctx.send(embed=discord.Embed(color=0xff5630, title="Error",
                                                       description="You need to be a [donator](https://www.patreon.com/NekoBot) to use this command."))
 
