@@ -13,7 +13,7 @@ class Audio:
 
         if not hasattr(bot, 'lavalink'):
             lavalink.Client(bot=bot,
-                            host="uplinkd.cf",
+                            host=config.lavalink['host'],
                             ws_port=8080,
                             password=config.lavalink['password'],
                             loop=self.bot.loop, log_level=logging.INFO)
