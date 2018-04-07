@@ -90,6 +90,12 @@ class Donator:
         if user == 0:
             db.execute(f"UPDATE donator SET userid = {ctx.message.author.id} WHERE token = \"{key}\"")
             connection.commit()
+            channel = self.bot.get_channel(431887286246834178)
+            await channel.send(embed=discord.Embed(color=0x8bff87,
+                                                   title="Token Accepted",
+                                                   description=f"```css\n"
+                                                               f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
+                                                               f"Key: [ {key} ]").set_thumbnail(url=ctx.message.author.avatar_url))
             return await ctx.send("**Token Accepted!**")
         else:
             return await ctx.send("**Token already in use.**")

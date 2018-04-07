@@ -705,7 +705,7 @@ class Moderation:
             return
         channel = self.bot.get_channel(431887286246834178)
         owner = self.bot.get_user(guild.owner_id)
-        embed = discord.Embed(color=0xDEADBF, title="Guild Leave",
+        embed = discord.Embed(color=0xff6f3f, title="Guild Leave",
                               description=f"```\n"
                                           f"Name:       {guild.name}\n"
                                           f"Members:    {len(set(guild.members))}\n"
