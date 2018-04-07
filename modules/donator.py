@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord, aiohttp
-import random, string, json
+import random, string, json, time
+import pymysql
 
 import config
 
@@ -24,7 +25,20 @@ class Donator:
 
         author = ctx.message.author
 
-        if author.id not in self.donators:
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+
+        db.execute(f"SELECT userid FROM donator")
+        alltokens = db.fetchall()
+        tokenlist = []
+        for x in range(len(alltokens)):
+            tokenlist.append(int(alltokens[x][0]))
+
+        if author.id not in tokenlist:
             return await ctx.send(embed=discord.Embed(color=0xff5630, title="Error",
                                                       description="You need to be a [donator](https://www.patreon.com/NekoBot) to use this command."))
 
@@ -39,6 +53,48 @@ class Donator:
                 await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=t['url']))
 
     @commands.command()
+    @commands.is_owner()
+    async def createkey(self, ctx):
+        """Create a key"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        x1 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
+        x2 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
+        x3 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
+        token = f"{x1}-{x2}-{x3}"
+        await ctx.send(embed=discord.Embed(color=0xDEADBF, title="Token Generated", description=f"```css\n"
+                                                                                                f"[ {token} ]```"))
+        timenow = int(time.time())
+        db.execute(f"INSERT INTO donator VALUES (0, \"{token}\", {timenow})")
+        connection.commit()
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def redeem(self, ctx, *, key: str):
+        """Redeem your donation key"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        x = db.execute(f"SELECT 1 FROM donator WHERE token = \"{key}\"")
+        if x == 0:
+            return await ctx.send("**Invalid key**")
+        db.execute(f"SELECT userid FROM donator WHERE token = \"{key}\"")
+        user = int(db.fetchone()[0])
+        if user == 0:
+            db.execute(f"UPDATE donator SET userid = {ctx.message.author.id} WHERE token = \"{key}\"")
+            connection.commit()
+            return await ctx.send("**Token Accepted!**")
+        else:
+            return await ctx.send("**Token already in use.**")
+
+    @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def donate(self, ctx):
         """Donate"""
@@ -50,8 +106,20 @@ class Donator:
     async def owner_upload(self, ctx):
         """File Uploader"""
         author = ctx.message.author
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
 
-        if author.id not in self.donators:
+        db.execute(f"SELECT userid FROM donator")
+        alltokens = db.fetchall()
+        tokenlist = []
+        for x in range(len(alltokens)):
+            tokenlist.append(int(alltokens[x][0]))
+
+        if author.id not in tokenlist:
             return await ctx.send(embed=discord.Embed(color=0xff5630, title="Error",
                                                       description="You need to be a [donator](https://www.patreon.com/NekoBot) to use this command."))
 
