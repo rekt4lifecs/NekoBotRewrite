@@ -31,8 +31,8 @@ class DiscordBotsOrgAPI:
                 async with aiohttp.ClientSession() as session:
                     async with session.post('https://bots.discord.pw/api/bots/310039170792030211/stats',
                                             headers={'Authorization': f'{config.dpw_key}'},
-                                            data={"shard_count": self.bot.shard_count,
-                                                  "server_count": len(self.bot.guilds)}) as response:
+                                            json={"server_count": len(self.bot.guilds),
+                                                  "shard_count": self.bot.shard_count}) as response:
                         t = await response.json()
                         print(t)
             except Exception as e:
