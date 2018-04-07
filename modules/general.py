@@ -7,7 +7,7 @@ from .utils.chat_formatting import pagify
 from PIL import __version__ as pilv
 from bs4 import __version__ as bsv
 from urllib.parse import quote_plus
-import string
+import string, json
 
 from .utils.paginator import HelpPaginator, CannotPaginate
 from .utils import chat_formatting
@@ -480,6 +480,23 @@ class General:
                    "<:dnd:313956276893646850> Outlook not so good", "<:dnd:313956276893646850> Very doubtful"]
         await ctx.send(embed=discord.Embed(title=random.choice(answers), color=0xDEADBF))
 
+    @commands.command(aliases=['ddg'])
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def duckduckgo(self, ctx, *, search_terms: str):
+        search = search_terms.replace(" ", "%20")
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f"http://api.duckduckgo.com/?q={search}&format=json") as r:
+                res = await r.read()
+                res = json.loads(res)
+                try:
+                    data = res['RelatedTopics'][0]['Text']
+                    url = res['RelatedTopics'][0]['FirstURL']
+                except:
+                    return await ctx.send("**No search results found.**")
+                embed = discord.Embed(color=0xDEADBF, title=f"Search results for {search_terms}",
+                                      description=f"[{data}]({url})")
+                await ctx.send(embed=embed)
+
     @commands.command()
     async def botinfo(self, ctx, bot_user : int = None):
         """Get Bot Info"""
@@ -587,7 +604,7 @@ class General:
 
             embed.add_field(name="General",
                             value="`lmgtfy`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
-                                  " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`", inline=False)
+                                  " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`, `duckduckgo`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`upload`, `trapcard`, `donate`")
             embed.add_field(name="Moderation",
