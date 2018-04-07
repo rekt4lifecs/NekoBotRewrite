@@ -667,6 +667,18 @@ class Moderation:
             pass
         await channel.send(embed=embed)
 
+    @commands.command()
+    async def traceback(self, ctx, *, reason: str):
+        """Traceback Check"""
+        user = ctx.message.author
+        for role in user.roles:
+            if role.id == 404595507554549760:
+                channel = self.bot.get_channel(431987399581499403)
+                embed = discord.Embed(color=0x8bff87, title="Issue Fixed", description=f"Issue fixed by {user.id}\n"
+                                                                                       f"Reason:\n```\n"
+                                                                                       f"{reason}```")
+                await channel.send(embed=embed)
+
     async def on_guild_join(self, guild):
         if not guild.large:
             return
