@@ -393,178 +393,178 @@ class economy:
                     except:
                         pass
 
-    @commands.command()
-    @commands.cooldown(1, 120, commands.BucketType.user)
-    async def top(self, ctx):
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
-        # await self.bot.get_user_info(310039170792030211)
-        try:
-            if await self.usercheck('levels', ctx.message.author) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
-        msg = await ctx.send(embed=discord.Embed(color=0xDEADBF, title="Top Users", description="Loading..."))
-        starttime = int(time.time())
-        msg
-        db.execute("SELECT userid, level FROM levels ORDER BY level DESC LIMIT 10")
-        all_users = db.fetchall()
-        all_bot_users = await self.bot.get_all_members()
-        try:
-            user1 = await self.bot.get_user_info(int(all_users[0][0]))
-        except:
-            user1 = "Deleted User"
-        user1_lvl = self._find_level(int(all_users[0][1]))
-        try:
-            user2 = await self.bot.get_user_info(int(all_users[1][0]))
-        except:
-            user2 = "Deleted User"
-        user2_lvl = self._find_level(int(all_users[1][1]))
-        try:
-            user3 = await self.bot.get_user_info(int(all_users[2][0]))
-        except:
-            user3 = "Deleted User"
-        user3_lvl = self._find_level(int(all_users[2][1]))
-        try:
-            user4 = await self.bot.get_user_info(int(all_users[3][0]))
-        except:
-            user4 = "Deleted User"
-        user4_lvl = self._find_level(int(all_users[3][1]))
-        try:
-            user5 = await self.bot.get_user_info(int(all_users[4][0]))
-        except:
-            user5 = "Deleted User"
-        user5_lvl = self._find_level(int(all_users[4][1]))
-        try:
-            user6 = await self.bot.get_user_info(int(all_users[5][0]))
-        except:
-            user6 = "Deleted User"
-        user6_lvl = self._find_level(int(all_users[5][1]))
-        try:
-            user7 = await self.bot.get_user_info(int(all_users[6][0]))
-        except:
-            user7 = "Deleted User"
-        user7_lvl = self._find_level(int(all_users[6][1]))
-        try:
-            user8 = await self.bot.get_user_info(int(all_users[7][0]))
-        except:
-            user8 = "Deleted User"
-        user8_lvl = self._find_level(int(all_users[7][1]))
-        try:
-            user9 = await self.bot.get_user_info(int(all_users[8][0]))
-        except:
-            user9 = "Deleted User"
-        user9_lvl = self._find_level(int(all_users[8][1]))
-        try:
-            user10 = await self.bot.get_user_info(int(all_users[9][0]))
-        except:
-            user10 = "Deleted User"
-        user10_lvl = self._find_level(int(all_users[9][1]))
-
-        embed = discord.Embed(color=0xDEADBF, title="Top Users",
-                              description=f"`1. ♔{user1}♔ ({all_users[0][0]}) - Level {user1_lvl}`\n"
-                                          f"`2. ♕{user2}♕ ({all_users[1][0]}) - Level {user2_lvl}`\n"
-                                          f"`3. ♖{user3}♖ ({all_users[2][0]}) - Level {user3_lvl}`\n"
-                                          f"`4. {user4} ({all_users[3][0]}) - Level {user4_lvl}`\n"
-                                          f"`5. {user5} ({all_users[4][0]}) - Level {user5_lvl}`\n"
-                                          f"`6. {user6} ({all_users[5][0]}) - Level {user6_lvl}`\n"
-                                          f"`7. {user7} ({all_users[6][0]}) - Level {user7_lvl}`\n"
-                                          f"`8. {user8} ({all_users[7][0]}) - Level {user8_lvl}`\n"
-                                          f"`9. {user9} ({all_users[8][0]}) - Level {user9_lvl}`\n"
-                                          f"`10. {user10} ({all_users[9][0]}) - Level {user10_lvl}`\n")
-        endtime = int(time.time())
-        embed.set_footer(text=f"Finished in {endtime - starttime}s")
-        await msg.edit(embed=embed)
-        
-    @commands.command()
-    @commands.cooldown(1, 120, commands.BucketType.user)
-    async def ecotop(self, ctx):
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
-        try:
-            if await self.usercheck('levels', ctx.message.author) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
-        # await self.bot.get_user_info(310039170792030211)
-        msg = await ctx.send(embed=discord.Embed(color=0xDEADBF, title="Top Users | Economy", description="Loading..."))
-        starttime = int(time.time())
-        msg
-        db.execute("SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10")
-        all_users = db.fetchall()
-        try:
-            user1 = await self.bot.get_user_info(int(all_users[0][0]))
-        except:
-            user1 = "Deleted User"
-        user1_lvl = int(all_users[0][1])
-        try:
-            user2 = await self.bot.get_user_info(int(all_users[1][0]))
-        except:
-            user2 = "Deleted User"
-        user2_lvl = int(all_users[1][1])
-        try:
-            user3 = await self.bot.get_user_info(int(all_users[2][0]))
-        except:
-            user3 = "Deleted User"
-        user3_lvl = int(all_users[2][1])
-        try:
-            user4 = await self.bot.get_user_info(int(all_users[3][0]))
-        except:
-            user4 = "Deleted User"
-        user4_lvl = int(all_users[3][1])
-        try:
-            user5 = await self.bot.get_user_info(int(all_users[4][0]))
-        except:
-            user5 = "Deleted User"
-        user5_lvl = int(all_users[4][1])
-        try:
-            user6 = await self.bot.get_user_info(int(all_users[5][0]))
-        except:
-            user6 = "Deleted User"
-        user6_lvl = int(all_users[5][1])
-        try:
-            user7 = await self.bot.get_user_info(int(all_users[6][0]))
-        except:
-            user7 = "Deleted User"
-        user7_lvl = int(all_users[6][1])
-        try:
-            user8 = await self.bot.get_user_info(int(all_users[7][0]))
-        except:
-            user8 = "Deleted User"
-        user8_lvl = int(all_users[7][1])
-        try:
-            user9 = await self.bot.get_user_info(int(all_users[8][0]))
-        except:
-            user9 = "Deleted User"
-        user9_lvl = int(all_users[8][1])
-        try:
-            user10 = await self.bot.get_user_info(int(all_users[9][0]))
-        except:
-            user10 = "Deleted User"
-        user10_lvl = int(all_users[9][1])
-
-        embed = discord.Embed(color=0xDEADBF, title="Top Users | Economy",
-                              description=f"`1. ♔{user1}♔ ({all_users[0][0]}) - ${user1_lvl}`\n"
-                                          f"`2. ♕{user2}♕ ({all_users[1][0]}) - ${user2_lvl}`\n"
-                                          f"`3. ♖{user3}♖ ({all_users[2][0]}) - ${user3_lvl}`\n"
-                                          f"`4. {user4} ({all_users[3][0]}) - ${user4_lvl}`\n"
-                                          f"`5. {user5} ({all_users[4][0]}) - ${user5_lvl}`\n"
-                                          f"`6. {user6} ({all_users[5][0]}) - ${user6_lvl}`\n"
-                                          f"`7. {user7} ({all_users[6][0]}) - ${user7_lvl}`\n"
-                                          f"`8. {user8} ({all_users[7][0]}) - ${user8_lvl}`\n"
-                                          f"`9. {user9} ({all_users[8][0]}) - ${user9_lvl}`\n"
-                                          f"`10. {user10} ({all_users[9][0]}) - ${user10_lvl}`\n")
-        endtime = int(time.time())
-        embed.set_footer(text=f"Finished in {endtime - starttime}s")
-        await msg.edit(embed=embed)
+    # @commands.command()
+    # @commands.cooldown(1, 120, commands.BucketType.user)
+    # async def top(self, ctx):
+    #     connection = pymysql.connect(host="localhost",
+    #                                  user="root",
+    #                                  password="rektdiscord",
+    #                                  db="nekobot",
+    #                                  port=3306)
+    #     db = connection.cursor()
+    #     # await self.bot.get_user_info(310039170792030211)
+    #     try:
+    #         if await self.usercheck('levels', ctx.message.author) is False:
+    #             await self._create_user(ctx.message.author.id)
+    #     except:
+    #         pass
+    #     msg = await ctx.send(embed=discord.Embed(color=0xDEADBF, title="Top Users", description="Loading..."))
+    #     starttime = int(time.time())
+    #     msg
+    #     db.execute("SELECT userid, level FROM levels ORDER BY level DESC LIMIT 10")
+    #     all_users = db.fetchall()
+    #     all_bot_users = await self.bot.get_all_members()
+    #     try:
+    #         user1 = await self.bot.get_user_info(int(all_users[0][0]))
+    #     except:
+    #         user1 = "Deleted User"
+    #     user1_lvl = self._find_level(int(all_users[0][1]))
+    #     try:
+    #         user2 = await self.bot.get_user_info(int(all_users[1][0]))
+    #     except:
+    #         user2 = "Deleted User"
+    #     user2_lvl = self._find_level(int(all_users[1][1]))
+    #     try:
+    #         user3 = await self.bot.get_user_info(int(all_users[2][0]))
+    #     except:
+    #         user3 = "Deleted User"
+    #     user3_lvl = self._find_level(int(all_users[2][1]))
+    #     try:
+    #         user4 = await self.bot.get_user_info(int(all_users[3][0]))
+    #     except:
+    #         user4 = "Deleted User"
+    #     user4_lvl = self._find_level(int(all_users[3][1]))
+    #     try:
+    #         user5 = await self.bot.get_user_info(int(all_users[4][0]))
+    #     except:
+    #         user5 = "Deleted User"
+    #     user5_lvl = self._find_level(int(all_users[4][1]))
+    #     try:
+    #         user6 = await self.bot.get_user_info(int(all_users[5][0]))
+    #     except:
+    #         user6 = "Deleted User"
+    #     user6_lvl = self._find_level(int(all_users[5][1]))
+    #     try:
+    #         user7 = await self.bot.get_user_info(int(all_users[6][0]))
+    #     except:
+    #         user7 = "Deleted User"
+    #     user7_lvl = self._find_level(int(all_users[6][1]))
+    #     try:
+    #         user8 = await self.bot.get_user_info(int(all_users[7][0]))
+    #     except:
+    #         user8 = "Deleted User"
+    #     user8_lvl = self._find_level(int(all_users[7][1]))
+    #     try:
+    #         user9 = await self.bot.get_user_info(int(all_users[8][0]))
+    #     except:
+    #         user9 = "Deleted User"
+    #     user9_lvl = self._find_level(int(all_users[8][1]))
+    #     try:
+    #         user10 = await self.bot.get_user_info(int(all_users[9][0]))
+    #     except:
+    #         user10 = "Deleted User"
+    #     user10_lvl = self._find_level(int(all_users[9][1]))
+    #
+    #     embed = discord.Embed(color=0xDEADBF, title="Top Users",
+    #                           description=f"`1. ♔{user1}♔ ({all_users[0][0]}) - Level {user1_lvl}`\n"
+    #                                       f"`2. ♕{user2}♕ ({all_users[1][0]}) - Level {user2_lvl}`\n"
+    #                                       f"`3. ♖{user3}♖ ({all_users[2][0]}) - Level {user3_lvl}`\n"
+    #                                       f"`4. {user4} ({all_users[3][0]}) - Level {user4_lvl}`\n"
+    #                                       f"`5. {user5} ({all_users[4][0]}) - Level {user5_lvl}`\n"
+    #                                       f"`6. {user6} ({all_users[5][0]}) - Level {user6_lvl}`\n"
+    #                                       f"`7. {user7} ({all_users[6][0]}) - Level {user7_lvl}`\n"
+    #                                       f"`8. {user8} ({all_users[7][0]}) - Level {user8_lvl}`\n"
+    #                                       f"`9. {user9} ({all_users[8][0]}) - Level {user9_lvl}`\n"
+    #                                       f"`10. {user10} ({all_users[9][0]}) - Level {user10_lvl}`\n")
+    #     endtime = int(time.time())
+    #     embed.set_footer(text=f"Finished in {endtime - starttime}s")
+    #     await msg.edit(embed=embed)
+    #
+    # @commands.command()
+    # @commands.cooldown(1, 120, commands.BucketType.user)
+    # async def ecotop(self, ctx):
+    #     connection = pymysql.connect(host="localhost",
+    #                                  user="root",
+    #                                  password="rektdiscord",
+    #                                  db="nekobot",
+    #                                  port=3306)
+    #     db = connection.cursor()
+    #     try:
+    #         if await self.usercheck('levels', ctx.message.author) is False:
+    #             await self._create_user(ctx.message.author.id)
+    #     except:
+    #         pass
+    #     # await self.bot.get_user_info(310039170792030211)
+    #     msg = await ctx.send(embed=discord.Embed(color=0xDEADBF, title="Top Users | Economy", description="Loading..."))
+    #     starttime = int(time.time())
+    #     msg
+    #     db.execute("SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10")
+    #     all_users = db.fetchall()
+    #     try:
+    #         user1 = await self.bot.get_user_info(int(all_users[0][0]))
+    #     except:
+    #         user1 = "Deleted User"
+    #     user1_lvl = int(all_users[0][1])
+    #     try:
+    #         user2 = await self.bot.get_user_info(int(all_users[1][0]))
+    #     except:
+    #         user2 = "Deleted User"
+    #     user2_lvl = int(all_users[1][1])
+    #     try:
+    #         user3 = await self.bot.get_user_info(int(all_users[2][0]))
+    #     except:
+    #         user3 = "Deleted User"
+    #     user3_lvl = int(all_users[2][1])
+    #     try:
+    #         user4 = await self.bot.get_user_info(int(all_users[3][0]))
+    #     except:
+    #         user4 = "Deleted User"
+    #     user4_lvl = int(all_users[3][1])
+    #     try:
+    #         user5 = await self.bot.get_user_info(int(all_users[4][0]))
+    #     except:
+    #         user5 = "Deleted User"
+    #     user5_lvl = int(all_users[4][1])
+    #     try:
+    #         user6 = await self.bot.get_user_info(int(all_users[5][0]))
+    #     except:
+    #         user6 = "Deleted User"
+    #     user6_lvl = int(all_users[5][1])
+    #     try:
+    #         user7 = await self.bot.get_user_info(int(all_users[6][0]))
+    #     except:
+    #         user7 = "Deleted User"
+    #     user7_lvl = int(all_users[6][1])
+    #     try:
+    #         user8 = await self.bot.get_user_info(int(all_users[7][0]))
+    #     except:
+    #         user8 = "Deleted User"
+    #     user8_lvl = int(all_users[7][1])
+    #     try:
+    #         user9 = await self.bot.get_user_info(int(all_users[8][0]))
+    #     except:
+    #         user9 = "Deleted User"
+    #     user9_lvl = int(all_users[8][1])
+    #     try:
+    #         user10 = await self.bot.get_user_info(int(all_users[9][0]))
+    #     except:
+    #         user10 = "Deleted User"
+    #     user10_lvl = int(all_users[9][1])
+    #
+    #     embed = discord.Embed(color=0xDEADBF, title="Top Users | Economy",
+    #                           description=f"`1. ♔{user1}♔ ({all_users[0][0]}) - ${user1_lvl}`\n"
+    #                                       f"`2. ♕{user2}♕ ({all_users[1][0]}) - ${user2_lvl}`\n"
+    #                                       f"`3. ♖{user3}♖ ({all_users[2][0]}) - ${user3_lvl}`\n"
+    #                                       f"`4. {user4} ({all_users[3][0]}) - ${user4_lvl}`\n"
+    #                                       f"`5. {user5} ({all_users[4][0]}) - ${user5_lvl}`\n"
+    #                                       f"`6. {user6} ({all_users[5][0]}) - ${user6_lvl}`\n"
+    #                                       f"`7. {user7} ({all_users[6][0]}) - ${user7_lvl}`\n"
+    #                                       f"`8. {user8} ({all_users[7][0]}) - ${user8_lvl}`\n"
+    #                                       f"`9. {user9} ({all_users[8][0]}) - ${user9_lvl}`\n"
+    #                                       f"`10. {user10} ({all_users[9][0]}) - ${user10_lvl}`\n")
+    #     endtime = int(time.time())
+    #     embed.set_footer(text=f"Finished in {endtime - starttime}s")
+    #     await msg.edit(embed=embed)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
