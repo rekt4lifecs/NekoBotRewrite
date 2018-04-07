@@ -309,38 +309,12 @@ class Moderation:
             await ctx.send('\N{OK HAND SIGN}')
 
     @commands.command()
-    @commands.is_owner()
     async def latency(self, ctx):
-        latency1 = round(self.bot.latencies[0][1] * 1000)
-        latency2 = round(self.bot.latencies[1][1] * 1000)
-        latency3 = round(self.bot.latencies[2][1] * 1000)
-        latency4 = round(self.bot.latencies[3][1] * 1000)
-        latency5 = round(self.bot.latencies[4][1] * 1000)
-        latency6 = round(self.bot.latencies[5][1] * 1000)
-        latency7 = round(self.bot.latencies[6][1] * 1000)
-        msg = await ctx.send(f"Shard1: {latency1}ms\n"
-                             f"Shard2: {latency2}ms\n"
-                             f"Shard3: {latency3}ms\n"
-                             f"Shard4: {latency4}ms\n"
-                             f"Shard5: {latency5}ms\n"
-                             f"Shard6: {latency6}ms\n"
-                             f"Shard7: {latency7}ms")
-        for x in range(5):
-            await asyncio.sleep(10)
-            latency1 = round(self.bot.latencies[0][1] * 1000)
-            latency2 = round(self.bot.latencies[1][1] * 1000)
-            latency3 = round(self.bot.latencies[2][1] * 1000)
-            latency4 = round(self.bot.latencies[3][1] * 1000)
-            latency5 = round(self.bot.latencies[4][1] * 1000)
-            latency6 = round(self.bot.latencies[5][1] * 1000)
-            latency7 = round(self.bot.latencies[6][1] * 1000)
-            await msg.edit(content=f"Shard1: {latency1}ms\n"
-                                   f"Shard2: {latency2}ms\n"
-                                   f"Shard3: {latency3}ms\n"
-                                   f"Shard4: {latency4}ms\n"
-                                   f"Shard5: {latency5}ms\n"
-                                   f"Shard6: {latency6}ms\n"
-                                   f"Shard7: {latency7}ms")
+        if not ctx.message.author.id in [266277541646434305, 270133511325876224]:
+            return
+        xd = '\n'.join(f'Shard {shard}: '+str(round(self.bot.latencies[shard][1]*1000)) + 'ms' for shard in self.bot.shards)
+        for page in pagify(xd):
+            await ctx.send(page)
 
     @commands.command(hidden=True, aliases=['exec'])
     @commands.is_owner()

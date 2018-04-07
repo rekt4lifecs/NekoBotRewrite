@@ -251,12 +251,15 @@ class Fun:
         """Get a dank meme OwO"""
         # NoSteal kthx
         sub = "dankmemes" #Add more?
-        data = config.imgur._get_imgur(self, sub)['data']
-        js = random.choice(data)
+        url = f'https://api.imgur.com/3/gallery/r/{sub}/hot/{random.randint(1, 5)}'
+        headers = {"Authorization": f"Client-ID {config.imgur}"}
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url, headers=headers) as r:
+                res = await r.json()
+        js = random.choice(res['data'])
         if js['nsfw'] or js['is_ad'] == True:
             while True:
-                print("Had to loop meme")
-                js = random.choice(data)
+                js = random.choice(res['data'])
                 if js['nsfw'] or js['is_ad'] == False:
                     break
         embed = discord.Embed(color=0xDEADBF,

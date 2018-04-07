@@ -51,6 +51,7 @@ class NekoBot(commands.AutoShardedBot):
     def __init__(self):
         super().__init__(command_prefix=commands.when_mentioned_or('n!'),
                          description="NekoBot",
+                         shard_count=50,
                          pm_help=None,
                          help_attrs={'hidden': True})
         self.counter = Counter()
