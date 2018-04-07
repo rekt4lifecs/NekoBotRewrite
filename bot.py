@@ -67,6 +67,7 @@ class NekoBot(commands.AutoShardedBot):
                 await ctx.send(page)
 
     async def on_command_error(self, ctx, exception):
+        channel = self.get_channel(431987399581499403)
         if isinstance(exception, commands.NoPrivateMessage):
             await ctx.send('This command cannot be used in private messages.')
         elif isinstance(exception, commands.DisabledCommand):
@@ -76,6 +77,9 @@ class NekoBot(commands.AutoShardedBot):
                                title="Error",
                                description=f"Error in command {ctx.command.qualified_name}, "
                                            f"[Support Server](https://discord.gg/q98qeYN)")
+            await channel.send(embed=discord.Embed(color=0xff6f3f,
+                                                   title="Command Error").add_field(name=f"Command: {ctx.command.qualified_name}",
+                                                                                    value=f"```py\n{exception}```"))
             try:
                 owner = self.owner_id
                 await owner.send(f"Error in `{ctx.command.qualified_name}`\n```\n{exception}\n```")
@@ -99,6 +103,7 @@ class NekoBot(commands.AutoShardedBot):
             await ctx.send(f"Im missing permissions ;-;\nPermissions I need:\n{exception.missing_perms}")
         else:
             log.exception(type(exception).__name__, exc_info=exception)
+            await channel.send(embed=discord.Embed(color=0xff6f3f, title="Unknown Error", description=f"{exception}"))
 
     async def on_message(self, message):
         self.counter["messages_read"] += 1
