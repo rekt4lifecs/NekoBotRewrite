@@ -87,10 +87,7 @@ class NekoBot(commands.AutoShardedBot):
         elif isinstance(exception, commands.BotMissingPermissions):
             await ctx.send(f"Im missing permissions ;-;\nPermissions I need:\n{exception.missing_perms}")
         elif isinstance(exception, discord.Forbidden):
-            try:
-                await ctx.send("**I either don't have that permission or am forbidden to do that.")
-            except:
-                pass
+            pass
         else:
             log.exception(type(exception).__name__, exc_info=exception)
             await channel.send(embed=discord.Embed(color=0xff6f3f, title="Unknown Error", description=f"{exception}"))
