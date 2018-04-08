@@ -106,6 +106,22 @@ class Fun:
         except:
             await ctx.send("There was an error. Please try again.")
 
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def baguette(self, ctx, user:discord.Member):
+        """:^)"""
+        if not os.path.isfile(f"data/baguette/{user.id}.png"):
+            img = Image.open("data/baguette.jpg")
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(user.avatar_url_as(format="png")) as r:
+                    res = await r.read()
+            avatar = Image.open(BytesIO(res)).resize((275, 275))
+
+            img.paste(avatar, (260, 75))
+
+            img.save(f"data/baguette/{user.id}.png")
+        await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"), embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))
+
     @commands.command(name="b64", aliases=['b64encode', 'base64encode'])
     @commands.cooldown(1, 7, commands.BucketType.user)
     async def base_encode(self, ctx, *, encode_to: str):

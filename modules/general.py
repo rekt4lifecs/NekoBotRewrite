@@ -582,7 +582,7 @@ class General:
             embed.add_field(name="Fun",
                             value="`food`, `ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
                                   "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `joke`, "
-                                  "`b64`, `md5`, `kannagen`, `iphonex`", inline=False)
+                                  "`b64`, `md5`, `kannagen`, `iphonex`, `baguette`", inline=False)
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
