@@ -9,3 +9,5 @@ config.py
 
 .idea/
 *.sql
+
+.config.json
