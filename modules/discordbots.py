@@ -11,12 +11,9 @@ class DiscordBotsOrgAPI:
         self.token = config.dbots_key
         self.dblpy = dbl.Client(self.bot, self.token)
 
-    @commands.command()
-    @commands.is_owner()
-    async def startdbl(self, ctx):
+    async def startdbl(self):
         stats2 = [f"Servers: {len(self.bot.guilds)}", f"Users: {len(set(self.bot.get_all_members()))}",
                   "OwO whats n!help", "🤔🤔🤔"]
-        await ctx.send("Starting DBL...")
         while True:
             print("Attempting to update server count.")
             try:
@@ -48,6 +45,9 @@ class DiscordBotsOrgAPI:
             except Exception as e:
                 print(f"Failed to post to terminal, {e}")
             await asyncio.sleep(1800)
+
+    async def on_ready(self):
+        await self.startdbl()
 
 def setup(bot):
     bot.add_cog(DiscordBotsOrgAPI(bot))

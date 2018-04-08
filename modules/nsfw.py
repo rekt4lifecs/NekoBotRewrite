@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, random, aiohttp, config, requests, pymysql
+import discord, random, aiohttp, requests
 from bs4 import BeautifulSoup as bs
 from collections import Counter
 import config
@@ -11,19 +11,28 @@ class NSFW:
         self.bot = bot
         self.counter = Counter()
 
+    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+        connection = self.bot.sql
+        async with connection.cursor() as db:
+            await db.execute(query)
+            if isSelect:
+                if fetchAll:
+                    values = await db.fetchall()
+                else:
+                    values = await db.fetchone()
+            if commit:
+                await connection.commit()
+        connection.close()
+        if isSelect:
+            return values
+
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(200, 20, commands.BucketType.user)
     async def pgif(self, ctx):
         """Posts a Random PrOn GIF"""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
-        amount = db.execute(f'SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"')
-        if amount != 0:
+        amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"', isSelect=True)
+        if amount:
             if not ctx.message.channel.is_nsfw():
                 await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
                 return
@@ -379,18 +388,12 @@ class NSFW:
     @commands.command()
     @commands.guild_only()
     async def hentai(self, ctx):
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         self.counter['hentai'] += 1
-        amount = db.execute(f'SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"')
-        if amount != 0:
+        amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"', isSelect=True)
+        if amount:
             x = random.choice(['bj', 'cum', 'Random_hentai_gif', 'boobs', 'pussy', 'anal'])
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f"https://nekos.life/api/v2/img/{x}") as r:

@@ -1,6 +1,7 @@
-import discord, pymysql, random, time, datetime, aiohttp, asyncio
+import discord, pymysql, random, time, datetime, asyncio
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
+
 
 class CardGame:
     """Loli Card Gamelol"""
@@ -8,7 +9,7 @@ class CardGame:
     def __init__(self, bot):
         self.bot = bot
 
-    async def usercheck(self, datab : str, user : discord.Member):
+    async def usercheck(self, datab: str, user: discord.Member):
         user = user.id
         connection = pymysql.connect(host="localhost",
                                      user="root",
@@ -56,68 +57,70 @@ class CardGame:
     @card.command(name='transfer')
     async def card_transfer(self, ctx, card_num: int, user: discord.Member):
         """Transfer a card to a user"""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
-        if not db.execute(f"SELECT 1 FROM roleplay WHERE userid = {ctx.message.author.id}"):
-            return await ctx.send(f"{ctx.message.author.mention}, you don't have any cards!")
-        elif user.bot:
-            return await ctx.send("**You can't transfer cards to bots**")
-        elif not db.execute(f"SELECT 1 FROM roleplay WHERE userid = {user.id}"):
-            return await ctx.send(f"{user.name} doesn't have any cards.")
-        db.execute(f"SELECT cardid{card_num} FROM roleplay WHERE userid = {ctx.message.author.id}")
-        cardid = int(db.fetchone()[0])
-        if cardid == 0:
-            return await ctx.send("**Empty Slot**")
-        else:
-            db.execute(f"SELECT character_name FROM roleplay_cards WHERE cardid = {cardid}")
-            card_name = db.fetchone()[0]
-
-        db.execute(f"SELECT cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 FROM roleplay WHERE userid = {user.id}")
-        allcards = db.fetchall()
-        cardid1 = int(allcards[0][0])
-        cardid2 = int(allcards[0][1])
-        cardid3 = int(allcards[0][2])
-        cardid4 = int(allcards[0][3])
-        cardid5 = int(allcards[0][4])
-        cardid6 = int(allcards[0][5])
-        if cardid1 == 0:
-            cardid = "cardid1"
-        elif cardid2 == 0:
-            cardid = "cardid2"
-        elif cardid3 == 0:
-            cardid = "cardid3"
-        elif cardid4 == 0:
-            cardid = "cardid4"
-        elif cardid5 == 0:
-            cardid = "cardid5"
-        elif cardid6 == 0:
-            cardid = "cardid6"
-        else:
-            return await ctx.send(f"**{user.name} is out of slots!**")
-
-        await ctx.send(f"Are you sure you want to give {user.name}, {card_name}")
-
-        def check(m):
-            return m.author == ctx.message.author and m.channel == ctx.message.channel
-
-        try:
-            msg = await self.bot.wait_for('message', check=check, timeout=15.0)
-        except asyncio.TimeoutError:
-            return await ctx.send("**Timed out...**")
-        if str(msg.content).lower().startswith("yes"):
-            db.execute(f"SELECT cardid{card_num} FROM roleplay WHERE userid = {user.id}")
-            cardidxx = int(db.fetchone()[0])
-            db.execute(f"UPDATE roleplay SET {cardid} = 0 WHERE userid = {ctx.message.author.id}")
-            connection.commit()
-            db.execute(f"UPDATE roleplay SET {cardid} = {cardidxx} WHERE userid = {user.id}")
-            connection.commit()
-            await ctx.send(f"**Successfully transferred {card_name} from {ctx.message.author.name} to {user.name}!**")
-        else:
-            return await ctx.send("Transaction cancelled.")
+        await ctx.send("**Coming Soon.**", delete_after=5)
+        # connection = pymysql.connect(host="localhost",
+        #                              user="root",
+        #                              password="rektdiscord",
+        #                              db="nekobot",
+        #                              port=3306)
+        # db = connection.cursor()
+        # if not db.execute(f"SELECT 1 FROM roleplay WHERE userid = {ctx.message.author.id}"):
+        #     return await ctx.send(f"{ctx.message.author.mention}, you don't have any cards!")
+        # elif user.bot:
+        #     return await ctx.send("**You can't transfer cards to bots**")
+        # elif not db.execute(f"SELECT 1 FROM roleplay WHERE userid = {user.id}"):
+        #     return await ctx.send(f"{user.name} doesn't have any cards.")
+        # db.execute(f"SELECT cardid{card_num} FROM roleplay WHERE userid = {ctx.message.author.id}")
+        # cardid = int(db.fetchone()[0])
+        # if cardid == 0:
+        #     return await ctx.send("**Empty Slot**")
+        # else:
+        #     db.execute(f"SELECT character_name FROM roleplay_cards WHERE cardid = {cardid}")
+        #     card_name = db.fetchone()[0]
+        #
+        # db.execute(
+        #     f"SELECT cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 FROM roleplay WHERE userid = {user.id}")
+        # allcards = db.fetchall()
+        # cardid1 = int(allcards[0][0])
+        # cardid2 = int(allcards[0][1])
+        # cardid3 = int(allcards[0][2])
+        # cardid4 = int(allcards[0][3])
+        # cardid5 = int(allcards[0][4])
+        # cardid6 = int(allcards[0][5])
+        # if cardid1 == 0:
+        #     cardid = "cardid1"
+        # elif cardid2 == 0:
+        #     cardid = "cardid2"
+        # elif cardid3 == 0:
+        #     cardid = "cardid3"
+        # elif cardid4 == 0:
+        #     cardid = "cardid4"
+        # elif cardid5 == 0:
+        #     cardid = "cardid5"
+        # elif cardid6 == 0:
+        #     cardid = "cardid6"
+        # else:
+        #     return await ctx.send(f"**{user.name} is out of slots!**")
+        #
+        # await ctx.send(f"Are you sure you want to give {user.name}, {card_name}")
+        #
+        # def check(m):
+        #     return m.author == ctx.message.author and m.channel == ctx.message.channel
+        #
+        # try:
+        #     msg = await self.bot.wait_for('message', check=check, timeout=15.0)
+        # except asyncio.TimeoutError:
+        #     return await ctx.send("**Timed out...**")
+        # if str(msg.content).lower().startswith("yes"):
+        #     db.execute(f"SELECT cardid{card_num} FROM roleplay WHERE userid = {user.id}")
+        #     cardidxx = int(db.fetchone()[0])
+        #     db.execute(f"UPDATE roleplay SET {cardid} = 0 WHERE userid = {ctx.message.author.id}")
+        #     connection.commit()
+        #     db.execute(f"UPDATE roleplay SET {cardid} = {cardidxx} WHERE userid = {user.id}")
+        #     connection.commit()
+        #     await ctx.send(f"**Successfully transferred {card_name} from {ctx.message.author.name} to {user.name}!**")
+        # else:
+        #     return await ctx.send("Transaction cancelled.")
 
     @card.command(name='fight', aliases=['battle'])
     async def card_battle(self, ctx, user: discord.Member):
@@ -184,7 +187,8 @@ class CardGame:
                 if user_card == 0:
                     return await ctx.send(f"{user.mention}, you don't have a card in that slot.")
                 else:
-                    db.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {author_card}")
+                    db.execute(
+                        f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {author_card}")
                     all_author_cards = db.fetchall()
                     author_card_name = all_author_cards[0][0]
                     author_card_attack = all_author_cards[0][1]
@@ -194,20 +198,25 @@ class CardGame:
                     user_card_name = all_user_cards[0][0]
                     user_card_attack = all_user_cards[0][1]
                     user_card_defense = all_user_cards[0][2]
-                    msg = await ctx.send(embed=discord.Embed(color=0xDEADBF, title=f"{author_card_name} ({author.name}) |\n"
-                                                                                   f" {user_card_name} ({user.name})",
-                                                             description=f"**{author.name}** vs **{user.name}**"))
+                    msg = await ctx.send(
+                        embed=discord.Embed(color=0xDEADBF, title=f"{author_card_name} ({author.name}) |\n"
+                                                                  f" {user_card_name} ({user.name})",
+                                            description=f"**{author.name}** vs **{user.name}**"))
                     await asyncio.sleep(random.randint(3, 6))
-                    if (int(author_card_attack) + int(author_card_defense)) > (int(user_card_attack) + int(user_card_defense)):
-                        await msg.edit(embed=discord.Embed(color=0xDEADBF, title=f"{author_card_name} ({author.name}) |\n"
-                                                                                   f" {user_card_name} ({user.name})",
-                                                             description=f"**{author.name}** vs **{user.name}**\n"
-                                                                         f"**{author.name}** Beat **{user.name}**"))
-                    elif (int(author_card_attack) + int(author_card_defense)) < (int(user_card_attack) + int(user_card_defense)):
-                        await msg.edit(embed=discord.Embed(color=0xDEADBF, title=f"{author_card_name} ({author.name}) |\n"
-                                                                                   f" {user_card_name} ({user.name})",
-                                                             description=f"**{author.name}** vs **{user.name}**\n"
-                                                                         f"**{user.name}** Beat **{author.name}**"))
+                    if (int(author_card_attack) + int(author_card_defense)) > (
+                            int(user_card_attack) + int(user_card_defense)):
+                        await msg.edit(
+                            embed=discord.Embed(color=0xDEADBF, title=f"{author_card_name} ({author.name}) |\n"
+                                                                      f" {user_card_name} ({user.name})",
+                                                description=f"**{author.name}** vs **{user.name}**\n"
+                                                            f"**{author.name}** Beat **{user.name}**"))
+                    elif (int(author_card_attack) + int(author_card_defense)) < (
+                            int(user_card_attack) + int(user_card_defense)):
+                        await msg.edit(
+                            embed=discord.Embed(color=0xDEADBF, title=f"{author_card_name} ({author.name}) |\n"
+                                                                      f" {user_card_name} ({user.name})",
+                                                description=f"**{author.name}** vs **{user.name}**\n"
+                                                            f"**{user.name}** Beat **{author.name}**"))
         else:
             return await ctx.send("Battle cancelled.")
 
@@ -250,7 +259,8 @@ class CardGame:
             timeleft_m = time.strftime("%M", time.gmtime(delta.seconds))
             await ctx.send(f"Wait another {timeleft}h {timeleft_m}m before using daily again...")
             return
-        db.execute(f"SELECT cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 FROM roleplay WHERE userid = {author.id}")
+        db.execute(
+            f"SELECT cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 FROM roleplay WHERE userid = {author.id}")
         allcards = db.fetchall()
         cardid1 = int(allcards[0][0])
         cardid2 = int(allcards[0][1])
@@ -439,10 +449,12 @@ class CardGame:
         except:
             pass
         author = ctx.message.author
-        db.execute(f"SELECT cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 FROM roleplay WHERE userid = {author.id}")
+        db.execute(
+            f"SELECT cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 FROM roleplay WHERE userid = {author.id}")
         allcards = db.fetchall()[0]
 
-        card1 = db.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[0])}")
+        card1 = db.execute(
+            f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[0])}")
         if card1 != 0:
             all_ = db.fetchall()[0]
             card1 = str(all_[0]).replace("_", " ").title()
@@ -452,8 +464,9 @@ class CardGame:
             card1 = "Empty"
             card1_a = 0
             card1_d = 0
-            
-        card2 = db.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[1])}")
+
+        card2 = db.execute(
+            f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[1])}")
         if card2 != 0:
             all_ = db.fetchall()[0]
             card2 = str(all_[0]).replace("_", " ").title()
@@ -463,8 +476,9 @@ class CardGame:
             card2 = "Empty"
             card2_a = 0
             card2_d = 0
-            
-        card3 = db.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[2])}")
+
+        card3 = db.execute(
+            f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[2])}")
         if card3 != 0:
             all_ = db.fetchall()[0]
             card3 = str(all_[0]).replace("_", " ").title()
@@ -474,8 +488,9 @@ class CardGame:
             card3 = "Empty"
             card3_a = 0
             card3_d = 0
-            
-        card4 = db.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[3])}")
+
+        card4 = db.execute(
+            f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[3])}")
         if card4 != 0:
             all_ = db.fetchall()[0]
             card4 = str(all_[0]).replace("_", " ").title()
@@ -485,8 +500,9 @@ class CardGame:
             card4 = "Empty"
             card4_a = 0
             card4_d = 0
-            
-        card5 = db.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[4])}")
+
+        card5 = db.execute(
+            f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[4])}")
         if card5 != 0:
             all_ = db.fetchall()[0]
             card5 = str(all_[0]).replace("_", " ").title()
@@ -496,8 +512,9 @@ class CardGame:
             card5 = "Empty"
             card5_a = 0
             card5_d = 0
-            
-        card6 = db.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[5])}")
+
+        card6 = db.execute(
+            f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[5])}")
         if card6 != 0:
             all_ = db.fetchall()[0]
             card6 = str(all_[0]).replace("_", " ").title()
@@ -567,17 +584,10 @@ class CardGame:
 
         await ctx.send(file=discord.File(f'data/cards/{num}.png'), embed=embed.set_image(url=f'attachment://{num}.png'))
 
-
     @card.command(name='generate')
     @commands.is_owner()
     async def card_gen(self, ctx, character: str = "shiro", attack: int = 1, defense: int = 1):
         """Recieve your dailies"""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
         card_name = f"data/{character}.jpg"
         img = Image.open('data/card.jpg')
         _character = Image.open(card_name).resize((314, 313))
@@ -596,6 +606,7 @@ class CardGame:
         img.save(f"data/cards/{num}.png")
         await ctx.send(file=discord.File(f"data/cards/{num}.png"),
                        embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{num}.png'))
+
 
 def setup(bot):
     bot.add_cog(CardGame(bot))

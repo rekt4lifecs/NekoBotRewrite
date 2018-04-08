@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-import psutil, datetime, aiohttp, random, config, pymysql, aiomysql, math
+import psutil, datetime, random, config, math, aiohttp
 from collections import Counter
 from hurry.filesize import size
 from .utils.chat_formatting import pagify
@@ -9,8 +9,7 @@ from bs4 import __version__ as bsv
 from urllib.parse import quote_plus
 import string, json
 
-from .utils.paginator import HelpPaginator, CannotPaginate
-from .utils import chat_formatting
+from .utils.paginator import HelpPaginator
 
 def millify(n):
     millnames = ['', 'k', 'M', ' Billion', ' Trillion']
@@ -26,6 +25,21 @@ class General:
     def __init__(self, bot):
         self.bot = bot
         self.counter = Counter()
+
+    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+        connection = self.bot.sql
+        async with connection.cursor() as db:
+            await db.execute(query)
+            if isSelect:
+                if fetchAll:
+                    values = await db.fetchall()
+                else:
+                    values = await db.fetchone()
+            if commit:
+                await connection.commit()
+        connection.close()
+        if isSelect:
+            return values
 
     @commands.command()
     async def lmgtfy(self, ctx, *, search_terms: str):
@@ -56,26 +70,6 @@ class General:
     @commands.command(aliases=['version'])
     async def info(self, ctx):
         servers = len(self.bot.guilds)
-        latency1 = "%.4f" % self.bot.latencies[0][1]
-        latency2 = "%.4f" % self.bot.latencies[1][1]
-        connection = await aiomysql.connect(user='root',
-                                            password=config.dbpass,
-                                            host='localhost',
-                                            port=3306,
-                                            db='nekobot')
-        async with connection.cursor() as cur:
-            await cur.execute(f"SELECT amount FROM stats WHERE type = \"messages\"")
-            messages = await cur.fetchone()
-            messages_read = int(messages[0])
-            await cur.execute(f"SELECT amount FROM stats WHERE type = \"commands\"")
-            commands = await cur.fetchone()
-            commands_done = int(commands[0])
-            await cur.execute(f"SELECT amount FROM stats WHERE type = \"bans\"")
-            bans = await cur.fetchone()
-            bans = int(bans[0])
-            await cur.execute(f"SELECT amount FROM stats WHERE type = \"kicks\"")
-            kicks = await cur.fetchone()
-            kicks = int(kicks[0])
         info = discord.Embed(title="**Info**",
                              color=0xDEADBF,
                              description=f"Servers: **{millify(servers)} ({servers})**\n"
@@ -83,13 +77,7 @@ class General:
                                          f"Bot Commands: **{str(len(self.bot.commands))}**\n"
                                          f"Channels: **{millify(len(set(self.bot.get_all_channels())))}**\n"
                                          f"Shards: **{self.bot.shard_count}**\n"
-                                         f"Latency - Shard 1: **{latency1}** Shard 2: **{latency2}**\n"
-                                         f"Kicks with bot: **{kicks}**\n"
-                                         f"Bans with bot: **{bans}**")
-        info.add_field(name="Messages Read", value=f"Since Restart: **{millify(self.bot.counter['messages_read'])}**,")
-                                                   #f"\nTotal: **{millify(messages_read)}** (**{messages_read}**)")
-        # info.add_field(name="Processed Commands", value=f"Since Restart: **{millify(self.bot.counter['commands'])}**,")
-        #                                                 #f"\nTotal: **{millify(commands_done)}** (**{commands_done}**)")
+                                         f"Messages Read (Since Restart): **{millify(self.bot.counter['messages_read'])}**")
         try:
             info.add_field(name="System:", value=f"CPU %: **{psutil.cpu_percent()}%**\n"
                                              f"Virtual Memory: **{size(psutil.virtual_memory().available)}**\n"
@@ -102,7 +90,7 @@ class General:
                                            " [Support Server](https://discord.gg/q98qeYN) | "
                                            "[Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | <:nkotreon:430733839003025409> [Patreon](https://www.patreon.com/NekoBot)")
         info.set_footer(
-            text="Bot by ReKT#0001 and was forced to use MySQL by Fox#0001 <3")
+            text="Bot by ReKT#0001 & Kot#0001 :^)")
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
         await ctx.send(embed=info)
 
@@ -157,11 +145,6 @@ class General:
                       if m.status == discord.Status.online or
                       m.status == discord.Status.idle])
 
-        if server.features == []:
-            features = "None"
-        else:
-            features = str(server.features).replace("[", "").replace("]", "")
-
         embed = discord.Embed(color=0xDEADBF)
         embed.add_field(name="Name", value=f"**{server.name}**\n({server.id})")
         embed.add_field(name="Owner", value=server.owner)
@@ -197,7 +180,6 @@ class General:
         embed.add_field(name="Guild", value=channel.guild)
         embed.add_field(name="ID", value=channel.id)
         embed.add_field(name="Category ID", value=channel.category_id)
-        # embed.add_field(name="Topic", value=channel.topic)
         embed.add_field(name="Position", value=channel.position)
         embed.add_field(name="NSFW", value=str(channel.is_nsfw()))
         embed.add_field(name="Members", value=len(channel.members))
@@ -221,7 +203,7 @@ class General:
             else:
                 pos = 0
             if pos not in range(0, 11):  # API only provides the
-                pos = 0  # top 10 definitions
+                pos = 0                  # top 10 definitions
         except ValueError:
             pos = 0
 
@@ -303,12 +285,6 @@ class General:
         or
             .permissions/.perms ReKT#0001 #testing
         anyway doesn't matter ;p"""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
         if user == None:
             user = ctx.message.author
 
@@ -317,8 +293,7 @@ class General:
         else:
             channel = discord.utils.get(ctx.message.guild.channels, name=channel)
             print(channel)
-
-        amount = db.execute(f'SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"')
+        amount = await self.execute(isSelect=True, query=f"SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"")
         if amount != 0:
             try:
                 perms = user.permissions_in(channel)
@@ -548,25 +523,6 @@ class General:
         await ctx.send(embed=em)
 
     @commands.command()
-    @commands.is_owner()
-    async def todo(self, ctx, *, todo:str=None):
-        """What to do"""
-        connection = await aiomysql.connect(user='root',
-                                            password=config.dbpass,
-                                            host='localhost',
-                                            port=3306,
-                                            db='nekobot')
-        async with connection.cursor() as cur:
-            if todo is not None:
-                await cur.execute(f"update stats set amount = \"{todo}\" where type = \"todo\"")
-                await connection.commit()
-                await ctx.send(f"Added {todo}")
-            else:
-                await cur.execute(f"SELECT amount FROM stats WHERE type = \"todo\"")
-                todo_list = await cur.fetchone()
-                await ctx.send(todo_list[0])
-
-    @commands.command()
     async def calc(self, ctx, num1 : int, operator : str, num2 : int):
         """Calculator, +, -, *, /"""
         try:
@@ -591,7 +547,17 @@ class General:
     async def help(self, ctx, option: str = None):
         """Help Command OwO"""
         color = 0xDEADBF
-        # too lazy to loop kthx fiteme source stealers
+        if not option is None:
+            entity = self.bot.get_cog(option) or self.bot.get_command(option)
+
+            if entity is None:
+                clean = option.replace('@', '@\u200b')
+                return await ctx.send(f'Command or category "{clean}" not found.')
+            elif isinstance(entity, commands.Command):
+                p = await HelpPaginator.from_command(ctx, entity)
+            else:
+                p = await HelpPaginator.from_cog(ctx, entity)
+            return await p.paginate()
         try:
             latency = "%.4f" % self.bot.latencies[0][1]
             embed = discord.Embed(color=color,

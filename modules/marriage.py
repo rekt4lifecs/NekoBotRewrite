@@ -1,20 +1,30 @@
 from discord.ext import commands
-import discord, asyncio, pymysql
+import discord, asyncio
 
 class Marriage:
 
     def __init__(self, bot):
         self.bot = bot
 
+    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+        connection = self.bot.sql
+        async with connection.cursor() as db:
+            await db.execute(query)
+            if isSelect:
+                if fetchAll:
+                    values = await db.fetchall()
+                else:
+                    values = await db.fetchone()
+            if commit:
+                await connection.commit()
+        connection.close()
+        if isSelect:
+            return values
+
     async def userexists(self, datab : str, user : discord.Member):
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
         user = user.id
-        if not db.execute(f'SELECT 1 FROM {datab} WHERE userid = {user}'):
+        x = await self.execute(f"SELECT 1 FROM {datab} WHERE userid = {user}", isSelect=True)
+        if not x:
             return False
         else:
             return True
@@ -23,12 +33,6 @@ class Marriage:
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def marry(self, ctx, user : discord.Member):
         """Marry someone OwO"""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
         author = ctx.message.author
 
         if user == author:
@@ -54,21 +58,13 @@ class Marriage:
                 return
 
             await ctx.send(f"🎉 {author.mention} ❤ {user.mention} 🎉")
-            db.execute(f"INSERT INTO marriage VALUES({author.id}, {user.id})")
-            connection.commit()
-            db.execute(f"INSERT INTO marriage VALUES({user.id}, {author.id})")
-            connection.commit()
+            await self.execute(f"INSERT INTO marriage VALUES({author.id}, {user.id})", commit=True)
+            await self.execute(f"INSERT INTO marriage VALUES({user.id}, {author.id})", commit=True)
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def divorce(self, ctx, user : discord.Member):
         """Divorce ;-;"""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
         author = ctx.message.author
 
         if user == author:
@@ -81,17 +77,15 @@ class Marriage:
         elif await self.userexists('marriage', user) is False:
             await ctx.send(embed=discord.Embed(color=0xff5630, description="That user isn't married"))
             return
-        db.execute(f"SELECT marryid FROM marriage WHERE userid = {author.id}")
-        user_married_to = int(db.fetchone()[0])
+        x = await self.execute(f"SELECT marryid FROM marriage WHERE userid = {author.id}", isSelect=True)
+        user_married_to = int(x[0])
         if user_married_to != user.id:
             await ctx.send(embed=discord.Embed(color=0xff5630, description="You are not married to that user"))
             return
         else:
             await ctx.send(f"{author.name} divorced {user.name} 😦😢")
-            db.execute(f"DELETE FROM marriage WHERE userid = {author.id}")
-            connection.commit()
-            db.execute(f"DELETE FROM marriage WHERE userid = {user.id}")
-            connection.commit()
+            await self.execute(f"DELETE FROM marriage WHERE userid = {author.id}", commit=True)
+            await self.execute(f"DELETE FROM marriage WHERE userid = {user.id}", commit=True)
 
 def setup(bot):
     bot.add_cog(Marriage(bot))

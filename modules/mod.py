@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, argparse, re, shlex, traceback, io, textwrap, asyncio, pymysql, config, os
+import discord, argparse, re, shlex, traceback, io, textwrap, asyncio
 from .utils import checks
 from contextlib import redirect_stdout
 from collections import Counter
@@ -108,17 +108,6 @@ class Moderation:
     @checks.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: ActionReason = None):
         """Kicks a member from the server."""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
-        db.execute(f"SELECT amount FROM stats WHERE type = \"kicks\"")
-        kicks = db.fetchone()
-        kicks = int(kicks[0])
-        db.execute(f"UPDATE stats SET amount = {kicks + 1} WHERE type = \"kicks\"")
-        connection.commit()
         try:
             if reason is None:
                 reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
@@ -132,17 +121,6 @@ class Moderation:
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: MemberID, *, reason: ActionReason = None):
         """Bans a member from the server."""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
-        db.execute(f"SELECT amount FROM stats WHERE type = \"bans\"")
-        bans = db.fetchone()
-        bans = int(bans[0])
-        db.execute(f"UPDATE stats SET amount = {bans + 1} WHERE type = \"bans\"")
-        connection.commit()
         try:
             if reason is None:
                 reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
@@ -684,7 +662,7 @@ class Moderation:
             return
         channel = self.bot.get_channel(431887286246834178)
         owner = self.bot.get_user(guild.owner_id)
-        embed = discord.Embed(color=0xDEADBF, title="Guild Join",
+        embed = discord.Embed(color=0x8bff87, title="Guild Join",
                               description=f"```\n"
                                           f"Name:       {guild.name}\n"
                                           f"Members:    {len(set(guild.members))}\n"

@@ -1,7 +1,10 @@
+import time
+starttime = time.time()
 from discord.ext import commands
 import logging, traceback, sys, discord
 from datetime import date
 from collections import Counter
+import aiomysql
 
 import config
 log = logging.getLogger('NekoBot')
@@ -10,23 +13,6 @@ date = f"{date.today().timetuple()[0]}_{date.today().timetuple()[1]}_{date.today
 handler = logging.FileHandler(filename=f'NekoBot_{date}.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 log.addHandler(handler)
-
-# ------Default------
-# 'modules.cardgame',
-# 'modules.donator',
-# 'modules.chatbot',
-# 'modules.devtools',
-# 'modules.crypto',
-# 'modules.discordbots',
-# 'modules.eco',
-# 'modules.fun',
-# 'modules.games',
-# 'modules.general',
-# 'modules.imgwelcome',
-# 'modules.marriage',
-# 'modules.mod',
-# 'modules.nsfw',
-# 'modules.reactions'
 
 startup_extensions = {
     'modules.audio',
@@ -46,7 +32,6 @@ startup_extensions = {
 }
 
 class NekoBot(commands.AutoShardedBot):
-    """NekoBot Rewrite OwO"""
 
     def __init__(self):
         super().__init__(command_prefix=commands.when_mentioned_or('n!'),
@@ -55,6 +40,13 @@ class NekoBot(commands.AutoShardedBot):
                          pm_help=None,
                          help_attrs={'hidden': True})
         self.counter = Counter()
+
+        async def _init_mysql(self):
+            self.sql = await aiomysql.connect(host='localhost', port=3306,
+                                              user='root', password=config.dbpass,
+                                              db='nekobot')
+
+        self.loop.create_task(_init_mysql(self))
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
@@ -101,6 +93,11 @@ class NekoBot(commands.AutoShardedBot):
             pass
         elif isinstance(exception, commands.BotMissingPermissions):
             await ctx.send(f"Im missing permissions ;-;\nPermissions I need:\n{exception.missing_perms}")
+        elif isinstance(exception, discord.Forbidden):
+            try:
+                await ctx.send("**I either don't have that permission or am forbidden to do that.")
+            except:
+                pass
         else:
             log.exception(type(exception).__name__, exc_info=exception)
             await channel.send(embed=discord.Embed(color=0xff6f3f, title="Unknown Error", description=f"{exception}"))

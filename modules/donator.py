@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord, aiohttp
-import random, string, json, time
-import pymysql
+import random, string, time
+import datetime
 
 import config
 
@@ -9,11 +9,21 @@ class Donator:
 
     def __init__(self, bot):
         self.bot = bot
-        self.donators = ["178189410871803904",
-                             "205379510139486208",
-                             "102165107244539904",
-                             "270133511325876224",
-                             "266277541646434305"]
+
+    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+        connection = self.bot.sql
+        async with connection.cursor() as db:
+            await db.execute(query)
+            if isSelect:
+                if fetchAll:
+                    values = await db.fetchall()
+                else:
+                    values = await db.fetchone()
+            if commit:
+                await connection.commit()
+        connection.close()
+        if isSelect:
+            return values
 
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
@@ -25,15 +35,7 @@ class Donator:
 
         author = ctx.message.author
 
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
-
-        db.execute(f"SELECT userid FROM donator")
-        alltokens = db.fetchall()
+        alltokens = await self.execute(isSelect=True, fetchAll=True, query="SELECT userid FROM donator")
         tokenlist = []
         for x in range(len(alltokens)):
             tokenlist.append(int(alltokens[x][0]))
@@ -56,12 +58,6 @@ class Donator:
     @commands.is_owner()
     async def createkey(self, ctx):
         """Create a key"""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
         x1 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
         x2 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
         x3 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
@@ -69,58 +65,85 @@ class Donator:
         await ctx.send(embed=discord.Embed(color=0xDEADBF, title="Token Generated", description=f"```css\n"
                                                                                                 f"[ {token} ]```"))
         timenow = int(time.time())
-        db.execute(f"INSERT INTO donator VALUES (0, \"{token}\", {timenow})")
-        connection.commit()
+        await self.execute(query=f"INSERT INTO donator VALUES (0, \"{token}\", {timenow})", commit=True)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def redeem(self, ctx, *, key: str):
         """Redeem your donation key"""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
-        x = db.execute(f"SELECT 1 FROM donator WHERE token = \"{key}\"")
-        if x == 0:
+        x = await self.execute(query=f"SELECT 1 FROM donator WHERE token = \"{key}\"", isSelect=True)
+        if not x:
             return await ctx.send("**Invalid key**")
-        db.execute(f"SELECT userid FROM donator WHERE token = \"{key}\"")
-        user = int(db.fetchone()[0])
-        if user == 0:
-            db.execute(f"UPDATE donator SET userid = {ctx.message.author.id} WHERE token = \"{key}\"")
-            connection.commit()
+        alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
+        tokenlist = []
+        for x in range(len(alltokens)):
+            tokenlist.append(int(alltokens[x][0]))
+        if ctx.message.author.id in tokenlist:
+            return await ctx.send("**You already have a token activated!**")
+        user = await self.execute(query=f"SELECT userid FROM donator WHERE token = \"{key}\"",
+                                      isSelect=True)
+        if int(user[0]) == 0:
+            await self.execute(query=f"UPDATE donator SET userid = {ctx.message.author.id} WHERE token = \"{key}\"",
+                                   commit=True)
             channel = self.bot.get_channel(431887286246834178)
             await channel.send(embed=discord.Embed(color=0x8bff87,
                                                    title="Token Accepted",
                                                    description=f"```css\n"
                                                                f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
-                                                               f"Key: [ {key} ]").set_thumbnail(url=ctx.message.author.avatar_url))
+                                                               f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
             return await ctx.send("**Token Accepted!**")
         else:
+            channel = self.bot.get_channel(431887286246834178)
+            await channel.send(embed=discord.Embed(color=0xff6f3f,
+                                                   title="Token Denied",
+                                                   description=f"```css\n"
+                                                               f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
+                                                               f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
             return await ctx.send("**Token already in use.**")
+
+    @commands.command()
+    @commands.is_owner()
+    async def delkey(self, ctx, *, key:str):
+        """Delete a key"""
+        x = await self.execute(query=f"SELECT 1 FROM donator WHERE token = \"{key}\"", isSelect=True)
+        if not x:
+            return await ctx.send("**Invalid key**")
+        else:
+            await self.execute(query=f"DELETE FROM donator WHERE token = \"{key}\"", commit=True)
+            await ctx.send(f"**Key `{key}` has been deleted.**")
+            embed = discord.Embed(color=0xff6f3f, title="Token Deleted",
+                                  description=f"```css\n"
+                                              f"Key: [ {key} ] \n"
+                                              f"```")
+            channel = self.bot.get_channel(431887286246834178)
+            return await channel.send(embed=embed)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def donate(self, ctx):
-        """Donate"""
-        return await ctx.send(embed=discord.Embed(color=0xff5630, title="OwO Whats This",
+        """Donate or Show key time left."""
+        alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
+        tokenlist = []
+        for x in range(len(alltokens)):
+            tokenlist.append(int(alltokens[x][0]))
+        if ctx.message.author.id in tokenlist:
+            user_token = await self.execute(query=f"SELECT token, usetime FROM donator WHERE userid = {ctx.message.author.id}",
+                                                isSelect=True)
+            timeconvert = datetime.datetime.fromtimestamp(int(user_token[1])).strftime('%Y-%m-%d')
+            embed = discord.Embed(color=0xDEADBF, title="Key Info", description=f"Key: `XXXX-XXXX-{user_token[0][-4:]}`\n"
+                                                                                f"Expiry Date: `{timeconvert}`")
+            return await ctx.send(embed=embed)
+        else:
+            return await ctx.send(embed=discord.Embed(color=0xff5630, title="OwO Whats This",
                                                   description="Come donate on [Patreon](https://www.patreon.com/NekoBot) to get access to special features OwO"))
 
     @commands.command(name='upload')
     @commands.cooldown(1, 15, commands.BucketType.user)
-    async def owner_upload(self, ctx):
+    async def donator_upload(self, ctx):
         """File Uploader"""
         author = ctx.message.author
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
 
-        db.execute(f"SELECT userid FROM donator")
-        alltokens = db.fetchall()
+        alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
         tokenlist = []
         for x in range(len(alltokens)):
             tokenlist.append(int(alltokens[x][0]))
