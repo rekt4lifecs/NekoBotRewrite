@@ -501,7 +501,7 @@ class General:
     async def botinfo(self, ctx, bot_user : int = None):
         """Get Bot Info"""
         if bot_user == None:
-            bot_user = config.botid
+            bot_user = self.bot.user.id
         url = f"https://discordbots.org/api/bots/{bot_user}"
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
@@ -541,8 +541,6 @@ class General:
         except:
             pass
         try:
-        #em.add_field(name="Invite", value=)
-        #em.add_field(name="Website", value=bot['website'])
             em.set_thumbnail(url=f"https://images.discordapp.net/avatars/{bot['id']}/{bot['avatar']}")
         except:
             pass
@@ -611,7 +609,7 @@ class General:
                             value="`kick`, `ban`, `massban`, `unban`, `rename`, `poll`, `purge`, `mute`, `unmute`", inline=False)
             embed.add_field(name="Roleplay", value="`card`")
             embed.add_field(name="IMGWelcomer", value="`imgwelcome`", inline=False)
-            embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `top`, `ecotop`, `transfer`, "
+            embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `transfer`, "
                                                            "`coinflip`, `blackjack`", inline=False)
             embed.add_field(name="Fun",
                             value="`food`, `ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
