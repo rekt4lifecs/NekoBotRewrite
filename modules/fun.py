@@ -111,13 +111,13 @@ class Fun:
     async def baguette(self, ctx, user:discord.Member):
         """:^)"""
         if not os.path.isfile(f"data/baguette/{user.id}.png"):
-            img = Image.open("data/baguette.jpg")
+            img = Image.open("data/baguette.jpg").convert('RGBA')
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(user.avatar_url_as(format="png")) as r:
                     res = await r.read()
-            avatar = Image.open(BytesIO(res)).resize((275, 275))
+            avatar = Image.open(BytesIO(res)).resize((275, 275)).convert("RGBA")
 
-            img.paste(avatar, (260, 75))
+            img.alpha_composite(avatar, (260, 75))
 
             img.save(f"data/baguette/{user.id}.png")
         await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"), embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))
