@@ -3,6 +3,7 @@ import discord, random, aiohttp, requests
 from bs4 import BeautifulSoup as bs
 from collections import Counter
 import config
+import aiomysql
 
 class NSFW:
     """NSFW Commands OwO"""
@@ -12,7 +13,9 @@ class NSFW:
         self.counter = Counter()
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        connection = self.bot.sql
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                              user='root', password=config.dbpass,
+                                              db='nekobot')
         async with connection.cursor() as db:
             await db.execute(query)
             if isSelect:

@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord, aiohttp, asyncio, time, datetime, config, random, math, logging
-import aioredis
+import aioredis, aiomysql
 
 log = logging.getLogger("NekoBot")
 
@@ -11,7 +11,9 @@ class economy:
         self.bot = bot
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        connection = self.bot.sql
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                              user='root', password=config.dbpass,
+                                              db='nekobot')
         async with connection.cursor() as db:
             await db.execute(query)
             if isSelect:

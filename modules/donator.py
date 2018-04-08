@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord, aiohttp
 import random, string, time
 import datetime
-
+import aiomysql
 import config
 
 class Donator:
@@ -11,7 +11,9 @@ class Donator:
         self.bot = bot
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        connection = self.bot.sql
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                              user='root', password=config.dbpass,
+                                              db='nekobot')
         async with connection.cursor() as db:
             await db.execute(query)
             if isSelect:

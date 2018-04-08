@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-import psutil, datetime, random, config, math, aiohttp
+import psutil, datetime, random, config, math, aiohttp, aiomysql
 from collections import Counter
 from hurry.filesize import size
 from .utils.chat_formatting import pagify
@@ -27,7 +27,9 @@ class General:
         self.counter = Counter()
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        connection = self.bot.sql
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                              user='root', password=config.dbpass,
+                                              db='nekobot')
         async with connection.cursor() as db:
             await db.execute(query)
             if isSelect:

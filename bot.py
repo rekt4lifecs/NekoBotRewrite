@@ -41,13 +41,6 @@ class NekoBot(commands.AutoShardedBot):
                          help_attrs={'hidden': True})
         self.counter = Counter()
 
-        async def _init_mysql(self):
-            self.sql = await aiomysql.connect(host='localhost', port=3306,
-                                              user='root', password=config.dbpass,
-                                              db='nekobot')
-
-        self.loop.create_task(_init_mysql(self))
-
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
             pages = await self.formatter.format_help_for(ctx, ctx.invoked_subcommand)
