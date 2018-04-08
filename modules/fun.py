@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord, aiohttp, random, config, datetime, asyncio, base64, hashlib, textwrap, uuid
 from io import BytesIO
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageFont, ImageDraw, ImageOps
 import os, time
 
 key = config.weeb
@@ -111,13 +111,15 @@ class Fun:
     async def baguette(self, ctx, user:discord.Member):
         """:^)"""
         if not os.path.isfile(f"data/baguette/{user.id}.png"):
-            img = Image.open("data/baguette.jpg").convert('RGBA')
+            img = Image.open("data/baguette.jpg")
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(user.avatar_url_as(format="png")) as r:
                     res = await r.read()
-            avatar = Image.open(BytesIO(res)).resize((275, 275)).convert("RGBA")
+            avatar = Image.open(BytesIO(res)).resize((275, 275))
+            mask = Image.open('data/mask.png').convert('L').resize((275, 275))
+            output = ImageOps.fit(avatar, mask.size, centering=(0.5, 0.5))
 
-            img.alpha_composite(avatar, (260, 75))
+            img.paste(output, (260, 75))
 
             img.save(f"data/baguette/{user.id}.png")
         await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"), embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))
