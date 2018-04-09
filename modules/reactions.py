@@ -3,7 +3,8 @@ import discord, config, aiohttp
 from collections import Counter
 
 key = config.weeb
-auth = {"Authorization": "Wolke " + key}
+auth = {"Authorization": "Wolke " + key,
+        "User-Agent": "NekoBot/1.5.0"}
 
 class Reactions:
     """Reactions"""
