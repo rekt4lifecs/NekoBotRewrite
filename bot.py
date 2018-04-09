@@ -40,6 +40,12 @@ class NekoBot(commands.AutoShardedBot):
                          pm_help=None,
                          help_attrs={'hidden': True})
         self.counter = Counter()
+        for extension in startup_extensions:
+            try:
+                self.load_extension(extension)
+            except:
+                print("Failed to load {}.".format(extension), file=sys.stderr)
+                traceback.print_exc()
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
@@ -88,6 +94,12 @@ class NekoBot(commands.AutoShardedBot):
             await ctx.send(f"Im missing permissions ;-;\nPermissions I need:\n{exception.missing_perms}")
         elif isinstance(exception, discord.Forbidden):
             pass
+        elif isinstance(exception, discord.LoginFailure):
+            print("Failed to login. Invalid token?")
+        elif isinstance(exception, discord.DiscordException):
+            print(f"Discord Exception, {exception}")
+        elif isinstance(exception, discord.NotFound):
+            pass
         else:
             log.exception(type(exception).__name__, exc_info=exception)
             await channel.send(embed=discord.Embed(color=0xff6f3f, title="Unknown Error", description=f"{exception}"))
@@ -119,12 +131,6 @@ class NekoBot(commands.AutoShardedBot):
         print(f"Servers {len(self.guilds)}")
         print(f"Users {len(set(self.get_all_members()))}")
         await self.change_presence(status=discord.Status.idle)
-        for extension in startup_extensions:
-            try:
-                self.load_extension(extension)
-            except:
-                print("Failed to load {}.".format(extension), file=sys.stderr)
-                traceback.print_exc()
 
     def run(self):
         super().run(config.token)

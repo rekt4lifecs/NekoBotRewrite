@@ -13,7 +13,10 @@ class DiscordBotsOrgAPI:
 
     async def startdbl(self):
         stats2 = [f"Servers: {len(self.bot.guilds)}", f"Users: {len(set(self.bot.get_all_members()))}",
-                  "OwO whats n!help", "🤔🤔🤔"]
+                  "OwO whats n!help", "🤔🤔🤔", f"{self.bot.shard_count} Shards OwO", "👀", "(╯°□°）╯︵ ┻━┻",
+                  "¯\_(ツ)_/¯", "┬─┬ノ(ಠ_ಠノ)", "><(((('>", "_/\__/\__0>", "ô¿ô", "°º¤ø,¸¸,ø¤º°`°º¤ø,", "=^..^=",
+                  "龴ↀ◡ↀ龴", "^⨀ᴥ⨀^", "^⨀ᴥ⨀^", "⨌⨀_⨀⨌", "•|龴◡龴|•", "ˁ˚ᴥ˚ˀ", "⦿⽘⦿", " (╯︵╰,)",
+                  " (╯_╰)", "㋡", "ˁ˚ᴥ˚ˀ", "\(^-^)/"]
         while True:
             print("Attempting to update server count.")
             try:
