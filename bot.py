@@ -118,6 +118,7 @@ class NekoBot(commands.AutoShardedBot):
         print(f"Shard {shard_id} Connected...")
 
     async def on_ready(self):
+        print(f"Finished in {int(time.time()) - int(starttime)}s")
         print("             _         _           _   \n"
               "            | |       | |         | |  \n"
               "  _ __   ___| | _____ | |__   ___ | |_ \n"

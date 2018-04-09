@@ -1,5 +1,6 @@
 from discord.ext import commands
 import discord, pymysql, config, aiohttp
+import base64, json
 
 connection = pymysql.connect(user='root',
                              password=config.dbpass,
@@ -77,6 +78,26 @@ class Games:
                                       title="Error Contacting OSU API",
                                       description=f"```{e}```")
                 await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.cooldown(1, 25, commands.BucketType.user)
+    async def minecraft(self, ctx, username:str):
+        try:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f"https://api.mojang.com/users/profiles/minecraft/{username}") as r:
+                    res = await r.json()
+            user_id = res['id']
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f"https://sessionserver.mojang.com/session/minecraft/profile/{user_id}") as r:
+                    res = await r.json()
+            data = base64.b64decode(res['properties'][0]['value'])
+            data = json.loads(data)
+            skin = data['textures']['SKIN']['url']
+            embed = discord.Embed(color=0xDEADBF, title=f"User: {res['name']}")
+            embed.set_image(url=skin)
+            await ctx.send(embed=embed)
+        except:
+            await ctx.send("**Failed to get user**")
 
     @commands.command(aliases=['ow'])
     @commands.cooldown(1, 5, commands.BucketType.user)

@@ -1,5 +1,6 @@
 from discord.ext import commands
 import asyncio, config, dbl, discord, random, aiohttp
+import aiomysql
 
 messages = ["OwO Whats this", "MonkaS", "OwO", "Haiiiii", ".help", "🤔🤔🤔", "HMMM🤔", "USE n! WEW", "n!HELP REE"]
 
@@ -10,6 +11,23 @@ class DiscordBotsOrgAPI:
         self.bot = bot
         self.token = config.dbots_key
         self.dblpy = dbl.Client(self.bot, self.token)
+
+    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                              user='root', password=config.dbpass,
+                                              db='nekobot')
+        async with connection.cursor() as db:
+            await db.execute(query)
+            if isSelect:
+                if fetchAll:
+                    values = await db.fetchall()
+                else:
+                    values = await db.fetchone()
+            if commit:
+                await connection.commit()
+        connection.close()
+        if isSelect:
+            return values
 
     async def startdbl(self):
         stats2 = [f"Servers: {len(self.bot.guilds)}", f"Users: {len(set(self.bot.get_all_members()))}",
@@ -47,6 +65,7 @@ class DiscordBotsOrgAPI:
                         print(t)
             except Exception as e:
                 print(f"Failed to post to terminal, {e}")
+            await self.execute(f"INSERT INTO serverstats VALUES ({int(time.time())}, {self.bot.guilds})", commit=True)
             await asyncio.sleep(1800)
 
     async def on_ready(self):

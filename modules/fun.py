@@ -138,13 +138,30 @@ class Fun:
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
+    async def achievement(self, ctx, *, achievement:str):
+        """Achievement Generator"""
+        if not os.path.isfile(f"data/achievement/{achievement.lower().replace(' ', '%20')}.png"):
+            try:
+                url = f"https://www.minecraftskinstealer.com/achievement/a.php?i=2&h=Achievement%20Get!" \
+                      f"&t={achievement.replace(' ', '%20')}"
+                async with aiohttp.ClientSession() as cs:
+                    async with cs.get(url) as r:
+                        res = await r.read()
+                img = Image.open(BytesIO(res))
+                img.save(f"data/achievement/{achievement.lower().replace(' ', '-')}.png")
+            except Exception as e:
+                return await ctx.send(f"**{e}**")
+        await ctx.send(file=discord.File(f"data/achievement/{achievement.lower().replace(' ', '-')}.png"))
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def baguette(self, ctx, user:discord.Member):
         """:^)"""
         if user is None:
             user = ctx.message.author
         amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {user.id} AND type = \"upvote\"',
                                     isSelect=True)
-        if amount:
+        if not amount:
             if not os.path.isfile(f"data/baguette/{user.id}.png"):
                 img = Image.open("data/baguette.jpg")
                 async with aiohttp.ClientSession() as cs:
@@ -160,7 +177,7 @@ class Fun:
             await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"),
                            embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))
         else:
-            return await ctx.send("**Vote t-to use me b-baka <:bakaa:432914537608380419>", delete_after=5)
+            return await ctx.send("**Vote t-to use me b-baka <:bakaa:432914537608380419>**", delete_after=5)
 
     @commands.command(name="b64", aliases=['b64encode', 'base64encode'])
     @commands.cooldown(1, 7, commands.BucketType.user)

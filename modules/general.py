@@ -79,6 +79,7 @@ class General:
                                          f"Bot Commands: **{str(len(self.bot.commands))}**\n"
                                          f"Channels: **{millify(len(set(self.bot.get_all_channels())))}**\n"
                                          f"Shards: **{self.bot.shard_count}**\n"
+                                         f"Bot in voice channel(s): **{len(self.bot.voice_clients)}**\n"
                                          f"Messages Read (Since Restart): **{millify(self.bot.counter['messages_read'])}**")
         try:
             info.add_field(name="System:", value=f"CPU %: **{psutil.cpu_percent()}%**\n"
@@ -580,7 +581,7 @@ class General:
             embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `transfer`, "
                                                            "`coinflip`, `blackjack`", inline=False)
             embed.add_field(name="Fun",
-                            value="`food`, `ship`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
+                            value="`food`, `ship`, `achievement`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
                                   "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `joke`, "
                                   "`b64`, `md5`, `kannagen`, `iphonex`, `baguette`", inline=False)
 
@@ -594,7 +595,7 @@ class General:
                                   "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`, `rem`, `poi`, `greet`, "
                                   "`insultwaifu`, `foxgirl`", inline=False)
             embed.add_field(name="Game Stats",
-                            value="`osu`, `overwatch`, `fortnite`", inline=False)
+                            value="`osu`, `overwatch`, `fortnite`, `minecraft`", inline=False)
             embed.add_field(name="Marriage", value="`marry`, `divorce`", inline=False)
 
             await ctx.send(embed=embed)
