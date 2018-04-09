@@ -64,7 +64,7 @@ class Donator:
         x2 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
         x3 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
         token = f"{x1}-{x2}-{x3}"
-        await ctx.send(embed=discord.Embed(color=0xDEADBF, title="Token Generated", description=f"```css\n"
+        await ctx.send(embed=discord.Embed(color=0x8bff87, title="Token Generated", description=f"```css\n"
                                                                                                 f"[ {token} ]```"))
         timenow = int(time.time())
         await self.execute(query=f"INSERT INTO donator VALUES (0, \"{token}\", {timenow})", commit=True)
