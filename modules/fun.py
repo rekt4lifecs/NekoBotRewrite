@@ -3,6 +3,7 @@ import discord, aiohttp, random, config, datetime, asyncio, base64, hashlib, tex
 from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw, ImageOps
 import os, time
+import aiomysql
 
 key = config.weeb
 auth = {"Authorization": "Wolke " + key}
@@ -55,6 +56,35 @@ class Fun:
 
     def __init__(self, bot):
         self.bot = bot
+
+    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                              user='root', password=config.dbpass,
+                                              db='nekobot')
+        async with connection.cursor() as db:
+            await db.execute(query)
+            if isSelect:
+                if fetchAll:
+                    values = await db.fetchall()
+                else:
+                    values = await db.fetchone()
+            if commit:
+                await connection.commit()
+        connection.close()
+        if isSelect:
+            return values
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def votecheck(self, ctx, user: discord.Member = None):
+        if user is None:
+            user = ctx.message.author
+        amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {user.id} AND type = \"upvote\"',
+                                    isSelect=True)
+        if amount:
+            await ctx.send("Yay")
+        else:
+            await ctx.send("Nay")
 
     @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
@@ -110,19 +140,27 @@ class Fun:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def baguette(self, ctx, user:discord.Member):
         """:^)"""
-        if not os.path.isfile(f"data/baguette/{user.id}.png"):
-            img = Image.open("data/baguette.jpg")
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(user.avatar_url_as(format="png")) as r:
-                    res = await r.read()
-            avatar = Image.open(BytesIO(res)).resize((275, 275))
-            mask = Image.open('data/mask.png').convert('L').resize((275, 275))
-            output = ImageOps.fit(avatar, mask.size, centering=(0.5, 0.5))
+        if user is None:
+            user = ctx.message.author
+        amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {user.id} AND type = \"upvote\"',
+                                    isSelect=True)
+        if amount:
+            if not os.path.isfile(f"data/baguette/{user.id}.png"):
+                img = Image.open("data/baguette.jpg")
+                async with aiohttp.ClientSession() as cs:
+                    async with cs.get(user.avatar_url_as(format="png")) as r:
+                        res = await r.read()
+                avatar = Image.open(BytesIO(res)).resize((275, 275))
+                mask = Image.open('data/mask.png').convert('L').resize((275, 275))
+                output = ImageOps.fit(avatar, mask.size, centering=(0.5, 0.5))
 
-            img.paste(output, (260, 75))
+                img.paste(output, (260, 75))
 
-            img.save(f"data/baguette/{user.id}.png")
-        await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"), embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))
+                img.save(f"data/baguette/{user.id}.png")
+            await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"),
+                           embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))
+        else:
+            return await ctx.send("**Vote t-to use me b-baka <:bakaa:432914537608380419>")
 
     @commands.command(name="b64", aliases=['b64encode', 'base64encode'])
     @commands.cooldown(1, 7, commands.BucketType.user)
