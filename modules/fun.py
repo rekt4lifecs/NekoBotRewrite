@@ -160,7 +160,7 @@ class Fun:
             await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"),
                            embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))
         else:
-            return await ctx.send("**Vote t-to use me b-baka <:bakaa:432914537608380419>")
+            return await ctx.send("**Vote t-to use me b-baka <:bakaa:432914537608380419>", delete_after=5)
 
     @commands.command(name="b64", aliases=['b64encode', 'base64encode'])
     @commands.cooldown(1, 7, commands.BucketType.user)
