@@ -29,6 +29,8 @@ class DiscordBotsOrgAPI:
         if isSelect:
             return values
 
+    @commands.command()
+    @commands.is_owner()
     async def startdbl(self):
         stats2 = [f"Servers: {len(self.bot.guilds)}", f"Users: {len(set(self.bot.get_all_members()))}",
                   "OwO whats n!help", "🤔🤔🤔", f"{self.bot.shard_count} Shards OwO", "👀", "(╯°□°）╯︵ ┻━┻",
@@ -68,8 +70,8 @@ class DiscordBotsOrgAPI:
             await self.execute(f"INSERT INTO serverstats VALUES ({int(time.time())}, {self.bot.guilds})", commit=True)
             await asyncio.sleep(1800)
 
-    async def on_ready(self):
-        await self.startdbl()
+    # async def on_ready(self):
+    #     await self.startdbl()
 
 def setup(bot):
     bot.add_cog(DiscordBotsOrgAPI(bot))

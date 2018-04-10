@@ -1,10 +1,7 @@
-import time
-starttime = time.time()
 from discord.ext import commands
 import logging, traceback, sys, discord
 from datetime import date
 from collections import Counter
-import aiomysql
 
 import config
 log = logging.getLogger('NekoBot')
@@ -36,16 +33,10 @@ class NekoBot(commands.AutoShardedBot):
     def __init__(self):
         super().__init__(command_prefix=commands.when_mentioned_or('n!'),
                          description="NekoBot",
-                         shard_count=10,
                          pm_help=None,
+                         shard_count=8,
                          help_attrs={'hidden': True})
         self.counter = Counter()
-        for extension in startup_extensions:
-            try:
-                self.load_extension(extension)
-            except:
-                print("Failed to load {}.".format(extension), file=sys.stderr)
-                traceback.print_exc()
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
@@ -118,7 +109,6 @@ class NekoBot(commands.AutoShardedBot):
         print(f"Shard {shard_id} Connected...")
 
     async def on_ready(self):
-        print(f"Finished in {int(time.time()) - int(starttime)}s")
         print("             _         _           _   \n"
               "            | |       | |         | |  \n"
               "  _ __   ___| | _____ | |__   ___ | |_ \n"
@@ -132,6 +122,12 @@ class NekoBot(commands.AutoShardedBot):
         print(f"Servers {len(self.guilds)}")
         print(f"Users {len(set(self.get_all_members()))}")
         await self.change_presence(status=discord.Status.idle)
+        for extension in startup_extensions:
+            try:
+                self.load_extension(extension)
+            except:
+                print("Failed to load {}.".format(extension), file=sys.stderr)
+                traceback.print_exc()
 
     def run(self):
         super().run(config.token)

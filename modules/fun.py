@@ -157,27 +157,26 @@ class Fun:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def baguette(self, ctx, user:discord.Member):
         """:^)"""
+        await ctx.trigger_typing()
         if user is None:
             user = ctx.message.author
-        amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {user.id} AND type = \"upvote\"',
-                                    isSelect=True)
-        if not amount:
-            if not os.path.isfile(f"data/baguette/{user.id}.png"):
-                img = Image.open("data/baguette.jpg")
-                async with aiohttp.ClientSession() as cs:
-                    async with cs.get(user.avatar_url_as(format="png")) as r:
-                        res = await r.read()
-                avatar = Image.open(BytesIO(res)).resize((275, 275))
-                mask = Image.open('data/mask.png').convert('L').resize((275, 275))
-                output = ImageOps.fit(avatar, mask.size, centering=(0.5, 0.5))
+        if not os.path.isfile(f"data/baguette/{user.id}.png"):
+            img = Image.open("data/baguette.jpg")
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(user.avatar_url_as(format="png")) as r:
+                    res = await r.read()
+            avatar = Image.open(BytesIO(res)).resize((275, 275)).convert('RGBA')
+            size = (128, 128)
+            mask = Image.new('L', size, 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((0, 0) + size, fill=255)
+            output = ImageOps.fit(avatar, mask.size, centering=(0.5, 0.5))
+            output.putalpha(mask).resize('RGBA')
+            img.alpha_composite(output, (260, 75))
 
-                img.paste(output, (260, 75))
-
-                img.save(f"data/baguette/{user.id}.png")
-            await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"),
-                           embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))
-        else:
-            return await ctx.send("**Vote t-to use me b-baka <:bakaa:432914537608380419>**", delete_after=5)
+            img.save(f"data/baguette/{user.id}.png")
+        await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"),
+                       embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))
 
     @commands.command(name="b64", aliases=['b64encode', 'base64encode'])
     @commands.cooldown(1, 7, commands.BucketType.user)

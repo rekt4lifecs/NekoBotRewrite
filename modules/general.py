@@ -83,8 +83,6 @@ class General:
                                          f"Messages Read (Since Restart): **{millify(self.bot.counter['messages_read'])}**")
         try:
             info.add_field(name="System:", value=f"CPU %: **{psutil.cpu_percent()}%**\n"
-                                             f"Virtual Memory: **{size(psutil.virtual_memory().available)}**\n"
-                                             f"Free Space: **{size(psutil.disk_usage(psutil.disk_partitions()[1].device).free)}**\n"
                                              f"Boot Time: **{datetime.datetime.fromtimestamp(psutil.boot_time()).strftime('%Y-%m-%d %H:%M:%S')}**\n"
                                              f"**Discord.py** {discord.__version__} | **PIL** {pilv} | **BeautifulSoup** {bsv} | **psutil** {psutil.__version__} | **aiomysql** {aiomysql.__version__} | **aiohttp** {aiohttp.__version__}")
         except:
