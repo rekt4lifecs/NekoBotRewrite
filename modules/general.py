@@ -105,7 +105,7 @@ class General:
         """Lookup a user with a userid"""
         user = self.bot.get_user(userid)
         if user is None:
-            return await ctx.send(f"```css\n[ Whois Lookup for {userid} ]\n\nUser not found!111")
+            return await ctx.send(f"```css\n[ Whois Lookup for {userid} ]\n\nUser not found!```")
         text = f"```css\n" \
                f"[ Whois Lookup for {userid} ]\n\n" \
                f"Name:      {user.name}\n" \
