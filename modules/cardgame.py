@@ -1,7 +1,7 @@
 import discord, pymysql, random, time, datetime, asyncio
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
-
+import textwrap
 
 class CardGame:
     """Loli Card Gamelol"""
@@ -357,12 +357,61 @@ class CardGame:
         draw = ImageDraw.Draw(img)
         title_font = ImageFont.truetype("data/fonts/card.ttf", 40)
         lower_font = ImageFont.truetype("data/fonts/card.ttf", 20)
+        desc_font = ImageFont.truetype("data/fonts/card.ttf", 16)
 
         img.paste(_character, (52, 114))
+
+        if character == 'kanna':
+            description = "Be sure to keep this loli charged. Very thicc thighs."
+        elif character == 'yaya':
+            description = "She'll be your puppet if you promise to marry her."
+        elif character == 'yoshino':
+            description = "She must be a happy loli. Word of the wise never have her lose Yoshinon."
+        elif character == 'toujou_koneko':
+            description = "A Neko Loli who will not kindly treat perverted actions."
+        elif character == 'terminus_est':
+            description = "A sword who can transform into a loli. For some reason is just fine wearing only knee socks but not being fully naked."
+        elif character == 'azuki_azusa':
+            description = "A hard working loli who pretends to be rich. Likes animals and works a lot of jobs to afford the act."
+        elif character == 'itsuka_kotori':
+            description = "A bipolar loli. The color of the ribbon determines her personally as weak for white and strong for black."
+        elif character == 'tachibana_kanade':
+            description = "An \"Angel\" who develops her own body to defend."
+        elif character == 'nyaruko':
+            description = "An obessive otaku loli who will kill anyone that dares attempt to harm what she loves. "
+        elif character == 'cirno':
+            description = "A ice fairy who never backs down from a challenge. She is very weak in respect to others but won't stop trying."
+        elif character == 'flandre_scarlet':
+            description = "She respects her sister so much that she never leaves the mansion due to her orders. Is nice, quiet, and a tad nuts. "
+        elif character == 'shiro':
+            description = "Genius gamer who is excellent at both strategy and in first person shooters. She will quickly master languages."
+        elif character == 'aihara_enju':
+            description = "A rabbit type girl who will protect her friends. Can get jealous even to friends and tries to marry her partner at every chance."
+        elif character == 'takanashi_rikka':
+            description = "A loli suffering from \"8th grade syndrome\" who believes she has the power of the tyrants's eye an will always walk around with an umbrella."
+        elif character == 'tsutsukakushi_tsukiko':
+            description = "A gluttonous loli who will eat numerous snacks and cannot show emotion. Thinks of herself as childish."
+        elif character == 'aisaka_taiga':
+            description = "Kind to those she trusts while aggressive to others. She hates he height pointed out or being called the palm top tiger."
+        elif character == 'hasegawa_kobato':
+            description = "A very shy loli who enjoys cosplaying. She is almost always dressed up in a cosplay of her favorite gothic vampire."
+        elif character == 'sprout_tina':
+            description = "A noctural loli. She will be sleepy during the day; however, when night falls she becomes an excellent sniper Who follows every order."
+        elif character == 'konjiki_no_yami':
+            description = "Attacks those that talk about something she doesn't like and hates perverted people."
+        elif character == 'yukihira_furano':
+            description = "A quiet girl that will insert sexual or vulgar words or phrases into sentences. Is also a part of the \"Reject Five\""
+        elif character == 'tatsumaki':
+            description = "Arrogant and overconfident. She considers her job as a duty and also can get bored while not fighting monsters."
+        elif character == 'victorique_de_blois':
+            description = "Bored by a normal life so she wants cases or other things to entertain her. She dislikes most strangers. She is also very intelligent."
+        else:
+            description = ""
 
         draw.text((37, 23), character.replace('_', ' '), (0, 0, 0), title_font)
         draw.text((255, 550), str(attack), (0, 0, 0), lower_font)
         draw.text((344, 550), str(defense), (0, 0, 0), lower_font)
+        draw.text((40, 477), textwrap.fill(description, 37), (0, 0, 0), font=desc_font)
 
         img.save(f"data/cards/{num}.png")
 

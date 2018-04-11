@@ -49,9 +49,9 @@ class DiscordBotsOrgAPI:
                 async with aiohttp.ClientSession() as session:
                     async with session.post('https://bots.discord.pw/api/bots/310039170792030211/stats',
                                             headers={'Authorization': f'{config.dpw_key}'},
-                                            json={"server_count": len(self.bot.guilds),
+                                            data={"server_count": len(self.bot.guilds),
                                                   "shard_count": self.bot.shard_count}) as response:
-                        t = await response.json()
+                        t = await response.read()
                         print(t)
             except Exception as e:
                 print(f"Failed to post to pw, {e}")

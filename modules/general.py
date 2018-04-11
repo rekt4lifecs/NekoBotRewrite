@@ -87,10 +87,10 @@ class General:
         #                                      f"**Discord.py** {discord.__version__} | **PIL** {pilv} | **BeautifulSoup** {bsv} | **psutil** {psutil.__version__} | **aiomysql** {aiomysql.__version__} | **aiohttp** {aiohttp.__version__}")
         # except:
         #     pass
-        try:
-            info.add_field(name="System", value=f"")
-        except:
-            pass
+        # try:
+        #     info.add_field(name="System", value=f"discord.py {discord.__version__} | BeautifulSoup {bsv} | Pillow {pilv} | ")
+        # except:
+        #     pass
         info.add_field(name="Links", value="<:GH:416593854368841729> - [GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) |"
                                            " [Support Server](https://discord.gg/q98qeYN) | "
                                            "[Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | <:nkotreon:430733839003025409> [Patreon](https://www.patreon.com/NekoBot)")
