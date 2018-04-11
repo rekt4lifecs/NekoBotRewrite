@@ -11,5 +11,4 @@ pymysql
 dblpy
 aiomysql
 lavalink
-aioredis
 websockets==3.4

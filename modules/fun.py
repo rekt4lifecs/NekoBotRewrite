@@ -161,19 +161,21 @@ class Fun:
         if user is None:
             user = ctx.message.author
         if not os.path.isfile(f"data/baguette/{user.id}.png"):
-            img = Image.open("data/baguette.jpg")
+            img = Image.open("data/baguette.jpg").convert('RGBA')
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(user.avatar_url_as(format="png")) as r:
                     res = await r.read()
-            avatar = Image.open(BytesIO(res)).resize((275, 275)).convert('RGBA')
-            size = (128, 128)
-            mask = Image.new('L', size, 0)
-            draw = ImageDraw.Draw(mask)
-            draw.ellipse((0, 0) + size, fill=255)
-            output = ImageOps.fit(avatar, mask.size, centering=(0.5, 0.5))
-            output.putalpha(mask).resize('RGBA')
-            img.alpha_composite(output, (260, 75))
-
+            if not os.path.isfile(f"data/avatars/{user.id}.png"):
+                avatar = Image.open(BytesIO(res)).resize((275, 275)).convert('RGBA')
+                size = (500, 500)
+                mask = Image.new('L', size, 0)
+                draw = ImageDraw.Draw(mask)
+                draw.ellipse((0, 0) + size, fill=255)
+                output = ImageOps.fit(avatar, mask.size, centering=(0.5, 0.5))
+                output.putalpha(mask)
+                output.save(f"data/avatars/{user.id}.png")
+            avatar = Image.open(f"data/avatars/{user.id}.png").resize((290, 290))
+            img.alpha_composite(avatar, (260, 75))
             img.save(f"data/baguette/{user.id}.png")
         await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"),
                        embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))

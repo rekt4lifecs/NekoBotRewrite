@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-import psutil, datetime, random, config, math, aiohttp, aiomysql
+import datetime, random, config, math, aiohttp, aiomysql
 from collections import Counter
 from hurry.filesize import size
 from .utils.chat_formatting import pagify
@@ -81,12 +81,12 @@ class General:
                                          f"Shards: **{self.bot.shard_count}**\n"
                                          f"Bot in voice channel(s): **{len(self.bot.voice_clients)}**\n"
                                          f"Messages Read (Since Restart): **{millify(self.bot.counter['messages_read'])}**")
-        try:
-            info.add_field(name="System:", value=f"CPU %: **{psutil.cpu_percent()}%**\n"
-                                             f"Boot Time: **{datetime.datetime.fromtimestamp(psutil.boot_time()).strftime('%Y-%m-%d %H:%M:%S')}**\n"
-                                             f"**Discord.py** {discord.__version__} | **PIL** {pilv} | **BeautifulSoup** {bsv} | **psutil** {psutil.__version__} | **aiomysql** {aiomysql.__version__} | **aiohttp** {aiohttp.__version__}")
-        except:
-            pass
+        # try:
+        #     info.add_field(name="System:", value=f"CPU %: **{psutil.cpu_percent()}%**\n"
+        #                                      f"Boot Time: **{datetime.datetime.fromtimestamp(psutil.boot_time()).strftime('%Y-%m-%d %H:%M:%S')}**\n"
+        #                                      f"**Discord.py** {discord.__version__} | **PIL** {pilv} | **BeautifulSoup** {bsv} | **psutil** {psutil.__version__} | **aiomysql** {aiomysql.__version__} | **aiohttp** {aiohttp.__version__}")
+        # except:
+        #     pass
         info.add_field(name="Links", value="<:GH:416593854368841729> - [GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) |"
                                            " [Support Server](https://discord.gg/q98qeYN) | "
                                            "[Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | <:nkotreon:430733839003025409> [Patreon](https://www.patreon.com/NekoBot)")

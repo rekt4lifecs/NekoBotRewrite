@@ -34,9 +34,16 @@ class NekoBot(commands.AutoShardedBot):
         super().__init__(command_prefix=commands.when_mentioned_or('n!'),
                          description="NekoBot",
                          pm_help=None,
-                         shard_count=8,
+                         shard_count=10,
+                         shard_id=0,
                          help_attrs={'hidden': True})
         self.counter = Counter()
+        for extension in startup_extensions:
+            try:
+                self.load_extension(extension)
+            except:
+                print("Failed to load {}.".format(extension), file=sys.stderr)
+                traceback.print_exc()
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
@@ -122,12 +129,6 @@ class NekoBot(commands.AutoShardedBot):
         print(f"Servers {len(self.guilds)}")
         print(f"Users {len(set(self.get_all_members()))}")
         await self.change_presence(status=discord.Status.idle)
-        for extension in startup_extensions:
-            try:
-                self.load_extension(extension)
-            except:
-                print("Failed to load {}.".format(extension), file=sys.stderr)
-                traceback.print_exc()
 
     def run(self):
         super().run(config.token)

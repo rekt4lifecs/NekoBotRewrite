@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord, aiohttp, asyncio, time, datetime, config, random, math, logging
-import aioredis, aiomysql
+import aiomysql
 
 log = logging.getLogger("NekoBot")
 
@@ -50,12 +50,6 @@ class economy:
             await self.execute(f"INSERT INTO levels VALUES ({user_id}, 0, 0, 0, 0, 0, 0)", commit=True)
         except:
             pass
-
-    @commands.command()
-    @commands.is_owner()
-    async def redistest(self, ctx):
-        redis = await aioredis.create_connection(address='redis://localhost')
-        await redis.set("")
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
