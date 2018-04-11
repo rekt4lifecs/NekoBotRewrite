@@ -320,6 +320,23 @@ class Fun:
                                            color=0xDEADBF))
 
     @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def changemymind(self, ctx, *, text:str):
+        filename = text.lower().replace(' ', '-')
+        await ctx.trigger_typing()
+        if not os.path.isfile(f"data/changemymind/{filename}.png"):
+            img = Image.open("data/changemymind.png")
+            font = ImageFont.truetype('data/fonts/arial.ttf', 60)
+            _text = Image.new('L', (750, 1000))
+            draw = ImageDraw.Draw(_text)
+            draw.text((0, 0), textwrap.fill(text, 24), font=font, fill=255)
+            w = _text.rotate(22.5, expand=1)
+            img.paste(ImageOps.colorize(w, (0, 0, 0), (0, 0, 0)), (910, 650), w)
+            img.save(f"data/changemymind/{filename}.png")
+        await ctx.send(file=discord.File(f"data/changemymind/{filename}.png"),
+                       embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{filename}.png'))
+
+    @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def owoify(self, ctx, *, text:str = None):
         if text is None:

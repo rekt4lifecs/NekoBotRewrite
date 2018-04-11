@@ -30,12 +30,28 @@ class NSFW:
             return values
 
     @commands.command()
+    @commands.is_owner()
+    async def hasvoted(self, ctx):
+        votes = await self.execute("SELECT user FROM dbl", isSelect=True, fetchAll=True)
+        voters = []
+        for vote in votes:
+            voters.append(vote[0])
+        print(voters)
+        if str(ctx.message.author.id) in voters:
+            await ctx.send("yay")
+        else:
+            await ctx.send("Nay")
+
+    @commands.command()
     @commands.guild_only()
     @commands.cooldown(200, 20, commands.BucketType.user)
     async def pgif(self, ctx):
         """Posts a Random PrOn GIF"""
-        amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"', isSelect=True)
-        if amount:
+        votes = await self.execute("SELECT user FROM dbl", isSelect=True, fetchAll=True)
+        voters = []
+        for vote in votes:
+            voters.append(vote[0])
+        if str(ctx.message.author.id) in voters:
             if not ctx.message.channel.is_nsfw():
                 await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
                 return
@@ -397,26 +413,30 @@ class NSFW:
         self.counter['hentai'] += 1
         # amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"', isSelect=True)
         # if amount:
-        types = ['cum', 'les', 'Random_hentai_gif', 'bj', 'nsfw_neko_gif', 'anal', 'pussy', 'classic', 'kuni', 'boobs', 'Random_hentai_gif']
-        if type is None:
-            x = random.choice(types)
-        elif not type in types:
-            return await ctx.send(f"Invalid type. List of types: `{types}`")
+        votes = await self.execute("SELECT user FROM dbl", isSelect=True, fetchAll=True)
+        voters = []
+        for vote in votes:
+            voters.append(vote[0])
+        if str(ctx.message.author.id) in voters:
+            types = ['cum', 'les', 'Random_hentai_gif', 'bj', 'nsfw_neko_gif', 'anal', 'pussy', 'classic', 'kuni', 'boobs', 'Random_hentai_gif']
+            if type is None:
+                x = random.choice(types)
+            elif not type in types:
+                return await ctx.send(f"Invalid type. List of types: `{types}`")
+            else:
+                x = type
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f"https://nekos.life/api/v2/img/{x}") as r:
+                    res = await r.json()
+                    em = discord.Embed(color=0xDEADBF)
+                    em.set_image(url=res['url'])
+                    await ctx.send(embed=em)
         else:
-            x = type
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"https://nekos.life/api/v2/img/{x}") as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
-        # else:
-        #     embed = discord.Embed(color=0xDEADBF,
-        #                           title="oof",
-        #                           description="Have you voted yet <:smirkGuns:417969421252952085>\n"
-        #                                       "https://discordbots.org/bot/310039170792030211/vote\n"
-        #                                       "ppl broke the bot with this so vote 🤷")
-        #     await ctx.send(embed=embed)
+            embed = discord.Embed(color=0xDEADBF,
+                                  title="oof",
+                                  description="Have you voted yet <:smirkGuns:417969421252952085>\n"
+                                              "https://discordbots.org/bot/310039170792030211/vote")
+            await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
