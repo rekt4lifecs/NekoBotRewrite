@@ -161,7 +161,7 @@ class Donator:
 
         msg = await self.bot.wait_for('message', check=check)
 
-        if msg.content in ['cancel', 'Cancel']:
+        if msg.content.lower() in ['cancel', 'Cancel']:
             return await ctx.send("**Cancelled.**")
 
         try:

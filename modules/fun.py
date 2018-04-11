@@ -320,12 +320,38 @@ class Fun:
                                            color=0xDEADBF))
 
     @commands.command()
-    @commands.cooldown(1, 15, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def owoify(self, ctx, *, text:str = None):
+        if text is None:
+            return await ctx.send("oopsie whoopsie you made a fucky wucky, you gave me no text to owoify")
+        else:
+            text = text.replace(' ', '%20')
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f"https://nekos.life/api/v2/owoify?text={text}") as r:
+                res = await r.json()
+        try:
+            em = discord.Embed(color=0xDEADBF, description=f"{res['owo']}", title="OwOified Text")
+            await ctx.send(embed=em)
+        except:
+            return await ctx.send("Failed to get the OwOified Text or you input is over 100 characters.")
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def lizard(self, ctx):
+        """Get a lizard owo"""
+        url = "https://nekos.life/api/lizard"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['url']))
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def meme(self, ctx):
         """Get a dank meme OwO"""
         # NoSteal kthx
-        sub = "dankmemes" #Add more?
-        url = f'https://api.imgur.com/3/gallery/r/{sub}/hot/{random.randint(1, 5)}'
+        sub = ["dankmemes", "animemes"] #Add more?
+        url = f'https://api.imgur.com/3/gallery/r/{random.choice(sub)}/hot/{random.randint(1, 5)}'
         headers = {"Authorization": f"Client-ID {config.imgur}"}
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url, headers=headers) as r:

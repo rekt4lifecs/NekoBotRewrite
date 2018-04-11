@@ -87,6 +87,10 @@ class General:
         #                                      f"**Discord.py** {discord.__version__} | **PIL** {pilv} | **BeautifulSoup** {bsv} | **psutil** {psutil.__version__} | **aiomysql** {aiomysql.__version__} | **aiohttp** {aiohttp.__version__}")
         # except:
         #     pass
+        try:
+            info.add_field(name="System", value=f"")
+        except:
+            pass
         info.add_field(name="Links", value="<:GH:416593854368841729> - [GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) |"
                                            " [Support Server](https://discord.gg/q98qeYN) | "
                                            "[Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | <:nkotreon:430733839003025409> [Patreon](https://www.patreon.com/NekoBot)")
@@ -570,7 +574,7 @@ class General:
             embed.add_field(name="General",
                             value="`lmgtfy`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
                                   " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`, `duckduckgo`", inline=False)
-            embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
+            embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`, `memory`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
             embed.add_field(name="Moderation",
                             value="`kick`, `ban`, `massban`, `unban`, `rename`, `poll`, `purge`, `mute`, `unmute`", inline=False)
@@ -581,7 +585,7 @@ class General:
             embed.add_field(name="Fun",
                             value="`food`, `ship`, `achievement`, `shitpost`, `meme`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
                                   "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `joke`, "
-                                  "`b64`, `md5`, `kannagen`, `iphonex`, `baguette`", inline=False)
+                                  "`b64`, `md5`, `kannagen`, `iphonex`, `baguette`, `owoify`, `lizard`", inline=False)
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"

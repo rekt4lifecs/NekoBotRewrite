@@ -3,12 +3,21 @@ import discord, argparse, re, shlex, traceback, io, textwrap, asyncio
 from .utils import checks
 from contextlib import redirect_stdout
 from collections import Counter
-from .utils.chat_formatting import pagify
+from .utils.chat_formatting import pagify, box
 from .utils.hastebin import post as hastebin
+import math
 
 class Arguments(argparse.ArgumentParser):
     def error(self, message):
         raise RuntimeError(message)
+
+def millify(n):
+    millnames = ['', 'k', 'M', ' Billion', ' Trillion']
+    n = float(n)
+    millidx = max(0, min(len(millnames) - 1,
+                         int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
+
+    return '{:.0f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
 
 def to_emoji(c):
     base = 0x1f1e6
@@ -306,6 +315,16 @@ class Moderation:
                 await ctx.send(f'`{command}`: {pa}')
             else:
                 await ctx.send(f"`{command}`: ```{result}```\n")
+
+    @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def memory(self, ctx):
+        """Get memory stats"""
+        result = await run_cmd("cat /proc/meminfo | grep -A 2 MemTotal")
+        text = f"```css\n" \
+               f"[ Memory ]\n\n" \
+               f"{result}\n```"
+        await ctx.send(text)
 
     @commands.command()
     @commands.guild_only()
@@ -698,6 +717,31 @@ class Moderation:
         except:
             pass
         await channel.send(embed=embed)
+
+    async def on_message_delete(self, message):
+        if message.guild.id == 221989003400970241:
+            channel = self.bot.get_channel(431887286246834178)
+            embed = discord.Embed(color=0xff6f3f, title="Message Deleted",
+                                  description=f"```\n"
+                                              f"Author:     {message.author}\n"
+                                              f"Channel:    {message.channel.name} ({message.channel.id})\n"
+                                              f"Reactions:  {len(message.reactions)}\n"
+                                              f"Content:    {message.content}\n```")
+            await channel.send(embed=embed)
+
+    async def on_message_edit(self, before, after):
+        if before.author.bot:
+            return
+        if before.guild.id == 221989003400970241:
+            channel = self.bot.get_channel(431887286246834178)
+            embed = discord.Embed(color=0xffa230, title="Message Edited",
+                                  description=f"```\n"
+                                              f"Author:     {before.author}\n"
+                                              f"Channel:    {before.channel.name} ({before.channel.id})\n"
+                                              f"Before:     {before.content}\n"
+                                              f"After:      {after.content}```")
+            embed.set_footer(text=f"Edited at {after.edited_at}")
+            await channel.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Moderation(bot))
