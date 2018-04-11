@@ -105,6 +105,18 @@ class Donator:
 
     @commands.command()
     @commands.is_owner()
+    async def keys(self, ctx):
+        """View all keys + expiry"""
+        allkeys = await self.execute("SELECT userid, token, usetime FROM donator", isSelect=True, fetchAll=True)
+        text = f"```css\n" \
+               f"[      USER      ] | [    KEY     ] | [ EXPIRY DATE ]\n"
+        for key in allkeys:
+            text += f"{key[0]} | {key[1]} | {datetime.datetime.fromtimestamp(int(key[2])).strftime('%Y-%m-%d')}\n"
+        text += "```"
+        await ctx.send(text)
+
+    @commands.command()
+    @commands.is_owner()
     async def delkey(self, ctx, *, key:str):
         """Delete a key"""
         x = await self.execute(query=f"SELECT 1 FROM donator WHERE token = \"{key}\"", isSelect=True)

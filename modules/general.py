@@ -99,6 +99,25 @@ class General:
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
         await ctx.send(embed=info)
 
+    @commands.command()
+    @commands.cooldown(1, 15, commands.BucketType.user)
+    async def whois(self, ctx, userid:int):
+        """Lookup a user with a userid"""
+        user = self.bot.get_user(userid)
+        if user is None:
+            return await ctx.send(f"```css\n[ Whois Lookup for {userid} ]\n\nUser not found!111")
+        text = f"```css\n" \
+               f"[ Whois Lookup for {userid} ]\n\n" \
+               f"Name:      {user.name}\n" \
+               f"ID:        {user.id}\n" \
+               f"Discrim:   {user.discriminator}\n" \
+               f"Bot:       {user.bot}\n" \
+               f"Created:   {user.created_at}\n" \
+               f"```"
+        embed = discord.Embed(color=0xDEADBF, description=text)
+        embed.set_thumbnail(url=user.avatar_url)
+        await ctx.send(embed=embed)
+
     @commands.command(aliases=['user'])
     @commands.guild_only()
     async def userinfo(self, ctx, user: discord.Member = None):
@@ -573,7 +592,7 @@ class General:
 
             embed.add_field(name="General",
                             value="`lmgtfy`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
-                                  " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`, `duckduckgo`", inline=False)
+                                  " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`, `duckduckgo`, `whois`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`, `memory`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
             embed.add_field(name="Moderation",
