@@ -4,6 +4,8 @@ from io import BytesIO
 from PIL import Image, ImageFont, ImageDraw, ImageOps
 import os, time
 import aiomysql
+import json
+from googleapiclient import discovery
 
 key = config.weeb
 auth = {"Authorization": "Wolke " + key}
@@ -73,6 +75,43 @@ class Fun:
         connection.close()
         if isSelect:
             return values
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def toxicity(self, ctx, *, text:str):
+        """Get text toxicity levels"""
+        try:
+            API_KEY = "AIzaSyAc49LROgPF9IEiLDavWqwb2z8UndUUbcM"
+            service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=API_KEY)
+            analyze_request = {
+                'comment': {'text': f'{text}'},
+                'requestedAttributes': {'TOXICITY': {},
+                                        'SEVERE_TOXICITY': {},
+                                        'SPAM': {},
+                                        'UNSUBSTANTIAL': {},
+                                        'OBSCENE': {},
+                                        'INFLAMMATORY': {},
+                                        'INCOHERENT': {}}
+            }
+            response = service.comments().analyze(body=analyze_request).execute()
+            em = discord.Embed(color=0xDEADBF, title="Toxicity Levels")
+            em.add_field(name="Toxicity",
+                         value=f"{round(float(response['attributeScores']['TOXICITY']['summaryScore']['value'])*100)}%")
+            em.add_field(name="Severe Toxicity",
+                         value=f"{round(float(response['attributeScores']['SEVERE_TOXICITY']['summaryScore']['value'])*100)}%")
+            em.add_field(name="Spam",
+                         value=f"{round(float(response['attributeScores']['SPAM']['summaryScore']['value'])*100)}%")
+            em.add_field(name="Unsubstantial",
+                         value=f"{round(float(response['attributeScores']['UNSUBSTANTIAL']['summaryScore']['value'])*100)}%")
+            em.add_field(name="Obscene",
+                         value=f"{round(float(response['attributeScores']['OBSCENE']['summaryScore']['value'])*100)}%")
+            em.add_field(name="Inflammatory",
+                         value=f"{round(float(response['attributeScores']['INFLAMMATORY']['summaryScore']['value'])*100)}%")
+            em.add_field(name="Incoherent",
+                         value=f"{round(float(response['attributeScores']['INCOHERENT']['summaryScore']['value'])*100)}%")
+            await ctx.send(embed=em)
+        except:
+            await ctx.send("Error getting data.")
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -322,19 +361,27 @@ class Fun:
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def changemymind(self, ctx, *, text:str):
-        filename = text.lower().replace(' ', '-')
-        await ctx.trigger_typing()
-        if not os.path.isfile(f"data/changemymind/{filename}.png"):
-            img = Image.open("data/changemymind.png")
-            font = ImageFont.truetype('data/fonts/arial.ttf', 60)
-            _text = Image.new('L', (750, 1000))
-            draw = ImageDraw.Draw(_text)
-            draw.text((0, 0), textwrap.fill(text, 24), font=font, fill=255)
-            w = _text.rotate(22.5, expand=1)
-            img.paste(ImageOps.colorize(w, (0, 0, 0), (0, 0, 0)), (910, 650), w)
-            img.save(f"data/changemymind/{filename}.png")
-        await ctx.send(file=discord.File(f"data/changemymind/{filename}.png"),
-                       embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{filename}.png'))
+        votes = await self.execute("SELECT user FROM dbl", isSelect=True, fetchAll=True)
+        voters = []
+        for vote in votes:
+            voters.append(vote[0])
+        if str(ctx.message.author.id) in voters:
+            filename = text.lower().replace(' ', '-')
+            await ctx.trigger_typing()
+            if not os.path.isfile(f"data/changemymind/{filename}.png"):
+                img = Image.open("data/changemymind.png")
+                font = ImageFont.truetype('data/fonts/arial.ttf', 60)
+                _text = Image.new('L', (750, 1000))
+                draw = ImageDraw.Draw(_text)
+                draw.text((0, 0), textwrap.fill(text, 24), font=font, fill=255)
+                w = _text.rotate(22.5, expand=1)
+                img.paste(ImageOps.colorize(w, (0, 0, 0), (0, 0, 0)), (910, 650), w)
+                img.save(f"data/changemymind/{filename}.png")
+            await ctx.send(file=discord.File(f"data/changemymind/{filename}.png"),
+                           embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{filename}.png'))
+        else:
+            em = discord.Embed(color=0xDEADBF, description="https://discordbots.org/bot/nekobot/vote")
+            return await ctx.send(file=discord.File("data/vote.png"), embed=em.set_image(url="attachment://vote.png"))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
