@@ -188,11 +188,6 @@ class economy:
     async def rep(self, ctx, user : discord.Member):
         """Give user reputation"""
         author = ctx.message.author
-        try:
-            if await self.usercheck('levels', ctx.message.author) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
         if user == author:
             await ctx.send("You can't give yourself rep <:nkoDed:422666465238319107>")
             return
@@ -202,6 +197,7 @@ class economy:
         else:
             if await self.usercheck("levels", user) is False:
                 log.info("Creating account...")
+                await self._create_user(ctx.message.author.id)
 
             x = await self.execute(f"SELECT lastrep FROM levels WHERE userid = {author.id}", isSelect=True)
             lastrep = x[0]

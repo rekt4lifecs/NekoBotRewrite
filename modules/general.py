@@ -608,7 +608,7 @@ class General:
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
-                                  " `gonewild`, `nsfw`, `doujin`, `girl`, `hentai`", inline=False)
+                                  " `gonewild`, `nsfw`, `doujin`, `girl`, `hentai`, `rule34`", inline=False)
 
             embed.add_field(name="Reactions",
                             value="`hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"

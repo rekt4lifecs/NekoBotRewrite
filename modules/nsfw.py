@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup as bs
 from collections import Counter
 import config
 import aiomysql
+import json
 
 class NSFW:
     """NSFW Commands OwO"""
@@ -437,6 +438,30 @@ class NSFW:
                                   description="Have you voted yet <:smirkGuns:417969421252952085>\n"
                                               "https://discordbots.org/bot/310039170792030211/vote")
             await ctx.send(embed=embed)
+
+    @commands.command(name="rule34", aliases=["r34"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.guild_only()
+    async def rule34(self, ctx, tag:str):
+        """Search rule34"""
+        if not ctx.message.channel.is_nsfw():
+            return await ctx.send("This is not an NSFW channel...", delete_after=5)
+        try:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f"https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags={tag}") as r:
+                    data = json.loads(await r.text())
+            non_loli = list(filter(lambda x: 'loli' not in x['tags'] and 'shota' not in x['tags'], data))
+            if len(non_loli) == 0:
+                em = discord.Embed(color=0xff6f3f, title="Warning", description="Loli/Shota in search.")
+                return await ctx.send(embed=em)
+            response = non_loli[random.randint(0, len(non_loli) - 1)]
+            img = f"https://img.rule34.xxx/images/{response['directory']}/{response['image']}"
+            tags = response['tags'].split(' ')
+            em = discord.Embed(color=0xDEADBF, description=f'`{", ".join(tags)}`')
+            em.set_image(url=img)
+            await ctx.send(embed=em)
+        except json.JSONDecodeError:
+            await ctx.send(":x: No image found. Sorry :/")
 
     @commands.command()
     @commands.guild_only()

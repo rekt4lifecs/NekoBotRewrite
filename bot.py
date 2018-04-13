@@ -2,6 +2,7 @@ from discord.ext import commands
 import logging, traceback, sys, discord
 from datetime import date
 from collections import Counter
+import json
 
 import config
 log = logging.getLogger('NekoBot')
@@ -57,10 +58,35 @@ class NekoBot(commands.AutoShardedBot):
 
     async def on_command_error(self, ctx, exception):
         channel = self.get_channel(431987399581499403)
-        if isinstance(exception, commands.NoPrivateMessage):
-            await ctx.send('This command cannot be used in private messages.')
-        elif isinstance(exception, commands.DisabledCommand):
-            await ctx.send('This command is disabled...')
+        ignored = (commands.CommandNotFound, commands.UserInputError,
+                   commands.NoPrivateMessage, commands.DisabledCommand,
+                   commands.CheckFailure)
+        exception = getattr(exception, 'original', exception)
+        if isinstance(exception, ignored):
+            return
+        elif isinstance(exception, commands.BadArgument):
+            await self.send_cmd_help(ctx)
+        elif isinstance(exception, commands.MissingRequiredArgument):
+            await self.send_cmd_help(ctx)
+        elif isinstance(exception, commands.CommandOnCooldown):
+            await ctx.send('Command is on cooldown... {:.2f}s left'.format(exception.retry_after))
+        elif isinstance(exception, commands.CommandNotFound):
+            pass
+        elif isinstance(exception, commands.BotMissingPermissions):
+            await ctx.send(f"Im missing permissions ;-;\nPermissions I need:\n{exception.missing_perms}")
+        elif isinstance(exception, discord.Forbidden):
+            pass
+        elif isinstance(exception, discord.LoginFailure):
+            print("Failed to login. Invalid token?")
+        elif isinstance(exception, discord.DiscordException):
+            print(f"Discord Exception, {exception}")
+        elif isinstance(exception, discord.NotFound):
+            pass
+        elif isinstance(exception, json.JSONDecodeError):
+            try:
+                await ctx.send("Failed to get data...", delete_after=5)
+            except:
+                pass
         elif isinstance(exception, commands.CommandInvokeError):
             em = discord.Embed(color=0xDEADBF,
                                title="Error",
@@ -78,26 +104,6 @@ class NekoBot(commands.AutoShardedBot):
             print('In {}:'.format(ctx.command.qualified_name), file=sys.stderr)
             traceback.print_tb(exception.original.__traceback__)
             print('{}: {}'.format(exception.original.__class__.__name__, exception.original), file=sys.stderr)
-        elif isinstance(exception, commands.BadArgument):
-            await self.send_cmd_help(ctx)
-        elif isinstance(exception, commands.MissingRequiredArgument):
-            await self.send_cmd_help(ctx)
-        elif isinstance(exception, commands.CheckFailure):
-            await ctx.send('You are not allowed to use that command.')
-        elif isinstance(exception, commands.CommandOnCooldown):
-            await ctx.send('Command is on cooldown... {:.2f}s left'.format(exception.retry_after))
-        elif isinstance(exception, commands.CommandNotFound):
-            pass
-        elif isinstance(exception, commands.BotMissingPermissions):
-            await ctx.send(f"Im missing permissions ;-;\nPermissions I need:\n{exception.missing_perms}")
-        elif isinstance(exception, discord.Forbidden):
-            pass
-        elif isinstance(exception, discord.LoginFailure):
-            print("Failed to login. Invalid token?")
-        elif isinstance(exception, discord.DiscordException):
-            print(f"Discord Exception, {exception}")
-        elif isinstance(exception, discord.NotFound):
-            pass
         else:
             log.exception(type(exception).__name__, exc_info=exception)
             await channel.send(embed=discord.Embed(color=0xff6f3f, title="Unknown Error", description=f"{exception}"))

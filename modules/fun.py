@@ -110,20 +110,10 @@ class Fun:
             em.add_field(name="Incoherent",
                          value=f"{round(float(response['attributeScores']['INCOHERENT']['summaryScore']['value'])*100)}%")
             await ctx.send(embed=em)
+        except discord.Forbidden:
+            pass
         except:
             await ctx.send("Error getting data.")
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def votecheck(self, ctx, user: discord.Member = None):
-        if user is None:
-            user = ctx.message.author
-        amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {user.id} AND type = \"upvote\"',
-                                    isSelect=True)
-        if amount:
-            await ctx.send("Yay")
-        else:
-            await ctx.send("Nay")
 
     @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
@@ -172,6 +162,8 @@ class Fun:
 
         try:
             await ctx.send(embed=e)
+        except discord.Forbidden:
+            pass
         except:
             await ctx.send("There was an error. Please try again.")
 
@@ -190,7 +182,10 @@ class Fun:
                 img.save(f"data/achievement/{achievement.lower().replace(' ', '-')}.png")
             except Exception as e:
                 return await ctx.send(f"**{e}**")
-        await ctx.send(file=discord.File(f"data/achievement/{achievement.lower().replace(' ', '-')}.png"))
+        try:
+            await ctx.send(file=discord.File(f"data/achievement/{achievement.lower().replace(' ', '-')}.png"))
+        except discord.Forbidden:
+            pass
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -216,8 +211,11 @@ class Fun:
             avatar = Image.open(f"data/avatars/{user.id}.png").resize((290, 290))
             img.alpha_composite(avatar, (260, 75))
             img.save(f"data/baguette/{user.id}.png")
-        await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"),
-                       embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))
+        try:
+            await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"),
+                           embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))
+        except discord.Forbidden:
+            pass
 
     @commands.command(name="b64", aliases=['b64encode', 'base64encode'])
     @commands.cooldown(1, 7, commands.BucketType.user)
@@ -227,6 +225,8 @@ class Fun:
             encoded = base64.b64encode(encode_to.encode())
             await ctx.send(embed=discord.Embed(color=0xDEADBF, title=f"{encode_to}",
                                                description=f"```\n{encoded}\n```"))
+        except discord.Forbidden:
+            pass
         except Exception as e:
             await ctx.send(f"Could not encode.\n`{e}`")
 
@@ -238,6 +238,8 @@ class Fun:
             encoded = hashlib.md5(encode_to.encode('utf-8')).hexdigest()
             await ctx.send(embed=discord.Embed(color=0xDEADBF, title=f"{encode_to}",
                                                description=f"```\n{encoded}\n```"))
+        except discord.Forbidden:
+            pass
         except Exception as e:
             await ctx.send(f"Could not encode.\n`{e}`")
 
@@ -255,8 +257,10 @@ class Fun:
         draw.text((120, 80), text, (255, 255, 255), font=font)
         num = random.randint(1, 10)
         img.save(f"data/clyde{num}.png")
-
-        await ctx.send(file=discord.File(f"data/clyde{num}.png"))
+        try:
+            await ctx.send(file=discord.File(f"data/clyde{num}.png"))
+        except discord.Forbidden:
+            pass
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -365,7 +369,8 @@ class Fun:
         voters = []
         for vote in votes:
             voters.append(vote[0])
-        if str(ctx.message.author.id) in voters:
+        weebsh = self.bot.get_guild(300407204987666432)
+        if str(ctx.message.author.id) in voters or weebsh.get_member(ctx.message.author.id):
             filename = text.lower().replace(' ', '-')
             await ctx.trigger_typing()
             if not os.path.isfile(f"data/changemymind/{filename}.png"):
@@ -380,8 +385,8 @@ class Fun:
             await ctx.send(file=discord.File(f"data/changemymind/{filename}.png"),
                            embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{filename}.png'))
         else:
-            em = discord.Embed(color=0xDEADBF, description="https://discordbots.org/bot/nekobot/vote")
-            return await ctx.send(file=discord.File("data/vote.png"), embed=em.set_image(url="attachment://vote.png"))
+            em = discord.Embed(color=0xDEADBF, description="https://discordbots.org/bot/nekobot/vote", title="owo whats this")
+            return await ctx.send(embed=em)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -603,19 +608,18 @@ class Fun:
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def kannagen(self, ctx, *, text:str):
         """Generate Kanna"""
-        img = Image.open('data/kannagen.jpg').convert('RGBA').rotate(12)
-        hand = Image.open('data/hand.png').rotate(12)
+        img = Image.open('data/kannagen.jpg').convert('RGBA')
+        hand = Image.open('data/hand.png')
 
         text = '\n'.join(textwrap.wrap(text, 13))
 
-        draw = ImageDraw.Draw(img)
-        font = ImageFont.truetype("data/fonts/arial.ttf", 15)
-
-        draw.text((35, 37), text, (0, 0, 0), font)
-
+        font = ImageFont.truetype('data/fonts/arial.ttf', 15)
+        _text = Image.new('L', (225, 225))
+        draw = ImageDraw.Draw(_text)
+        draw.text((0, 0), text, font=font, fill=255)
+        w = _text.rotate(350, expand=1)
+        img.paste(ImageOps.colorize(w, (0, 0, 0), (0, 0, 0)), (11, 20), w)
         img.alpha_composite(hand)
-
-        img = img.rotate(-8)
 
         img.save("kanna.png")
 

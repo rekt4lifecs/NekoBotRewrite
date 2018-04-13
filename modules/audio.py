@@ -38,6 +38,7 @@ class Audio:
                     await c.send('**Queue Ended**')
 
     @commands.command()
+    @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def play(self, ctx, *, query):
         """Play Something"""
@@ -88,6 +89,7 @@ class Audio:
             await player.play()
 
     @commands.command()
+    @commands.guild_only()
     async def skip(self, ctx):
         """Skip a song"""
         player = self.bot.lavalink.players.get(ctx.guild.id)
@@ -106,6 +108,7 @@ class Audio:
         await player.skip()
 
     @commands.command()
+    @commands.guild_only()
     async def stop(self, ctx):
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
@@ -124,6 +127,7 @@ class Audio:
         await ctx.send('⏹ | Stopped.')
 
     @commands.command()
+    @commands.guild_only()
     async def now(self, ctx):
         player = self.bot.lavalink.players.get(ctx.guild.id)
         song = 'Nothing'
@@ -140,6 +144,7 @@ class Audio:
         await ctx.send(embed=embed)
 
     @commands.command()
+    @commands.guild_only()
     async def queue(self, ctx, page: int = 1):
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
@@ -163,6 +168,7 @@ class Audio:
         await ctx.send(embed=embed)
 
     @commands.command()
+    @commands.guild_only()
     async def pause(self, ctx):
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
@@ -184,6 +190,7 @@ class Audio:
             await ctx.send('⏯ | Paused')
 
     @commands.command()
+    @commands.guild_only()
     async def volume(self, ctx, volume: int = None):
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
@@ -201,6 +208,7 @@ class Audio:
         await ctx.send(f'🔈 | Set to {player.volume}%')
 
     @commands.command()
+    @commands.guild_only()
     async def shuffle(self, ctx):
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
@@ -219,6 +227,7 @@ class Audio:
         await ctx.send('🔀 | Shuffle ' + ('enabled' if player.shuffle else 'disabled'))
 
     @commands.command()
+    @commands.guild_only()
     async def repeat(self, ctx):
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
@@ -237,6 +246,7 @@ class Audio:
         await ctx.send('🔁 | Repeat ' + ('enabled' if player.repeat else 'disabled'))
 
     @commands.command()
+    @commands.guild_only()
     async def find(self, ctx, *, query):
         if not query.startswith('ytsearch:') and not query.startswith('scsearch:'):
             query = 'ytsearch:' + query
@@ -257,6 +267,7 @@ class Audio:
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['dc'])
+    @commands.guild_only()
     async def disconnect(self, ctx):
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
