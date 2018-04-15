@@ -607,7 +607,7 @@ class General:
                                   "`b64`, `md5`, `kannagen`, `iphonex`, `baguette`, `owoify`, `lizard`", inline=False)
 
             embed.add_field(name="NSFW",
-                            value="`pgif`, `4k`, `phsearch`, `lewdneko`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
+                            value="`pgif`, `4k`, `phsearch`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
                                   " `gonewild`, `nsfw`, `doujin`, `girl`, `hentai`, `rule34`", inline=False)
 
             embed.add_field(name="Reactions",
