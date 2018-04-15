@@ -2,6 +2,7 @@ import discord, pymysql, random, time, datetime, asyncio
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
+import aiohttp, config
 
 class CardGame:
     """Loli Card Gamelol"""
@@ -236,6 +237,11 @@ class CardGame:
     @card.command(name='daily')
     async def card_daily(self, ctx):
         """Get your card daily"""
+        async with aiohttp.ClientSession(headers={"Authorization": config.dbots_key}) as cs:
+            async with cs.get(f'https://discordbots.org/api/bots/310039170792030211/check?userId={ctx.message.author.id}') as r:
+                res = await r.json()
+        if not res['voted'] == 1:
+            return await ctx.send("You haven't voted today ;c")
         connection = pymysql.connect(host="localhost",
                                      user="root",
                                      password="rektdiscord",

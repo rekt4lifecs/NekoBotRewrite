@@ -359,7 +359,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get("http://37.59.36.62:10000/shitpost") as r:
                 res = await r.json()
-        await ctx.send(embed=discord.Embed(description=random.choice(res['msg']),
+        await ctx.send(embed=discord.Embed(description=res['msg'],
                                            color=0xDEADBF))
 
     @commands.command()
