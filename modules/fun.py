@@ -363,6 +363,32 @@ class Fun:
                                            color=0xDEADBF))
 
     @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def captcha(self, ctx, user: discord.Member):
+        """Captcha a User OWO"""
+        url = user.avatar_url
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.read()
+        avatar = Image.open(BytesIO(res)).convert('RGB').resize((95, 96))
+        img = Image.open("data/captcha.png")
+        img.paste(avatar, (7, 99))
+        img.paste(avatar, (105, 99))
+        img.paste(avatar, (204, 99))
+        img.paste(avatar, (7, 197))
+        img.paste(avatar, (105, 197))
+        img.paste(avatar, (204, 197))
+        img.paste(avatar, (7, 294))
+        img.paste(avatar, (105, 294))
+        img.paste(avatar, (204, 294))
+        draw = ImageDraw.Draw(img)
+        font = ImageFont.truetype("data/fonts/arial.ttf", 15)
+        draw.text((25, 40), user.name, (255, 255, 255), font)
+        img.save("data/captchaimg.png")
+        await ctx.send(file=discord.File("data/captchaimg.png"),
+                       embed=discord.Embed(color=0xDEADBF).set_image(url='attachment://captchaimg.png'))
+
+    @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def duck(self, ctx):
         """Gets a duck image /shrug"""
