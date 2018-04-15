@@ -365,7 +365,6 @@ class NSFW:
                               title="NSFW Stats")
         embed.add_field(name="PGIF", value=self.counter['pgif'])
         embed.add_field(name="4k", value=self.counter['4k'])
-        embed.add_field(name="Lewd Neko", value=self.counter['lewdneko'])
         embed.add_field(name="Yande.re", value=self.counter['yandere'])
         embed.add_field(name="Ass", value=self.counter['ass'])
         embed.add_field(name="Boobs", value=self.counter['boobs'])
