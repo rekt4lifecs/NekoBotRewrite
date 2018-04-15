@@ -363,6 +363,17 @@ class Fun:
                                            color=0xDEADBF))
 
     @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def duck(self, ctx):
+        """Gets a duck image /shrug"""
+        url = "https://api.random-d.uk/random"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+        em = discord.Embed(color=0xDEADBF)
+        await ctx.send(embed=em.set_image(url=res['url']))
+
+    @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def changemymind(self, ctx, *, text:str):
         votes = await self.execute("SELECT user FROM dbl", isSelect=True, fetchAll=True)
