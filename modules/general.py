@@ -611,10 +611,10 @@ class General:
                                   " `gonewild`, `nsfw`, `doujin`, `girl`, `hentai`, `rule34`", inline=False)
 
             embed.add_field(name="Reactions",
-                            value="`hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
+                            value="`awoo`, `blush`, `confused`, `cry`, `dance`, `insult`, `cry`, `hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
                                   "`poke`, `nom`, `lick`, `lewd`, `trap`, `owo`, `wasted`, `banghead`,"
                                   "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`, `rem`, `poi`, `greet`, "
-                                  "`insultwaifu`, `foxgirl`", inline=False)
+                                  "`insultwaifu`, `foxgirl`, `jojo`, `megumin`, `pout`, `shrug`, `sleepy`, `sumfuk`, `initiald`, `deredere`", inline=False)
             embed.add_field(name="Game Stats",
                             value="`osu`, `overwatch`, `fortnite`, `minecraft`", inline=False)
             embed.add_field(name="Marriage", value="`marry`, `divorce`", inline=False)
