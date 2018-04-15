@@ -60,7 +60,7 @@ class NSFW:
             async with aiohttp.ClientSession() as cs:
                 async with cs.get("http://37.59.36.62:10000/pgif") as r:
                     res = await r.json()
-            x = "r" + res['msg']
+            x = "http://37.59.36.62/pgif/" + res['msg']
             em = discord.Embed(color=0xDEADBF)
             em.set_image(url=x)
 

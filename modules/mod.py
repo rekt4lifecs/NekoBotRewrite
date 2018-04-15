@@ -6,6 +6,7 @@ from collections import Counter
 from .utils.chat_formatting import pagify, box
 from .utils.hastebin import post as hastebin
 import math
+import pymysql
 
 class Arguments(argparse.ArgumentParser):
     def error(self, message):
@@ -676,6 +677,81 @@ class Moderation:
                                                                                        f"{reason}```")
                 await channel.send(embed=embed)
 
+    @commands.group()
+    @checks.is_admin()
+    @commands.guild_only()
+    async def config(self, ctx:commands.Context):
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        if not db.execute(f"SELECT 1 FROM config WHERE guild = {ctx.message.guild.id}"):
+                                    # guild | channel | delete invites | log bans | log kicks | log joins | log edits
+            db.execute(f"INSERT INTO config VALUES ({ctx.message.guild.id}, 0, false, false, false, false, false)")
+            connection.commit()
+        if ctx.invoked_subcommand is None:
+            em = discord.Embed(color=0xDEADBF, title=f"⚙ Config Commands",
+                               description="```\n"
+                                           "Commands:\n\n"
+                                           "n!config info       - View current config settings.\n"
+                                           "n!config channel    - Set the log channel\n"
+                                           "n!config set        - Set log settings```")
+            return await ctx.send(embed=em)
+
+    @config.command(name="info")
+    async def config_info(self, ctx):
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        if not db.execute(f"SELECT 1 FROM config WHERE guild = {ctx.message.guild.id}"):
+            # guild | channel | delete invites | log bans | log kicks | log joins | log edits
+            db.execute(f"INSERT INTO config VALUES ({ctx.message.guild.id}, 0, false, false, false, false, false)")
+            connection.commit()
+        guild = ctx.message.guild
+        db.execute(f"SELECT log_channel, delete_invites, log_bans, log_kicks, log_joins, log_edits FROM config WHERE guild = {guild.id}")
+        all_settings = db.fetchall()[0]
+        if int(all_settings[0]) == 0:
+            channel = "None"
+        else:
+            channel = self.bot.get_channel(int(all_settings[0]))
+            channel = channel.name
+        if int(all_settings[1]) == 0:
+            delete_invites = False
+        else:
+            delete_invites = True
+        if int(all_settings[2]) == 0:
+            log_bans = False
+        else:
+            log_bans = True
+        if int(all_settings[3]) == 0:
+            log_kicks = False
+        else:
+            log_kicks = True
+        if int(all_settings[4]) == 0:
+            log_joins = False
+        else:
+            log_joins = True
+        if int(all_settings[5]) == 0:
+            log_edits = False
+        else:
+            log_edits = True
+
+        em = discord.Embed(color=0xDEADBF, title=f"⚙ Config Settings for {guild.name}",
+                           description=f"```\n"
+                                       f"Channel:       {channel}\n"
+                                       f"Delete Invites:{delete_invites}\n"
+                                       f"Log Bans:      {log_bans}\n"
+                                       f"Log Kicks:     {log_kicks}\n"
+                                       f"Log Joins:     {log_joins}\n"
+                                       f"Log Edits:     {log_edits}\n"
+                                       f"```")
+        await ctx.send(embed=em)
+
     async def on_guild_join(self, guild):
         if not guild.large:
             return
@@ -718,16 +794,17 @@ class Moderation:
             pass
         await channel.send(embed=embed)
 
-    async def on_message_delete(self, message):
-        if message.guild.id == 221989003400970241:
-            channel = self.bot.get_channel(431887286246834178)
-            embed = discord.Embed(color=0xff6f3f, title="Message Deleted",
-                                  description=f"```\n"
-                                              f"Author:     {message.author}\n"
-                                              f"Channel:    {message.channel.name} ({message.channel.id})\n"
-                                              f"Reactions:  {len(message.reactions)}\n"
-                                              f"Content:    {message.content}\n```")
-            await channel.send(embed=embed)
+    # async def on_message_delete(self, message):
+    #     message = self.bot.get_message(messageid)
+    #     if channelid == 221989003400970241:
+    #         channel = self.bot.get_channel(431887286246834178)
+    #         embed = discord.Embed(color=0xff6f3f, title="Message Deleted",
+    #                               description=f"```\n"
+    #                                           f"Author:     {message.author}\n"
+    #                                           f"Channel:    {message.channel.name} ({message.channel.id})\n"
+    #                                           f"Reactions:  {len(message.reactions)}\n"
+    #                                           f"Content:    {message.content}\n```")
+    #         await channel.send(embed=embed)
 
     async def on_message_edit(self, before, after):
         if before.author.bot:
