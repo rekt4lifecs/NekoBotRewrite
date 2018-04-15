@@ -389,6 +389,30 @@ class Fun:
                        embed=discord.Embed(color=0xDEADBF).set_image(url='attachment://captchaimg.png'))
 
     @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def whowouldwin(self, ctx:commands.Context, user1: discord.Member, user2: discord.Member = None):
+        """Who would win"""
+        await ctx.trigger_typing()
+        if user2 is None:
+            user2 = ctx.message.author
+        user1url = user1.avatar_url
+        user2url = user2.avatar_url
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(user1url) as r:
+                res = await r.read()
+        user1 = Image.open(BytesIO(res)).resize((390, 390))
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(user2url) as r:
+                res = await r.read()
+        user2 = Image.open(BytesIO(res)).resize((390, 390))
+        img = Image.open("data/who_would_win.jpg")
+        img.paste(user1, (13, 100))
+        img.paste(user2, (430, 100))
+        img.save("data/www.png")
+        await ctx.send(file=discord.File("data/www.png"),
+                       embed=discord.Embed(color=0xDEADBF).set_image(url='attachment://www.png'))
+
+    @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def duck(self, ctx):
         """Gets a duck image /shrug"""
