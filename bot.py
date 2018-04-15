@@ -29,10 +29,14 @@ startup_extensions = {
     'modules.reactions'
 }
 
+def _prefix_callable(bot, msg):
+    prefixes = ['n!', 'N!']
+    return commands.when_mentioned_or(*prefixes)(bot, msg)
+
 class NekoBot(commands.AutoShardedBot):
 
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or('n!'),
+        super().__init__(command_prefix=_prefix_callable, #commands.when_mentioned_or('n!')
                          description="NekoBot",
                          pm_help=None,
                          shard_count=10,
