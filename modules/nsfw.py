@@ -117,28 +117,6 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(200, 10, commands.BucketType.user)
-    async def lewdneko(self, ctx):
-        """Posts a Lewd Neko OwO"""
-        if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-            return
-        self.counter["lewdneko"] += 1
-        async with aiohttp.ClientSession() as cs:
-            x = random.choice(['https://nekos.life/api/v2/img/nsfw_neko_gif', 'http://nekos.life/api/lewd/neko'])
-            async with cs.get(x) as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                try:
-                    urla = res['neko']
-                except:
-                    urla = res['url']
-                em.set_image(url=urla)
-                em.set_footer(text="nekos.life owo")
-                await ctx.send(embed=em)
-
-    @commands.command()
-    @commands.guild_only()
     async def yandere(self, ctx, *tags: str):
         """Search Yande.re OwO"""
         if not ctx.message.channel.is_nsfw():

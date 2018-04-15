@@ -478,17 +478,31 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command(pass_context=True, aliases=["neko"])
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    @commands.command(pass_context=True, aliases=["neko", "nko"])
     async def kemonomimi(self, ctx):
         """Girls with animal characteristics OwO"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get(f'https://api-v2.weeb.sh/images/random?type={random.choice(["kemonomimi", "neko"])}') as r:
-                res = await r.json()
-                em = discord.Embed(
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        if not ctx.message.channel.is_nsfw():
+            async with aiohttp.ClientSession(headers=auth) as cs:
+                async with cs.get(f'https://api-v2.weeb.sh/images/random?type={random.choice(["kemonomimi", "neko"])}') as r:
+                    res = await r.json()
+                    em = discord.Embed(
+                                       color=0xDEADBF)
+                    em.set_image(url=res['url'])
+                    await ctx.send(embed=em)
+        else:
+            async with aiohttp.ClientSession() as cs:
+                x = random.choice(['https://nekos.life/api/v2/img/nsfw_neko_gif', 'http://nekos.life/api/lewd/neko'])
+                async with cs.get(x) as r:
+                    res = await r.json()
+                    em = discord.Embed(color=0xDEADBF)
+                    try:
+                        urla = res['neko']
+                    except:
+                        urla = res['url']
+                    em.set_image(url=urla)
+                    em.set_footer(text="nekos.life owo")
+                    await ctx.send(embed=em)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(pass_context=True, aliases=['foxgirls'])
