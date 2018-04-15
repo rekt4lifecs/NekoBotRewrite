@@ -416,12 +416,13 @@ class Fun:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def duck(self, ctx):
         """Gets a duck image /shrug"""
+        self.bot.counter['duck'] += 1
         url = "https://api.random-d.uk/random"
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 res = await r.json()
         em = discord.Embed(color=0xDEADBF)
-        await ctx.send(embed=em.set_image(url=res['url']))
+        await ctx.send(embed=em.set_image(url=res['url']).set_footer(text=f"Ducks sent since last restart: {self.bot.counter['duck']}"))
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
