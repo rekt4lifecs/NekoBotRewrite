@@ -676,149 +676,303 @@ class Moderation:
                                                                                        f"Reason:\n```\n"
                                                                                        f"{reason}```")
                 await channel.send(embed=embed)
-
-    @commands.group()
-    @checks.is_admin()
-    @commands.guild_only()
-    async def config(self, ctx:commands.Context):
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
-        if not db.execute(f"SELECT 1 FROM config WHERE guild = {ctx.message.guild.id}"):
-                                    # guild | channel | delete invites | log bans | log kicks | log joins | log edits
-            db.execute(f"INSERT INTO config VALUES ({ctx.message.guild.id}, 0, false, false, false, false, false)")
-            connection.commit()
-        if ctx.invoked_subcommand is None:
-            em = discord.Embed(color=0xDEADBF, title=f"⚙ Config Commands",
-                               description="```\n"
-                                           "Commands:\n\n"
-                                           "n!config info       - View current config settings.\n"
-                                           "n!config channel    - Set the log channel\n"
-                                           "n!config set        - Set log settings```")
-            return await ctx.send(embed=em)
-
-    @config.command(name="info")
-    async def config_info(self, ctx):
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
-        if not db.execute(f"SELECT 1 FROM config WHERE guild = {ctx.message.guild.id}"):
-            # guild | channel | delete invites | log bans | log kicks | log joins | log edits
-            db.execute(f"INSERT INTO config VALUES ({ctx.message.guild.id}, 0, false, false, false, false, false)")
-            connection.commit()
-        guild = ctx.message.guild
-        db.execute(f"SELECT log_channel, delete_invites, log_bans, log_kicks, log_joins, log_edits FROM config WHERE guild = {guild.id}")
-        all_settings = db.fetchall()[0]
-        if int(all_settings[0]) == 0:
-            channel = "None"
-        else:
-            channel = self.bot.get_channel(int(all_settings[0]))
-            channel = channel.name
-        if int(all_settings[1]) == 0:
-            delete_invites = False
-        else:
-            delete_invites = True
-        if int(all_settings[2]) == 0:
-            log_bans = False
-        else:
-            log_bans = True
-        if int(all_settings[3]) == 0:
-            log_kicks = False
-        else:
-            log_kicks = True
-        if int(all_settings[4]) == 0:
-            log_joins = False
-        else:
-            log_joins = True
-        if int(all_settings[5]) == 0:
-            log_edits = False
-        else:
-            log_edits = True
-
-        em = discord.Embed(color=0xDEADBF, title=f"⚙ Config Settings for {guild.name}",
-                           description=f"```\n"
-                                       f"Channel:       {channel}\n"
-                                       f"Delete Invites:{delete_invites}\n"
-                                       f"Log Bans:      {log_bans}\n"
-                                       f"Log Kicks:     {log_kicks}\n"
-                                       f"Log Joins:     {log_joins}\n"
-                                       f"Log Edits:     {log_edits}\n"
-                                       f"```")
-        await ctx.send(embed=em)
-
-    async def on_guild_join(self, guild):
-        if not guild.large:
-            return
-        channel = self.bot.get_channel(431887286246834178)
-        owner = self.bot.get_user(guild.owner_id)
-        embed = discord.Embed(color=0x8bff87, title="Guild Join",
-                              description=f"```\n"
-                                          f"Name:       {guild.name}\n"
-                                          f"Members:    {len(set(guild.members))}\n"
-                                          f"Channels:   {len(guild.text_channels)}\n"
-                                          f"Roles:      {len(guild.roles)}\n"
-                                          f"Emojis:     {len(guild.emojis)}\n"
-                                          f"Region:     {guild.region}\n"
-                                          f"ID:         {guild.id}```\n"
-                                          f"Owner: **{owner.name}** ({owner.id})")
-        try:
-            embed.set_thumbnail(url=guild.icon_url)
-        except:
-            pass
-        await channel.send(embed=embed)
-
-    async def on_guild_remove(self, guild):
-        if not guild.large:
-            return
-        channel = self.bot.get_channel(431887286246834178)
-        owner = self.bot.get_user(guild.owner_id)
-        embed = discord.Embed(color=0xff6f3f, title="Guild Leave",
-                              description=f"```\n"
-                                          f"Name:       {guild.name}\n"
-                                          f"Members:    {len(set(guild.members))}\n"
-                                          f"Channels    {len(guild.text_channels)}\n"
-                                          f"Roles:      {len(guild.roles)}\n"
-                                          f"Emojis:     {len(guild.emojis)}\n"
-                                          f"Region:     {guild.region}\n"
-                                          f"ID:         {guild.id}```\n"
-                                          f"Owner: **{owner.name}** ({owner.id})")
-        try:
-            embed.set_thumbnail(url=guild.icon_url)
-        except:
-            pass
-        await channel.send(embed=embed)
-
-    # async def on_message_delete(self, message):
-    #     message = self.bot.get_message(messageid)
-    #     if channelid == 221989003400970241:
+    # TODO
+    # @commands.group()
+    # @checks.is_admin()
+    # @commands.guild_only()
+    # async def config(self, ctx:commands.Context):
+    #     connection = pymysql.connect(host="localhost",
+    #                                  user="root",
+    #                                  password="rektdiscord",
+    #                                  db="nekobot",
+    #                                  port=3306)
+    #     db = connection.cursor()
+    #     if not db.execute(f"SELECT 1 FROM config WHERE guild = {ctx.message.guild.id}"):
+    #                                 # guild | channel | delete invites | log bans | log kicks | log joins | log edits
+    #         db.execute(f"INSERT INTO config VALUES ({ctx.message.guild.id}, 0, false, false, false, false, false)")
+    #         connection.commit()
+    #     if ctx.invoked_subcommand is None:
+    #         em = discord.Embed(color=0xDEADBF, title=f"⚙ Config Commands",
+    #                            description="```\n"
+    #                                        "Commands:\n\n"
+    #                                        "n!config info       - View current config settings.\n"
+    #                                        "n!config channel    - Set the log channel\n"
+    #                                        "n!config set        - Set log settings\n"
+    #                                        "n!config channel    - Set the log channel\n"
+    #                                        "n!config invites    - Log invites\n"
+    #                                        "n!config bans       - Log bans\n"
+    #                                        "n!config kicks      - Log kicks\n"
+    #                                        "n!config joins      - Log joins\n"
+    #                                        "n!config edits      - Log edits\n```")
+    #         return await ctx.send(embed=em)
+    #
+    # @config.command(name="info")
+    # async def config_info(self, ctx):
+    #     connection = pymysql.connect(host="localhost",
+    #                                  user="root",
+    #                                  password="rektdiscord",
+    #                                  db="nekobot",
+    #                                  port=3306)
+    #     db = connection.cursor()
+    #     if not db.execute(f"SELECT 1 FROM config WHERE guild = {ctx.message.guild.id}"):
+    #         # guild | channel | delete invites | log bans | log kicks | log joins | log edits
+    #         db.execute(f"INSERT INTO config VALUES ({ctx.message.guild.id}, 0, false, false, false, false, false)")
+    #         connection.commit()
+    #     guild = ctx.message.guild
+    #     db.execute(f"SELECT log_channel, delete_invites, log_bans, log_kicks, log_joins, log_edits FROM config WHERE guild = {guild.id}")
+    #     all_settings = db.fetchall()[0]
+    #     if int(all_settings[0]) == 0:
+    #         channel = "None"
+    #     else:
+    #         channel = self.bot.get_channel(int(all_settings[0]))
+    #         channel = channel.name
+    #     if int(all_settings[1]) == 0:
+    #         delete_invites = False
+    #     else:
+    #         delete_invites = True
+    #     if int(all_settings[2]) == 0:
+    #         log_bans = False
+    #     else:
+    #         log_bans = True
+    #     if int(all_settings[3]) == 0:
+    #         log_kicks = False
+    #     else:
+    #         log_kicks = True
+    #     if int(all_settings[4]) == 0:
+    #         log_joins = False
+    #     else:
+    #         log_joins = True
+    #     if int(all_settings[5]) == 0:
+    #         log_edits = False
+    #     else:
+    #         log_edits = True
+    #
+    #     em = discord.Embed(color=0xDEADBF, title=f"⚙ Config Settings for {guild.name}",
+    #                        description=f"```\n"
+    #                                    f"Channel:           {channel}\n"
+    #                                    f"Delete Invites:    {delete_invites}\n"
+    #                                    f"Log Bans:          {log_bans}\n"
+    #                                    f"Log Kicks:         {log_kicks}\n"
+    #                                    f"Log Joins:         {log_joins}\n"
+    #                                    f"Log Edits:         {log_edits}\n"
+    #                                    f"```")
+    #     await ctx.send(embed=em)
+    #
+    # @config.command(name="channel")
+    # async def log_channel(self, ctx, channel : discord.TextChannel = None):
+    #     connection = pymysql.connect(host="localhost",
+    #                                  user="root",
+    #                                  password="rektdiscord",
+    #                                  db="nekobot",
+    #                                  port=3306)
+    #     db = connection.cursor()
+    #     if not db.execute(f"SELECT 1 FROM config WHERE guild = {ctx.message.guild.id}"):
+    #         # guild | channel | delete invites | log bans | log kicks | log joins | log edits
+    #         db.execute(f"INSERT INTO config VALUES ({ctx.message.guild.id}, 0, false, false, false, false, false)")
+    #         connection.commit()
+    #     if channel is None:
+    #         db.execute(f"UPDATE config SET log_channel = 0 WHERE guild = {ctx.message.guild.id}")
+    #         connection.commit()
+    #         return await ctx.send("Disabled log channel.")
+    #     db.execute(f"UPDATE config SET log_channel = {channel.id} WHERE guild = {ctx.message.guild.id}")
+    #     connection.commit()
+    #     await ctx.send(f"Updated log channel to **{channel.name}**")
+    #
+    # @config.command(name="invites")
+    # async def delete_invites(self, ctx, delete_them:bool):
+    #     """Delete invites? True/False"""
+    #     connection = pymysql.connect(host="localhost",
+    #                                  user="root",
+    #                                  password="rektdiscord",
+    #                                  db="nekobot",
+    #                                  port=3306)
+    #     db = connection.cursor()
+    #     if not db.execute(f"SELECT 1 FROM config WHERE guild = {ctx.message.guild.id}"):
+    #         # guild | channel | delete invites | log bans | log kicks | log joins | log edits
+    #         db.execute(f"INSERT INTO config VALUES ({ctx.message.guild.id}, 0, false, false, false, false, false)")
+    #         connection.commit()
+    #     if delete_them is False:
+    #         db.execute(f"UPDATE config SET delete_invites = false WHERE guild = {ctx.message.guild.id}")
+    #         connection.commit()
+    #         await ctx.send("Disabled deletion of invites.")
+    #     else:
+    #         db.execute(f"UPDATE config SET delete_invites = true WHERE guild = {ctx.message.guild.id}")
+    #         connection.commit()
+    #         await ctx.send("Enabled deletion of invites.")
+    #
+    # @config.command(name="bans")
+    # async def log_bans(self, ctx, delete_them:bool):
+    #     """Log Bans? True/False"""
+    #     connection = pymysql.connect(host="localhost",
+    #                                  user="root",
+    #                                  password="rektdiscord",
+    #                                  db="nekobot",
+    #                                  port=3306)
+    #     db = connection.cursor()
+    #     if not db.execute(f"SELECT 1 FROM config WHERE guild = {ctx.message.guild.id}"):
+    #         # guild | channel | delete invites | log bans | log kicks | log joins | log edits
+    #         db.execute(f"INSERT INTO config VALUES ({ctx.message.guild.id}, 0, false, false, false, false, false)")
+    #         connection.commit()
+    #     if delete_them is False:
+    #         db.execute(f"UPDATE config SET log_bans = false WHERE guild = {ctx.message.guild.id}")
+    #         connection.commit()
+    #         await ctx.send("Disabled ban logging.")
+    #     else:
+    #         db.execute(f"UPDATE config SET log_bans = true WHERE guild = {ctx.message.guild.id}")
+    #         connection.commit()
+    #         await ctx.send("Enabled ban logging.")
+    #
+    # @config.command(name="kicks")
+    # async def log_kicks(self, ctx, delete_them:bool):
+    #     """Log Kicks? True/False"""
+    #     connection = pymysql.connect(host="localhost",
+    #                                  user="root",
+    #                                  password="rektdiscord",
+    #                                  db="nekobot",
+    #                                  port=3306)
+    #     db = connection.cursor()
+    #     if not db.execute(f"SELECT 1 FROM config WHERE guild = {ctx.message.guild.id}"):
+    #         # guild | channel | delete invites | log bans | log kicks | log joins | log edits
+    #         db.execute(f"INSERT INTO config VALUES ({ctx.message.guild.id}, 0, false, false, false, false, false)")
+    #         connection.commit()
+    #     if delete_them is False:
+    #         db.execute(f"UPDATE config SET log_kicks = false WHERE guild = {ctx.message.guild.id}")
+    #         connection.commit()
+    #         await ctx.send("Disabled kick logging.")
+    #     else:
+    #         db.execute(f"UPDATE config SET log_kicks = true WHERE guild = {ctx.message.guild.id}")
+    #         connection.commit()
+    #         await ctx.send("Enabled kick logging.")
+    #
+    # @config.command(name="joins")
+    # async def log_joins(self, ctx, delete_them:bool):
+    #     """Log Joins? True/False"""
+    #     connection = pymysql.connect(host="localhost",
+    #                                  user="root",
+    #                                  password="rektdiscord",
+    #                                  db="nekobot",
+    #                                  port=3306)
+    #     db = connection.cursor()
+    #     if not db.execute(f"SELECT 1 FROM config WHERE guild = {ctx.message.guild.id}"):
+    #         # guild | channel | delete invites | log bans | log kicks | log joins | log edits
+    #         db.execute(f"INSERT INTO config VALUES ({ctx.message.guild.id}, 0, false, false, false, false, false)")
+    #         connection.commit()
+    #     if delete_them is False:
+    #         db.execute(f"UPDATE config SET log_joins = false WHERE guild = {ctx.message.guild.id}")
+    #         connection.commit()
+    #         await ctx.send("Disabled join logging.")
+    #     else:
+    #         db.execute(f"UPDATE config SET log_joins = true WHERE guild = {ctx.message.guild.id}")
+    #         connection.commit()
+    #         await ctx.send("Enabled join logging.")
+    #
+    # @config.command(name="edits")
+    # async def log_edits(self, ctx, delete_them:bool):
+    #     """Log Edits? True/False"""
+    #     connection = pymysql.connect(host="localhost",
+    #                                  user="root",
+    #                                  password="rektdiscord",
+    #                                  db="nekobot",
+    #                                  port=3306)
+    #     db = connection.cursor()
+    #     if not db.execute(f"SELECT 1 FROM config WHERE guild = {ctx.message.guild.id}"):
+    #         # guild | channel | delete invites | log bans | log kicks | log joins | log edits
+    #         db.execute(f"INSERT INTO config VALUES ({ctx.message.guild.id}, 0, false, false, false, false, false)")
+    #         connection.commit()
+    #     if delete_them is False:
+    #         db.execute(f"UPDATE config SET log_edits = false WHERE guild = {ctx.message.guild.id}")
+    #         connection.commit()
+    #         await ctx.send("Disabled edit logging.")
+    #     else:
+    #         db.execute(f"UPDATE config SET log_edits = true WHERE guild = {ctx.message.guild.id}")
+    #         connection.commit()
+    #         await ctx.send("Enabled edit logging.")
+    #
+    # async def on_guild_join(self, guild):
+    #     if not guild.large:
+    #         return
+    #     channel = self.bot.get_channel(431887286246834178)
+    #     owner = self.bot.get_user(guild.owner_id)
+    #     embed = discord.Embed(color=0x8bff87, title="Guild Join",
+    #                           description=f"```\n"
+    #                                       f"Name:       {guild.name}\n"
+    #                                       f"Members:    {len(set(guild.members))}\n"
+    #                                       f"Channels:   {len(guild.text_channels)}\n"
+    #                                       f"Roles:      {len(guild.roles)}\n"
+    #                                       f"Emojis:     {len(guild.emojis)}\n"
+    #                                       f"Region:     {guild.region}\n"
+    #                                       f"ID:         {guild.id}```\n"
+    #                                       f"Owner: **{owner.name}** ({owner.id})")
+    #     try:
+    #         embed.set_thumbnail(url=guild.icon_url)
+    #     except:
+    #         pass
+    #     await channel.send(embed=embed)
+    #
+    # async def on_guild_remove(self, guild):
+    #     if not guild.large:
+    #         return
+    #     channel = self.bot.get_channel(431887286246834178)
+    #     owner = self.bot.get_user(guild.owner_id)
+    #     embed = discord.Embed(color=0xff6f3f, title="Guild Leave",
+    #                           description=f"```\n"
+    #                                       f"Name:       {guild.name}\n"
+    #                                       f"Members:    {len(set(guild.members))}\n"
+    #                                       f"Channels    {len(guild.text_channels)}\n"
+    #                                       f"Roles:      {len(guild.roles)}\n"
+    #                                       f"Emojis:     {len(guild.emojis)}\n"
+    #                                       f"Region:     {guild.region}\n"
+    #                                       f"ID:         {guild.id}```\n"
+    #                                       f"Owner: **{owner.name}** ({owner.id})")
+    #     try:
+    #         embed.set_thumbnail(url=guild.icon_url)
+    #     except:
+    #         pass
+    #     await channel.send(embed=embed)
+    #
+    # # async def on_message_delete(self, message):
+    # #     message = self.bot.get_message(messageid)
+    # #     if channelid == 221989003400970241:
+    # #         channel = self.bot.get_channel(431887286246834178)
+    # #         embed = discord.Embed(color=0xff6f3f, title="Message Deleted",
+    # #                               description=f"```\n"
+    # #                                           f"Author:     {message.author}\n"
+    # #                                           f"Channel:    {message.channel.name} ({message.channel.id})\n"
+    # #                                           f"Reactions:  {len(message.reactions)}\n"
+    # #                                           f"Content:    {message.content}\n```")
+    # #         await channel.send(embed=embed)
+    #
+    # async def on_message_edit(self, before, after):
+    #     if before.author.bot:
+    #         return
+    #     guild = before.guild
+    #     if guild.id == 221989003400970241:
     #         channel = self.bot.get_channel(431887286246834178)
-    #         embed = discord.Embed(color=0xff6f3f, title="Message Deleted",
+    #         embed = discord.Embed(color=0xffa230, title="Message Edited",
     #                               description=f"```\n"
-    #                                           f"Author:     {message.author}\n"
-    #                                           f"Channel:    {message.channel.name} ({message.channel.id})\n"
-    #                                           f"Reactions:  {len(message.reactions)}\n"
-    #                                           f"Content:    {message.content}\n```")
+    #                                           f"Author:     {before.author}\n"
+    #                                           f"Channel:    {before.channel.name} ({before.channel.id})\n"
+    #                                           f"Before:     {before.content}\n"
+    #                                           f"After:      {after.content}```")
+    #         embed.set_footer(text=f"Edited at {after.edited_at}")
     #         await channel.send(embed=embed)
-
-    async def on_message_edit(self, before, after):
-        if before.author.bot:
-            return
-        if before.guild.id == 221989003400970241:
-            channel = self.bot.get_channel(431887286246834178)
-            embed = discord.Embed(color=0xffa230, title="Message Edited",
-                                  description=f"```\n"
-                                              f"Author:     {before.author}\n"
-                                              f"Channel:    {before.channel.name} ({before.channel.id})\n"
-                                              f"Before:     {before.content}\n"
-                                              f"After:      {after.content}```")
-            embed.set_footer(text=f"Edited at {after.edited_at}")
-            await channel.send(embed=embed)
+    #     connection = pymysql.connect(host="localhost",
+    #                                  user="root",
+    #                                  password="rektdiscord",
+    #                                  db="nekobot",
+    #                                  port=3306)
+    #     db = connection.cursor()
+    #     if db.execute(f"SELECT 1 FROM config WHERE guild = {guild.id}"):
+    #         try:
+    #             db.execute(f"SELECT log_channel FROM config WHERE guild {guild.id}")
+    #             channel = int(db.fetchone()[0])
+    #             channel = self.bot.get_channel(channel)
+    #             embed = discord.Embed(color=0xffa230, title=f"Message Edited - {before.author.name}")
+    #             embed.add_field(name="Before", value=before.content)
+    #             embed.add_field(name="After", value=after.content)
+    #             await channel.send(embed=embed)
+    #         except Exception as e:
+    #             print(e)
 
 def setup(bot):
     bot.add_cog(Moderation(bot))
