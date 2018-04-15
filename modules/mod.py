@@ -888,47 +888,47 @@ class Moderation:
     #         connection.commit()
     #         await ctx.send("Enabled edit logging.")
     #
-    # async def on_guild_join(self, guild):
-    #     if not guild.large:
-    #         return
-    #     channel = self.bot.get_channel(431887286246834178)
-    #     owner = self.bot.get_user(guild.owner_id)
-    #     embed = discord.Embed(color=0x8bff87, title="Guild Join",
-    #                           description=f"```\n"
-    #                                       f"Name:       {guild.name}\n"
-    #                                       f"Members:    {len(set(guild.members))}\n"
-    #                                       f"Channels:   {len(guild.text_channels)}\n"
-    #                                       f"Roles:      {len(guild.roles)}\n"
-    #                                       f"Emojis:     {len(guild.emojis)}\n"
-    #                                       f"Region:     {guild.region}\n"
-    #                                       f"ID:         {guild.id}```\n"
-    #                                       f"Owner: **{owner.name}** ({owner.id})")
-    #     try:
-    #         embed.set_thumbnail(url=guild.icon_url)
-    #     except:
-    #         pass
-    #     await channel.send(embed=embed)
-    #
-    # async def on_guild_remove(self, guild):
-    #     if not guild.large:
-    #         return
-    #     channel = self.bot.get_channel(431887286246834178)
-    #     owner = self.bot.get_user(guild.owner_id)
-    #     embed = discord.Embed(color=0xff6f3f, title="Guild Leave",
-    #                           description=f"```\n"
-    #                                       f"Name:       {guild.name}\n"
-    #                                       f"Members:    {len(set(guild.members))}\n"
-    #                                       f"Channels    {len(guild.text_channels)}\n"
-    #                                       f"Roles:      {len(guild.roles)}\n"
-    #                                       f"Emojis:     {len(guild.emojis)}\n"
-    #                                       f"Region:     {guild.region}\n"
-    #                                       f"ID:         {guild.id}```\n"
-    #                                       f"Owner: **{owner.name}** ({owner.id})")
-    #     try:
-    #         embed.set_thumbnail(url=guild.icon_url)
-    #     except:
-    #         pass
-    #     await channel.send(embed=embed)
+    async def on_guild_join(self, guild):
+        if not guild.large:
+            return
+        channel = self.bot.get_channel(431887286246834178)
+        owner = self.bot.get_user(guild.owner_id)
+        embed = discord.Embed(color=0x8bff87, title="Guild Join",
+                              description=f"```\n"
+                                          f"Name:       {guild.name}\n"
+                                          f"Members:    {len(set(guild.members))}\n"
+                                          f"Channels:   {len(guild.text_channels)}\n"
+                                          f"Roles:      {len(guild.roles)}\n"
+                                          f"Emojis:     {len(guild.emojis)}\n"
+                                          f"Region:     {guild.region}\n"
+                                          f"ID:         {guild.id}```\n"
+                                          f"Owner: **{owner.name}** ({owner.id})")
+        try:
+            embed.set_thumbnail(url=guild.icon_url)
+        except:
+            pass
+        await channel.send(embed=embed)
+
+    async def on_guild_remove(self, guild):
+        if not guild.large:
+            return
+        channel = self.bot.get_channel(431887286246834178)
+        owner = self.bot.get_user(guild.owner_id)
+        embed = discord.Embed(color=0xff6f3f, title="Guild Leave",
+                              description=f"```\n"
+                                          f"Name:       {guild.name}\n"
+                                          f"Members:    {len(set(guild.members))}\n"
+                                          f"Channels    {len(guild.text_channels)}\n"
+                                          f"Roles:      {len(guild.roles)}\n"
+                                          f"Emojis:     {len(guild.emojis)}\n"
+                                          f"Region:     {guild.region}\n"
+                                          f"ID:         {guild.id}```\n"
+                                          f"Owner: **{owner.name}** ({owner.id})")
+        try:
+            embed.set_thumbnail(url=guild.icon_url)
+        except:
+            pass
+        await channel.send(embed=embed)
     #
     # # async def on_message_delete(self, message):
     # #     message = self.bot.get_message(messageid)
@@ -941,38 +941,38 @@ class Moderation:
     # #                                           f"Reactions:  {len(message.reactions)}\n"
     # #                                           f"Content:    {message.content}\n```")
     # #         await channel.send(embed=embed)
-    #
-    # async def on_message_edit(self, before, after):
-    #     if before.author.bot:
-    #         return
-    #     guild = before.guild
-    #     if guild.id == 221989003400970241:
-    #         channel = self.bot.get_channel(431887286246834178)
-    #         embed = discord.Embed(color=0xffa230, title="Message Edited",
-    #                               description=f"```\n"
-    #                                           f"Author:     {before.author}\n"
-    #                                           f"Channel:    {before.channel.name} ({before.channel.id})\n"
-    #                                           f"Before:     {before.content}\n"
-    #                                           f"After:      {after.content}```")
-    #         embed.set_footer(text=f"Edited at {after.edited_at}")
-    #         await channel.send(embed=embed)
-    #     connection = pymysql.connect(host="localhost",
-    #                                  user="root",
-    #                                  password="rektdiscord",
-    #                                  db="nekobot",
-    #                                  port=3306)
-    #     db = connection.cursor()
-    #     if db.execute(f"SELECT 1 FROM config WHERE guild = {guild.id}"):
-    #         try:
-    #             db.execute(f"SELECT log_channel FROM config WHERE guild {guild.id}")
-    #             channel = int(db.fetchone()[0])
-    #             channel = self.bot.get_channel(channel)
-    #             embed = discord.Embed(color=0xffa230, title=f"Message Edited - {before.author.name}")
-    #             embed.add_field(name="Before", value=before.content)
-    #             embed.add_field(name="After", value=after.content)
-    #             await channel.send(embed=embed)
-    #         except Exception as e:
-    #             print(e)
+
+    async def on_message_edit(self, before, after):
+        if before.author.bot:
+            return
+        guild = before.guild
+        if guild.id == 221989003400970241:
+            channel = self.bot.get_channel(431887286246834178)
+            embed = discord.Embed(color=0xffa230, title="Message Edited",
+                                  description=f"```\n"
+                                              f"Author:     {before.author}\n"
+                                              f"Channel:    {before.channel.name} ({before.channel.id})\n"
+                                              f"Before:     {before.content}\n"
+                                              f"After:      {after.content}```")
+            embed.set_footer(text=f"Edited at {after.edited_at}")
+            await channel.send(embed=embed)
+        # connection = pymysql.connect(host="localhost",
+        #                              user="root",
+        #                              password="rektdiscord",
+        #                              db="nekobot",
+        #                              port=3306)
+        # db = connection.cursor()
+        # if db.execute(f"SELECT 1 FROM config WHERE guild = {guild.id}"):
+        #     try:
+        #         db.execute(f"SELECT log_channel FROM config WHERE guild {guild.id}")
+        #         channel = int(db.fetchone()[0])
+        #         channel = self.bot.get_channel(channel)
+        #         embed = discord.Embed(color=0xffa230, title=f"Message Edited - {before.author.name}")
+        #         embed.add_field(name="Before", value=before.content)
+        #         embed.add_field(name="After", value=after.content)
+        #         await channel.send(embed=embed)
+        #     except Exception as e:
+        #         print(e)
 
 def setup(bot):
     bot.add_cog(Moderation(bot))
