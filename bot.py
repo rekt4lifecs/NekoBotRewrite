@@ -61,7 +61,7 @@ class NekoBot(commands.AutoShardedBot):
         ignored = (commands.CommandNotFound, commands.UserInputError,
                    commands.NoPrivateMessage, commands.DisabledCommand,
                    commands.CheckFailure)
-        exception = getattr(exception, 'original', exception)
+        # exception = getattr(exception, 'original', exception)
         if isinstance(exception, ignored):
             return
         elif isinstance(exception, commands.BadArgument):
@@ -71,22 +71,22 @@ class NekoBot(commands.AutoShardedBot):
         elif isinstance(exception, commands.CommandOnCooldown):
             await ctx.send('Command is on cooldown... {:.2f}s left'.format(exception.retry_after))
         elif isinstance(exception, commands.CommandNotFound):
-            pass
+            return
         elif isinstance(exception, commands.BotMissingPermissions):
             await ctx.send(f"Im missing permissions ;-;\nPermissions I need:\n{exception.missing_perms}")
         elif isinstance(exception, discord.Forbidden):
-            pass
+            return
         elif isinstance(exception, discord.LoginFailure):
             print("Failed to login. Invalid token?")
         elif isinstance(exception, discord.DiscordException):
             print(f"Discord Exception, {exception}")
         elif isinstance(exception, discord.NotFound):
-            pass
+            return
         elif isinstance(exception, json.JSONDecodeError):
             try:
                 await ctx.send("Failed to get data...", delete_after=5)
             except:
-                pass
+                return 
         elif isinstance(exception, commands.CommandInvokeError):
             em = discord.Embed(color=0xDEADBF,
                                title="Error",
