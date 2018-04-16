@@ -3,6 +3,7 @@ git+https://github.com/pytest-dev/pytest-asyncio
 beautifulsoup4
 pillow
 requests
+scipy
 psutil
 hurry.filesize
 matplotlib
