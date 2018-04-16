@@ -298,6 +298,7 @@ class Moderation:
             await ctx.send('\N{OK HAND SIGN}')
 
     @commands.command(hidden=True)
+    @commands.is_owner()
     async def unload(self, ctx, *, module):
         """Unloads a module."""
         module = "modules." + module
@@ -309,6 +310,7 @@ class Moderation:
             await ctx.send('\N{OK HAND SIGN}')
 
     @commands.command(name='reload', hidden=True)
+    @commands.is_owner()
     async def _reload(self, ctx, *, module):
         """Reloads a module."""
         module = "modules." + module
