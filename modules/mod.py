@@ -6,6 +6,8 @@ from collections import Counter
 from .utils.chat_formatting import pagify, box
 from .utils.hastebin import post as hastebin
 import math
+import string
+import time
 import pymysql
 
 class Arguments(argparse.ArgumentParser):
@@ -101,6 +103,28 @@ class Moderation:
 
         for page in pagify(msg, ['\n']):
             await ctx.send(page)
+
+    @commands.command()
+    @commands.cooldown(1, 900, commands.BucketType.user)
+    @commands.guild_only()
+    @checks.is_admin()
+    async def dehoist(self, ctx):
+        """Dehoister"""
+        users_dehoisted = []
+        users_failed = []
+        starttime = int(time.time())
+        await ctx.send("Dehoist started...")
+        for user in ctx.message.guild.members:
+            try:
+                if not user.display_name[0] in list(str(string.ascii_letters)):
+                    await user.edit(nick=None, reason="Hoisting")
+                    users_dehoisted.append(f"{user.name}-{user.id}")
+            except:
+                users_failed.append(user.id)
+                pass
+        hastepaste = await hastebin("\n".join(users_dehoisted))
+        await ctx.send(f"{len(users_dehoisted)} users dehoisted, finished in {int(time.time() - starttime)}s.\n"
+                       f"{len(users_failed)} users failed to dehoist. Users dehoisted: {hastepaste}")
 
     @commands.command()
     @commands.is_owner()
