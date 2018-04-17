@@ -186,6 +186,31 @@ class Fun:
             await ctx.send(file=discord.File(f"data/achievement/{achievement.lower().replace(' ', '-')}.png"))
         except discord.Forbidden:
             pass
+        
+    @commands.command(aliases=['pillow'])
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def bodypillow(self, ctx, user: discord.Member):
+        """Bodypillow someone"""
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(user.avatar_url_as(format="png")) as r:
+                res = await r.read()
+        avatar = Image.open(BytesIO(res)).convert('RGBA')
+        size = (500, 500)
+        mask = Image.new('L', size, 0)
+        draw = ImageDraw.Draw(mask)
+        draw.ellipse((0, 0) + size, fill=255)
+        output = ImageOps.fit(avatar, mask.size, centering=(0.5, 0.5))
+        output.putalpha(mask)
+        output.save("data/_profile.png")
+        pillow = Image.open("data/pillow.jpg").convert('RGBA')
+        avatar = Image.open("data/_profile.png").resize((175, 175)).rotate(300)
+        pillow.alpha_composite(avatar, (700, 140))
+        pillow.save("pillow.png")
+        em = discord.Embed(color=0xDEADBF, title=f"{user.name}'s body pillow.")
+        await ctx.send(file=discord.File("pillow.png"), embed=em.set_image(url='attachment://pillow.png'))
+        os.remove("data/_profile.png")
+        os.remove("pillow.png")
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
