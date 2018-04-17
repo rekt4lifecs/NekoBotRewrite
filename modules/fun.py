@@ -186,7 +186,21 @@ class Fun:
             await ctx.send(file=discord.File(f"data/achievement/{achievement.lower().replace(' ', '-')}.png"))
         except discord.Forbidden:
             pass
-        
+
+    @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def threats(self, ctx, user:discord.Member):
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(user.avatar_url_as(format="png")) as r:
+                res = await r.read()
+        avatar = Image.open(BytesIO(res)).convert('RGBA').resize((300, 300))
+        img = Image.open("data/threats.jpg").convert('RGBA')
+        img.alpha_composite(avatar, (860, 140))
+        img.save("x.png")
+        await ctx.send(file=discord.File("x.png"), embed=discord.Embed(color=0xDEADBF).set_image(url='attachment://x.png'))
+        os.remove("x.png")
+
     @commands.command(aliases=['pillow'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def bodypillow(self, ctx, user: discord.Member):
