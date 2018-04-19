@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord, aiohttp, asyncio, time, datetime, config, random, math, logging
 import aiomysql
 import pymysql
+import json
 
 log = logging.getLogger("NekoBot")
 
@@ -128,9 +129,13 @@ class economy:
             balance = int(x[0])
         else:
             balance = 0
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f"https://api.weeb.sh/reputation/{self.bot.user.id}/{user.id}",
+                               headers={"Authorization": "Wolke " + config.weeb}) as r:
+                data = await r.json()
         embed = discord.Embed(color=0xDEABDF, title=f"{user.display_name}'s Profile",
                               description=f"`Balance:` **{balance}**\n"
-                                          f"`Rep:` **{rep}**\n"
+                                          f"`Rep:` **{data['user']['reputation']}**\n"
                                           f"`Level:` **{level}** | **{xp}/{required}**\n\n"
                                           f"```\n{description}```\n"
                                           f"Married to: **{married}**")
@@ -195,29 +200,21 @@ class economy:
         elif user.bot:
             await ctx.send("You can't rep bots <:nkoDed:422666465238319107>")
             return
+        async with aiohttp.ClientSession() as cs:
+            async with cs.post(f"https://api.weeb.sh/reputation/310039170792030211/{user.id}",
+                               headers={"Authorization": "Wolke " + config.weeb},
+                               data={"source_user": str(author.id)}) as r:
+                data = await r.json()
+        # await ctx.send(f"```\n{json.dumps(data, indent=4)}\n```")
+        if data['status'] == 200:
+            em = discord.Embed(color=0xDEADBF, title="Given Rep!",
+                               description=f"{author.mention} has given {user.mention} 1 rep!\n"
+                               f"**{user.name}** Now has {data['targetUser']['reputation']} rep!")
+            return await ctx.send(embed=em)
         else:
-            if await self.usercheck("levels", user) is False:
-                log.info("Creating account...")
-                await self._create_user(ctx.message.author.id)
-
-            x = await self.execute(f"SELECT lastrep FROM levels WHERE userid = {author.id}", isSelect=True)
-            lastrep = x[0]
-            timenow = datetime.datetime.utcfromtimestamp(time.time()).strftime("%d")
-            timecheck = datetime.datetime.utcfromtimestamp(int(lastrep)).strftime("%d")
-            if timecheck == timenow:
-                await ctx.send("You already used your rep today 😦")
-                return
-            else:
-                x = await self.execute(f"SELECT rep FROM levels WHERE userid = {user.id}", isSelect=True)
-                current_rep = int(x[0])
-                patrons = [102165107244539904, 270133511325876224]
-                if user.id in patrons:
-                    newrep = 2
-                else:
-                    newrep = 1
-                await self.execute(f"UPDATE levels SET rep = {current_rep + newrep} WHERE userid = {user.id}", commit=True)
-                await self.execute(f"UPDATE levels SET lastrep = {int(time.time())} WHERE userid = {author.id}", commit=True)
-                await ctx.send(f"{ctx.message.author.name} gave {user.mention} rep! 🎉🎉🎉")
+            em = discord.Embed(color=0xDEADBF, title="Given Rep!",
+                               description=f"{author.mention}, you dont have any rep points available ;c")
+            return await ctx.send(embed=em)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -496,6 +493,61 @@ class economy:
     #     endtime = int(time.time())
     #     embed.set_footer(text=f"Finished in {endtime - starttime}s")
     #     await msg.edit(embed=embed)
+
+    @commands.command()
+    @commands.cooldown(1, 20, commands.BucketType.user)
+    async def top(self, ctx):
+        """Get Top Users OwO"""
+        connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+        db = connection.cursor()
+        try:
+            if await self.usercheck('levels', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
+        em = discord.Embed(color=0xDEADBF, title="Top Users | Economy", description="Loading...")
+        msg = await ctx.send(embed=em)
+        db.execute("SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10")
+        allusers = db.fetchall()
+        all_members = []
+        for guild in self.bot.guilds:
+            for member in guild.members:
+                if member.id == int(allusers[0][0]):
+                    user1 = member.name
+                elif member.id == int(allusers[1][0]):
+                    user2 = member.name
+                elif member.id == int(allusers[2][0]):
+                    user3 = member.name
+                elif member.id == int(allusers[3][0]):
+                    user4 = member.name
+                elif member.id == int(allusers[4][0]):
+                    user5 = member.name
+                elif member.id == int(allusers[5][0]):
+                    user6 = member.name
+                elif member.id == int(allusers[6][0]):
+                    user7 = member.name
+                elif member.id == int(allusers[7][0]):
+                    user8 = member.name
+                elif member.id == int(allusers[8][0]):
+                    user9 = member.name
+                elif member.id == int(allusers[9][0]):
+                    user10 = member.name
+        embed = discord.Embed(color=0xDEADBF, title="Top Users",
+                              description=f"`1. ♔{user1}♔ - ${int(allusers[0][1])}`\n"
+                                          f"`2. ♕{user2}♕ - ${int(allusers[1][1])}`\n"
+                                          f"`3. ♖{user3}♖ - ${int(allusers[2][1])}`\n"
+                                          f"`4. {user4} - ${int(allusers[3][1])}`\n"
+                                          f"`5. {user5} - ${int(allusers[4][1])}`\n"
+                                          f"`6. {user6} - ${int(allusers[5][1])}`\n"
+                                          f"`7. {user7} - ${int(allusers[6][1])}`\n"
+                                          f"`8. {user8} - ${int(allusers[7][1])}`\n"
+                                          f"`9. {user9} - ${int(allusers[8][1])}`\n"
+                                          f"`10. {user10} - ${int(allusers[9][1])}`\n")
+        return await msg.edit(embed=embed)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
