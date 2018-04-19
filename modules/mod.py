@@ -8,7 +8,8 @@ from .utils.hastebin import post as hastebin
 import math
 import string
 import time
-import pymysql
+import config
+import pymysql, aiomysql
 
 class Arguments(argparse.ArgumentParser):
     def error(self, message):
@@ -295,7 +296,7 @@ class Moderation:
         except Exception as e:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
-            await ctx.send('\N{OK HAND SIGN}')
+            await ctx.send('👌💯🔥')
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -307,7 +308,7 @@ class Moderation:
         except Exception as e:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
-            await ctx.send('\N{OK HAND SIGN}')
+            await ctx.send('👌💯🔥')
 
     @commands.command(name='reload', hidden=True)
     @commands.is_owner()
@@ -320,7 +321,7 @@ class Moderation:
         except Exception as e:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
-            await ctx.send('\N{OK HAND SIGN}')
+            await ctx.send('👌💯🔥')
 
     @commands.command()
     async def latency(self, ctx):
@@ -441,6 +442,42 @@ class Moderation:
             else:
                 self._last_result = ret
                 await ctx.send(f'```py\n{value}{ret}\n```')
+
+    async def on_message_delete(self, message):
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                            user='root', password=config.dbpass,
+                                            db='nekobot')
+        async with connection.cursor() as db:
+            try:
+                if not await db.execute(f"SELECT 1 FROM snipe WHERE channel = {message.channel.id}"):
+                    await db.execute(f"INSERT INTO snipe VALUES ({message.channel.id}, \"{message.content}\", {message.author.id})")
+                else:
+                    await db.execute(f"UPDATE snipe SET message = \"{message.content}\" WHERE channel = {message.channel.id}")
+                await connection.commit()
+            except:
+                pass
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def snipe(self, ctx):
+        """Snipe the last message."""
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                            user='root', password=config.dbpass,
+                                            db='nekobot')
+        channel = ctx.message.channel
+        async with connection.cursor() as db:
+            if not await db.execute(f"SELECT 1 FROM snipe WHERE channel = {channel.id}"):
+                return await ctx.send("**No message found to snipe.**")
+            else:
+                try:
+                    await db.execute(f"SELECT message, author FROM snipe WHERE channel = {channel.id}")
+                    message = await db.fetchall()
+                    em = discord.Embed(color=0xDEADBF, title=f"Sniped message by {ctx.message.author}",
+                                       description=f"{message[0][0]}")
+                    return await ctx.send(embed=em)
+                except:
+                    return await ctx.send("**Failed to get message.**")
 
     @commands.group(aliases=['remove'])
     @commands.guild_only()

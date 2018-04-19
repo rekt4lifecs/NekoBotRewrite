@@ -43,7 +43,7 @@ class NekoBot(commands.AutoShardedBot):
                          shard_count=10,
                          shard_id=0,
                          status=discord.Status.dnd,
-                         max_messages=3000,
+                         max_messages=5000,
                          help_attrs={'hidden': True})
         self.counter = Counter()
         for extension in startup_extensions:

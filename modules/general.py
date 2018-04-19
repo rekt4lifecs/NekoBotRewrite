@@ -62,6 +62,9 @@ class General:
         if isSelect:
             return values
 
+    async def on_socket_response(self, msg):
+        self.bot.socket_stats[msg.get('t')] += 1
+
     @commands.command()
     async def lmgtfy(self, ctx, *, search_terms: str):
         """Creates a lmgtfy link"""
@@ -127,6 +130,16 @@ class General:
             text="Bot by ReKT#0001 & cleaned by Kot#1337 :^)")
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
         await ctx.send(embed=info)
+
+    @commands.command(hidden=True)
+    async def socketstats(self, ctx):
+        delta = datetime.datetime.utcnow() - self.bot.uptime
+        minutes = delta.total_seconds() / 60
+        total = sum(self.bot.socket_stats.values())
+        cpm = total / minutes
+        em = discord.Embed(color=0xDEADBF, title="Websocket Stats",
+                           description=f'{total} socket events observed ({cpm:.2f}/minute):\n{self.bot.socket_stats}')
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.cooldown(1, 15, commands.BucketType.user)
@@ -718,7 +731,7 @@ class General:
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
             embed.add_field(name="Moderation",
-                            value="`kick`, `ban`, `massban`, `unban`, `rename`, `poll`, `purge`, `mute`, `unmute`, `dehoist`", inline=False)
+                            value="`kick`, `ban`, `massban`, `unban`, `rename`, `snipe`, `poll`, `purge`, `mute`, `unmute`, `dehoist`", inline=False)
             embed.add_field(name="Roleplay", value="`card`")
             embed.add_field(name="IMGWelcomer", value="`imgwelcome`", inline=False)
             embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `transfer`, "
@@ -852,5 +865,7 @@ class General:
 
 
 def setup(bot):
+    if not hasattr(bot, 'socket_stats'):
+        bot.socket_stats = Counter()
     bot.remove_command('help')
     bot.add_cog(General(bot))
