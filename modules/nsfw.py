@@ -58,11 +58,10 @@ class NSFW:
                 return
             self.counter['pgif'] += 1
             async with aiohttp.ClientSession() as cs:
-                async with cs.get("http://37.59.36.62:10000/pgif") as r:
+                async with cs.get("https://nekobot.xyz/api/image?type=pgif") as r:
                     res = await r.json()
-            x = "http://37.59.36.62/pgif/" + res['msg']
             em = discord.Embed(color=0xDEADBF)
-            em.set_image(url=x)
+            em.set_image(url=res['message'])
 
             await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
         else:
@@ -83,12 +82,11 @@ class NSFW:
             return
         self.counter["4k"] += 1
         async with aiohttp.ClientSession() as cs:
-            async with cs.get("http://37.59.36.62:10000/4kdata") as r:
+            async with cs.get("https://nekobot.xyz/api/image?type=4k") as r:
                 res = await r.json()
-        data = res['msg']
+        data = res['message']
         embed = discord.Embed(color=0xDEADBF)
-        url = "http://37.59.36.62/4k/" + data
-        embed.set_image(url=url)
+        embed.set_image(url=data)
         await ctx.send(embed=embed.set_footer(text=f"Used by {ctx.message.author.name}"))
 
     @commands.command()
