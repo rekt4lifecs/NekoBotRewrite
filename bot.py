@@ -3,6 +3,7 @@ import logging, traceback, sys, discord
 from datetime import date
 from collections import Counter
 import json
+import datetime
 
 import config
 log = logging.getLogger('NekoBot')
@@ -110,6 +111,8 @@ class NekoBot(commands.AutoShardedBot):
         await self.close()
 
     async def on_shard_ready(self, shard_id):
+        if not hasattr(self, 'uptime'):
+            self.uptime = datetime.datetime.utcnow()
         print(f"Shard {shard_id} Connected...")
 
     async def on_ready(self):

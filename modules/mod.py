@@ -444,6 +444,7 @@ class Moderation:
 
     @commands.group(aliases=['remove'])
     @commands.guild_only()
+    @checks.has_permissions(manage_messages=True)
     async def purge(self, ctx):
         """Removes messages that meet a criteria.""" # RoboDanny <3
         
@@ -479,10 +480,15 @@ class Moderation:
 
         try:
             deleted = await ctx.channel.purge(limit=limit, before=before, after=after, check=predicate)
-        except discord.Forbidden as e:
+        except discord.Forbidden:
             return await ctx.send('I do not have permissions to delete messages.')
         except discord.HTTPException as e:
             return await ctx.send(f'Error: {e} (try a smaller search?)')
+
+        try:
+            await ctx.message.delete()
+        except:
+            pass
 
         spammers = Counter(m.author.display_name for m in deleted)
         deleted = len(deleted)
@@ -496,36 +502,31 @@ class Moderation:
 
         if len(to_send) > 2000:
             e = discord.Embed(color=0x87ff8f, description=f'Successfully removed {deleted} messages.')
-            await ctx.send(embed=e, delete_after=10)
+            await ctx.send(embed=e, delete_after=4)
         else:
-            await ctx.send(to_send, delete_after=10)
+            await ctx.send(to_send, delete_after=4)
 
     @purge.command()
-    @commands.has_permissions(manage_messages=True)
     async def embeds(self, ctx, search=100):
         """Removes messages that have embeds in them."""
         await self.do_removal(ctx, search, lambda e: len(e.embeds))
 
     @purge.command()
-    @commands.has_permissions(manage_messages=True)
     async def files(self, ctx, search=100):
         """Removes messages that have attachments in them."""
         await self.do_removal(ctx, search, lambda e: len(e.attachments))
 
     @purge.command(name='all')
-    @commands.has_permissions(manage_messages=True)
     async def _remove_all(self, ctx, search=100):
         """Removes all messages."""
         await self.do_removal(ctx, search, lambda e: True)
 
     @purge.command()
-    @commands.has_permissions(manage_messages=True)
     async def user(self, ctx, member: discord.Member, search=100):
         """Removes all messages by the member."""
         await self.do_removal(ctx, search, lambda e: e.author == member)
 
     @purge.command()
-    @commands.has_permissions(manage_messages=True)
     async def contains(self, ctx, *, substr: str):
         """Removes all messages containing a substring."""
         if len(substr) < 3:
@@ -534,7 +535,6 @@ class Moderation:
             await self.do_removal(ctx, 100, lambda e: substr in e.content)
 
     @purge.command(name='bot')
-    @commands.has_permissions(manage_messages=True)
     async def _bot(self, ctx, prefix=None, search=100):
         """Removes a bot user's messages and messages with their optional prefix."""
 
@@ -544,7 +544,6 @@ class Moderation:
         await self.do_removal(ctx, search, predicate)
 
     @purge.command(name='emoji')
-    @commands.has_permissions(manage_messages=True)
     async def _emoji(self, ctx, search=100):
         """Removes all messages containing custom emoji."""
         custom_emoji = re.compile(r'<:(\w+):(\d+)>')
@@ -554,7 +553,6 @@ class Moderation:
         await self.do_removal(ctx, search, predicate)
 
     @purge.command(name='reactions')
-    @commands.has_permissions(manage_messages=True)
     async def _reactions(self, ctx, search=100):
         """Removes all reactions from messages that have them."""
 
@@ -571,7 +569,6 @@ class Moderation:
                                            description=f'Successfully removed {total_reactions} reactions.'))
 
     @purge.command()
-    @commands.has_permissions(manage_messages=True)
     async def custom(self, ctx, *, args: str):
         """A more advanced purge command.
 

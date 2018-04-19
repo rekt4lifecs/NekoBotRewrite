@@ -88,6 +88,25 @@ class General:
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
 
+    def get_bot_uptime(self, *, brief=False):
+        now = datetime.datetime.utcnow()
+        delta = now - self.bot.uptime
+        hours, remainder = divmod(int(delta.total_seconds()), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        days, hours = divmod(hours, 24)
+
+        if not brief:
+            if days:
+                fmt = '{d} days, {h} hours, {m} minutes, and {s} seconds'
+            else:
+                fmt = '{h} hours, {m} minutes, and {s} seconds'
+        else:
+            fmt = '{h}h {m}m {s}s'
+            if days:
+                fmt = '{d}d ' + fmt
+
+        return fmt.format(d=days, h=hours, m=minutes, s=seconds)
+
     @commands.command(aliases=['version'])
     async def info(self, ctx):
         servers = len(self.bot.guilds)
@@ -99,22 +118,13 @@ class General:
                                          f"Channels: **{millify(len(set(self.bot.get_all_channels())))}**\n"
                                          f"Shards: **{self.bot.shard_count}**\n"
                                          f"Bot in voice channel(s): **{len(self.bot.voice_clients)}**\n"
+                                         f"Uptime: **{self.get_bot_uptime()}**\n"
                                          f"Messages Read (Since Restart): **{millify(self.bot.counter['messages_read'])}**")
-        # try:
-        #     info.add_field(name="System:", value=f"CPU %: **{psutil.cpu_percent()}%**\n"
-        #                                      f"Boot Time: **{datetime.datetime.fromtimestamp(psutil.boot_time()).strftime('%Y-%m-%d %H:%M:%S')}**\n"
-        #                                      f"**Discord.py** {discord.__version__} | **PIL** {pilv} | **BeautifulSoup** {bsv} | **psutil** {psutil.__version__} | **aiomysql** {aiomysql.__version__} | **aiohttp** {aiohttp.__version__}")
-        # except:
-        #     pass
-        # try:
-        #     info.add_field(name="System", value=f"discord.py {discord.__version__} | BeautifulSoup {bsv} | Pillow {pilv} | ")
-        # except:
-        #     pass
         info.add_field(name="Links", value="<:GH:416593854368841729> - [GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) |"
                                            " [Support Server](https://discord.gg/q98qeYN) | "
                                            "[Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | <:nkotreon:430733839003025409> [Patreon](https://www.patreon.com/NekoBot)")
         info.set_footer(
-            text="Bot by ReKT#0001 & Kot#0001 :^)")
+            text="Bot by ReKT#0001 & cleaned by Kot#1337 :^)")
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
         await ctx.send(embed=info)
 
