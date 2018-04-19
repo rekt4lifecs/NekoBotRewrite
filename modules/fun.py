@@ -191,40 +191,23 @@ class Fun:
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def threats(self, ctx, user:discord.Member):
         await ctx.trigger_typing()
+        userurl = user.avatar_url_as(format='png')
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(user.avatar_url_as(format="png")) as r:
-                res = await r.read()
-        avatar = Image.open(BytesIO(res)).convert('RGBA').resize((300, 300))
-        img = Image.open("data/threats.jpg").convert('RGBA')
-        img.alpha_composite(avatar, (860, 140))
-        img.save("x.png")
-        await ctx.send(file=discord.File("x.png"), embed=discord.Embed(color=0xDEADBF).set_image(url='attachment://x.png'))
-        os.remove("x.png")
+            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=threats&url={userurl}") as r:
+                res = await r.json()
+        await ctx.send( embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
     @commands.command(aliases=['pillow'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def bodypillow(self, ctx, user: discord.Member):
         """Bodypillow someone"""
         await ctx.trigger_typing()
+        userurl = user.avatar_url_as(format='png')
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(user.avatar_url_as(format="png")) as r:
-                res = await r.read()
-        avatar = Image.open(BytesIO(res)).convert('RGBA')
-        size = (500, 500)
-        mask = Image.new('L', size, 0)
-        draw = ImageDraw.Draw(mask)
-        draw.ellipse((0, 0) + size, fill=255)
-        output = ImageOps.fit(avatar, mask.size, centering=(0.5, 0.5))
-        output.putalpha(mask)
-        output.save("data/_profile.png")
-        pillow = Image.open("data/pillow.jpg").convert('RGBA')
-        avatar = Image.open("data/_profile.png").resize((175, 175)).rotate(300)
-        pillow.alpha_composite(avatar, (700, 140))
-        pillow.save("pillow.png")
+            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=bodypillow&url={userurl}") as r:
+                res = await r.json()
         em = discord.Embed(color=0xDEADBF, title=f"{user.name}'s body pillow.")
-        await ctx.send(file=discord.File("pillow.png"), embed=em.set_image(url='attachment://pillow.png'))
-        os.remove("data/_profile.png")
-        os.remove("pillow.png")
+        await ctx.send(embed=em.set_image(url=res['message']))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -233,26 +216,12 @@ class Fun:
         await ctx.trigger_typing()
         if user is None:
             user = ctx.message.author
-        if not os.path.isfile(f"data/baguette/{user.id}.png"):
-            img = Image.open("data/baguette.jpg").convert('RGBA')
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(user.avatar_url_as(format="png")) as r:
-                    res = await r.read()
-            if not os.path.isfile(f"data/avatars/{user.id}.png"):
-                avatar = Image.open(BytesIO(res)).resize((275, 275)).convert('RGBA')
-                size = (500, 500)
-                mask = Image.new('L', size, 0)
-                draw = ImageDraw.Draw(mask)
-                draw.ellipse((0, 0) + size, fill=255)
-                output = ImageOps.fit(avatar, mask.size, centering=(0.5, 0.5))
-                output.putalpha(mask)
-                output.save(f"data/avatars/{user.id}.png")
-            avatar = Image.open(f"data/avatars/{user.id}.png").resize((290, 290))
-            img.alpha_composite(avatar, (260, 75))
-            img.save(f"data/baguette/{user.id}.png")
+        userurl = user.avatar_url_as(format='png')
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=baguette&url={userurl}") as r:
+                res = await r.json()
         try:
-            await ctx.send(file=discord.File(f"data/baguette/{user.id}.png"),
-                           embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.png'))
+            await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
         except discord.Forbidden:
             pass
 
@@ -287,17 +256,11 @@ class Fun:
     async def clyde(self, ctx, *, text : str = None):
         if text is None:
             text = "ReKT is best bot maker"
-
-        img = Image.open("data/clyde.png")
-
-        draw = ImageDraw.Draw(img)
-        font = ImageFont.truetype("data/fonts/Whitney.ttf", 20)
-
-        draw.text((120, 80), text, (255, 255, 255), font=font)
-        num = random.randint(1, 10)
-        img.save(f"data/clyde{num}.png")
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=clyde&text={text}") as r:
+                res = await r.json()
         try:
-            await ctx.send(file=discord.File(f"data/clyde{num}.png"))
+            await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
         except discord.Forbidden:
             pass
 
@@ -358,20 +321,6 @@ class Fun:
         else:
             user2url = user2.avatar_url
             user1url = user1.avatar_url
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(user1url) as r:
-                    resx = await r.read()
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(user2url) as r:
-                    resz = await r.read()
-            img = Image.open("data/ship/ship.jpg")
-            user1img = Image.open(BytesIO(resx))
-            user2img = Image.open(BytesIO(resz))
-
-            user1img = user1img.resize((int(250), int(250)))
-            user2img = user2img.resize((int(225), int(225)))
-            img.paste(user1img, (280, 210))
-            img.paste(user2img, (620, 130))
 
             self_length = len(user1.name)
             first_length = round(self_length / 2)
@@ -381,24 +330,54 @@ class Fun:
             second_half = user2.name[second_length:]
             finalName = first_half + second_half
 
-            img.save(f"data/ship/mode2{user1.id}-{user2.id}.png")
             score = random.randint(0, 100)
             filled_progbar = round(score / 100 * 10)
             counter_ = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f"https://nekobot.xyz/api/imagegen?type=ship&user1={user1url}&user2={user2url}") as r:
+                    res = await r.json()
             e = discord.Embed(color=0xDEADBF, title=f'{user1.name} ❤ {user2.name}', description=f"**Love %**\n"
                                                                                                 f"`{counter_}` **{score}%**\n\n"
                                                                                                 f"{finalName}")
-            await ctx.send(file=discord.File(f'data/ship/mode2{user1.id}-{user2.id}.png'), content="{}".format(finalName),
-                           embed=e.set_image(url=f'attachment://mode2{user1.id}-{user2.id}.png'))
+            await ctx.send(content="{}".format(finalName),
+                           embed=e.set_image(url=res['message']))
 
     @commands.command()
     @commands.cooldown(1, 45, commands.BucketType.user)
     async def shitpost(self, ctx):
         """Shitpost ofc"""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("http://37.59.36.62:10000/shitpost") as r:
-                res = await r.json()
-        await ctx.send(embed=discord.Embed(description=res['msg'],
+        await ctx.trigger_typing()
+        shitpost = [
+            "I am 11 yeears oLD and ready to hurt myself by STEPPING ON. Lego . I yell at brother telling leggomy eggo because it came from Walmart and I want to step on a Lego. Never but Legos I it not gonna eat them and step on them 💀 they kill!!!1!!1 I want 35 dollars to buy some robuxxx.",
+            "In 2001, Microsoft legally had to ship every version of windows with a folder known today as System32 it is a folder that lets the government and/or hackers spy on you. You do not legally have to have it installed. It is best that the first thing you do is delete system32. To do it, ask someone else I cant be bothered.",
+            "Hiii guys~ 😆🖑 im🕴11 years 🤖 old😉🤗 and my favrit 👍👍❤ raper 🕶🔊🎤 is xxxtentacion🙃🙃 one ☝️ time🕐🕐 my mom👰👰 tooke away my ipad😔🙄🖕🏼 awaay and i got rlly 😡mad and angry😠 rite so thenn i 📣🎧listend🎧 to xxtenshun's 💞 songg🔊🎤 nd i rllly rlated to it 😩😩 and know hes my fav rpaper🙂🙂🙂",
+            "Ok, I am going to explain you idiots why being alive is actually gay. So as you guys may know, being alive requires breathing the atmosphere, which is approximately 78.084% Nitrogen, 20.946% Oxygen, 0.9340% Argon etc. There's a lot of other things including the vapor of whatever liquids you're around at the moment. Now, to get to the point, every man that ever ejaculated has traces of sperm in his penis, sperm is a liquid which means it evaporates all the time and escapes into the atmosphere. That means that by breathing you're swallowing sperm, and that's gay.",
+            "Listen up bitch. I have my girlfriend right here next to me as my fucking SLAVE. I am a fucking ALPHAMALE who eats meat, fucks your girlfriend and female relatives, and otherwise...is superior to people who don't eat animal proteins. If you ate a 100% Non-GMO Full Vegan diet VERSUS me...a typical American who eats meats, carbs, and some vegetables; Who would win in a fight? We can set this up now, just for the amusement of people online/youtube/etc. Me versus You. A simple fight to prove which diet is actually better for a human male? You can brag about how much you spend to keep so fucking healthy, but the truth is...l would dominate you in a fight until you either gave up, started crying, or were knocked unconscious. Ahhhh, what am I saying? You are probably too much of a coward to fight anyone anyway. lol.",
+            "You just insulted my favorite game of all time. Somehow this tells me that you're not old enough to understand the pain and complexity that people can hold. Doki Doki isn't just a visual novel. It illustrates the pain of everyone. Every single bit of it makes perfect sense. I can tell you're pretty young because you play minecraft. Also because you put your real name on a social site where everybody can access it. So obviously you wouldn't understand any of DDLC because it's not meant for little kids because 1) it's disturbing in some parts and 2) it illustrates many concepts that won't usually be encountered until later in life and 3) it has a lot of profanity. DDLC is a work of art; something to be admired and enjoyed. Each character is crafted with very fine precision.",
+            "A Weeaboo has been detected in this post. The Weeaboo has been identified with the Keyword (replace with something a weeb would say). Please evacuate from this post immediately.",
+            "I was born with glass bones and paper skin. Every morning I break my legs and every afternoon I break my arms. At night, I lay awake in agony until my heart attacks put me to sleep.",
+            "⚠🚫🚫🚫🚧🚧HALT🚧🚧🚫🚫🚫⚠[scanning... 10%] [scanning... 48%] [scanning... 72%] [scanning complete.] system consensus: a THOT has been detected. entering lockdown mode.",
+            "hey man i just want to be friends this is different <insert picture of black cock> WHAT I WILL RAGE AFTER YOU AND YOUR FAGGOT FRIENDS RA RA RAH RAGE I WILL MAKE 25 DISCORD ACCOUNTS AND EVENTUALLY ONE OF THEM WILL WIN AND TAKE ADMIN I will delete my discord",
+            "Now that draws the line, I'm completely fine with the mass genocide of an entire race but when someone targets roblox accounts, that just ticks me off. That just grinds my metaphorical gears, that just forces me to scale the walls of my residence. It just stirs emotions of anger, fear, hatred, all of it, it just makes me feel emotionally high. Roblox is a gift from god, roblox accounts are like lives, you don't steal them, you don't steal god's gifts, it's a sin as much as murder is. It's morally wrong, even though I'm fine with the mass murder of a race, roblox account stealing is just totally wrong. Please stop, please.﻿",
+            "🚶You owned a car 🚗🚗 for 4⏰📅 years⏰👍. You🚶 named it👱 Brad👱. You💑❤💗 loved💕Brad💕😙. And then you🚶⚠ totaled⚠🚧🚗🚙 him🚦. You two 💏💑had been through everything 👬together🎭. 👬2 boyfriends👬, 🔨🔧3 jobs🔫,❌ nothing ❌could replace👱 Brad🍆🍆. Then Liberty Mutual",
+            "Ok listen here piece of american shit. You may think yourself as the greatest fucking retard out in this world , but let me say this to you : You're an arrogant cunt that acts like an adult and shut the fuck up. i mean SHUT THE FUCK UP you fucking braindead retard that probably hot beaten by your drunk father while while your mom killed herself in the bathtub swallowing the soap like the bitch she is. You're just a self-centered morron that likes making people feel bad . people like you deserve death on the electric chair . you bring only hate while you fuck others for your own enjoyment. fucking downgrade bastard. i treat everyone equally but i hate narcissits . and that's what you are. a narcissist with internet connection that shows of on sites at how good he is at shit while you have nothing to show in the real like. btw thanks for making me write this shit on christmas , by how quick you respond it means that your familly hates you and they dont spend time with you. i bet your mother commited suicide after she saw the retard she raised. now eat shit and die in the closest pub.﻿",
+            "you are worst turk. you are the turk idiot you are the turk smell. return to croatioa. to our croatia cousins you may come our contry. you may live in the zoo….ahahahaha ,bosnia we will never forgeve you. cetnik rascal FUck but fuck asshole turk stink bosnia sqhipere shqipare..turk genocide best day of my life. take a bath of dead turk..ahahahahahBOSNIA WE WILL GET YOU!! do not forget ww2 .albiania we kill the king , albania return to your precious mongolia….hahahahaha idiot turk and bosnian smell so bad..wow i can smell it. REMOVE KEBAB FROM THE PREMISES. you will get caught. russia+usa+croatia+slovak=kill bosnia…you will ww2/ tupac alive in serbia, tupac making album of serbia . fast rap tupac serbia. we are rich and have gold now hahahaha ha because of tupac… you are ppoor stink turk… you live in a hovel hahahaha, you live in a yurt tupac alive numbr one #1 in serbia ….fuck the croatia ,..FUCKk ashol turks no good i spit﻿ in the mouth eye of ur flag and contry. 2pac aliv and real strong wizard kill all the turk farm aminal with rap magic now we the serba rule .ape of the zoo presidant georg bush fukc the great satan and lay egg this egg hatch and bosnia wa;s born. stupid baby form the eggn give bak our clay we will crush u lik a skull of pig. serbia greattst countrey",
+            "Oh my fuck- Oh my fucking god! Have you seen her? She’s so beautiful. I’ve never felt this way before for anyone. She makes my heart beat a million miles a minute. I will do anything for her. I would die for her; to protect someone so precious. I wish I could comfort her and give her head pats. Imagine how beautiful our kids would be! Let us sing and dance together. Imagine us laying in bed and whispering sweet nothings to each other. Imagine how cute that would be. Imagine playing dress up with her and choosing what clothes she will wear. She’ll say “it’s too tight, but I’ll wear it for you...” Imagine how passionate we would be for each other during sex. Oh how I long for that feeling. I have chosen to retain my virginity just for her, my love. But God has other plans for us... he separates us even though we are meant to be together. God why have you forsaken me?! Let me love who I love! Let me be with her... One day, my dream and goal in life is that I will be come a scientist, with my intellect, and develop an invention to bring her into our plan of existence. She may not be real to the world, but she is real in my heart. Yes, Sans from Undertale, it will not be long until I will see you.",
+            "One day in 1938 hitlers mom told hitler, 'gas the jews'. Hitler was shocked by this statement, but still agreed and began a worldwide conquest. In 1945 hitler stumbled back to his barrack, defeated and humiliated. 'Well mom i did what you asked at least' he said. Hitlers mom glared at him before saying' i asked for a glass of juice, not gas the jews'. After hearing this, hitler shot himself. So hitler did nothing wrong it was his mother.",
+            "I do my best to include my workout into my game playing while I wait for the next round to start all I do is pushups and situps. In between my competitive (CSGO) sessions I tend to do more intensive cardio related workouts.",
+            "back off shes mine teleports behind caity and swoops into arms, taking her into cover and then teleporting back my name's sponic, i'm 13, red and black, and i'll beat you up because i can't die and i can dodge all attacks. come at me you f***er. sorry my mom is looking at the screen . nothing personnel kid. heil hitler. did i mention my oc is a nazi? i'll pound you into submission and save m'lady so hard and finally have someone to play minecraft with. caity what's your minecraft mine is awesomekraftr06 because i love minecraft . i hate you sonic the ehdgehog 123 face my rath.",
+            "i come to study Mechanical Engineering at American university. i am here little time and i am very hard stress. i am gay also and this very difficult for me, i am very religion person. i never act to be gay with other men before. but after i am in america 6 weeks i am my friend together he is gay also. He was show me American video game and then we are kiss. We sex together. I never before now am tell my mother about gay because i am very shame. As i ** this American boy it is very good to me but also i am feel so guilty. I feel extreme guilty as I begin orgasm. I feel so guilty that I pick up my telephone and call Mother in Russia. I awaken her. It too late for stopping so I am cumming sex. I am very upset and guilty and crying, so I yell her, 'I AM CUM FROM SEX' (in Russia). She say what? I say 'I AM CUM FROM SEX' and she say you boy, do not marry American girl, and I say 'NO I AM CUM FROM SEX WITH MAN, I AM IN ASS, I CUM IN ASS' and my mother very angry me. She not get scared though. I hang up phone and am very embarrass. My friend also he is very embarrass. I am guilt and feel very stupid. I wonder, why do I gay with man? But I continue because when it spurt it feel very good in American ass.",
+            "_-kun.. d-do you.. really have feelings for me?~ UwU B-Baka!!! I-It's not like i like you back or anything... OwO Hehe nuzzles _-kun i wuv chu~ O//////O yur su kawaii sugoi.. >< aishteru <3 _-kun..~ y-your my sugoi U/////U senpai~~ Ow< hehe nyaa~~ XDDD wiggles ears and tail X////X you make me sekimen~~ <333 UwU",
+            "The banana is an edible fruit – botanically a berry[1][2] – produced by several kinds of large herbaceous flowering plants in the genusMusa.[3] In some countries, bananas used for cooking may be called plantains, in contrast to dessert bananas. The fruit is variable in size, color, and firmness, but is usually elongated and curved, with soft flesh rich in starch covered with a rind, which may be green, yellow, red, purple, or brown when ripe. The fruits grow in clusters hanging from the top of the plant. Almost all modern edible parthenocarpic (seedless) bananas come from two wild species – Musa acuminata and Musa balbisiana. The scientific names of most cultivated bananas are Musa acuminata, Musa balbisiana, and Musa × paradisiaca for the hybrid Musa acuminata × M. balbisiana, depending on their genomic constitution. The old scientific name Musa sapientum is no longer used.",
+            "When I was in 8th grade one of my teachers told everyone in my class one of us had autism and he couldn’t tell us who because that person didn’t know and now at least once a month I lay awake at night wondering if I’m autistic and everyone is just treating me normal, but I’m at an Italian restaurant with my parents and the waitress just asked me for soup or salad and for the 5th time in my life I responded with yes thinking she said 'super salad' and I realized that finally gave me the answer that I am in fact, the one with autism."
+            "I bet when you touch your filthy genitals with your sinner hands and you're about to squirt, you orgasm. Take your caveman habits and your prehistoric noises along with you. If you want to scream out of pleasure, just go to a cave like the animal you are. Fucking humanoid. What a filthy whore you are. Loving yourself and wanting to feel pleasure. Tsk tsk tsk, go to church, maybe there's still hope for you, you cock-loving slut. If I could hit you with a stick I certainly would but thanks to the new legislations and laws, something like that is far from legal. The only measure one could take is exclaiming \"BEGONE THOT\" while referring to you, but your screams are so loud you have made yourself deaf. What a fucking wanker you are. Your ass by now is probably some random dude's cumdumpster. You smell of sin. Fucking slut.",
+            "Hello , this is the owner of HentaiHaven.org We are currently making a catalog with anime babes inside to sell to our veiwers. Would you be interested in sketching one for us? We understand that you are a huge fan of our website and have over 3000 hours watchtime! We would love it if you could draw us an 11 year old girl called Natsuki! We have also seen your artwork of Earth Chan hentai comics and we loved it! We can give you a free Premium account on our website and throw in a little extra episode for you ;). Dont miss out on this Amazing Deal!",
+            "Think about it, Roblox is a form of cancer. Vaccines have a little bit of what they cure in them. So Roblox cures cancer right? Maybe not. The game is cancer enough, but the 10 year old squeakers are as well. These grade school kids will make your ears bleed so badly that you'll be jealous of Helen Keller. Also the youtube intros are the bloody WORST. I mean take Minecraft intros and inject them with ultra AIDS and mecha-Ebola. I mean the community is just a tumor in it of itself. Based on this evidence Roblox is more cancer than cancer itself. And since cancer is a mild form of Roblox, cancer is the cure to Roblox. Cancer also has the added benefit of taking you out of your misery if it fails to cure you. In short: GOD IS DEAD AND ROBLOX KILLED HIM!!",
+            "Loli? Really? Loli. Is that the level you'd stoop to just to get off? You know that's basically anime childporn, right? You do know that it'd be halfway less bad-looking on you if you were a furry, right? Do you know where furries go to talk to other furries? Furry conventions. But for the lolicon, wanna know where they go to talk with other lolicons? Prison. FUCKING PRISON. Get out of my sights, just looking at you is making me fucking sick. That you'd even think of saying something like that in my presence. Know your place you perverted piece of shit. I bet you only wanna fuck a loli because they're the only ones that'll feel your micro-chode baby dick. A full-grown woman wouldn't even bother looking at you. Ugh... fucking ew. Go away! Go! GO!!! GET THE FUCK OUT!!!! No one wants you here, you pedophile! Hey, everyone, Frank is a fucking pedophile! They like lolis! Hahaha!~ Have fun in prison, you fucking cuck. <3",
+            "Well 🤔I 👳wrote📝 this song 🎵for the christian👼 youth👶. I wanna teach kids👨‍👨‍👧‍👧 the christian truth🗣. If you 👊wanna reach🖐 those kids👦👦 on the street🌆. Then you gotta do a rap🎤 to a hip-hop 🎙beat. So I gave my summon an urban kick⚽. And my rhymes are fly🐦, my beats are sick😷. My crew is big👦👼👶👳👥👨‍👨‍👧‍👧 and it keeps getting bigga, That's cause Jesus 👼christ is my nigga🙊. He's a life changer👷, miracle arranger. Born to the virgin 🤓mom in the manger. Water to wine🍷, he's a drink exchanger. And he died😵 for your sins. I preach✊ the word, that's my gig. And I am better than the notorious big💩. And the other MC's 😎are wishing well. But if you live in sin, you burn 🔥in hell. Now pass my mic🎙 to my lovely wife👩. She's a fly MC and a love❤ of my life. So lets bust 🍆a rhyme with a further-a-do. Take it away, mary sue.👧. Jesus christ is my nigga. He's the son of the original g↪.And he was sent to earth🌎 to the way we should be. Like if another MC says \"Your a freak,😠 your a lame butt 🍑rapper and your rhymes are weak🤓\". I don't get mad😡 and I don't critique. I forgive him🤗, and turn the other cheek. I don't blaspheme and I don't brag, I don't cuss😤, and my pants👖 don't sag. I do a little christian swag and I'm proud to be an american🇺🇸. Jesus Christ is a nigga. Let the light 🌞shine through ya. Now lets pop a cap in your butt 🍑and say \"Hallelujah\". Jesus Christ is a nigga. He's a homie MC, JC, you see👀. He's an honest, caring, peace loving nigga like me😇. If you do drugs☣ and you think your cool😎. You need to come to the sunday school⛪. Put those drugs in a garbage can🗑, stand up tall🕴 you're a christian man.",
+            "femboys awe the futuwe of ouw genyewation uwu, they awe cute, giwwy and wuvs putting things up theiw wittwe swutty boipussy, they awe the pewfect giwwfwiends owo and they wiww wuv you fowevew and evew so they nyuzzwes with you O//W//O wooks at daddy c-can I be youw sexy femboy so you can use me as a c-cummies wag pweaseeeee?"
+        ]
+        await ctx.send(embed=discord.Embed(description=random.choice(shitpost),
                                            color=0xDEADBF))
 
     @commands.command()
@@ -407,25 +386,9 @@ class Fun:
         """Captcha a User OWO"""
         url = user.avatar_url
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.read()
-        avatar = Image.open(BytesIO(res)).convert('RGB').resize((95, 96))
-        img = Image.open("data/captcha.png")
-        img.paste(avatar, (7, 99))
-        img.paste(avatar, (105, 99))
-        img.paste(avatar, (204, 99))
-        img.paste(avatar, (7, 197))
-        img.paste(avatar, (105, 197))
-        img.paste(avatar, (204, 197))
-        img.paste(avatar, (7, 294))
-        img.paste(avatar, (105, 294))
-        img.paste(avatar, (204, 294))
-        draw = ImageDraw.Draw(img)
-        font = ImageFont.truetype("data/fonts/arial.ttf", 15)
-        draw.text((25, 40), user.name, (255, 255, 255), font)
-        img.save("data/captchaimg.png")
-        await ctx.send(file=discord.File("data/captchaimg.png"),
-                       embed=discord.Embed(color=0xDEADBF).set_image(url='attachment://captchaimg.png'))
+            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=captcha&url={url}&username={user.name}") as r:
+                res = await r.json()
+        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -437,19 +400,9 @@ class Fun:
         user1url = user1.avatar_url
         user2url = user2.avatar_url
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(user1url) as r:
-                res = await r.read()
-        user1 = Image.open(BytesIO(res)).resize((390, 390))
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(user2url) as r:
-                res = await r.read()
-        user2 = Image.open(BytesIO(res)).resize((390, 390))
-        img = Image.open("data/who_would_win.jpg")
-        img.paste(user1, (13, 100))
-        img.paste(user2, (430, 100))
-        img.save("data/www.png")
-        await ctx.send(file=discord.File("data/www.png"),
-                       embed=discord.Embed(color=0xDEADBF).set_image(url='attachment://www.png'))
+            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=whowouldwin&user1={user1url}&user2={user2url}") as r:
+                res = await r.json()
+        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -472,19 +425,12 @@ class Fun:
             voters.append(vote[0])
         weebsh = self.bot.get_guild(300407204987666432)
         if str(ctx.message.author.id) in voters or weebsh.get_member(ctx.message.author.id):
-            filename = text.lower().replace(' ', '-')
             await ctx.trigger_typing()
-            if not os.path.isfile(f"data/changemymind/{filename}.png"):
-                img = Image.open("data/changemymind.png")
-                font = ImageFont.truetype('data/fonts/arial.ttf', 60)
-                _text = Image.new('L', (750, 1000))
-                draw = ImageDraw.Draw(_text)
-                draw.text((0, 0), textwrap.fill(text, 24), font=font, fill=255)
-                w = _text.rotate(22.5, expand=1)
-                img.paste(ImageOps.colorize(w, (0, 0, 0), (0, 0, 0)), (910, 650), w)
-                img.save(f"data/changemymind/{filename}.png")
-            await ctx.send(file=discord.File(f"data/changemymind/{filename}.png"),
-                           embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{filename}.png'))
+            url = f"https://nekobot.xyz/api/imagegen?type=changemymind&text={text}"
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(url) as r:
+                    res = await r.json()
+            await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
         else:
             em = discord.Embed(color=0xDEADBF, description="https://discordbots.org/bot/nekobot/vote", title="owo whats this")
             return await ctx.send(embed=em)
@@ -569,25 +515,13 @@ class Fun:
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def jpeg(self, ctx, user : discord.Member = None):
         """OwO Whats This"""
-        starttime = int(time.time())
         if user is None:
             user = ctx.message.author
-        if not os.path.isfile(f"data/jpeg/{user.id}.jpg"):
-            try:
-                url = user.avatar_url
-                async with aiohttp.ClientSession() as cs:
-                    async with cs.get(url) as r:
-                        res = await r.read()
-                img = Image.open(BytesIO(res)).convert('RGB')
-            except:
-                await ctx.send('Error getting image!')
-                return
-            final = BytesIO()
-            img.save(f'data/jpeg/{user.id}.jpg', quality=1)
-            final.seek(0)
-        await ctx.send(file=discord.File(fp=f'data/jpeg/{user.id}.jpg'),
-                       embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{user.id}.jpg')
-                       .set_footer(text=f"Time Taken: {int(time.time()) - starttime}"))
+        url = f"https://nekobot.xyz/api/imagegen?type=jpeg&url={user.avatar_url_as(format='jpg')}"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
     @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
@@ -685,46 +619,26 @@ class Fun:
 
     @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def iphonex(self, ctx, *, url: str):
+    async def iphonex(self, ctx:commands.Context, *, url: str):
         """Generate an iPhone X Image"""
-        bg = Image.new('RGBA', (360, 722), (0, 0, 0, 0))
-        img = Image.open("data/iphonex.png").convert('RGBA')
-        try:
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    res = await r.read()
-            url = Image.open(BytesIO(res)).convert('RGBA').resize((315, 682))
-        except:
-            return await ctx.send("**There was an error receiving that image url.**")
-        bg.alpha_composite(url, (20, 20))
-        bg.alpha_composite(img, (0, 0))
-
-        num = uuid.uuid4()
-        bg.save(f'data/iphone/{num}.png')
-
-        await ctx.send(file=discord.File(f'data/iphone/{num}.png'),
-                       embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{num}.png'))
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=iphonex&url={url}") as r:
+                res = await r.json()
+        if res['success'] is False:
+            return await ctx.send("**Error generating image with that url.**")
+        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
     @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def kannagen(self, ctx, *, text:str):
         """Generate Kanna"""
-        img = Image.open('data/kannagen.jpg').convert('RGBA')
-        hand = Image.open('data/hand.png')
-
-        text = '\n'.join(textwrap.wrap(text, 13))
-
-        font = ImageFont.truetype('data/fonts/arial.ttf', 15)
-        _text = Image.new('L', (225, 225))
-        draw = ImageDraw.Draw(_text)
-        draw.text((0, 0), text, font=font, fill=255)
-        w = _text.rotate(350, expand=1)
-        img.paste(ImageOps.colorize(w, (0, 0, 0), (0, 0, 0)), (11, 20), w)
-        img.alpha_composite(hand)
-
-        img.save("kanna.png")
-
-        await ctx.send(file=discord.File("kanna.png"))
+        await ctx.trigger_typing()
+        url = f"https://nekobot.xyz/api/imagegen?type=kannagen&text={text}"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
