@@ -19,7 +19,7 @@ class Reactions:
     async def awoo(self, ctx):
         """AWOOOOOOOO"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=awoo') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=awoo') as r:
                 res = await r.json()
                 em = discord.Embed(title="AWOOOO",
                                    color=0xDEADBF)
@@ -31,7 +31,7 @@ class Reactions:
     async def blush(self, ctx):
         """>~<"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=blush') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=blush') as r:
                 res = await r.json()
                 em = discord.Embed(title=f"{ctx.message.author.name} blushes",
                                    color=0xDEADBF)
@@ -43,7 +43,7 @@ class Reactions:
     async def confused(self, ctx):
         """?!??!?!?"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=clagwimoth') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=clagwimoth') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -53,7 +53,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def dance(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=dance') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=dance') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -63,7 +63,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def insult(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=dance') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=dance') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -74,7 +74,7 @@ class Reactions:
     async def cry(self, ctx):
         """;w;"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=cry') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=cry') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -84,7 +84,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def jojo(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=jojo') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=jojo') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -94,7 +94,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def megumin(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=megumin') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=megumin') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -104,7 +104,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def pout(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=pout') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=pout') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -114,7 +114,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def sumfuk(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=sumfuk') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=sumfuk') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -124,7 +124,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def initiald(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=initial_d') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=initial_d') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -134,7 +134,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def deredere(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=deredere') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=deredere') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -144,7 +144,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def sleepy(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=sleepy') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=sleepy') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -154,7 +154,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def shrug(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=shrug') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=shrug') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -165,7 +165,7 @@ class Reactions:
     async def hug(self, ctx, user: discord.Member):
         """Hug someone OwO"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=hug') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=hug') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = "NekoBot"
@@ -183,7 +183,7 @@ class Reactions:
     async def kiss(self, ctx, user: discord.Member):
         """Kiss someone OwO"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=kiss') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=kiss') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = "their arm ;-;"
@@ -201,7 +201,7 @@ class Reactions:
     async def pat(self, ctx, user: discord.Member):
         """Pat someone OwO"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=pat') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=pat') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = "themself ;-;"
@@ -219,7 +219,7 @@ class Reactions:
     async def cuddle(self, ctx, user: discord.Member):
         """Cudddddduuulzzzz OWO"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=cuddle') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=cuddle') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = "themself ;-;"
@@ -237,7 +237,7 @@ class Reactions:
     async def tickle(self, ctx, user: discord.Member):
         """Whats this OWO"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=tickle') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=tickle') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = "themself :3"
@@ -255,7 +255,7 @@ class Reactions:
     async def bite(self, ctx, user: discord.Member):
         """Bite someone OwO"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=bite') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=bite') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = "themself and cries ;-;"
@@ -273,7 +273,7 @@ class Reactions:
     async def slap(self, ctx, user: discord.Member):
         """Ouch ;-;"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=slap') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=slap') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = "themself ;-;"
@@ -291,7 +291,7 @@ class Reactions:
     async def punch(self, ctx, user: discord.Member):
         """Ouch ;-;"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=punch') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=punch') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = "themself ;-;"
@@ -309,7 +309,7 @@ class Reactions:
     async def poke(self, ctx, user: discord.Member):
         """poke poke poke ^-^"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=poke') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=poke') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = "themself"
@@ -327,7 +327,7 @@ class Reactions:
     async def nom(self, ctx, user: discord.Member):
         """noomss on someone owo"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=nom') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=nom') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = "their leg"
@@ -345,7 +345,7 @@ class Reactions:
     async def lick(self, ctx, user: discord.Member):
         """licks someone"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=lick') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=lick') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = " their eye"
@@ -362,7 +362,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def greet(self, ctx, user: discord.Member):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=greet') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=greet') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = " themself"
@@ -380,7 +380,7 @@ class Reactions:
     async def lewd(self, ctx):
         """Leeewd!!!"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=lewd') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=lewd') as r:
                 res = await r.json()
                 em = discord.Embed(title="LEWD!!",
                                    color=0xDEADBF)
@@ -392,7 +392,7 @@ class Reactions:
     async def trap(self, ctx):
         """its a trap owo"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=trap') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=trap') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -403,7 +403,7 @@ class Reactions:
     async def owo(self, ctx):
         """OwO Whats This"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=owo') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=owo') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -414,7 +414,7 @@ class Reactions:
     async def wasted(self, ctx):
         """Wastteeddd"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=wasted') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=wasted') as r:
                 res = await r.json()
                 em = discord.Embed(title="**{}** is wasted".format(ctx.message.author.name),
                                    color=0xDEADBF)
@@ -426,7 +426,7 @@ class Reactions:
     async def banghead(self, ctx):
         """Head banging intensifys"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=banghead') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=banghead') as r:
                 res = await r.json()
                 em = discord.Embed(title="**{}** bangs their head".format(ctx.message.author.name),
                                    color=0xDEADBF)
@@ -438,7 +438,7 @@ class Reactions:
     async def discordmeme(self, ctx):
         """Discord Memes OwO"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=discord_memes') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=discord_memes') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -449,7 +449,7 @@ class Reactions:
     async def stare(self, ctx):
         """Stares"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=stare') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=stare') as r:
                 res = await r.json()
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -460,7 +460,7 @@ class Reactions:
     async def thinking(self, ctx):
         """THINKSSSS"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=thinking') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=thinking') as r:
                 res = await r.json()
                 em = discord.Embed(title="{} is thinking...".format(ctx.message.author.name),color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -471,7 +471,7 @@ class Reactions:
     async def dab(self, ctx):
         """hits a thicc dab"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=dab') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=dab') as r:
                 res = await r.json()
                 em = discord.Embed(title="**{}** hits a thicc dab".format(ctx.message.author.name),
                                    color=0xDEADBF)
@@ -484,7 +484,7 @@ class Reactions:
         """Girls with animal characteristics OwO"""
         if not ctx.message.channel.is_nsfw():
             async with aiohttp.ClientSession(headers=auth) as cs:
-                async with cs.get(f'https://api-v2.weeb.sh/images/random?type={random.choice(["kemonomimi", "neko"])}') as r:
+                async with cs.get(f'https://api.weeb.sh/images/random?type={random.choice(["kemonomimi", "neko"])}') as r:
                     res = await r.json()
                     em = discord.Embed(
                                        color=0xDEADBF)
@@ -520,7 +520,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def rem(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=rem') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=rem') as r:
                 res = await r.json()
                 em = discord.Embed(
                                    color=0xDEADBF)
@@ -531,7 +531,7 @@ class Reactions:
     @commands.command(pass_context=True)
     async def poi(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=poi') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=poi') as r:
                 res = await r.json()
                 em = discord.Embed(
                                    color=0xDEADBF)
@@ -553,7 +553,7 @@ class Reactions:
     async def bang(self, ctx, user: discord.Member):
         """~BANG~"""
         async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api-v2.weeb.sh/images/random?type=bang') as r:
+            async with cs.get('https://api.weeb.sh/images/random?type=bang') as r:
                 res = await r.json()
                 if user == ctx.message.author:
                     user = "themself"
@@ -574,7 +574,7 @@ class Reactions:
             user = ctx.message.author
         await ctx.trigger_typing()
         async with aiohttp.ClientSession() as session:
-            async with session.post('https://api-v2.weeb.sh/auto-image/waifu-insult',
+            async with session.post('https://api.weeb.sh/auto-image/waifu-insult',
                                     headers={'Authorization': f'Wolke {config.weeb}'},
                                     data={'avatar': user.avatar_url}) as response:
                 t = await response.read()
