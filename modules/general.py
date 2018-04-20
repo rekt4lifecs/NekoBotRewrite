@@ -321,7 +321,7 @@ class General:
     @commands.command()
     async def avatar(self, ctx, user: discord.Member = None, type:str = None):
         """Get a user's avatar"""
-        if user == None:
+        if user is None:
             user = ctx.message.author
         async with aiohttp.ClientSession() as cs:
             async with cs.get(user.avatar_url_as(format='png')) as r:
