@@ -321,6 +321,7 @@ class General:
     @commands.command()
     async def avatar(self, ctx, user: discord.Member = None, type:str = None):
         """Get a user's avatar"""
+        await ctx.channel.trigger_typing()
         if user is None:
             user = ctx.message.author
         async with aiohttp.ClientSession() as cs:
