@@ -405,6 +405,17 @@ class Fun:
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
     @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def awooify(self, ctx:commands.Context, user1: discord.Member):
+        """Who would win"""
+        await ctx.trigger_typing()
+        user1url = user1.avatar_url_as(format='png')
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=awooify&url={user1url}") as r:
+                res = await r.json()
+        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
+
+    @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def duck(self, ctx):
         """Gets a duck image /shrug"""
