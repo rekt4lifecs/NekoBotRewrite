@@ -336,6 +336,24 @@ class General:
             await ctx.send(embed=em.set_image(url=user.avatar_url_as(format=type)))
 
     @commands.command()
+    @commands.cooldown(1, 2, commands.BucketType.user)
+    async def coffee(self, ctx):
+        """Coffee owo"""
+        url = "https://coffee.alexflipnote.xyz/random.json"
+        await ctx.channel.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+            em = discord.Embed()
+            msg = await ctx.send("*drinks coffee*", embed=em.set_image(url=res['file']))
+            async with cs.get(res['file']) as r:
+                data = await r.read()
+            color_thief = ColorThief(BytesIO(data))
+            hexx = int(triplet(color_thief.get_color()), 16)
+            em = discord.Embed(color=hexx)
+            await msg.edit(embed=em.set_image(url=res['file']))
+
+    @commands.command()
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def qr(self, ctx, *, message: str):
         """Generate a QR Code"""
@@ -741,7 +759,7 @@ class General:
                              icon_url="https://i.imgur.com/x2N73t0.png")
 
             embed.add_field(name="General",
-                            value="`lmgtfy`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
+                            value="`lmgtfy`, `coffee`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
                                   " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`, `duckduckgo`, `whois`, `memory`, "
                                   "`discriminfo`, `discrim`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
