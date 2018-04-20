@@ -12,6 +12,12 @@ from .utils.paginator import EmbedPages, Pages
 from scipy import stats
 import numpy
 from .utils.paginator import HelpPaginator
+from colorthief import ColorThief
+from io import BytesIO
+
+LOWERCASE, UPPERCASE = 'x', 'X'
+def triplet(rgb, lettercase=LOWERCASE):
+    return format(rgb[0]<<16 | rgb[1]<<8 | rgb[2], '06'+lettercase)
 
 class Discriminator(commands.Converter):
     async def convert(self, ctx, argument):
@@ -313,11 +319,20 @@ class General:
             return
 
     @commands.command()
-    async def avatar(self, ctx, user: discord.Member = None):
+    async def avatar(self, ctx, user: discord.Member = None, type:str = None):
         """Get a user's avatar"""
         if user == None:
             user = ctx.message.author
-        await ctx.send(user.avatar_url_as(format="png"))
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(user.avatar_url_as(format='png')) as r:
+                res = await r.read()
+        color_thief = ColorThief(BytesIO(res))
+        hexx = int(triplet(color_thief.get_color()), 16)
+        em = discord.Embed(color=hexx, title=f"{user.name}'s Avatar")
+        if type is None or type not in ['jpeg', 'jpg', 'png']:
+            await ctx.send(embed=em.set_image(url=user.avatar_url))
+        else:
+            await ctx.send(embed=em.set_image(url=user.avatar_url_as(format=type)))
 
     @commands.command()
     @commands.cooldown(1, 60, commands.BucketType.user)
@@ -737,7 +752,7 @@ class General:
             embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `transfer`, "
                                                            "`coinflip`, `blackjack`, `top`", inline=False)
             embed.add_field(name="Fun",
-                            value="`food`, `bodypillow`, `toxicity`, `ship`, `achievement`, `shitpost`, `meme`, `changemymind`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
+                            value="`awooify`, `food`, `bodypillow`, `toxicity`, `ship`, `achievement`, `shitpost`, `meme`, `changemymind`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
                                   "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `joke`, "
                                   "`b64`, `md5`, `kannagen`, `iphonex`, `baguette`, `owoify`, `lizard`, `duck`, `captcha`, `whowouldwin`, `threats`", inline=False)
 
