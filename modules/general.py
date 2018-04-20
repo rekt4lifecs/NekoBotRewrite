@@ -354,6 +354,23 @@ class General:
             await msg.edit(embed=em.set_image(url=res['file']))
 
     @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def animepic(self, ctx):
+        url = "https://computerfreaker.cf/api/anime/read.php"
+        await ctx.channel.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+            em = discord.Embed()
+            msg = await ctx.send(embed=em.set_image(url=res['url']))
+            async with cs.get(res['url']) as r:
+                data = await r.read()
+            color_thief = ColorThief(BytesIO(data))
+            hexx = int(triplet(color_thief.get_color()), 16)
+            em = discord.Embed(color=hexx)
+            await msg.edit(embed=em.set_image(url=res['url']))
+
+    @commands.command()
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def qr(self, ctx, *, message: str):
         """Generate a QR Code"""
@@ -761,7 +778,7 @@ class General:
             embed.add_field(name="General",
                             value="`lmgtfy`, `coffee`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
                                   " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`, `duckduckgo`, `whois`, `memory`, "
-                                  "`discriminfo`, `discrim`", inline=False)
+                                  "`discriminfo`, `discrim`, `animepic`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
             embed.add_field(name="Moderation",
