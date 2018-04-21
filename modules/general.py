@@ -768,12 +768,9 @@ class General:
                 p = await HelpPaginator.from_cog(ctx, entity)
             return await p.paginate()
         try:
-            latency = "%.4f" % self.bot.latencies[0][1]
-            embed = discord.Embed(color=color,
-                                  title=f"Prefix: When Mentioned or 'n!'",
-                                  description=f"Latency: {latency}")
+            embed = discord.Embed(color=color)
             embed.set_author(name="NekoBot",
-                             icon_url="https://i.imgur.com/x2N73t0.png")
+                             icon_url=self.bot.user.avatar_url_as(format='png'))
 
             embed.add_field(name="General",
                             value="`lmgtfy`, `coffee`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"

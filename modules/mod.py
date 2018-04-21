@@ -10,6 +10,9 @@ import string
 import time
 import config
 import pymysql, aiomysql
+import re
+
+invite_rx = re.compile("discord(?:app)?\.(?:gg|com\/invite)\/([a-z0-9]{1,16})", re.IGNORECASE)
 
 class Arguments(argparse.ArgumentParser):
     def error(self, message):
@@ -447,12 +450,13 @@ class Moderation:
         connection = await aiomysql.connect(host='localhost', port=3306,
                                             user='root', password=config.dbpass,
                                             db='nekobot')
+        finishedmsg = invite_rx.sub("[INVITE]", message.content) # Original Content :^)
         async with connection.cursor() as db:
             try:
                 if not await db.execute(f"SELECT 1 FROM snipe WHERE channel = {message.channel.id}"):
                     await db.execute(f"INSERT INTO snipe VALUES ({message.channel.id}, \"{message.content}\", {message.author.id})")
                 else:
-                    await db.execute(f"UPDATE snipe SET message = \"{message.content}\" WHERE channel = {message.channel.id}")
+                    await db.execute(f"UPDATE snipe SET message = \"{finishedmsg}\" WHERE channel = {message.channel.id}")
                 await connection.commit()
             except:
                 pass
