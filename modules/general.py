@@ -753,6 +753,21 @@ class General:
         await p.paginate()
 
     @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    async def sameservers(self, ctx):
+        """Find the same servers with you and the bot owo"""
+        author = ctx.message.author
+        shared = []
+        for guild in self.bot.guilds:
+            for member in guild.members:
+                if member.id == author.id:
+                    shared.append(guild.name)
+        em = discord.Embed(color=0xDEADBF, title="Shared Servers",
+                           description="\n".join(shared))
+        await ctx.send(embed=em)
+
+    @commands.command()
     async def help(self, ctx, option: str = None):
         """Help Command OwO"""
         color = 0xDEADBF
@@ -775,7 +790,7 @@ class General:
             embed.add_field(name="General",
                             value="`lmgtfy`, `coffee`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
                                   " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`, `duckduckgo`, `whois`, `memory`, "
-                                  "`discriminfo`, `discrim`, `animepic`", inline=False)
+                                  "`discriminfo`, `discrim`, `animepic`, `sameservers`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
             embed.add_field(name="Moderation",
