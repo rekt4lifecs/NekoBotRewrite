@@ -4,6 +4,7 @@ import random, string, time
 import datetime
 import aiomysql
 import config
+import os
 
 class Donator:
 
@@ -34,6 +35,7 @@ class Donator:
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def donator_trapcard(self, ctx, user: discord.Member):
         """Trap a user!"""
+        await ctx.trigger_typing()
 
         author = ctx.message.author
 
@@ -47,19 +49,20 @@ class Donator:
                                                       description="You need to be a [donator](https://www.patreon.com/NekoBot) to use this command."))
 
         async with aiohttp.ClientSession() as session:
-            url = f"http://37.59.36.62:10000/trapcard" \
-                  f"?authorization={config.donator}" \
+            url = f"https://nekobot.xyz/api/imagegen" \
+                  f"?type=trap" \
                   f"&name={user.name}" \
                   f"&author={author.name}" \
                   f"&image={user.avatar_url_as(format='png')}"
             async with session.get(url) as response:
                 t = await response.json()
-                await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=t['url']))
+                await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=t['message']))
 
     @commands.command()
     @commands.is_owner()
     async def createkey(self, ctx):
         """Create a key"""
+        await ctx.trigger_typing()
         x1 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
         x2 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
         x3 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
@@ -73,6 +76,7 @@ class Donator:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def redeem(self, ctx, *, key: str):
         """Redeem your donation key"""
+        await ctx.trigger_typing()
         x = await self.execute(query=f"SELECT 1 FROM donator WHERE token = \"{key}\"", isSelect=True)
         if not x:
             return await ctx.send("**Invalid key**")
@@ -107,6 +111,7 @@ class Donator:
     @commands.is_owner()
     async def keys(self, ctx):
         """View all keys + expiry"""
+        await ctx.trigger_typing()
         allkeys = await self.execute("SELECT userid, token, usetime FROM donator", isSelect=True, fetchAll=True)
         text = f"```css\n" \
                f"[      USER      ] | [    KEY     ] | [ EXPIRY DATE ]\n"
@@ -119,6 +124,7 @@ class Donator:
     @commands.is_owner()
     async def delkey(self, ctx, *, key:str):
         """Delete a key"""
+        await ctx.trigger_typing()
         x = await self.execute(query=f"SELECT 1 FROM donator WHERE token = \"{key}\"", isSelect=True)
         if not x:
             return await ctx.send("**Invalid key**")
@@ -136,6 +142,7 @@ class Donator:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def donate(self, ctx):
         """Donate or Show key time left."""
+        await ctx.trigger_typing()
         alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
         tokenlist = []
         for x in range(len(alltokens)):
@@ -153,8 +160,9 @@ class Donator:
 
     @commands.command(name='upload')
     @commands.cooldown(1, 15, commands.BucketType.user)
-    async def donator_upload(self, ctx):
+    async def donator_upload(self, ctx:commands.Context):
         """File Uploader"""
+        await ctx.trigger_typing()
         author = ctx.message.author
 
         alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
@@ -185,9 +193,16 @@ class Donator:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as response:
                     t = await response.read()
-                    with open(f"/home/www/{randomnum}.{attachment}", "wb") as f:
+                    attach = f"{randomnum}.{attachment}"
+                    file = f"/var/www/html/" + attach
+                    with open(file, "wb") as f:
                         f.write(t)
-            await ctx.send(f"https://nekobot.xyz/{randomnum}.{attachment}")
+                async with session.get(f"https://nekobot.xyz/api/postimage?auth={config.dbpass}"
+                                       f"&type=x"
+                                       f"&url=http://45.76.114.202/{attach}") as response:
+                    t = await response.json()
+            await ctx.send(t["message"])
+            os.remove(file)
         except Exception as e:
             return await ctx.send(f"**Error uploading file**\n\n{e}")
 
