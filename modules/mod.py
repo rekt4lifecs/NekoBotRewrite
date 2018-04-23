@@ -1009,6 +1009,8 @@ class Moderation:
     async def on_message_edit(self, before, after):
         if before.author.bot:
             return
+        if before.content == after.content:
+            return
         guild = before.guild
         if guild.id == 221989003400970241:
             channel = self.bot.get_channel(431887286246834178)
