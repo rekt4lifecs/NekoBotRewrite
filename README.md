@@ -117,4 +117,4 @@ We have a bunch of fun commands for example you can ship too people in an image 
 | fortnite      | Gamestats      | None  | Retrieve your Fortnite Stats |
 | marry         | Marriage       | None  | Marry Someone OwO |
 | divoce        | Marriage       | None  | Divorce 😭 |
-| crypto        | Cryptocurrency | Noen  | Retrieve literally any Currency or Cryptocurrency and convert it to multiple other currencies |
+| crypto        | Cryptocurrency | None  | Retrieve literally any Currency or Cryptocurrency and convert it to multiple other currencies |
