@@ -778,9 +778,12 @@ class Fun:
                 async with cs.get(lastimg[0]) as r:
                     res = await r.read()
         else:
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    res = await r.read()
+            try:
+                async with aiohttp.ClientSession() as cs:
+                    async with cs.get(url) as r:
+                        res = await r.read()
+            except:
+                return await ctx.send("Not a valid URL.")
         try:
             img = Image.open(BytesIO(res)).convert("RGBA")
             x, y = img.size
@@ -804,9 +807,12 @@ class Fun:
                 async with cs.get(lastimg[0]) as r:
                     res = await r.read()
         else:
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    res = await r.read()
+            try:
+                async with aiohttp.ClientSession() as cs:
+                    async with cs.get(url) as r:
+                        res = await r.read()
+            except:
+                return await ctx.send("Not a valid URL.")
         try:
             img = Image.open(BytesIO(res)).convert("RGBA")
             x, y = img.size
