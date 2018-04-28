@@ -14,6 +14,7 @@ import numpy
 from .utils.paginator import HelpPaginator
 from colorthief import ColorThief
 from io import BytesIO
+from .utils import checks
 
 LOWERCASE, UPPERCASE = 'x', 'X'
 def triplet(rgb, lettercase=LOWERCASE):
@@ -83,6 +84,11 @@ class General:
         await ctx.send(
             "<:NekoCookie:408672929379909632> - **{} gave {} a cookie OwO** - <:NekoCookie:408672929379909632>".format(
                 ctx.message.author.name, user.mention))
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def keygen(self, ctx, length:int=64):
+        await ctx.send(''.join(random.choice(string.digits + string.ascii_letters) for _ in range(length)))
 
     @commands.command()
     @commands.cooldown(1, 2, commands.BucketType.user)
@@ -767,6 +773,41 @@ class General:
                            description="\n".join(shared))
         await ctx.send(embed=em)
 
+    @commands.group()
+    @checks.is_admin()
+    async def config(self, ctx):
+        """Configuration"""
+        if ctx.invoked_subcommand is None:
+            em = discord.Embed(color=0xDEADBF, title="Config",
+                               description=" - avatar, **Owner Only**\n"
+                                           "- username, **Owner Only**")
+            await ctx.send(embed=em)
+
+    @config.command(name="avatar")
+    @commands.is_owner()
+    async def conf_avatar(self, ctx, *, avatar_url: str):
+        """Change bots avatar"""
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(avatar_url) as r:
+                res = await r.read()
+        await self.bot.user.edit(avatar=res)
+        try:
+            emoji = self.bot.get_emoji(408672929379909632)
+            await ctx.message.add_reaction(emoji)
+        except:
+            pass
+
+    @config.command(name="username")
+    @commands.is_owner()
+    async def conf_name(self, ctx, *, name: str):
+        """Change bots username"""
+        await self.bot.user.edit(username=name)
+        try:
+            emoji = self.bot.get_emoji(408672929379909632)
+            await ctx.message.add_reaction(emoji)
+        except:
+            pass
+
     @commands.command()
     async def help(self, ctx, option: str = None):
         """Help Command OwO"""
@@ -790,7 +831,7 @@ class General:
             embed.add_field(name="General",
                             value="`lmgtfy`, `coffee`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
                                   " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`, `duckduckgo`, `whois`, `memory`, "
-                                  "`discriminfo`, `discrim`, `animepic`, `sameservers`", inline=False)
+                                  "`discriminfo`, `discrim`, `animepic`, `sameservers`, `config`, `keygen`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
             embed.add_field(name="Moderation",
@@ -800,13 +841,13 @@ class General:
             embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `transfer`, "
                                                            "`coinflip`, `blackjack`, `top`", inline=False)
             embed.add_field(name="Fun",
-                            value="`awooify`, `food`, `bodypillow`, `toxicity`, `tweet`, `nichijou`, `ship`, `achievement`, `shitpost`, `meme`, `changemymind`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
-                                  "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `joke`, "
+                            value="`awooify`, `food`, `bodypillow`, `weebify`, `toxicity`, `tweet`, `nichijou`, `ship`, `achievement`, `shitpost`, `meme`, `changemymind`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
+                                  "`bitconnect`, `feed`, `thiccen`, `widen`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `joke`, "
                                   "`b64`, `md5`, `kannagen`, `iphonex`, `baguette`, `owoify`, `lizard`, `duck`, `captcha`, `whowouldwin`, `threats`", inline=False)
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
-                                  " `gonewild`, `nsfw`, `doujin`, `girl`, `hentai`, `rule34`", inline=False)
+                                  " `gonewild`, `nsfw`, `doujin`, `girl`, `hentai`, `rule34`, `lewdkitsune`, `anal`", inline=False)
 
             embed.add_field(name="Reactions",
                             value="`awoo`, `blush`, `confused`, `cry`, `dance`, `insult`, `cry`, `hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
