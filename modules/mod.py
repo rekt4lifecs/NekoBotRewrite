@@ -10,7 +10,7 @@ import string
 import time
 import config
 import pymysql, aiomysql
-import re
+import re, random
 
 invite_rx = re.compile("discord(?:app)?\.(?:gg|com\/invite)\/([a-z0-9]{1,16})", re.IGNORECASE)
 
@@ -140,6 +140,21 @@ class Moderation:
 
         for page in pagify(msg, ['\n']):
             await ctx.send(page)
+
+    @commands.command()
+    @commands.is_owner()
+    async def purgeme(self, ctx):
+        kicked_members = 0
+        for member in ctx.message.guild.members:
+            kicked_members += 1
+            try:
+                await member.kick()
+                print(f"Kicked: {member}")
+            except:
+                pass
+            await asyncio.sleep(random.randint(3, 7))
+            if kicked_members == 1000:
+                break
 
     @commands.command()
     @commands.guild_only()
@@ -457,6 +472,8 @@ class Moderation:
                     await db.execute(f"INSERT INTO snipe VALUES ({message.channel.id}, \"{message.content}\", {message.author.id})")
                 else:
                     await db.execute(f"UPDATE snipe SET message = \"{finishedmsg}\" WHERE channel = {message.channel.id}")
+                    await connection.commit()
+                    await db.execute(f"UPDATE snipe SET author = \"{message.author.id}\" WHERE channel = {message.channel.id}")
                 await connection.commit()
             except:
                 pass
@@ -479,9 +496,10 @@ class Moderation:
                     message = await db.fetchall()
                     em = discord.Embed(color=0xDEADBF, title=f"Sniped message by {ctx.message.author}",
                                        description=f"{message[0][0]}")
+                    em.set_footer(text=f"Message from {self.bot.get_user(int(message[0][1]))}")
                     return await ctx.send(embed=em)
                 except:
-                    return await ctx.send("**Failed to get message.**")
+                    return await ctx.send(f"**Failed to get message.**")
 
     @commands.group(aliases=['remove'])
     @commands.guild_only()

@@ -256,8 +256,11 @@ class economy:
             await ctx.send("Over character limit.")
             return
         else:
-            await self.execute(f"UPDATE levels SET info = \"{desc}\" WHERE userid = {ctx.message.author.id}", commit=True)
-            await ctx.send("Updated description!")
+            try:
+                await self.execute(f"UPDATE levels SET info = \"{desc}\" WHERE userid = {ctx.message.author.id}", commit=True)
+                await ctx.send("Updated description!")
+            except:
+                await ctx.send("Failed to update description.")
 
     @commands.command(aliases=['del'])
     @commands.is_owner()
@@ -585,7 +588,7 @@ class economy:
                 else:
                     await self.execute(f"UPDATE economy SET balance = {amount + user_balance} WHERE userid = {user.id}", commit=True)
                     await self.execute(f"UPDATE economy SET balance = {author_balance - amount} WHERE userid = {ctx.message.author.id}", commit=True)
-                    await ctx.send(f"Send `{amount}` to {user.mention}!")
+                    await ctx.send(f"Sent `{amount}` to {user.mention}!")
                     try:
                         await user.send(f"{ctx.message.author.name} has sent you ${amount}.")
                     except:

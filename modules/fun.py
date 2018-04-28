@@ -116,6 +116,19 @@ class Fun:
             await ctx.send("Error getting data.")
 
     @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def weebify(self, ctx, *, text:str):
+        """Weebify Text"""
+        try:
+            key = config.idiotic_api
+            async with aiohttp.ClientSession(headers={"Authorization": key}) as cs:
+                async with cs.get(f'https://dev.anidiots.guide/text/owoify?text={text}') as r:
+                    res = await r.json()
+            await ctx.send(res['text'])
+        except:
+            await ctx.send("Failed to connect.")
+
+    @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def food(self, ctx):
         """Grabs Random Food Recipes"""
@@ -570,14 +583,29 @@ class Fun:
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def jpeg(self, ctx, user : discord.Member = None):
         """OwO Whats This"""
+        await ctx.trigger_typing()
         if user is None:
-            user = ctx.message.author
-        url = f"https://nekobot.xyz/api/imagegen?type=jpeg&url={user.avatar_url_as(format='jpg')}"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
+            if not await self.execute(f"SELECT 1 FROM lastimg WHERE channel = {ctx.message.channel.id}", isSelect=True):
+                return await ctx.send("**No recent images found.**")
+            lastimg = await self.execute(f"SElECT url FROM lastimg WHERE channel = {ctx.message.channel.id}", isSelect=True)
+            url = f"https://nekobot.xyz/api/imagegen?type=jpeg&url={lastimg[0]}"
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(url) as r:
+                    res = await r.json()
+        else:
+            url = f"https://nekobot.xyz/api/imagegen?type=jpeg&url={user.avatar_url_as(format='jpg')}"
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(url) as r:
+                    res = await r.json()
         if res['success'] != True:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
+        try:
+            if not await self.execute(query=f'SELECT 1 FROM lastimg WHERE channel = {ctx.message.channel.id}', isSelect=True):
+                await self.execute(f"INSERT INTO lastimg VALUES ({ctx.message.channel.id}, \"{res['message']}\")", commit=True)
+            else:
+                await self.execute(f"UPDATE lastimg SET url = \"{res['message']}\" WHERE channel = {ctx.message.channel.id}", commit=True)
+        except:
+            pass
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
     @commands.command()
@@ -736,6 +764,71 @@ class Fun:
         em.add_field(name=f"Round | {user1.name} vs {user2.name}",
                      value=f"***pew pew*** {random.choice([user1.name, user2.name])} got the first hit and won OwO")
         await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def thiccen(self, ctx, url:str=None):
+        """Thiccen an image"""
+        await ctx.trigger_typing()
+        if url is None:
+            if not await self.execute(f"SELECT 1 FROM lastimg WHERE channel = {ctx.message.channel.id}", isSelect=True):
+                return await ctx.send("**No recent images found.**")
+            lastimg = await self.execute(f"SElECT url FROM lastimg WHERE channel = {ctx.message.channel.id}", isSelect=True)
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(lastimg[0]) as r:
+                    res = await r.read()
+        else:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(url) as r:
+                    res = await r.read()
+        try:
+            img = Image.open(BytesIO(res)).convert("RGBA")
+            x, y = img.size
+            img = img.resize((int((x*3)), (int(y))))
+            img.save("temp.png")
+            await ctx.send(file=discord.File("temp.png"))
+            os.remove("temp.png")
+        except Exception as e:
+            await ctx.send(f"**Error getting image data.** {e}")
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def widen(self, ctx, url:str=None):
+        """Widen an image"""
+        await ctx.trigger_typing()
+        if url is None:
+            if not await self.execute(f"SELECT 1 FROM lastimg WHERE channel = {ctx.message.channel.id}", isSelect=True):
+                return await ctx.send("**No recent images found.**")
+            lastimg = await self.execute(f"SElECT url FROM lastimg WHERE channel = {ctx.message.channel.id}", isSelect=True)
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(lastimg[0]) as r:
+                    res = await r.read()
+        else:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(url) as r:
+                    res = await r.read()
+        try:
+            img = Image.open(BytesIO(res)).convert("RGBA")
+            x, y = img.size
+            img = img.resize((int((x)), (int(y*3))))
+            img.save("temp.png")
+            await ctx.send(file=discord.File("temp.png"))
+            os.remove("temp.png")
+        except Exception as e:
+            await ctx.send(f"**Error getting image data.** {e}")
+
+    async def on_message(self, message):
+        try:
+            try:
+                url = str(message.attachments[0].url)
+            except:
+                return
+            if not await self.execute(query=f'SELECT 1 FROM lastimg WHERE channel = {message.channel.id}', isSelect=True):
+                await self.execute(f"INSERT INTO lastimg VALUES ({message.channel.id}, \"{url}\")", commit=True)
+            else:
+                await self.execute(f"UPDATE lastimg SET url = \"{url}\" WHERE channel = {message.channel.id}", commit=True)
+        except:
+            return
 
 def setup(bot):
     bot.add_cog(Fun(bot))

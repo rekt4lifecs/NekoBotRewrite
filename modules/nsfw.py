@@ -73,6 +73,22 @@ class NSFW:
                 embed.set_footer(text="Use in a NSFW Channel BTW...")
             await ctx.send(embed=embed)
 
+    @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def anal(self, ctx):
+        if not ctx.message.channel.is_nsfw():
+            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            return
+        self.counter["anal"] += 1
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/image?type=anal") as r:
+                res = await r.json()
+        data = res['message']
+        embed = discord.Embed(color=0xDEADBF)
+        embed.set_image(url=data)
+        await ctx.send(embed=embed.set_footer(text=f"Used by {ctx.message.author.name}"))
+
     @commands.command(name="4k")
     @commands.guild_only()
     async def _fourk(self, ctx):
@@ -300,7 +316,21 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
-    async def hentai(self, ctx, type:str = None):
+    async def lewdkitsune(self, ctx):
+        """Lewd Kitsunes"""
+        if not ctx.message.channel.is_nsfw():
+            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            return
+        async with aiohttp.ClientSession() as cs:
+                async with cs.get(f"https://nekobot.xyz/api/image?type=lewdkitsune") as r:
+                    res = await r.json()
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=res['message'])
+        await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+
+    @commands.command()
+    @commands.guild_only()
+    async def hentai(self, ctx):
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
@@ -312,18 +342,11 @@ class NSFW:
         for vote in votes:
             voters.append(vote[0])
         if str(ctx.message.author.id) in voters:
-            types = ['cum', 'les', 'Random_hentai_gif', 'bj', 'nsfw_neko_gif', 'anal', 'pussy', 'classic', 'kuni', 'boobs', 'Random_hentai_gif']
-            if type is None:
-                x = random.choice(types)
-            elif not type in types:
-                return await ctx.send(f"Invalid type. List of types: `{types}`")
-            else:
-                x = type
             async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://nekos.life/api/v2/img/{x}") as r:
+                async with cs.get(f"https://nekobot.xyz/api/image?type=hentai") as r:
                     res = await r.json()
                     em = discord.Embed(color=0xDEADBF)
-                    em.set_image(url=res['url'])
+                    em.set_image(url=res['message'])
                     await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
         else:
             embed = discord.Embed(color=0xDEADBF,

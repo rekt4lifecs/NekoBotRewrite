@@ -37,14 +37,17 @@ class Games:
         elif ";" in username:
             print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
             return
-        if db.execute('SELECT 1 FROM osu WHERE userid = {}'.format(ctx.message.author.id)):
-            db.execute(f"UPDATE osu SET osu = \"{username}\" WHERE userid = {ctx.message.author.id}")
-            connection.commit()
-            await ctx.send("Updated!")
-        else:
-            db.execute(f"INSERT IGNORE INTO osu VALUES ({ctx.message.author.id}, \"{username}\")")
-            connection.commit()
-            await ctx.send("Added user!")
+        try:
+            if db.execute('SELECT 1 FROM osu WHERE userid = {}'.format(ctx.message.author.id)):
+                db.execute(f"UPDATE osu SET osu = \"{username}\" WHERE userid = {ctx.message.author.id}")
+                connection.commit()
+                await ctx.send("Updated!")
+            else:
+                db.execute(f"INSERT IGNORE INTO osu VALUES ({ctx.message.author.id}, \"{username}\")")
+                connection.commit()
+                await ctx.send("Added user!")
+        except:
+            await ctx.send("Failed to add user.")
 
     @osu.command()
     async def stats(self, ctx, user : discord.Member = None):
@@ -78,6 +81,31 @@ class Games:
                                       title="Error Contacting OSU API",
                                       description=f"```{e}```")
                 await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    async def pubg(self, ctx, region:str, username:str):
+        """Get PUBG Stats"""
+        regions = ["krjp", "jp", "na", "eu", "oc", "kakao", "sea", "sa", "as"]
+        if region not in regions:
+            em = discord.Embed(color=0xDEADBF, title="Error", description="Invalid Region Code.")
+            return await ctx.send(embed=em)
+        base = f"https://api.playbattlegrounds.com/shards/pc-{region}"
+        headers = {"Authorization": f"Bearer {config.pubg}",
+                   "Accept": "application/vnd.api+json"}
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f"{base}/players?filter[playerNames]={username}", headers=headers) as r:
+                res = await r.json()
+                if r.status == 404:
+                    em = discord.Embed(color=0xDEADBF, title="Error", description="User not found.")
+                    return await ctx.send(embed=em)
+            lastmatch = res["data"][0]["relationships"]["matches"]["data"][0]["id"]
+            async with cs.get(f"{base}/matches/{lastmatch}", headers=headers) as m:
+                matchdata = await m.json()
+        for player in matchdata["included"]:
+            if player["type"] == "participant":
+                if player["attributes"]["stats"]["playerId"] == res["data"][0]["id"]:
+                    await ctx.send(str(player))
 
     @commands.command()
     @commands.cooldown(1, 25, commands.BucketType.user)

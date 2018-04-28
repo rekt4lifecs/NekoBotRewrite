@@ -40,7 +40,6 @@ class NekoBot(commands.AutoShardedBot):
         super().__init__(command_prefix=_prefix_callable, #commands.when_mentioned_or('n!')
                          description="NekoBot",
                          pm_help=None,
-                         shard_count=10,
                          shard_id=0,
                          status=discord.Status.dnd,
                          max_messages=5000,
