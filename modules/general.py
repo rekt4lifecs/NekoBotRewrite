@@ -388,11 +388,6 @@ class General:
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def docs(self, ctx):
-        """Full docs MonkaS"""
-        await ctx.send("https://rekt4lifecs.github.io/NekoBotRewrite/")
-
-    @commands.command()
     async def vote(self, ctx):
         embed = discord.Embed(color=0xDEADBF,
                               title="Voting Link",
@@ -830,7 +825,7 @@ class General:
 
             embed.add_field(name="General",
                             value="`lmgtfy`, `coffee`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
-                                  " `avatar`, `qr`, `docs`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`, `duckduckgo`, `whois`, `memory`, "
+                                  " `avatar`, `qr`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`, `duckduckgo`, `whois`, `memory`, "
                                   "`discriminfo`, `discrim`, `animepic`, `sameservers`, `config`, `keygen`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
