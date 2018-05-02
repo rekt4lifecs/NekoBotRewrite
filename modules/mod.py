@@ -43,6 +43,23 @@ class Moderation:
         self.bot = bot
         self._last_result = None
 
+    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                              user='root', password=config.dbpass,
+                                              db='nekobot')
+        async with connection.cursor() as db:
+            await db.execute(query)
+            if isSelect:
+                if fetchAll:
+                    values = await db.fetchall()
+                else:
+                    values = await db.fetchone()
+            if commit:
+                await connection.commit()
+        connection.close()
+        if isSelect:
+            return values
+
     def cleanup_code(self, content):
         """Automatically removes code blocks from the code."""
         # remove ```py\n```
@@ -758,6 +775,28 @@ class Moderation:
                                                                                        f"Reason:\n```\n"
                                                                                        f"{reason}```")
                 await channel.send(embed=embed)
+
+    @commands.command()
+    @commands.is_owner()
+    async def sql(self, ctx, *, sql: str):
+        """Inject SQL"""
+        try:
+            await self.execute(query=sql, commit=True)
+            await ctx.message.add_reaction("✅")
+        except Exception as e:
+            await ctx.send(f"`{e}`")
+
+    @commands.command()
+    @commands.is_owner()
+    async def select(self, ctx, *, sql: str):
+        """Inject SQL"""
+        try:
+            x = await self.execute(query=f"SELECT {sql} LIMIT 10", isSelect=True, fetchAll=True)
+            await ctx.send(x)
+            await ctx.message.add_reaction("✅")
+        except Exception as e:
+            await ctx.send(f"`{e}`")
+
     # TODO
     # @commands.group()
     # @checks.is_admin()
