@@ -2,9 +2,8 @@ from discord.ext import commands
 import logging, traceback, sys, discord
 from datetime import date
 from collections import Counter
-import json
 import datetime
-
+import aiohttp
 import config
 log = logging.getLogger('NekoBot')
 log.setLevel(logging.INFO)
@@ -115,6 +114,20 @@ class NekoBot(commands.AutoShardedBot):
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
         print(f"Shard {shard_id} Connected...")
+        webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
+        payload = {
+            "embeds": [
+                {
+                    "title": "Shard Connect.",
+                    "description": f"Shard {shard_id} has connected.",
+                    "color": 14593471
+                }
+            ]
+        }
+        async with aiohttp.ClientSession() as cs:
+            async with cs.post(webhook_url, json=payload) as r:
+                res = await r.read()
+                print(res)
 
     async def on_ready(self):
         print("             _         _           _   \n"
