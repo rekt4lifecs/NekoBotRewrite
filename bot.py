@@ -64,6 +64,8 @@ class NekoBot(commands.AutoShardedBot):
 
     async def on_command_error(self, ctx, exception):
         channel = self.get_channel(431987399581499403)
+        if str(exception) == "Command raised an exception: NotFound: NOT FOUND (status code: 404): Unknown Channel":
+            return
         if isinstance(exception, commands.NoPrivateMessage):
             return
         elif isinstance(exception, commands.DisabledCommand):

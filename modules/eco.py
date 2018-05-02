@@ -269,16 +269,6 @@ class economy:
         ctx.send(f"Deleted {_id}")
 
     @commands.command()
-    @commands.is_owner()
-    async def sql(self, ctx, *, sql: str):
-        """Inject SQL"""
-        try:
-            await self.execute(query=sql, commit=True)
-            await ctx.message.add_reaction("✅")
-        except Exception as e:
-            await ctx.send(f"`{e}`")
-
-    @commands.command()
     @commands.cooldown(1, 900, commands.BucketType.user)
     async def coinflip(self, ctx, amount : int):
         """Coinflip OwO"""
