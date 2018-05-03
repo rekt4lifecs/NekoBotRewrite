@@ -6,6 +6,7 @@ NekoBot is an amazing Discord Bot with plenty of Fun and NSFW Commands all rewri
 We have a bunch of fun commands for example you can ship too people in an image OwO and can fight people in a 1v1 rust match. We have an economy system where you can get your daily credits, give users reputation and gable all your money ofcourse. Are you good at OSU, Overwatch or Fortnite? You can flex on them haters with your 100k scores! ~~if your not good at any of them maybe suggest another game your are good at ;)~~
 
 [![Discord Bots](https://discordbots.org/api/widget/310039170792030211.svg)](https://discordbots.org/bot/310039170792030211)
+![Server](https://img.shields.io/discord/221989003400970241.svg?logo=discord&style=for-the-badge)
 
 ### Commands
 | Command       | Category      |Alias|Info                          |
