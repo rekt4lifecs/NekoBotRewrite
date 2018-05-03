@@ -97,6 +97,7 @@ class economy:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def profile(self, ctx, user : discord.Member = None):
         """Get user's profile"""
+        await ctx.trigger_typing()
         if user == None:
             user = ctx.message.author
         try:
@@ -982,10 +983,10 @@ class economy:
         except Exception as e:
             await ctx.send(e)
     
-    async def _handle_on_message(self, message):
-        user = message.author
-        if user.bot:
-            return
+    # async def _handle_on_message(self, message):
+    #     user = message.author
+    #     if user.bot:
+    #         return
         # try:
         #     lastxp = await self.execute(f"SELECT lastxp FROM levels WHERE userid = {user.id}", isSelect=True)
         # except:
@@ -999,7 +1000,25 @@ class economy:
         # else:
         #     return
 
+    async def on_command(self, ctx):
+        if ctx.message.author.bot:
+            return
+        author = ctx.message.author
+        choice = random.randint(1, 25)
+        if choice == 15:
+            print(f"[XP] Updated {author.name}'s XP ({author.id})")
+            try:
+                xp = random.randint(1, 5)
+                if not await self.execute(f"SELECT 1 FROM levels WHERE userid = {author.id}", isSelect=True):
+                    return await self._create_user(author.id)
+                lastxp = await self.execute(f"SELECT level FROM levels WHERE userid = {author.id}", isSelect=True)
+                await self.execute(f"UPDATE levels SET level = {int(lastxp[0] + xp)} WHERE userid = {author.id}",
+                                   commit=True)
+            except Exception as e:
+                print(f"[XP] Error Giving XP {e}")
+        return
+
 def setup(bot):
     n = economy(bot)
-    bot.add_listener(n._handle_on_message, "on_message")
+    # bot.add_listener(n._handle_on_message, "on_message")
     bot.add_cog(n)
