@@ -76,6 +76,34 @@ class Fun:
         if isSelect:
             return values
 
+    @commands.command(aliases=['dragonify'])
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def dragonic(self, ctx, *, text:str):
+        """Translate english to dragonic"""
+        await ctx.trigger_typing()
+        try:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f"https://nekobot.xyz/api/text?type=dragonic&text={text}") as r:
+                    res = await r.json()
+            em = discord.Embed(color=0xDEADBF, title="Dragonic Text", description=res['message'])
+            await ctx.send(embed=em)
+        except:
+            await ctx.send("Failed to get data.")
+
+    @commands.command(aliases=['dedragonify'])
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def dedragonic(self, ctx, *, text:str):
+        """Translate dragonic to english"""
+        await ctx.trigger_typing()
+        try:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f"https://nekobot.xyz/api/text?type=dedragonic&text={text}") as r:
+                    res = await r.json()
+            em = discord.Embed(color=0xDEADBF, title="Dedragonic Text", description=res['message'])
+            await ctx.send(embed=em)
+        except:
+            await ctx.send("Failed to get data.")
+
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def toxicity(self, ctx, *, text:str):
