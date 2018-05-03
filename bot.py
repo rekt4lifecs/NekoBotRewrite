@@ -145,16 +145,13 @@ class NekoBot(commands.AutoShardedBot):
         print(f"Users {len(set(self.get_all_members()))}")
         await self.change_presence(status=discord.Status.idle)
 
-        key = config.weeb
         channel = self.get_channel(441571998943150082)
-        auth = {"Authorization": "Wolke " + key,
-                "User-Agent": "NekoBot/4.2.0"}
         while True:
-            async with aiohttp.ClientSession(headers=auth) as cs:
-                async with cs.get(f'https://api.weeb.sh/images/random?type={random.choice(["kemonomimi", "neko"])}') as r:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f'https://nekobot.xyz/api/image?type={random.choice(["neko", "lewdneko"])}') as r:
                     res = await r.json()
                     em = discord.Embed(color=0xDEADBF)
-                    em.set_image(url=res['url'])
+                    em.set_image(url=res['message'])
                     await channel.send(embed=em)
             await asyncio.sleep(900)
 
