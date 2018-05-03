@@ -4,6 +4,7 @@ from datetime import date
 from collections import Counter
 import datetime
 import aiohttp
+import random, asyncio
 import config
 log = logging.getLogger('NekoBot')
 log.setLevel(logging.INFO)
@@ -143,6 +144,19 @@ class NekoBot(commands.AutoShardedBot):
         print(f"Servers {len(self.guilds)}")
         print(f"Users {len(set(self.get_all_members()))}")
         await self.change_presence(status=discord.Status.idle)
+
+        key = config.weeb
+        channel = self.get_channel(441571998943150082)
+        auth = {"Authorization": "Wolke " + key,
+                "User-Agent": "NekoBot/4.2.0"}
+        while True:
+            async with aiohttp.ClientSession(headers=auth) as cs:
+                async with cs.get(f'https://api.weeb.sh/images/random?type={random.choice(["kemonomimi", "neko"])}') as r:
+                    res = await r.json()
+                    em = discord.Embed(color=0xDEADBF)
+                    em.set_image(url=res['url'])
+                    await channel.send(embed=em)
+            await asyncio.sleep(900)
 
     def run(self):
         super().run(config.token)
