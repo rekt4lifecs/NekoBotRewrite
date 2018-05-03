@@ -137,7 +137,7 @@ class Moderation:
         for user in ctx.message.guild.members:
             try:
                 if not user.display_name[0] in list(str(string.ascii_letters)):
-                    await user.edit(nick=None, reason="Hoisting")
+                    await user.edit(nick=chr(55343) + chr(56482) + str(user.name), reason="Hoisting")
                     users_dehoisted.append(f"{user.name}-{user.id}")
             except:
                 users_failed.append(user.id)
