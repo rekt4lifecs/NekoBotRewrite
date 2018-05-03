@@ -56,7 +56,6 @@ class Moderation:
                     values = await db.fetchone()
             if commit:
                 await connection.commit()
-        connection.close()
         if isSelect:
             return values
 
