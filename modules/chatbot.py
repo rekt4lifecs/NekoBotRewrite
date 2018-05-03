@@ -9,11 +9,11 @@ class Chatbot:
         channel = message.channel
         content = message.content
 
-        if content.startswith("<@310039170792030211> "):
+        if content.startswith("<@310039170792030211> ") or content.startswith("<@!310039170792030211> "):
             commands = []
             for command in self.bot.commands:
                 commands.append(command.name)
-            if str(message.content[22:]) in commands:
+            if str(message.content[22:]) in commands or str(message.content[23:]) in commands:
                 return
             await channel.trigger_typing()
             async with aiohttp.ClientSession(headers={"Authorization": "Bearer a7d6414f118443bc8653c9dc9f36dc06"}) as cs:
