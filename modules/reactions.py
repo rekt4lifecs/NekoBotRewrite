@@ -172,7 +172,7 @@ class Reactions:
                     text = "<:nekoHug:413608646988005376>"
                 else:
                     user = user.name
-                    text = "(=^‥^=) <a:nekoHuggu:413610309920489472>"
+                    text = "(^･o･^)ﾉ”"
                 em = discord.Embed(title="**{}** hugged **{}** {}".format(ctx.message.author.name, user, text),
                                    color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -190,7 +190,7 @@ class Reactions:
                     text = ""
                 else:
                     user = user.name
-                    text = "❤(´ω｀*) <a:nekoKiss:413608424840888331>"
+                    text = "❤(´ω｀*)"
                 em = discord.Embed(title="**{}** kissed **{}** {}".format(ctx.message.author.name, user, text),
                                    color=0xDEADBF)
                 em.set_image(url=res['url'])
@@ -208,7 +208,7 @@ class Reactions:
                     text = ""
                 else:
                     user = user.name
-                    text = "(●ↀωↀ●) <a:nekoPat:413613223435042826>"
+                    text = "(^･o･^)ﾉ”"
                 em = discord.Embed(title="**{}** patted **{}** {}".format(ctx.message.author.name, user, text),
                                    color=0xDEADBF)
                 em.set_image(url=res['url'])
