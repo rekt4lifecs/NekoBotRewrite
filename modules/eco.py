@@ -193,6 +193,7 @@ class economy:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def rep(self, ctx, user : discord.Member):
         """Give user reputation"""
+        await ctx.trigger_typing()
         author = ctx.message.author
         if user == author:
             await ctx.send("You can't give yourself rep <:nkoDed:422666465238319107>")
@@ -205,14 +206,23 @@ class economy:
                                headers={"Authorization": "Wolke " + config.weeb},
                                data={"source_user": str(author.id)}) as r:
                 data = await r.json()
+            async with cs.get(f"https://api.weeb.sh/reputation/310039170792030211/{author.id}",
+                               headers={"Authorization": "Wolke " + config.weeb}) as r:
+                repdata = await r.json()
         # await ctx.send(f"```\n{json.dumps(data, indent=4)}\n```")
+        availablerep = repdata['user']['availableReputations']
+        if availablerep > 1:
+            points = "points"
+        else:
+            points = "point"
         if data['status'] == 200:
             em = discord.Embed(color=0xDEADBF, title="Given Rep!",
                                description=f"{author.mention} has given {user.mention} 1 rep!\n"
-                               f"**{user.name}** Now has {data['targetUser']['reputation']} rep!")
+                               f"**{user.name}** Now has {data['targetUser']['reputation']} rep\n"
+                                           f"You now have {availablerep} rep {points} left for today!")
             return await ctx.send(embed=em)
         else:
-            em = discord.Embed(color=0xDEADBF, title="Given Rep!",
+            em = discord.Embed(color=0xDEADBF, title="Failed to give rep!",
                                description=f"{author.mention}, you dont have any rep points available ;c")
             return await ctx.send(embed=em)
 
