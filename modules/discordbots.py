@@ -23,7 +23,7 @@ class DiscordBotsOrgAPI:
             try:
                 await self.dblpy.post_server_count(shard_count=self.bot.shard_count, shard_no=self.bot.shard_id)
                 print("Posted server count. {}".format(len(self.bot.guilds)))
-                game = discord.Streaming(name=random.choice(stats2), url="https://www.twitch.tv/rekt4lifecs")
+                game = discord.Streaming(name=random.choice(stats2), url="https://www.twitch.tv/rektdevlol")
                 await self.bot.change_presence(activity=game)
             except Exception as e:
                 print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
