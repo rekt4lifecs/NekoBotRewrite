@@ -297,6 +297,24 @@ class Fun:
         except discord.Forbidden:
             pass
 
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def deepfry(self, ctx, user:discord.Member):
+        """Deepfry a user"""
+        await ctx.trigger_typing()
+        if user is None:
+            user = ctx.message.author
+        userurl = user.avatar_url_as(format='png')
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=deepfry&image={userurl}") as r:
+                res = await r.json()
+        if res['success'] != True:
+            return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
+        try:
+            await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
+        except discord.Forbidden:
+            pass
+
     @commands.command(name="b64", aliases=['b64encode', 'base64encode'])
     @commands.cooldown(1, 7, commands.BucketType.user)
     async def base_encode(self, ctx, *, encode_to: str):
