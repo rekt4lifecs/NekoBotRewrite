@@ -3,9 +3,10 @@ import logging, traceback, sys, discord
 from datetime import date
 from collections import Counter
 import datetime
-import aiohttp
-import random, asyncio
+import aiohttp, asyncio, aioredis
+import random
 import config
+
 log = logging.getLogger('NekoBot')
 log.setLevel(logging.INFO)
 date = f"{date.today().timetuple()[0]}_{date.today().timetuple()[1]}_{date.today().timetuple()[2]}"
@@ -45,6 +46,12 @@ class NekoBot(commands.AutoShardedBot):
                          max_messages=5000,
                          help_attrs={'hidden': True})
         self.counter = Counter()
+
+        async def _init_redis(self):
+            self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
+
+        self.loop.create_task(_init_redis(self))
+
         for extension in startup_extensions:
             try:
                 self.load_extension(extension)
