@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord, random, aiohttp, requests
 from bs4 import BeautifulSoup as bs
 from collections import Counter
+from .utils import checks
 import config
 import aiomysql
 import json
@@ -379,23 +380,24 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
-    async def nsfw(self, ctx):
-        """NSFW Stats"""
-        embed = discord.Embed(color=0xDEADBF,
-                              title="NSFW Stats")
-        embed.add_field(name="PGIF", value=self.counter['pgif'])
-        embed.add_field(name="4k", value=self.counter['4k'])
-        embed.add_field(name="Yande.re", value=self.counter['yandere'])
-        embed.add_field(name="Ass", value=self.counter['ass'])
-        embed.add_field(name="Boobs", value=self.counter['boobs'])
-        embed.add_field(name="Cumsluts", value=self.counter['cum'])
-        embed.add_field(name="Thighs", value=self.counter['thighs'])
-        embed.add_field(name="GoneWild", value=self.counter['gonewild'])
-        embed.add_field(name="Girl", value=self.counter['girl'])
-        embed.add_field(name="Big Boobs", value=self.counter['bigboobs'])
-        embed.add_field(name="Hentai", value=self.counter['hentai'])
+    @checks.is_admin()
+    async def nsfw(self, ctx, channel:discord.TextChannel = None):
+        """Make a channel NSFW."""
+        if channel is None:
+            channel = ctx.message.channel
 
-        await ctx.send(embed=embed)
+        try:
+            if channel.is_nsfw():
+                await channel.edit(nsfw=False)
+                await ctx.send(f"I have removed NSFW permissions from {channel.name}")
+            else:
+                await channel.edit(nsfw=True)
+                await ctx.send(f"I have have made {channel.name} an NSFW channel for you <3")
+        except:
+            try:
+                await ctx.send("I can't make that channel NSFW or don't have permissions to ;c")
+            except:
+                pass
 
 def setup(bot):
     bot.add_cog(NSFW(bot))
