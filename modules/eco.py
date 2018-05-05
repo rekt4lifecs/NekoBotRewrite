@@ -279,7 +279,7 @@ class economy:
         ctx.send(f"Deleted {_id}")
 
     @commands.command()
-    @commands.cooldown(1, 900, commands.BucketType.user)
+    @commands.cooldown(1, 60, commands.BucketType.user)
     async def coinflip(self, ctx, amount : int):
         """Coinflip OwO"""
         user = ctx.message.author
@@ -291,8 +291,8 @@ class economy:
         if amount <= 0:
             await ctx.send("Your amount is too low <:nkoDed:422666465238319107>")
             return
-        elif amount > 100000:
-            await ctx.send("You can't go past 100,000")
+        elif amount > 10000:
+            await ctx.send("You can't go past 10,000")
             return
         if await self.usercheck('economy', user) is False:
             await ctx.send("You don't have a bank account.")
