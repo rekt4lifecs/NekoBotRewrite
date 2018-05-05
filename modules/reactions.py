@@ -530,6 +530,17 @@ class Reactions:
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
+    async def triggered(self, ctx):
+        async with aiohttp.ClientSession(headers=auth) as cs:
+            async with cs.get('https://api.weeb.sh/images/random?type=triggered') as r:
+                res = await r.json()
+                em = discord.Embed(
+                                   color=0xDEADBF)
+                em.set_image(url=res['url'])
+                await ctx.send(embed=em)
+
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.command(pass_context=True)
     async def poi(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
             async with cs.get('https://api.weeb.sh/images/random?type=poi') as r:

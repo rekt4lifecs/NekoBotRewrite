@@ -13,5 +13,6 @@ pymysql
 dblpy
 aiomysql
 lavalink
+aioredis
 websockets==3.4
 google-api-python-client
