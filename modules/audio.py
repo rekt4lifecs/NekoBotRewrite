@@ -102,9 +102,6 @@ class Audio:
         for user in ctx.author.voice.channel.members:
             listx.append(user)
 
-        if len(listx) > 2 or not ctx.message.author.permissions_in(ctx.author.voice.channel).voice().manage_messages:
-            return await ctx.send("**You must be by yourself to skip me or have the `manage messages` perm ;c**")
-
         await ctx.send('⏭ | Skipped.')
         await player.skip()
 
@@ -119,9 +116,6 @@ class Audio:
         listx = []
         for user in ctx.author.voice.channel.members:
             listx.append(user)
-
-        if len(listx) > 2 or not ctx.message.author.permissions_in(ctx.author.voice.channel).voice().manage_messages:
-            return await ctx.send("**You must be by yourself to stop me or have the `manage messages` perm ;c**")
 
         player.queue.clear()
         await player.stop()
@@ -180,9 +174,6 @@ class Audio:
         for user in ctx.author.voice.channel.members:
             listx.append(user)
 
-        if len(listx) > 2 or not ctx.message.author.permissions_in(ctx.author.voice.channel).voice().manage_messages:
-            return await ctx.send("**You must be by yourself to pause me or have the `manage messages` perm ;c**")
-
         if player.paused:
             await player.set_pause(False)
             await ctx.send('⏯ | Resumed')
@@ -202,9 +193,6 @@ class Audio:
         for user in ctx.author.voice.channel.members:
             listx.append(user)
 
-        if len(listx) > 2 or not ctx.message.author.permissions_in(ctx.author.voice.channel).voice().manage_messages:
-            return await ctx.send("**You must be by yourself to change my volume or have the `manage messages` perm ;c**")
-
         await player.set_volume(volume)
         await ctx.send(f'🔈 | Set to {player.volume}%')
 
@@ -219,9 +207,6 @@ class Audio:
         listx = []
         for user in ctx.author.voice.channel.members:
             listx.append(user)
-
-        if len(listx) > 2 or not ctx.message.author.permissions_in(ctx.author.voice.channel).voice().manage_messages:
-            return await ctx.send("**You must be by yourself to shuffle me or have the `manage messages` perm ;c**")
 
         player.shuffle = not player.shuffle
 
@@ -238,9 +223,6 @@ class Audio:
         listx = []
         for user in ctx.author.voice.channel.members:
             listx.append(user)
-
-        if len(listx) > 2 or not ctx.message.author.permissions_in(ctx.author.voice.channel).voice().manage_messages:
-            return await ctx.send("**You must be by yourself to repeat me or have the `manage messages` perm ;c**")
 
         player.repeat = not player.repeat
 
@@ -281,9 +263,6 @@ class Audio:
         listx = []
         for user in ctx.author.voice.channel.members:
             listx.append(user)
-
-        if len(listx) > 2 or not ctx.message.author.permissions_in(ctx.author.voice.channel).voice().manage_messages:
-            return await ctx.send("**You must be by yourself to disconnect me or have the `manage messages` perm ;c**")
 
         await player.disconnect()
         await ctx.send('*⃣ | Disconnected.')
