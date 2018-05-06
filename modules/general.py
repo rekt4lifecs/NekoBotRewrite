@@ -2,10 +2,7 @@ from discord.ext import commands
 import discord
 import datetime, random, config, math, aiohttp, aiomysql
 from collections import Counter
-from hurry.filesize import size
 from .utils.chat_formatting import pagify
-from PIL import __version__ as pilv
-from bs4 import __version__ as bsv
 from urllib.parse import quote_plus
 import string, json
 from .utils.paginator import EmbedPages, Pages
@@ -45,6 +42,19 @@ def millify(n):
 
     return '{:.0f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
 
+# Languages
+languages = ["english", "weeb"]
+english = json.load(open("lang/english.json"))
+weeb = json.load(open("lang/weeb.json"))
+
+def getlang(lang:str):
+    if lang == "english":
+        return english
+    elif lang == "weeb":
+        return weeb
+    else:
+        return None
+
 class General:
     """General Commands"""
 
@@ -72,6 +82,24 @@ class General:
         self.bot.socket_stats[msg.get('t')] += 1
 
     @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def setlang(self, ctx, lang:str=None):
+        """Change the bot language for you."""
+        if lang is None:
+            em = discord.Embed(color=0xDEADBF, title="Change Language.",
+                               description="Usage: `n!setlang <language>`\n"
+                                           "Example: `n!setlank english`\n"
+                                           "\n"
+                                           "List of current languages:\n"
+                                           "`english`, `weeb`")
+            return await ctx.send(embed=em)
+        if lang.lower() in languages:
+            await self.bot.redis.set(f"{ctx.message.author.id}-lang", lang.lower())
+            await ctx.send(f"Set language to {lang.title()}!")
+        else:
+            await ctx.send("Invalid language.")
+
+    @commands.command()
     async def lmgtfy(self, ctx, *, search_terms: str):
         """Creates a lmgtfy link"""
         search_terms = search_terms.replace(" ", "+")
@@ -80,9 +108,12 @@ class General:
     @commands.command(pass_context=True)
     async def cookie(self, ctx, user: discord.Member):
         """Give somebody a cookie :3"""
-        await ctx.send(
-            "<:NekoCookie:408672929379909632> - **{} gave {} a cookie OwO** - <:NekoCookie:408672929379909632>".format(
-                ctx.message.author.name, user.mention))
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+            await ctx.send(getlang(lang)["general"]["cookie"].format(ctx.message.author.name, user.mention))
+        else:
+            await ctx.send(english["general"]["cookie"].format(ctx.message.author.name, user.mention))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -94,10 +125,18 @@ class General:
     async def flip(self, ctx):
         """Flip a coin"""
         x = random.randint(0, 1)
-        if x == 1:
-            await ctx.send("**Heads**", file=discord.File("data/heads.png"))
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+            if x == 1:
+                await ctx.send(getlang(lang)["general"]["flip"]["heads"], file=discord.File("data/heads.png"))
+            else:
+                await ctx.send(getlang(lang)["general"]["flip"]["tails"], file=discord.File("data/tails.png"))
         else:
-            await ctx.send("**Tails**", file=discord.File("data/tails.png"))
+            if x == 1:
+                await ctx.send("**Heads**", file=discord.File("data/heads.png"))
+            else:
+                await ctx.send("**Tails**", file=discord.File("data/tails.png"))
 
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
@@ -124,22 +163,30 @@ class General:
     @commands.command(aliases=['version'])
     async def info(self, ctx):
         servers = len(self.bot.guilds)
-        info = discord.Embed(title="**Info**",
-                             color=0xDEADBF,
-                             description=f"Servers: **{millify(servers)} ({servers})**\n"
-                                         f"Members **{millify(len(set(self.bot.get_all_members())))}**\n"
-                                         f"Bot Commands: **{str(len(self.bot.commands))}**\n"
-                                         f"Channels: **{millify(len(set(self.bot.get_all_channels())))}**\n"
-                                         f"Shards: **{self.bot.shard_count}**\n"
-                                         f"Bot in voice channel(s): **{len(self.bot.voice_clients)}**\n"
-                                         f"Uptime: **{self.get_bot_uptime()}**\n"
-                                         f"Messages Read (Since Restart): **{millify(self.bot.counter['messages_read'])}**")
-        info.add_field(name="Links", value="<:GH:416593854368841729> - [GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) |"
-                                           " [Support Server](https://discord.gg/q98qeYN) | "
-                                           "[Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | <:nkotreon:430733839003025409> [Patreon](https://www.patreon.com/NekoBot)")
-        info.set_footer(
-            text="Bot by ReKT#0001 & cleaned by Kot#1337 :^)")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+        info = discord.Embed(color=0xDEADBF,
+                             title=getlang(lang)["general"]["info"]["info"],
+                             description=getlang(lang)["general"]["info"]["stats"].format(millify(servers),
+                                                                                          servers,
+                                                                                          millify(len(set(
+                                                                                            self.bot.get_all_members()))),
+                                                                                          str(len(self.bot.commands)),
+                                                                                          millify(len(set(
+                                                                                              self.bot.get_all_channels()))),
+                                                                                          self.bot.shard_count,
+                                                                                          len(
+                                                                                              self.bot.voice_clients),
+                                                                                          self.get_bot_uptime(),
+                                                                                          millify(self.bot.counter[
+                                                                                                      'messages_read'])))
+        info.add_field(name=getlang(lang)["general"]["info"]["links"]["name"],
+                       value=getlang(lang)["general"]["info"]["links"]["links"])
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
+        info.set_footer(text=getlang(lang)["general"]["info"]["footer"])
         await ctx.send(embed=info)
 
     @commands.command(hidden=True)
@@ -157,15 +204,15 @@ class General:
     async def whois(self, ctx, userid:int):
         """Lookup a user with a userid"""
         user = self.bot.get_user(userid)
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         if user is None:
-            return await ctx.send(f"```css\n[ Whois Lookup for {userid} ]\n\nUser not found!```")
+            return await ctx.send(f"```css\n[ {getlang(lang)['general']['whois_notfound'].format(userid)}```")
         text = f"```css\n" \
-               f"[ Whois Lookup for {userid} ]\n\n" \
-               f"Name:      {user.name}\n" \
-               f"ID:        {user.id}\n" \
-               f"Discrim:   {user.discriminator}\n" \
-               f"Bot:       {user.bot}\n" \
-               f"Created:   {user.created_at}\n" \
+               f"{getlang(lang)['general']['whois'].format(userid, user.name, user.id, user.discriminator, user.bot, user.created_at)}" \
                f"```"
         embed = discord.Embed(color=0xDEADBF, description=text)
         embed.set_thumbnail(url=user.avatar_url)
@@ -175,6 +222,12 @@ class General:
     @commands.guild_only()
     async def userinfo(self, ctx, user: discord.Member = None):
         """Get a users info."""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+
         if user == None:
             user = ctx.message.author
         try:
@@ -185,15 +238,15 @@ class General:
         embed = discord.Embed(color=0xDEADBF)
         embed.set_author(name=user.name,
                          icon_url=user.avatar_url)
-        embed.add_field(name="ID", value=user.id)
-        embed.add_field(name="Discriminator", value=user.discriminator)
-        embed.add_field(name="Bot", value=str(user.bot))
-        embed.add_field(name="Created", value=user.created_at.strftime("%d %b %Y %H:%M"))
-        embed.add_field(name="Joined", value=user.joined_at.strftime("%d %b %Y %H:%M"))
-        embed.add_field(name="Animated Avatar", value=str(user.is_avatar_animated()))
-        embed.add_field(name="Playing", value=playinggame)
-        embed.add_field(name="Status", value=user.status)
-        embed.add_field(name="Color", value=user.color)
+        embed.add_field(name=getlang(lang)["general"]["userinfo"]["id"], value=user.id)
+        embed.add_field(name=getlang(lang)["general"]["userinfo"]["discrim"], value=user.discriminator)
+        embed.add_field(name=getlang(lang)["general"]["userinfo"]["bot"], value=str(user.bot))
+        embed.add_field(name=getlang(lang)["general"]["userinfo"]["created"], value=user.created_at.strftime("%d %b %Y %H:%M"))
+        embed.add_field(name=getlang(lang)["general"]["userinfo"]["joined"], value=user.joined_at.strftime("%d %b %Y %H:%M"))
+        embed.add_field(name=getlang(lang)["general"]["userinfo"]["animated_avatar"], value=str(user.is_avatar_animated()))
+        embed.add_field(name=getlang(lang)["general"]["userinfo"]["playing"], value=playinggame)
+        embed.add_field(name=getlang(lang)["general"]["userinfo"]["status"], value=user.status)
+        embed.add_field(name=getlang(lang)["general"]["userinfo"]["color"], value=user.color)
 
         try:
             roles = [x.name for x in user.roles if x.name != "@everyone"]
@@ -214,6 +267,12 @@ class General:
     @commands.guild_only()
     async def serverinfo(self, ctx):
         """Display Server Info"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+
         server = ctx.message.guild
 
         verif = server.verification_level
@@ -223,18 +282,18 @@ class General:
                       m.status == discord.Status.idle])
 
         embed = discord.Embed(color=0xDEADBF)
-        embed.add_field(name="Name", value=f"**{server.name}**\n({server.id})")
-        embed.add_field(name="Owner", value=server.owner)
-        embed.add_field(name="Online", value=f"**{online}/{len(server.members)}**")
-        embed.add_field(name="Created at", value=server.created_at.strftime("%d %b %Y %H:%M"))
-        embed.add_field(name="Channels", value=f"Text Channels: **{len(server.text_channels)}**\n"
+        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["name"], value=f"**{server.name}**\n({server.id})")
+        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["owner"], value=server.owner)
+        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["online"], value=f"**{online}/{len(server.members)}**")
+        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["created_at"], value=server.created_at.strftime("%d %b %Y %H:%M"))
+        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["channels"], value=f"Text Channels: **{len(server.text_channels)}**\n"
                                                f"Voice Channels: **{len(server.voice_channels)}**\n"
                                                f"Categories: **{len(server.categories)}**\n"
                                                f"AFK Channel: **{server.afk_channel}**")
-        embed.add_field(name="Roles", value=len(server.roles))
-        embed.add_field(name="Emojis", value=f"{len(server.emojis)}/100")
-        embed.add_field(name="Region", value=str(server.region).title())
-        embed.add_field(name="Security", value=f"Verification Level: **{verif}**\n"
+        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["roles"], value=len(server.roles))
+        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["emojis"], value=f"{len(server.emojis)}/100")
+        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["region"], value=str(server.region).title())
+        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["security"], value=f"Verification Level: **{verif}**\n"
                                                f"Content Filter: **{server.explicit_content_filter}**")
 
         try:
@@ -248,20 +307,26 @@ class General:
     @commands.guild_only()
     async def channelinfo(self, ctx, channel: discord.TextChannel = None):
         """Get Channel Info"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+
         if channel is None:
             channel = ctx.message.channel
 
         embed = discord.Embed(color=0xDEADBF,
                               description=channel.mention)
-        embed.add_field(name="Name", value=channel.name)
-        embed.add_field(name="Guild", value=channel.guild)
-        embed.add_field(name="ID", value=channel.id)
-        embed.add_field(name="Category ID", value=channel.category_id)
-        embed.add_field(name="Position", value=channel.position)
-        embed.add_field(name="NSFW", value=str(channel.is_nsfw()))
-        embed.add_field(name="Members", value=len(channel.members))
-        embed.add_field(name="Category", value=channel.category)
-        embed.add_field(name="Created at", value=channel.created_at.strftime("%d %b %Y %H:%M"))
+        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["name"], value=channel.name)
+        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["guild"], value=channel.guild)
+        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["id"], value=channel.id)
+        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["category_id"], value=channel.category_id)
+        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["position"], value=channel.position)
+        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["nsfw"], value=str(channel.is_nsfw()))
+        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["members"], value=len(channel.members))
+        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["category"], value=channel.category)
+        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["created_at"], value=channel.created_at.strftime("%d %b %Y %H:%M"))
 
         await ctx.send(embed=embed)
 
@@ -308,22 +373,6 @@ class General:
             await ctx.send(f"Error. {e}")
 
     @commands.command()
-    async def verify(self, ctx, user : discord.Member = None):
-        """Verify Server."""
-        server = ctx.message.guild
-        if server.id == 310037773786677258:
-            if user is None:
-                user = ctx.message.author
-            try:
-                emoji = self.bot.get_emoji(408672929379909632)
-                await ctx.message.add_reaction(emoji)
-            except:
-                pass
-            await user.send(f"Verification link: https://captcha.nayami.party/?sid={server.id}&u={user.id}")
-        else:
-            return
-
-    @commands.command()
     async def avatar(self, ctx, user: discord.Member = None, type:str = None):
         """Get a user's avatar"""
         await ctx.channel.trigger_typing()
@@ -344,13 +393,19 @@ class General:
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def coffee(self, ctx):
         """Coffee owo"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+
         url = "https://coffee.alexflipnote.xyz/random.json"
         await ctx.channel.trigger_typing()
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 res = await r.json()
             em = discord.Embed()
-            msg = await ctx.send("*drinks coffee*", embed=em.set_image(url=res['file']))
+            msg = await ctx.send(getlang(lang)["general"]["coffee"], embed=em.set_image(url=res['file']))
             async with cs.get(res['file']) as r:
                 data = await r.read()
             color_thief = ColorThief(BytesIO(data))
@@ -388,8 +443,13 @@ class General:
 
     @commands.command()
     async def vote(self, ctx):
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         embed = discord.Embed(color=0xDEADBF,
-                              title="Voting Link",
+                              title=getlang(lang)["general"]["voting_link"],
                               description="https://discordbots.org/bot/310039170792030211/vote")
         await ctx.send(embed=embed)
 
@@ -572,23 +632,6 @@ class General:
                    "<:dnd:313956276893646850> Outlook not so good", "<:dnd:313956276893646850> Very doubtful"]
         await ctx.send(embed=discord.Embed(title=random.choice(answers), color=0xDEADBF))
 
-    @commands.command(aliases=['ddg'])
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def duckduckgo(self, ctx, *, search_terms: str):
-        search = search_terms.replace(" ", "%20")
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"http://api.duckduckgo.com/?q={search}&format=json") as r:
-                res = await r.read()
-                res = json.loads(res)
-                try:
-                    data = res['RelatedTopics'][0]['Text']
-                    url = res['RelatedTopics'][0]['FirstURL']
-                except:
-                    return await ctx.send("**No search results found.**")
-                embed = discord.Embed(color=0xDEADBF, title=f"Search results for {search_terms}",
-                                      description=f"[{data}]({url})")
-                await ctx.send(embed=embed)
-
     @commands.command()
     async def botinfo(self, ctx, bot_user : int = None):
         """Get Bot Info"""
@@ -638,27 +681,6 @@ class General:
             pass
 
         await ctx.send(embed=em)
-
-    @commands.command()
-    async def calc(self, ctx, num1 : int, operator : str, num2 : int):
-        """Calculator, +, -, *, /"""
-        try:
-            if operator == "+":
-                i = num1 + num2
-            elif operator == "-":
-                i = num1 - num2
-            elif operator == "*":
-                i = num1 * num2
-            elif operator == '/':
-                i = num1 / num2
-            else:
-                await ctx.send("Not a valid operator.")
-                return
-            await ctx.send(i)
-        except Exception as e:
-            await ctx.send(embed=discord.Embed(color=0xDEADBF, title="⛔ Error", description=f"```\n"
-                                                                                      f"{e}\n"
-                                                                                      f"```"))
 
     @commands.command()
     async def discriminfo(self, ctx):
@@ -752,21 +774,6 @@ class General:
 
         await p.paginate()
 
-    @commands.command()
-    @commands.guild_only()
-    @commands.cooldown(1, 30, commands.BucketType.user)
-    async def sameservers(self, ctx):
-        """Find the same servers with you and the bot owo"""
-        author = ctx.message.author
-        shared = []
-        for guild in self.bot.guilds:
-            for member in guild.members:
-                if member.id == author.id:
-                    shared.append(guild.name)
-        em = discord.Embed(color=0xDEADBF, title="Shared Servers",
-                           description="\n".join(shared))
-        await ctx.send(embed=em)
-
     @commands.group()
     @checks.is_admin()
     async def config(self, ctx):
@@ -837,9 +844,9 @@ class General:
                              icon_url=self.bot.user.avatar_url_as(format='png'))
 
             embed.add_field(name="General",
-                            value="`lmgtfy`, `coffee`, `cookie`, `flip`, `info`, `userinfo`, `serverinfo`, `channelinfo`, `urban`,"
-                                  " `avatar`, `qr`, `vote`, `permissions`, `8ball`, `help`, `calc`, `crypto`, `duckduckgo`, `whois`, `memory`, "
-                                  "`discriminfo`, `discrim`, `animepic`, `sameservers`, `config`, `keygen`", inline=False)
+                            value="`help`, `discrim`, `discriminfo`, `botinfo`, `8ball`, `permissions`, `vote`, "
+                                  "`qr`, `animepic`, `coffee`, `avatar`, `urban`, `channelinfo`, `userinfo`, "
+                                  "`serverinfo`, `whois`, `info`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `crypto`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
             embed.add_field(name="Moderation",

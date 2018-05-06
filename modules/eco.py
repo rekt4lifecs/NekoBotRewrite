@@ -6,6 +6,19 @@ import json
 
 log = logging.getLogger("NekoBot")
 
+# Languages
+languages = ["english", "weeb"]
+english = json.load(open("lang/english.json"))
+weeb = json.load(open("lang/weeb.json"))
+
+def getlang(lang:str):
+    if lang == "english":
+        return english
+    elif lang == "weeb":
+        return weeb
+    else:
+        return None
+
 class economy:
     """Economy"""
 
@@ -56,6 +69,11 @@ class economy:
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def bank(self, ctx):
         """Bank info"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         try:
             if await self.usercheck('levels', ctx.message.author) is False:
                 await self._create_user(ctx.message.author.id)
@@ -68,9 +86,9 @@ class economy:
             total = total + int(x[0])
 
         em = discord.Embed(color=0xDEADBF,
-                           title="Welcome to the NekoBank!")
+                           title=getlang(lang)["eco"]["welcome"])
         em.set_thumbnail(url=self.bot.user.avatar_url)
-        em.add_field(name="Total $", value=f"{total}")
+        em.add_field(name=getlang(lang)["eco"]["total_amount"], value=f"{total}")
 
         await ctx.send(embed=em)
 
@@ -79,6 +97,11 @@ class economy:
     async def register(self, ctx):
         """Register a bank account"""
         user = ctx.message.author
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
 
         try:
             if await self.usercheck('levels', ctx.message.author) is False:
@@ -87,10 +110,10 @@ class economy:
             pass
 
         if await self.usercheck('economy', user) is False:
-            await ctx.send("Registered a bank account!")
+            await ctx.send(getlang(lang)["eco"]["registered"])
             await self.execute(f"INSERT INTO economy VALUES ({user.id}, 0, 0)", commit=True)
         else:
-            await ctx.send(f"You already have a bank account <:nkoDed:422666465238319107>")
+            await ctx.send(getlang(lang)["eco"]["already_registered"])
 
 
     @commands.command()
@@ -98,6 +121,12 @@ class economy:
     async def profile(self, ctx, user : discord.Member = None):
         """Get user's profile"""
         await ctx.trigger_typing()
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+
         if user == None:
             user = ctx.message.author
         try:
@@ -133,12 +162,12 @@ class economy:
             async with cs.get(f"https://api.weeb.sh/reputation/{self.bot.user.id}/{user.id}",
                                headers={"Authorization": "Wolke " + config.weeb}) as r:
                 data = await r.json()
-        embed = discord.Embed(color=0xDEABDF, title=f"{user.display_name}'s Profile",
-                              description=f"`Balance:` **{balance}**\n"
-                                          f"`Rep:` **{data['user']['reputation']}**\n"
-                                          f"`Level:` **{level}** | **{xp}/{required}**\n\n"
-                                          f"```\n{description}```\n"
-                                          f"Married to: **{married}**")
+        embed = discord.Embed(color=0xDEABDF, title=getlang(lang)["eco"]["profile"]["title"].format(user),
+                              description=getlang(lang)["eco"]["profile"]["description"].format(balance,
+                                                                                          data['user']['reputation'],
+                                                                                          level, xp, required,
+                                                                                          description,
+                                                                                          married))
         embed.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=embed)
 
@@ -146,6 +175,12 @@ class economy:
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def daily(self, ctx):
         """Receive your daily bonus"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+
         user = ctx.message.author
         try:
             if await self.usercheck('levels', ctx.message.author) is False:
@@ -153,7 +188,7 @@ class economy:
         except:
             pass
         if await self.usercheck('economy', user) is False:
-            await ctx.send("You don't have a bank account...")
+            await ctx.send(getlang(lang)["eco"]["no_account"])
             return
         else:
             x = await self.execute(f"SELECT payday FROM economy WHERE userid = {user.id}", isSelect=True)
@@ -165,7 +200,7 @@ class economy:
                                                      hour=0, minute=0, second=0)
                 delta = tomorrow - datetime.datetime.now()
                 timeleft = time.strftime("%H", time.gmtime(delta.seconds))
-                await ctx.send(f"Wait another {timeleft} hours before using daily again...")
+                await ctx.send(getlang(lang)["eco"]["daily_timer"].format(int(timeleft)))
                 return
             else:
                 x = await self.execute(f"SELECT balance FROM economy WHERE userid = {user.id}", isSelect=True)
@@ -177,16 +212,16 @@ class economy:
                     await self.execute(f"UPDATE economy SET balance = {balance + 7500} WHERE userid = {user.id}", commit=True)
                     await self.execute(f"UPDATE economy SET payday = {int(time.time())} WHERE userid = {user.id}", commit=True)
                     embed = discord.Embed(color=0xDEADBF,
-                                          title="Daily Credits",
-                                          description="Recieved 2500 + 5000 Daily credits - Voter Bonus!")
+                                          title=getlang(lang)["eco"]["daily_credits"],
+                                          description=getlang(lang)["eco"]["daily_voter"])
                     await ctx.send(embed=embed)
                 else:
                     await self.execute(f"UPDATE economy SET balance = {balance + 2500} WHERE userid = {user.id}", commit=True)
                     await self.execute(f"UPDATE economy SET payday = {int(time.time())} WHERE userid = {user.id}", commit=True)
                     embed = discord.Embed(color=0xDEADBF,
-                                          title="Daily Credits",
-                                          description="Recieved 2500 Daily credits!")
-                    embed.set_footer(text="Pssst voting will give you 3 times the daily bonus OwO, vote with n!vote")
+                                          title=getlang(lang)["eco"]["daily_credits"],
+                                          description=getlang(lang)["eco"]["daily_normal"])
+                    embed.set_footer(text=getlang(lang)["eco"]["vote_footer"])
                     await ctx.send(embed=embed)
 
     @commands.command()
@@ -194,12 +229,17 @@ class economy:
     async def rep(self, ctx, user : discord.Member):
         """Give user reputation"""
         await ctx.trigger_typing()
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         author = ctx.message.author
         if user == author:
-            await ctx.send("You can't give yourself rep <:nkoDed:422666465238319107>")
+            await ctx.send(getlang(lang)["eco"]["cant_rep_self"])
             return
         elif user.bot:
-            await ctx.send("You can't rep bots <:nkoDed:422666465238319107>")
+            await ctx.send(getlang(lang)["eco"]["cant_rep_bots"])
             return
         async with aiohttp.ClientSession() as cs:
             async with cs.post(f"https://api.weeb.sh/reputation/310039170792030211/{user.id}",
@@ -212,24 +252,29 @@ class economy:
         # await ctx.send(f"```\n{json.dumps(data, indent=4)}\n```")
         availablerep = repdata['user']['availableReputations']
         if availablerep > 1:
-            points = "points"
+            points = getlang(lang)["eco"]["points"]
         else:
-            points = "point"
+            points = getlang(lang)["eco"]["point"]
         if data['status'] == 200:
-            em = discord.Embed(color=0xDEADBF, title="Given Rep!",
-                               description=f"{author.mention} has given {user.mention} 1 rep!\n"
-                               f"**{user.name}** Now has {data['targetUser']['reputation']} rep\n"
-                                           f"You now have {availablerep} rep {points} left for today!")
+            em = discord.Embed(color=0xDEADBF, title=getlang(lang)["eco"]["given_rep"],
+                               description=getlang(lang)["eco"]["rep_msg"].format(author, user,
+                                                                                  data['targetUser']['reputation'],
+                                                                                  availablerep, points))
             return await ctx.send(embed=em)
         else:
-            em = discord.Embed(color=0xDEADBF, title="Failed to give rep!",
-                               description=f"{author.mention}, you dont have any rep points available ;c")
+            em = discord.Embed(color=0xDEADBF, title=getlang(lang)["eco"]["failed_rep"],
+                               description=getlang(lang)["eco"]["no_rep_points"].format(author))
             return await ctx.send(embed=em)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def setdesc(self, ctx, *, desc : str):
         """Set profile description"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         try:
             if await self.usercheck('levels', ctx.message.author) is False:
                 await self._create_user(ctx.message.author.id)
@@ -263,14 +308,14 @@ class economy:
             log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
             return
         if len(desc) > 500:
-            await ctx.send("Over character limit.")
+            await ctx.send(getlang(lang)["eco"]["set_desc"]["over_limit"])
             return
         else:
             try:
                 await self.execute(f"UPDATE levels SET info = \"{desc}\" WHERE userid = {ctx.message.author.id}", commit=True)
-                await ctx.send("Updated description!")
+                await ctx.send(getlang(lang)["eco"]["set_desc"]["updated"])
             except:
-                await ctx.send("Failed to update description.")
+                await ctx.send(getlang(lang)["eco"]["set_desc"]["failed"])
 
     @commands.command(aliases=['del'])
     @commands.is_owner()
@@ -282,6 +327,11 @@ class economy:
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def coinflip(self, ctx, amount : int):
         """Coinflip OwO"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         user = ctx.message.author
         try:
             if await self.usercheck('levels', ctx.message.author) is False:
@@ -289,22 +339,22 @@ class economy:
         except:
             pass
         if amount <= 0:
-            await ctx.send("Your amount is too low <:nkoDed:422666465238319107>")
+            await ctx.send(getlang(lang)["eco"]["coinflip"]["too_low"])
             return
         elif amount > 10000:
-            await ctx.send("You can't go past 10,000")
+            await ctx.send(getlang(lang)["eco"]["coinflip"]["too_high"])
             return
         if await self.usercheck('economy', user) is False:
-            await ctx.send("You don't have a bank account.")
+            await ctx.send(getlang(lang)["eco"]["no_account"])
             return
         else:
             x = await self.execute(f"SELECT balance FROM economy WHERE userid = {user.id}", isSelect=True)
             balance = int(x[0])
             if (balance - amount) < 0:
-                await ctx.send("You don't have that much to spend...")
+                await ctx.send(getlang(lang)["eco"]["coinflip"]["cant_spend"])
                 return
             else:
-                msg = await ctx.send("Flipping...")
+                msg = await ctx.send(getlang(lang)["eco"]["coinflip"]["flipping"])
                 await asyncio.sleep(random.randint(2, 5))
                 await self.execute(f"UPDATE economy SET balance = {balance - amount} WHERE userid = {user.id}", commit=True)
                 choice = random.randint(0, 1)
@@ -313,189 +363,16 @@ class economy:
                         await ctx.message.add_reaction('🎉')
                     except:
                         pass
-                    em = discord.Embed(color=0x42FF73, description=f"{user.mention} Won {amount * 1.5}!!!")
+                    em = discord.Embed(color=0x42FF73, description=getlang(lang)["eco"]["coinflip"]["won"].format(user, amount * 1.5))
                     await msg.edit(embed=em)
                     await self.execute(f"UPDATE economy SET balance = {balance + int(amount * 1.5)} WHERE userid = {user.id}", commit=True)
                 else:
-                    em = discord.Embed(color=0xFF5637, description="You Lost 😦")
+                    em = discord.Embed(color=0xFF5637, description=getlang(lang)["eco"]["coinflip"]["lost"])
                     await msg.edit(embed=em)
                     try:
                         await ctx.message.add_reaction('😦')
                     except:
                         pass
-
-    # @commands.command()
-    # @commands.cooldown(1, 120, commands.BucketType.user)
-    # async def top(self, ctx):
-    #     connection = pymysql.connect(host="localhost",
-    #                                  user="root",
-    #                                  password="rektdiscord",
-    #                                  db="nekobot",
-    #                                  port=3306)
-    #     db = connection.cursor()
-    #     # await self.bot.get_user_info(310039170792030211)
-    #     try:
-    #         if await self.usercheck('levels', ctx.message.author) is False:
-    #             await self._create_user(ctx.message.author.id)
-    #     except:
-    #         pass
-    #     msg = await ctx.send(embed=discord.Embed(color=0xDEADBF, title="Top Users", description="Loading..."))
-    #     starttime = int(time.time())
-    #     msg
-    #     db.execute("SELECT userid, level FROM levels ORDER BY level DESC LIMIT 10")
-    #     all_users = db.fetchall()
-    #     all_bot_users = await self.bot.get_all_members()
-    #     try:
-    #         user1 = await self.bot.get_user_info(int(all_users[0][0]))
-    #     except:
-    #         user1 = "Deleted User"
-    #     user1_lvl = self._find_level(int(all_users[0][1]))
-    #     try:
-    #         user2 = await self.bot.get_user_info(int(all_users[1][0]))
-    #     except:
-    #         user2 = "Deleted User"
-    #     user2_lvl = self._find_level(int(all_users[1][1]))
-    #     try:
-    #         user3 = await self.bot.get_user_info(int(all_users[2][0]))
-    #     except:
-    #         user3 = "Deleted User"
-    #     user3_lvl = self._find_level(int(all_users[2][1]))
-    #     try:
-    #         user4 = await self.bot.get_user_info(int(all_users[3][0]))
-    #     except:
-    #         user4 = "Deleted User"
-    #     user4_lvl = self._find_level(int(all_users[3][1]))
-    #     try:
-    #         user5 = await self.bot.get_user_info(int(all_users[4][0]))
-    #     except:
-    #         user5 = "Deleted User"
-    #     user5_lvl = self._find_level(int(all_users[4][1]))
-    #     try:
-    #         user6 = await self.bot.get_user_info(int(all_users[5][0]))
-    #     except:
-    #         user6 = "Deleted User"
-    #     user6_lvl = self._find_level(int(all_users[5][1]))
-    #     try:
-    #         user7 = await self.bot.get_user_info(int(all_users[6][0]))
-    #     except:
-    #         user7 = "Deleted User"
-    #     user7_lvl = self._find_level(int(all_users[6][1]))
-    #     try:
-    #         user8 = await self.bot.get_user_info(int(all_users[7][0]))
-    #     except:
-    #         user8 = "Deleted User"
-    #     user8_lvl = self._find_level(int(all_users[7][1]))
-    #     try:
-    #         user9 = await self.bot.get_user_info(int(all_users[8][0]))
-    #     except:
-    #         user9 = "Deleted User"
-    #     user9_lvl = self._find_level(int(all_users[8][1]))
-    #     try:
-    #         user10 = await self.bot.get_user_info(int(all_users[9][0]))
-    #     except:
-    #         user10 = "Deleted User"
-    #     user10_lvl = self._find_level(int(all_users[9][1]))
-    #
-    #     embed = discord.Embed(color=0xDEADBF, title="Top Users",
-    #                           description=f"`1. ♔{user1}♔ ({all_users[0][0]}) - Level {user1_lvl}`\n"
-    #                                       f"`2. ♕{user2}♕ ({all_users[1][0]}) - Level {user2_lvl}`\n"
-    #                                       f"`3. ♖{user3}♖ ({all_users[2][0]}) - Level {user3_lvl}`\n"
-    #                                       f"`4. {user4} ({all_users[3][0]}) - Level {user4_lvl}`\n"
-    #                                       f"`5. {user5} ({all_users[4][0]}) - Level {user5_lvl}`\n"
-    #                                       f"`6. {user6} ({all_users[5][0]}) - Level {user6_lvl}`\n"
-    #                                       f"`7. {user7} ({all_users[6][0]}) - Level {user7_lvl}`\n"
-    #                                       f"`8. {user8} ({all_users[7][0]}) - Level {user8_lvl}`\n"
-    #                                       f"`9. {user9} ({all_users[8][0]}) - Level {user9_lvl}`\n"
-    #                                       f"`10. {user10} ({all_users[9][0]}) - Level {user10_lvl}`\n")
-    #     endtime = int(time.time())
-    #     embed.set_footer(text=f"Finished in {endtime - starttime}s")
-    #     await msg.edit(embed=embed)
-    #
-    # @commands.command()
-    # @commands.cooldown(1, 120, commands.BucketType.user)
-    # async def ecotop(self, ctx):
-    #     connection = pymysql.connect(host="localhost",
-    #                                  user="root",
-    #                                  password="rektdiscord",
-    #                                  db="nekobot",
-    #                                  port=3306)
-    #     db = connection.cursor()
-    #     try:
-    #         if await self.usercheck('levels', ctx.message.author) is False:
-    #             await self._create_user(ctx.message.author.id)
-    #     except:
-    #         pass
-    #     # await self.bot.get_user_info(310039170792030211)
-    #     msg = await ctx.send(embed=discord.Embed(color=0xDEADBF, title="Top Users | Economy", description="Loading..."))
-    #     starttime = int(time.time())
-    #     msg
-    #     db.execute("SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10")
-    #     all_users = db.fetchall()
-    #     try:
-    #         user1 = await self.bot.get_user_info(int(all_users[0][0]))
-    #     except:
-    #         user1 = "Deleted User"
-    #     user1_lvl = int(all_users[0][1])
-    #     try:
-    #         user2 = await self.bot.get_user_info(int(all_users[1][0]))
-    #     except:
-    #         user2 = "Deleted User"
-    #     user2_lvl = int(all_users[1][1])
-    #     try:
-    #         user3 = await self.bot.get_user_info(int(all_users[2][0]))
-    #     except:
-    #         user3 = "Deleted User"
-    #     user3_lvl = int(all_users[2][1])
-    #     try:
-    #         user4 = await self.bot.get_user_info(int(all_users[3][0]))
-    #     except:
-    #         user4 = "Deleted User"
-    #     user4_lvl = int(all_users[3][1])
-    #     try:
-    #         user5 = await self.bot.get_user_info(int(all_users[4][0]))
-    #     except:
-    #         user5 = "Deleted User"
-    #     user5_lvl = int(all_users[4][1])
-    #     try:
-    #         user6 = await self.bot.get_user_info(int(all_users[5][0]))
-    #     except:
-    #         user6 = "Deleted User"
-    #     user6_lvl = int(all_users[5][1])
-    #     try:
-    #         user7 = await self.bot.get_user_info(int(all_users[6][0]))
-    #     except:
-    #         user7 = "Deleted User"
-    #     user7_lvl = int(all_users[6][1])
-    #     try:
-    #         user8 = await self.bot.get_user_info(int(all_users[7][0]))
-    #     except:
-    #         user8 = "Deleted User"
-    #     user8_lvl = int(all_users[7][1])
-    #     try:
-    #         user9 = await self.bot.get_user_info(int(all_users[8][0]))
-    #     except:
-    #         user9 = "Deleted User"
-    #     user9_lvl = int(all_users[8][1])
-    #     try:
-    #         user10 = await self.bot.get_user_info(int(all_users[9][0]))
-    #     except:
-    #         user10 = "Deleted User"
-    #     user10_lvl = int(all_users[9][1])
-    #
-    #     embed = discord.Embed(color=0xDEADBF, title="Top Users | Economy",
-    #                           description=f"`1. ♔{user1}♔ ({all_users[0][0]}) - ${user1_lvl}`\n"
-    #                                       f"`2. ♕{user2}♕ ({all_users[1][0]}) - ${user2_lvl}`\n"
-    #                                       f"`3. ♖{user3}♖ ({all_users[2][0]}) - ${user3_lvl}`\n"
-    #                                       f"`4. {user4} ({all_users[3][0]}) - ${user4_lvl}`\n"
-    #                                       f"`5. {user5} ({all_users[4][0]}) - ${user5_lvl}`\n"
-    #                                       f"`6. {user6} ({all_users[5][0]}) - ${user6_lvl}`\n"
-    #                                       f"`7. {user7} ({all_users[6][0]}) - ${user7_lvl}`\n"
-    #                                       f"`8. {user8} ({all_users[7][0]}) - ${user8_lvl}`\n"
-    #                                       f"`9. {user9} ({all_users[8][0]}) - ${user9_lvl}`\n"
-    #                                       f"`10. {user10} ({all_users[9][0]}) - ${user10_lvl}`\n")
-    #     endtime = int(time.time())
-    #     embed.set_footer(text=f"Finished in {endtime - starttime}s")
-    #     await msg.edit(embed=embed)
 
     @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
@@ -556,26 +433,31 @@ class economy:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def transfer(self, ctx, amount : int, user : discord.Member):
         """Transfer Credits to Users"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         try:
             if await self.usercheck('levels', ctx.message.author) is False:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
         if amount < 10:
-            await ctx.send("Minimum send price is $10")
+            await ctx.send(getlang(lang)["eco"]["transfer"]["min"])
             return
         if user.bot:
-            await ctx.send("You can't send credits to bots.")
+            await ctx.send(getlang(lang)["eco"]["transfer"]["bot"])
             return
         elif user == ctx.message.author:
-            await ctx.send("You cant send credits to yourself.")
+            await ctx.send(getlang(lang)["eco"]["transfer"]["self"])
             return
         else:
             if await self.usercheck('economy', ctx.message.author) is False:
-                await ctx.send("You don't have a bank account...")
+                await ctx.send(getlang(lang)["eco"]["no_account"])
                 return
             elif await self.usercheck('economy', user) is False:
-                await ctx.send(f"{user.name} has no bank account...")
+                await ctx.send(getlang(lang)["eco"]["transfer"]["user_no_account"].format(user))
                 return
             else:
                 x = await self.execute(f"SELECT balance FROM economy WHERE userid = {ctx.message.author.id}", isSelect=True)
@@ -583,12 +465,12 @@ class economy:
                 x = await self.execute(f"SELECT balance FROM economy WHERE userid = {user.id}", isSelect=True)
                 user_balance = int(x[0])
                 if (author_balance - amount) < 0:
-                    await ctx.send("You don't have that much to spend.")
+                    await ctx.send(getlang(lang)["eco"]["coinflip"]["cant_spend"])
                     return
                 else:
                     await self.execute(f"UPDATE economy SET balance = {amount + user_balance} WHERE userid = {user.id}", commit=True)
                     await self.execute(f"UPDATE economy SET balance = {author_balance - amount} WHERE userid = {ctx.message.author.id}", commit=True)
-                    await ctx.send(f"Sent `{amount}` to {user.mention}!")
+                    await ctx.send(getlang(lang)["eco"]["transfer"]["sent"].format(amount, user))
                     try:
                         await user.send(f"{ctx.message.author.name} has sent you ${amount}.")
                     except:

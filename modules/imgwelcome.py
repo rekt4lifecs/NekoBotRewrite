@@ -25,7 +25,8 @@ class IMGWelcome:
         embed.add_field(name="Instructions", value="Set your channel with **imgchannel**,\n"
                                                    "Step 2: Set your content with **imgcontent** such as \"Welcome user To server\",\n"
                                                    "Step 3: Change your background with **imgbg**\n"
-                                                   "Step 4: Profit?!")
+                                                   "Step 4: Profit?!\n\n"
+                                                   "To remove the welcomer use `n!imgdelete`.")
         await ctx.send(embed=embed)
         if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
             username = "0 1"
@@ -46,6 +47,18 @@ class IMGWelcome:
             connection.commit()
             await ctx.send(f"Updated imgwelcome to {channel.name}")
             print(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - Channel to {channel.name} ({channel.id})")
+
+    @commands.command()
+    @checks.is_admin()
+    async def imgdelete(self, ctx):
+        """Remove imgwelcomer from the server."""
+        if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
+            await ctx.send("Use `imgwelcome` to initialize.")
+            return
+        else:
+            db.execute(f"DELETE FROM imgwelcome WHERE server = {ctx.message.guild.id}")
+            connection.commit()
+            await ctx.send(f"Removed imgwelcome!")
 
     @commands.command()
     @checks.is_admin()

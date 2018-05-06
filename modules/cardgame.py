@@ -2,7 +2,20 @@ import discord, pymysql, random, time, datetime, asyncio
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
-import aiohttp, config
+import aiohttp, config, json
+
+# Languages
+languages = ["english", "weeb"]
+english = json.load(open("lang/english.json"))
+weeb = json.load(open("lang/weeb.json"))
+
+def getlang(lang:str):
+    if lang == "english":
+        return english
+    elif lang == "weeb":
+        return weeb
+    else:
+        return None
 
 class CardGame:
     """Loli Card Gamelol"""
@@ -41,24 +54,28 @@ class CardGame:
     @commands.cooldown(1, 7, commands.BucketType.user)
     async def card(self, ctx: commands.Context):
         """Loli Card Game OwO"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         try:
             if await self.usercheck('roleplay', ctx.message.author) is False:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
         if ctx.invoked_subcommand is None:
-            return await ctx.send("A loli roleplaying card game ofc!\n\n**Commands**\n"
-                                  "**n!card daily** - Get your daily cards\n"
-                                  "**n!card display** - Display a card of yours\n"
-                                  "**n!card list** - Lists your cards\n"
-                                  "**n!card sell** - Sell a card\n"
-                                  "**n!card fight** - Fight a user OwO\n"
-                                  "**n!card transfer** - Transfer a card")
+            return await ctx.send(getlang(lang)["cardgame"]["card_help"])
 
     @card.command(name='transfer')
     async def card_transfer(self, ctx, card_num: int, user: discord.Member):
         """Transfer a card to a user"""
-        await ctx.send("**Coming Soon.**", delete_after=5)
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+        await ctx.send(getlang(lang)["cardgame"]["coming_soon"], delete_after=5)
         # connection = pymysql.connect(host="localhost",
         #                              user="root",
         #                              password="rektdiscord",
@@ -126,6 +143,11 @@ class CardGame:
     @card.command(name='fight', aliases=['battle'])
     async def card_battle(self, ctx, user: discord.Member):
         """Fight a user OwO"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         connection = pymysql.connect(host="localhost",
                                      user="root",
                                      password="rektdiscord",
@@ -137,7 +159,7 @@ class CardGame:
             return await ctx.send(f"{author.mention}, you don't have any cards!")
         elif not db.execute(f"SELECT 1 FROM roleplay WHERE userid = {user.id}"):
             return await ctx.send(f"{user.name} doesn't have any cards.")
-        await ctx.send(f"{user.mention}, would you like to battle {author.mention}? Will timout in 15 seconds.")
+        await ctx.send(getlang(lang)["cardgame"]["battle"]["confirm"].format(user, author))
 
         def check_user(m):
             return m.author == user and m.channel == ctx.message.channel
@@ -148,45 +170,47 @@ class CardGame:
         try:
             msg = await self.bot.wait_for('message', check=check_user, timeout=15.0)
         except asyncio.TimeoutError:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description="Battle cancelled."))
+            await ctx.send(embed=discord.Embed(color=0xff5630,
+                                               description=getlang(lang)["cardgame"]["battle"]["cancelled"]))
             return
 
         if msg.content == "Yes" or msg.content == "yes":
-            await ctx.send(f"{author.mention}, please select a card.")
+            await ctx.send(getlang(lang)["cardgame"]["battle"]["author_select"].format(author))
             try:
                 msg = await self.bot.wait_for('message', check=check_author, timeout=15.0)
             except asyncio.TimeoutError:
-                return await ctx.send(embed=discord.Embed(color=0xff5630, description="Battle cancelled."))
+                return await ctx.send(embed=discord.Embed(color=0xff5630,
+                                                          description=getlang(lang)["cardgame"]["battle"]["cancelled"]))
             try:
                 msgcontent = int(msg.content)
             except:
-                return await ctx.send("Invalid card. Returning...")
+                return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid"])
             if msgcontent <= 0:
-                return await ctx.send("Invalid card. Returning...")
+                return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid"])
             elif msgcontent > 6:
-                return await ctx.send("Invalid card. Returning...")
+                return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid"])
             db.execute(f"SELECT cardid{msgcontent} FROM roleplay WHERE userid = {author.id}")
             author_card = int(db.fetchone()[0])
             if author_card == 0:
-                return await ctx.send(f"{author.mention}, you don't have a card in that slot.")
+                return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid_slot"].format(author))
             else:
-                await ctx.send(f"{user.mention}, please select a card.")
+                await ctx.send(getlang(lang)["cardgame"]["battle"]["author_select"].format(user))
                 try:
                     msg = await self.bot.wait_for('message', check=check_user, timeout=15.0)
                 except asyncio.TimeoutError:
-                    return await ctx.send(embed=discord.Embed(color=0xff5630, description="Battle cancelled."))
+                    return await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["cardgame"]["battle"]["cancelled"]))
                 try:
                     msgcontent = int(msg.content)
                 except:
-                    return await ctx.send("Invalid card. Returning...")
+                    return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid"])
                 if msgcontent <= 0:
-                    return await ctx.send("Invalid card. Returning...")
+                    return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid"])
                 elif msgcontent > 6:
-                    return await ctx.send("Invalid card. Returning...")
+                    return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid"])
                 db.execute(f"SELECT cardid{msgcontent} FROM roleplay WHERE userid = {user.id}")
                 user_card = int(db.fetchone()[0])
                 if user_card == 0:
-                    return await ctx.send(f"{user.mention}, you don't have a card in that slot.")
+                    return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid_slot"].format(user))
                 else:
                     db.execute(
                         f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {author_card}")
@@ -219,7 +243,7 @@ class CardGame:
                                                 description=f"**{author.name}** vs **{user.name}**\n"
                                                             f"**{user.name}** Beat **{author.name}**"))
         else:
-            return await ctx.send("Battle cancelled.")
+            return await ctx.send(getlang(lang)["cardgame"]["battle"]["cancelled"])
 
     @card.command(name='check')
     @commands.is_owner()
@@ -237,11 +261,16 @@ class CardGame:
     @card.command(name='daily')
     async def card_daily(self, ctx):
         """Get your card daily"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         async with aiohttp.ClientSession(headers={"Authorization": config.dbots_key}) as cs:
             async with cs.get(f'https://discordbots.org/api/bots/310039170792030211/check?userId={ctx.message.author.id}') as r:
                 res = await r.json()
         if not res['voted'] == 1:
-            return await ctx.send("You haven't voted today ;c")
+            return await ctx.send(getlang(lang)["cardgame"]["daily"]["no_vote"])
         connection = pymysql.connect(host="localhost",
                                      user="root",
                                      password="rektdiscord",
@@ -263,7 +292,7 @@ class CardGame:
             delta = tomorrow - datetime.datetime.now()
             timeleft = time.strftime("%H", time.gmtime(delta.seconds))
             timeleft_m = time.strftime("%M", time.gmtime(delta.seconds))
-            await ctx.send(f"Wait another {timeleft}h {timeleft_m}m before using daily again...")
+            await ctx.send(getlang(lang)["cardgame"]["daily"]["wait_time"].format(timeleft, timeleft_m))
             return
         db.execute(
             f"SELECT cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 FROM roleplay WHERE userid = {author.id}")
@@ -287,7 +316,7 @@ class CardGame:
         elif cardid6 == 0:
             dailycard = "cardid6"
         else:
-            return await ctx.send("**All your card slots are full.**")
+            return await ctx.send(getlang(lang)["cardgame"]["daily"]["slots_full"])
         list_ = [
             "Shiro",
             "Kafuu Chino",
@@ -353,7 +382,7 @@ class CardGame:
                    f"{random.randint(1, 50)},"
                    f"{random.randint(1, 50)})")
         connection.commit()
-        await ctx.send(f"Given character **{character_loli.replace('_', ' ').title()}!**")
+        await ctx.send(getlang(lang)["cardgame"]["cardgame"]["given_char"].format(character_loli.replace('_', ' ').title()))
 
     def _generate_card(self, character: str, num: int, attack: int, defense: int):
         card_name = f"data/{character}.jpg"

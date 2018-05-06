@@ -1,5 +1,19 @@
 from discord.ext import commands
 import discord, asyncio, aiomysql, config
+import json
+
+# Languages
+languages = ["english", "weeb"]
+english = json.load(open("lang/english.json"))
+weeb = json.load(open("lang/weeb.json"))
+
+def getlang(lang:str):
+    if lang == "english":
+        return english
+    elif lang == "weeb":
+        return weeb
+    else:
+        return None
 
 class Marriage:
 
@@ -36,18 +50,23 @@ class Marriage:
         """Marry someone OwO"""
         author = ctx.message.author
 
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+
         if user == author:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description="You can't marry yourself."))
+            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["marry_self"]))
             return
         if await self.userexists('marriage', author):
-            await ctx.send(embed=discord.Embed(color=0xff5630, description="You are already married"))
+            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["author_married"]))
             return
         elif await self.userexists('marriage', user):
-            await ctx.send(embed=discord.Embed(color=0xff5630, description="That user is already married."))
+            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["user_married"]))
             return
         else:
-            await ctx.send(f"{author.name} is wanting to marry {user.name}!\n"
-                           f"{user.mention} type yes to accept!")
+            await ctx.send(getlang(lang)["marriage"]["marry_msg"].format(author, user))
 
             def check(m):
                 return m.content == 'yes' and m.channel == ctx.message.channel and m.author == user
@@ -55,7 +74,7 @@ class Marriage:
             try:
                 await self.bot.wait_for('message', check=check, timeout=15.0)
             except asyncio.TimeoutError:
-                await ctx.send(embed=discord.Embed(color=0xff5630, description="Marriage Cancelled."))
+                await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["cancelled"]))
                 return
 
             await ctx.send(f"🎉 {author.mention} ❤ {user.mention} 🎉")
@@ -68,20 +87,26 @@ class Marriage:
         """Divorce ;-;"""
         author = ctx.message.author
 
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+
         if user == author:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description="How can you divorce yourself?"))
+            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["self_divorce"]))
             return
 
         if await self.userexists('marriage', author) is False:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description="You are not married"))
+            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["not_married"]))
             return
         elif await self.userexists('marriage', user) is False:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description="That user isn't married"))
+            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["user_not_married"]))
             return
         x = await self.execute(f"SELECT marryid FROM marriage WHERE userid = {author.id}", isSelect=True)
         user_married_to = int(x[0])
         if user_married_to != user.id:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description="You are not married to that user"))
+            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["author_not_married_to_user"]))
             return
         else:
             await ctx.send(f"{author.name} divorced {user.name} 😦😢")

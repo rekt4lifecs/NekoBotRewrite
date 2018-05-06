@@ -4,7 +4,21 @@ import random, string, time
 import datetime
 import aiomysql
 import config
-import os
+import os, json
+
+
+# Languages
+languages = ["english", "weeb"]
+english = json.load(open("lang/english.json"))
+weeb = json.load(open("lang/weeb.json"))
+
+def getlang(lang:str):
+    if lang == "english":
+        return english
+    elif lang == "weeb":
+        return weeb
+    else:
+        return None
 
 class Donator:
 
@@ -36,6 +50,12 @@ class Donator:
         """Trap a user!"""
         await ctx.trigger_typing()
 
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+
         author = ctx.message.author
 
         alltokens = await self.execute(isSelect=True, fetchAll=True, query="SELECT userid FROM donator")
@@ -44,8 +64,8 @@ class Donator:
             tokenlist.append(int(alltokens[x][0]))
 
         if author.id not in tokenlist:
-            return await ctx.send(embed=discord.Embed(color=0xff5630, title="Error",
-                                                      description="You need to be a [donator](https://www.patreon.com/NekoBot) to use this command."))
+            return await ctx.send(embed=discord.Embed(color=0xff5630, title=getlang(lang)["donator"]["error"]["error"],
+                                                      description=getlang(lang)["donator"]["error"]["message"]))
 
         async with aiohttp.ClientSession() as session:
             url = f"https://nekobot.xyz/api/imagegen" \
@@ -76,15 +96,20 @@ class Donator:
     async def redeem(self, ctx, *, key: str):
         """Redeem your donation key"""
         await ctx.trigger_typing()
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         x = await self.execute(query=f"SELECT 1 FROM donator WHERE token = \"{key}\"", isSelect=True)
         if not x:
-            return await ctx.send("**Invalid key**")
+            return await ctx.send(getlang(lang)["donator"]["error"]["invalid"])
         alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
         tokenlist = []
         for x in range(len(alltokens)):
             tokenlist.append(int(alltokens[x][0]))
         if ctx.message.author.id in tokenlist:
-            return await ctx.send("**You already have a token activated!**")
+            return await ctx.send(getlang(lang)["donator"]["error"]["already_active"])
         user = await self.execute(query=f"SELECT userid FROM donator WHERE token = \"{key}\"",
                                       isSelect=True)
         if int(user[0]) == 0:
@@ -104,7 +129,7 @@ class Donator:
                                                    description=f"```css\n"
                                                                f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
                                                                f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
-            return await ctx.send("**Token already in use.**")
+            return await ctx.send(getlang(lang)["donator"]["error"]["in_use"])
 
     @commands.command()
     @commands.is_owner()
@@ -142,6 +167,11 @@ class Donator:
     async def donate(self, ctx):
         """Donate or Show key time left."""
         await ctx.trigger_typing()
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
         tokenlist = []
         for x in range(len(alltokens)):
@@ -154,8 +184,8 @@ class Donator:
                                                                                 f"Expiry Date: `{timeconvert}`")
             return await ctx.send(embed=embed)
         else:
-            return await ctx.send(embed=discord.Embed(color=0xff5630, title="OwO Whats This",
-                                                  description="Come donate on [Patreon](https://www.patreon.com/NekoBot) to get access to special features OwO"))
+            return await ctx.send(embed=discord.Embed(color=0xff5630, title=getlang(lang)["donator"]["whats_this"],
+                                                  description=getlang(lang)["donator"]["donate"]))
 
     @commands.command(name='upload')
     @commands.cooldown(1, 15, commands.BucketType.user)
@@ -163,6 +193,11 @@ class Donator:
         """File Uploader"""
         await ctx.trigger_typing()
         author = ctx.message.author
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
 
         alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
         tokenlist = []
@@ -170,8 +205,8 @@ class Donator:
             tokenlist.append(int(alltokens[x][0]))
 
         if author.id not in tokenlist:
-            return await ctx.send(embed=discord.Embed(color=0xff5630, title="Error",
-                                                      description="You need to be a [donator](https://www.patreon.com/NekoBot) to use this command."))
+            return await ctx.send(embed=discord.Embed(color=0xff5630, title=getlang(lang)["donator"]["error"]["error"],
+                                                      description=getlang(lang)["donator"]["error"]["message"]))
 
         await ctx.send("**Send an image/file to upload. Type `cancel` to cancel.**")
 

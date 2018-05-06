@@ -10,7 +10,7 @@ import string
 import time
 import config
 import pymysql, aiomysql
-import re, random
+import re, json
 
 invite_rx = re.compile("discord(?:app)?\.(?:gg|com\/invite)\/([a-z0-9]{1,16})", re.IGNORECASE)
 
@@ -35,6 +35,19 @@ async def run_cmd(cmd: str) -> str:
     process = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     results = await process.communicate()
     return "".join(x.decode("utf-8") for x in results)
+
+# Languages
+languages = ["english", "weeb"]
+english = json.load(open("lang/english.json"))
+weeb = json.load(open("lang/weeb.json"))
+
+def getlang(lang:str):
+    if lang == "english":
+        return english
+    elif lang == "weeb":
+        return weeb
+    else:
+        return None
 
 class Moderation:
     """Moderation Tools"""
@@ -113,27 +126,20 @@ class Moderation:
             return ret
 
     @commands.command()
-    @commands.is_owner()
-    async def servers(self, ctx):
-        """Show all servers"""
-        servers = sorted(list(self.bot.guilds), key=lambda s: s.name.lower())
-        msg = ""
-        for i, server in enumerate(servers):
-            msg += "**{}** | ".format(server.name)
-
-        for page in pagify(msg, ['\n']):
-            await ctx.send(page)
-
-    @commands.command()
     @commands.cooldown(1, 900, commands.BucketType.user)
     @commands.guild_only()
     @checks.is_admin()
     async def dehoist(self, ctx):
         """Dehoister"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         users_dehoisted = []
         users_failed = []
         starttime = int(time.time())
-        await ctx.send("Dehoist started...")
+        await ctx.send(getlang(lang)["mod"]["dehoist"]["start"])
         for user in ctx.message.guild.members:
             try:
                 if not user.display_name[0] in list(str(string.ascii_letters)):
@@ -143,90 +149,84 @@ class Moderation:
                 users_failed.append(user.id)
                 pass
         hastepaste = await hastebin("\n".join(users_dehoisted))
-        await ctx.send(f"{len(users_dehoisted)} users dehoisted, finished in {int(time.time() - starttime)}s.\n"
-                       f"{len(users_failed)} users failed to dehoist. Users dehoisted: {hastepaste}")
-
-    @commands.command()
-    @commands.is_owner()
-    async def emotes(self, ctx):
-        emotes = sorted(list(self.bot.emojis), key=lambda s: s.name.lower())
-        msg = ""
-        for i, emote in enumerate(emotes):
-            msg += "**{}** | ".format(emote)
-
-        for page in pagify(msg, ['\n']):
-            await ctx.send(page)
-
-    @commands.command()
-    @commands.is_owner()
-    async def purgeme(self, ctx):
-        kicked_members = 0
-        for member in ctx.message.guild.members:
-            kicked_members += 1
-            try:
-                await member.kick()
-                print(f"Kicked: {member}")
-            except:
-                pass
-            await asyncio.sleep(random.randint(3, 7))
-            if kicked_members == 1000:
-                break
+        await ctx.send(getlang(lang)["mod"]["dehoist"]["end"].format(len(users_dehoisted),
+                                                                     int(time.time() - starttime),
+                                                                     len(users_failed),
+                                                                     hastepaste))
 
     @commands.command()
     @commands.guild_only()
     @checks.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: ActionReason = None):
         """Kicks a member from the server."""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         try:
             if reason is None:
                 reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
             await member.kick(reason=reason)
-            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{member.name} has been kicked."))
+            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=getlang(lang)["mod"]["kicked"].format(member)))
         except:
-            await ctx.send("I couldn't kick that user, either I dont have permissions or my role is too low.")
+            await ctx.send(getlang(lang)["mod"]["permission_error"])
 
     @commands.command()
     @commands.guild_only()
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: MemberID, *, reason: ActionReason = None):
         """Bans a member from the server."""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         try:
             if reason is None:
                 reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
             await ctx.guild.ban(discord.Object(id=member), reason=reason)
-            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{member.name} has been banned."))
+            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=getlang(lang)["mod"]["banned"].format(member)))
         except:
-            await ctx.send("I couldn't ban that user, either I dont have permissions or my role is too low.")
+            await ctx.send(getlang(lang)["mod"]["permission_error"])
 
     @commands.command()
     @commands.guild_only()
     @checks.has_permissions(ban_members=True)
     async def massban(self, ctx, reason: ActionReason, *members: MemberID):
         """Mass bans multiple members from the server."""
-
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         try:
             for member_id in members:
                 await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
 
             await ctx.send('\N{OK HAND SIGN}')
         except:
-            await ctx.send("I couldn't ban that user, either I dont have permissions or my role is too low.")
+            await ctx.send(getlang(lang)["mod"]["permission_error"])
 
     @commands.command()
     @commands.guild_only()
     @checks.has_permissions(ban_members=True)
     async def unban(self, ctx, member: BannedMember, *, reason: ActionReason = None):
         """Unbans a member from the server."""
-
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         if reason is None:
             reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
         await ctx.guild.unban(member.user, reason=reason)
         if member.reason:
-            await ctx.send(f'Unbanned {member.user} (ID: {member.user.id}), previously banned for {member.reason}.')
+            await ctx.send(getlang(lang)["mod"]["unbanned_reason"].format(member))
         else:
-            await ctx.send(f'Unbanned {member.user} (ID: {member.user.id}).')
+            await ctx.send(getlang(lang)["mod"]["unbanned"].format(member))
 
     @commands.is_owner()
     @commands.command()
@@ -241,15 +241,20 @@ class Moderation:
     @checks.admin_or_permissions(manage_nicknames=True)
     async def rename(self, ctx, user : discord.Member, *, nickname =""):
         """Rename a user"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         nickname = nickname.strip()
         if nickname == "":
             nickname = None
         try:
             await user.edit(nick=nickname)
-            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=f"{user.name} has been renamed."))
+            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=getlang(lang)["mod"]["renamed"].format(user)))
         except:
             e = discord.Embed(color=0xff5630, title="⚠ Error",
-                              description="I couldn't rename that user.")
+                              description=getlang(lang)["mod"]["permission_error"])
             await ctx.send(embed=e)
 
     @commands.command()
@@ -377,16 +382,6 @@ class Moderation:
                 await ctx.send(f'`{command}`: {pa}')
             else:
                 await ctx.send(f"`{command}`: ```{result}```\n")
-
-    @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def memory(self, ctx):
-        """Get memory stats"""
-        result = await run_cmd("cat /proc/meminfo | grep -A 2 MemTotal")
-        text = f"```css\n" \
-               f"[ Memory ]\n\n" \
-               f"{result}\n```"
-        await ctx.send(text)
 
     @commands.command()
     @commands.guild_only()
