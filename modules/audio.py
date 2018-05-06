@@ -3,8 +3,22 @@ import discord
 import logging, re, math
 import lavalink
 import config
+import json
 
 time_rx = re.compile('[0-9]+')
+
+# Languages
+languages = ["english", "weeb"]
+english = json.load(open("lang/english.json"))
+weeb = json.load(open("lang/weeb.json"))
+
+def getlang(lang:str):
+    if lang == "english":
+        return english
+    elif lang == "weeb":
+        return weeb
+    else:
+        return None
 
 class Audio:
 
@@ -43,23 +57,29 @@ class Audio:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def play(self, ctx, *, query):
         """Play Something"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
         if not player.is_connected:
             if not ctx.author.voice or not ctx.author.voice.channel:
-                return await ctx.send('You must join a voice channel.')
+                return await ctx.send(getlang(lang)["audio"]["join_voice"])
 
             permissions = ctx.author.voice.channel.permissions_for(ctx.me)
 
             if not permissions.connect or not permissions.speak:
-                return await ctx.send('Missing permissions `CONNECT` and/or `SPEAK`.')
+                return await ctx.send(getlang(lang)["audio"]["bot_missing_perms"])
 
             player.store('channel', ctx.channel.id)
             await player.connect(ctx.author.voice.channel.id)
 
         else:
             if not ctx.author.voice or not ctx.author.voice.channel or player.connected_channel.id != ctx.author.voice.channel.id:
-                return await ctx.send('Join my voice channel.')
+                return await ctx.send(getlang(lang)["audio"]["join_bot"])
 
         query = query.strip('<>')
 
@@ -69,7 +89,7 @@ class Audio:
         tracks = await self.bot.lavalink.get_tracks(query)
 
         if not tracks:
-            return await ctx.send('Nothing Found...')
+            return await ctx.send(getlang(lang)["audio"]["nothing_found"])
 
         embed = discord.Embed(colour=0xDEADBF)
 
@@ -77,11 +97,11 @@ class Audio:
             for track in tracks:
                 player.add(requester=ctx.author.id, track=track)
 
-            embed.title = "Playlist Enqueued!"
-            embed.description = f"Imported {len(tracks)} tracks from the playlist :)"
+            embed.title = getlang(lang)["audio"]["playlist_enqueued"]
+            embed.description = getlang(lang)["audio"]["imported_tracks"].format(len(tracks))
             await ctx.send(embed=embed)
         else:
-            embed.title = "Track Enqueued"
+            embed.title = getlang(lang)["audio"]["track_enqueued"]
             embed.description = f'[{tracks[0]["info"]["title"]}]({tracks[0]["info"]["uri"]})'
             await ctx.send(embed=embed)
             player.add(requester=ctx.author.id, track=tracks[0])
@@ -93,10 +113,15 @@ class Audio:
     @commands.guild_only()
     async def skip(self, ctx):
         """Skip a song"""
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
         if not player.is_playing:
-            return await ctx.send("I'm not playing anything...")
+            return await ctx.send(getlang(lang)["audio"]["not_playing"])
 
         listx = []
         for user in ctx.author.voice.channel.members:
@@ -108,10 +133,15 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def stop(self, ctx):
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
         if not player.is_playing:
-            return await ctx.send("I'm not playing anything...")
+            return await ctx.send(getlang(lang)["audio"]["not_playing"])
 
         listx = []
         for user in ctx.author.voice.channel.members:
@@ -124,6 +154,11 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def now(self, ctx):
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         player = self.bot.lavalink.players.get(ctx.guild.id)
         song = 'Nothing'
 
@@ -135,16 +170,21 @@ class Audio:
                 dur = lavalink.Utils.format_time(player.current.duration)
             song = f'**[{player.current.title}]({player.current.uri})**\n({pos}/{dur})'
 
-        embed = discord.Embed(colour=0xDEADBF, title='Now Playing', description=song)
+        embed = discord.Embed(colour=0xDEADBF, title=getlang(lang)["audio"]["now_playing"], description=song)
         await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
     async def queue(self, ctx, page: int = 1):
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
         if not player.queue:
-            return await ctx.send("There's nothing queued.")
+            return await ctx.send(getlang(lang)["audio"]["no_queue"])
 
         items_per_page = 10
         pages = math.ceil(len(player.queue) / items_per_page)
@@ -165,10 +205,15 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def pause(self, ctx):
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
         if not player.is_playing:
-            return await ctx.send('Not playing.')
+            return await ctx.send(getlang(lang)["audio"]["not_playing"])
 
         listx = []
         for user in ctx.author.voice.channel.members:
@@ -199,10 +244,15 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def shuffle(self, ctx):
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
         if not player.is_playing:
-            return await ctx.send('Nothing playing.')
+            return await ctx.send(getlang(lang)["audio"]["not_playing"])
 
         listx = []
         for user in ctx.author.voice.channel.members:
@@ -215,10 +265,15 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def repeat(self, ctx):
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
         if not player.is_playing:
-            return await ctx.send('Nothing playing.')
+            return await ctx.send(getlang(lang)["audio"]["not_playing"])
 
         listx = []
         for user in ctx.author.voice.channel.members:
@@ -231,13 +286,18 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def find(self, ctx, *, query):
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         if not query.startswith('ytsearch:') and not query.startswith('scsearch:'):
             query = 'ytsearch:' + query
 
         tracks = await self.bot.lavalink.get_tracks(query)
 
         if not tracks:
-            return await ctx.send('Nothing found')
+            return await ctx.send(getlang(lang)["audio"]["nothing_found"])
 
         tracks = tracks[:10]  # First 10 results
 
@@ -252,13 +312,18 @@ class Audio:
     @commands.command(aliases=['dc'])
     @commands.guild_only()
     async def disconnect(self, ctx):
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
         if not player.is_connected:
-            return await ctx.send('Not connected.')
+            return await ctx.send(getlang(lang)["audio"]["not_playing"])
 
         if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
-            return await ctx.send('You\'re not in my voicechannel!')
+            return await ctx.send(getlang(lang)["audio"]["not_in_my_vc"])
 
         listx = []
         for user in ctx.author.voice.channel.members:
