@@ -54,7 +54,7 @@ class CardGame:
     @commands.cooldown(1, 7, commands.BucketType.user)
     async def card(self, ctx: commands.Context):
         """Loli Card Game OwO"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -70,7 +70,7 @@ class CardGame:
     @card.command(name='transfer')
     async def card_transfer(self, ctx, card_num: int, user: discord.Member):
         """Transfer a card to a user"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -143,7 +143,7 @@ class CardGame:
     @card.command(name='fight', aliases=['battle'])
     async def card_battle(self, ctx, user: discord.Member):
         """Fight a user OwO"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -261,7 +261,7 @@ class CardGame:
     @card.command(name='daily')
     async def card_daily(self, ctx):
         """Get your card daily"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:

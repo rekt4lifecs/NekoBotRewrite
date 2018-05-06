@@ -57,7 +57,7 @@ class Audio:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def play(self, ctx, *, query):
         """Play Something"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -113,7 +113,7 @@ class Audio:
     @commands.guild_only()
     async def skip(self, ctx):
         """Skip a song"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -133,7 +133,7 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def stop(self, ctx):
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -154,7 +154,7 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def now(self, ctx):
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -176,7 +176,7 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def queue(self, ctx, page: int = 1):
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -205,7 +205,7 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def pause(self, ctx):
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -244,7 +244,7 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def shuffle(self, ctx):
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -265,7 +265,7 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def repeat(self, ctx):
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -286,7 +286,7 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def find(self, ctx, *, query):
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -312,7 +312,7 @@ class Audio:
     @commands.command(aliases=['dc'])
     @commands.guild_only()
     async def disconnect(self, ctx):
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:

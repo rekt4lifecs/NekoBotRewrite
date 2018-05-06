@@ -50,7 +50,7 @@ class Marriage:
         """Marry someone OwO"""
         author = ctx.message.author
 
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -87,7 +87,7 @@ class Marriage:
         """Divorce ;-;"""
         author = ctx.message.author
 
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
