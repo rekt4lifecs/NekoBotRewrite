@@ -50,7 +50,7 @@ class Donator:
         """Trap a user!"""
         await ctx.trigger_typing()
 
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -96,7 +96,7 @@ class Donator:
     async def redeem(self, ctx, *, key: str):
         """Redeem your donation key"""
         await ctx.trigger_typing()
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -167,7 +167,7 @@ class Donator:
     async def donate(self, ctx):
         """Donate or Show key time left."""
         await ctx.trigger_typing()
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -193,7 +193,7 @@ class Donator:
         """File Uploader"""
         await ctx.trigger_typing()
         author = ctx.message.author
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:

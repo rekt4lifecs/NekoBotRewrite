@@ -131,7 +131,7 @@ class Moderation:
     @checks.is_admin()
     async def dehoist(self, ctx):
         """Dehoister"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -159,7 +159,7 @@ class Moderation:
     @checks.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: ActionReason = None):
         """Kicks a member from the server."""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -177,7 +177,7 @@ class Moderation:
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: MemberID, *, reason: ActionReason = None):
         """Bans a member from the server."""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -196,7 +196,7 @@ class Moderation:
     @checks.has_permissions(ban_members=True)
     async def massban(self, ctx, reason: ActionReason, *members: MemberID):
         """Mass bans multiple members from the server."""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -214,7 +214,7 @@ class Moderation:
     @checks.has_permissions(ban_members=True)
     async def unban(self, ctx, member: BannedMember, *, reason: ActionReason = None):
         """Unbans a member from the server."""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -241,7 +241,7 @@ class Moderation:
     @checks.admin_or_permissions(manage_nicknames=True)
     async def rename(self, ctx, user : discord.Member, *, nickname =""):
         """Rename a user"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
