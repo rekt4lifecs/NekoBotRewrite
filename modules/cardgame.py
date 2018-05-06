@@ -382,7 +382,7 @@ class CardGame:
                    f"{random.randint(1, 50)},"
                    f"{random.randint(1, 50)})")
         connection.commit()
-        await ctx.send(getlang(lang)["cardgame"]["cardgame"]["given_char"].format(character_loli.replace('_', ' ').title()))
+        await ctx.send(getlang(lang)["cardgame"]["daily"]["given_char"].format(character_loli.replace('_', ' ').title()))
 
     def _generate_card(self, character: str, num: int, attack: int, defense: int):
         card_name = f"data/{character}.jpg"
