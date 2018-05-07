@@ -108,7 +108,7 @@ class General:
     @commands.command(pass_context=True)
     async def cookie(self, ctx, user: discord.Member):
         """Give somebody a cookie :3"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
             await ctx.send(getlang(lang)["general"]["cookie"].format(ctx.message.author.name, user.mention))
@@ -125,7 +125,7 @@ class General:
     async def flip(self, ctx):
         """Flip a coin"""
         x = random.randint(0, 1)
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
             if x == 1:
@@ -163,7 +163,7 @@ class General:
     @commands.command(aliases=['version'])
     async def info(self, ctx):
         servers = len(self.bot.guilds)
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -204,7 +204,7 @@ class General:
     async def whois(self, ctx, userid:int):
         """Lookup a user with a userid"""
         user = self.bot.get_user(userid)
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -222,7 +222,7 @@ class General:
     @commands.guild_only()
     async def userinfo(self, ctx, user: discord.Member = None):
         """Get a users info."""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -267,7 +267,7 @@ class General:
     @commands.guild_only()
     async def serverinfo(self, ctx):
         """Display Server Info"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -307,7 +307,7 @@ class General:
     @commands.guild_only()
     async def channelinfo(self, ctx, channel: discord.TextChannel = None):
         """Get Channel Info"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -393,7 +393,7 @@ class General:
     @commands.cooldown(1, 2, commands.BucketType.user)
     async def coffee(self, ctx):
         """Coffee owo"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -443,7 +443,7 @@ class General:
 
     @commands.command()
     async def vote(self, ctx):
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:

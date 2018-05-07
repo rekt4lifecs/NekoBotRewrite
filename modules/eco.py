@@ -69,7 +69,7 @@ class economy:
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def bank(self, ctx):
         """Bank info"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -97,7 +97,7 @@ class economy:
     async def register(self, ctx):
         """Register a bank account"""
         user = ctx.message.author
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -121,7 +121,7 @@ class economy:
     async def profile(self, ctx, user : discord.Member = None):
         """Get user's profile"""
         await ctx.trigger_typing()
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -175,7 +175,7 @@ class economy:
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def daily(self, ctx):
         """Receive your daily bonus"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -229,7 +229,7 @@ class economy:
     async def rep(self, ctx, user : discord.Member):
         """Give user reputation"""
         await ctx.trigger_typing()
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -270,7 +270,7 @@ class economy:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def setdesc(self, ctx, *, desc : str):
         """Set profile description"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -327,7 +327,7 @@ class economy:
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def coinflip(self, ctx, amount : int):
         """Coinflip OwO"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -433,7 +433,7 @@ class economy:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def transfer(self, ctx, amount : int, user : discord.Member):
         """Transfer Credits to Users"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
