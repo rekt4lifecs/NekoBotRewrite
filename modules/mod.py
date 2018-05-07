@@ -9,8 +9,8 @@ import math
 import string
 import time
 import config
-import pymysql, aiomysql
-import re, json
+import aiomysql
+import re, json, random
 
 startup_extensions = {
     'modules.audio',
@@ -158,12 +158,14 @@ class Moderation:
             lang = "english"
         users_dehoisted = []
         users_failed = []
+        wordlist = open("/usr/share/dict/american-english").read().splitlines()
         starttime = int(time.time())
         await ctx.send(getlang(lang)["mod"]["dehoist"]["start"])
         for user in ctx.message.guild.members:
             try:
                 if not user.display_name[0] in list(str(string.ascii_letters)):
-                    await user.edit(nick=chr(55343) + chr(56482) + str(user.name), reason="Hoisting")
+                    #await user.edit(nick=chr(55343) + chr(56482) + str(user.name), reason="Hoisting")
+                    await user.edit(nick=random.choice(wordlist), reason="Hoisting")
                     users_dehoisted.append(f"{user.name}-{user.id}")
             except:
                 users_failed.append(user.id)
