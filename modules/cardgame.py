@@ -54,7 +54,7 @@ class CardGame:
     @commands.cooldown(1, 7, commands.BucketType.user)
     async def card(self, ctx: commands.Context):
         """Loli Card Game OwO"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -70,7 +70,7 @@ class CardGame:
     @card.command(name='transfer')
     async def card_transfer(self, ctx, card_num: int, user: discord.Member):
         """Transfer a card to a user"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -143,7 +143,7 @@ class CardGame:
     @card.command(name='fight', aliases=['battle'])
     async def card_battle(self, ctx, user: discord.Member):
         """Fight a user OwO"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -261,7 +261,7 @@ class CardGame:
     @card.command(name='daily')
     async def card_daily(self, ctx):
         """Get your card daily"""
-        lang = None #await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
@@ -651,7 +651,7 @@ class CardGame:
         db.execute(f"SELECT {cardnum} FROM roleplay WHERE userid = {author.id}")
         if int(db.fetchone()[0]) == 0:
             return await ctx.send("**Empty Slot**")
-        num = random.randint(1, 1000000000)
+        num = ctx.message.author.id
         db.execute(f"SELECT {cardnum} FROM roleplay WHERE userid = {author.id}")
         cardid = int(db.fetchone()[0])
         db.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {cardid}")
