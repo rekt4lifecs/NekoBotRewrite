@@ -54,7 +54,7 @@ async def run_cmd(cmd: str) -> str:
     return "".join(x.decode("utf-8") for x in results)
 
 # Languages
-languages = ["english", "weeb"]
+languages = ["english", "weeb", "tsundere"]
 english = json.load(open("lang/english.json"))
 weeb = json.load(open("lang/weeb.json"))
 tsundere = json.load(open("lang/tsundere.json"))
