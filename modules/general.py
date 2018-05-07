@@ -829,6 +829,13 @@ class General:
             await ctx.send(f"`{e}`")
 
     @commands.command()
+    @commands.is_owner()
+    async def testlol(self, ctx):
+        allcogs = [cogs for cogs in self.bot.cogs]
+        for cog in allcogs:
+            print([str(i) for i in self.bot.commands if i.cog_name == cog])
+
+    @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def help(self, ctx, option: str = None):
         """Help Command OwO"""
@@ -862,7 +869,7 @@ class General:
             embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `transfer`, "
                                                            "`coinflip`, `blackjack`, `top`", inline=False)
             embed.add_field(name="Fun",
-                            value="`deepfry`, `blurpify` `awooify`, `dragonic`, `dedragonic`,`food`, `bodypillow`, `weebify`, `toxicity`, `tweet`, `nichijou`, `ship`, `achievement`, `shitpost`, `meme`, `changemymind`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
+                            value="`deepfry`, `blurpify`, `blurplate`, `awooify`, `dragonic`, `dedragonic`,`food`, `bodypillow`, `weebify`, `toxicity`, `tweet`, `nichijou`, `ship`, `achievement`, `shitpost`, `meme`, `changemymind`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
                                   "`bitconnect`, `feed`, `thiccen`, `widen`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `joke`, "
                                   "`b64`, `md5`, `kannagen`, `iphonex`, `baguette`, `owoify`, `lizard`, `duck`, `captcha`, `whowouldwin`, `threats`", inline=False)
 
