@@ -3,7 +3,7 @@ import discord, asyncio, aiomysql, config
 import json
 
 # Languages
-languages = ["english", "weeb"]
+languages = ["english", "weeb", "tsundere"]
 english = json.load(open("lang/english.json"))
 weeb = json.load(open("lang/weeb.json"))
 tsundere = json.load(open("lang/tsundere.json"))
