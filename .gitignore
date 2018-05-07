@@ -11,4 +11,3 @@ config.py
 *.sql
 
 .config.json
-*.json

@@ -6,12 +6,15 @@ import json
 languages = ["english", "weeb"]
 english = json.load(open("lang/english.json"))
 weeb = json.load(open("lang/weeb.json"))
+tsundere = json.load(open("lang/tsundere.json"))
 
 def getlang(lang:str):
     if lang == "english":
         return english
     elif lang == "weeb":
         return weeb
+    elif lang == "tsundere":
+        return tsundere
     else:
         return None
 
