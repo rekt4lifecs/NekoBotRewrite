@@ -1,10 +1,10 @@
 from discord.ext import commands
 import discord, aiohttp, random, config, datetime, asyncio, base64, hashlib, textwrap, uuid
 from io import BytesIO
-from PIL import Image, ImageFont, ImageDraw, ImageOps
+from PIL import Image, ImageEnhance
 import os, time
 import aiomysql
-import json
+import json, math
 from googleapiclient import discovery
 
 key = config.weeb
@@ -74,6 +74,22 @@ class Fun:
                 await connection.commit()
         if isSelect:
             return values
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def blurpify(self, ctx, user:discord.Member=None):
+        """Blurpify a users avatar"""
+        await ctx.trigger_typing()
+        if user is None:
+            user = ctx.message.author
+        if user.is_avatar_animated():
+            url = f"https://cdn.discordapp.com/avatars/{user.id}/{user.avatar}.gif"
+        else:
+            url = f"https://cdn.discordapp.com/avatars/{user.id}/{user.avatar}.png"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=blurpify&image={url}") as r:
+                res = await r.json()
+        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
     @commands.command(aliases=['dragonify'])
     @commands.cooldown(1, 3, commands.BucketType.user)
