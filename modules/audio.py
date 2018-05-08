@@ -30,8 +30,8 @@ class Audio:
 
         if not hasattr(bot, 'lavalink'):
             lavalink.Client(bot=bot,
-                            host="localhost",
-                            ws_port=3232,
+                            host=config.lavalink['host'],
+                            ws_port=8080,
                             password=config.lavalink['password'],
                             loop=self.bot.loop, log_level=logging.INFO)
             self.bot.lavalink.register_hook(self.track_hook)
