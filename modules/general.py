@@ -421,7 +421,7 @@ class General:
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def animepic(self, ctx):
-        url = "https://computerfreaker.cf/api/anime/read.php"
+        url = "https://api.computerfreaker.cf/v1/anime"
         await ctx.channel.trigger_typing()
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
