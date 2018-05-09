@@ -46,7 +46,7 @@ class economy:
             return values
 
     def forbiddencheck(self, text:str):
-        characters = string.ascii_letters
+        characters = string.ascii_letters + string.digits
         forbidden_char = 0
         for letter in text:
             if letter not in characters:
