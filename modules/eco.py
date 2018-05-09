@@ -3,6 +3,7 @@ import discord, aiohttp, asyncio, time, datetime, config, random, math, logging
 import aiomysql
 import pymysql
 import json
+import string
 
 log = logging.getLogger("NekoBot")
 
@@ -43,6 +44,14 @@ class economy:
                 await connection.commit()
         if isSelect:
             return values
+
+    def forbiddencheck(self, text:str):
+        characters = string.ascii_letters
+        forbidden_char = 0
+        for letter in text:
+            if letter not in characters:
+                forbidden_char += 1
+        return forbidden_char
 
     async def usercheck(self, datab : str, user : discord.Member):
         user = user.id
@@ -286,30 +295,8 @@ class economy:
         if await self.usercheck("levels", ctx.message.author) is False:
             await ctx.send("Error finding your profile.")
             return
-        if '"' in desc:
-            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif "'" in desc:
-            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif ";" in desc:
-            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif "%" in desc:
-            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif '\"' in desc:
-            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif '\\0' in desc:
-            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif "\\'" in desc:
-            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif "\%'" in desc:
-            log.info(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
+        if self.forbiddencheck(str(desc)) >= 1:
+            return await ctx.send("**Text has forbidden characters.**")
         if len(desc) > 500:
             await ctx.send(getlang(lang)["eco"]["set_desc"]["over_limit"])
             return
