@@ -1053,6 +1053,22 @@ class Moderation:
         except:
             pass
         await channel.send(embed=embed)
+
+    async def on_message(self, message):
+        if not message.guild.id == 221989003400970241:
+            return
+        if message.author.bot:
+            return
+        if invite_rx.findall(message.content) != []:
+            await message.delete()
+            channel = self.bot.get_channel(431887286246834178)
+            embed = discord.Embed(color=0xffa230, title="Invite Link",
+                                  description=f"```\n"
+                                              f"Author:     {message.author}\n"
+                                              f"Channel:    {message.channel.name} ({message.channel.id})\n"
+                                              f"Invite Link:{' '.join(invite_rx.findall(message.content))}```")
+            await channel.send(embed=embed)
+
     #
     # # async def on_message_delete(self, message):
     # #     message = self.bot.get_message(messageid)
