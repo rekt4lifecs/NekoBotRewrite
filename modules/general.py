@@ -974,26 +974,6 @@ class General:
             e = discord.Embed(color=0xDEADBF, title="⚠ Error", description="Not a valid currency format.")
         await ctx.send(embed=e)
 
-    # @commands.command()
-    # async def help(self, ctx, *, command: str = None):
-    #     """Show's help"""
-    #     try:
-    #         if command is None:
-    #             p = await HelpPaginator.from_bot(ctx)
-    #         else:
-    #             entity = self.bot.get_cog(command) or self.bot.get_command(command)
-    #
-    #             if entity is None:
-    #                 clean = command.replace('@', '@\u200b')
-    #                 return await ctx.send(f'Command or category "{clean}" not found.')
-    #             elif isinstance(entity, commands.Command):
-    #                 p = await HelpPaginator.from_command(ctx, entity)
-    #             else:
-    #                 p = await HelpPaginator.from_cog(ctx, entity)
-    #
-    #         await p.paginate()
-    #     except Exception as e:
-    #         return await ctx.send(chat_formatting.bold(e))
 
 
 def setup(bot):

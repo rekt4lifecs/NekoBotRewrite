@@ -79,69 +79,6 @@ class CardGame:
         else:
             lang = "english"
         await ctx.send(getlang(lang)["cardgame"]["coming_soon"], delete_after=5)
-        # connection = pymysql.connect(host="localhost",
-        #                              user="root",
-        #                              password="rektdiscord",
-        #                              db="nekobot",
-        #                              port=3306)
-        # db = connection.cursor()
-        # if not db.execute(f"SELECT 1 FROM roleplay WHERE userid = {ctx.message.author.id}"):
-        #     return await ctx.send(f"{ctx.message.author.mention}, you don't have any cards!")
-        # elif user.bot:
-        #     return await ctx.send("**You can't transfer cards to bots**")
-        # elif not db.execute(f"SELECT 1 FROM roleplay WHERE userid = {user.id}"):
-        #     return await ctx.send(f"{user.name} doesn't have any cards.")
-        # db.execute(f"SELECT cardid{card_num} FROM roleplay WHERE userid = {ctx.message.author.id}")
-        # cardid = int(db.fetchone()[0])
-        # if cardid == 0:
-        #     return await ctx.send("**Empty Slot**")
-        # else:
-        #     db.execute(f"SELECT character_name FROM roleplay_cards WHERE cardid = {cardid}")
-        #     card_name = db.fetchone()[0]
-        #
-        # db.execute(
-        #     f"SELECT cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 FROM roleplay WHERE userid = {user.id}")
-        # allcards = db.fetchall()
-        # cardid1 = int(allcards[0][0])
-        # cardid2 = int(allcards[0][1])
-        # cardid3 = int(allcards[0][2])
-        # cardid4 = int(allcards[0][3])
-        # cardid5 = int(allcards[0][4])
-        # cardid6 = int(allcards[0][5])
-        # if cardid1 == 0:
-        #     cardid = "cardid1"
-        # elif cardid2 == 0:
-        #     cardid = "cardid2"
-        # elif cardid3 == 0:
-        #     cardid = "cardid3"
-        # elif cardid4 == 0:
-        #     cardid = "cardid4"
-        # elif cardid5 == 0:
-        #     cardid = "cardid5"
-        # elif cardid6 == 0:
-        #     cardid = "cardid6"
-        # else:
-        #     return await ctx.send(f"**{user.name} is out of slots!**")
-        #
-        # await ctx.send(f"Are you sure you want to give {user.name}, {card_name}")
-        #
-        # def check(m):
-        #     return m.author == ctx.message.author and m.channel == ctx.message.channel
-        #
-        # try:
-        #     msg = await self.bot.wait_for('message', check=check, timeout=15.0)
-        # except asyncio.TimeoutError:
-        #     return await ctx.send("**Timed out...**")
-        # if str(msg.content).lower().startswith("yes"):
-        #     db.execute(f"SELECT cardid{card_num} FROM roleplay WHERE userid = {user.id}")
-        #     cardidxx = int(db.fetchone()[0])
-        #     db.execute(f"UPDATE roleplay SET {cardid} = 0 WHERE userid = {ctx.message.author.id}")
-        #     connection.commit()
-        #     db.execute(f"UPDATE roleplay SET {cardid} = {cardidxx} WHERE userid = {user.id}")
-        #     connection.commit()
-        #     await ctx.send(f"**Successfully transferred {card_name} from {ctx.message.author.name} to {user.name}!**")
-        # else:
-        #     return await ctx.send("Transaction cancelled.")
 
     @card.command(name='fight', aliases=['battle'])
     async def card_battle(self, ctx, user: discord.Member):
