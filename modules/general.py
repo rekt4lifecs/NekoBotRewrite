@@ -378,6 +378,7 @@ class General:
             await ctx.send(f"Error. {e}")
 
     @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def avatar(self, ctx, user: discord.Member = None, type:str = None):
         """Get a user's avatar"""
         await ctx.channel.trigger_typing()
@@ -395,7 +396,7 @@ class General:
             await ctx.send(embed=em.set_image(url=user.avatar_url_as(format=type)))
 
     @commands.command()
-    @commands.cooldown(1, 2, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def coffee(self, ctx):
         """Coffee owo"""
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
@@ -419,7 +420,7 @@ class General:
             await msg.edit(embed=em.set_image(url=res['file']))
 
     @commands.command()
-    @commands.cooldown(1, 3, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def animepic(self, ctx):
         url = "https://api.computerfreaker.cf/v1/anime"
         await ctx.channel.trigger_typing()
@@ -459,6 +460,7 @@ class General:
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["perms"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def permissions(self, ctx, user: discord.Member = None, channel: str = None):
         """Get Permissions,
 
@@ -621,6 +623,7 @@ class General:
             await ctx.send(embed=embed)
 
     @commands.command(aliases=["8"], name="8ball")
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def _8ball(self, ctx, *, question: str):
         """Ask 8Ball a question"""
         answers = ["<:online:313956277808005120> It is certain", "<:online:313956277808005120> As I see it, yes",
@@ -638,56 +641,62 @@ class General:
         await ctx.send(embed=discord.Embed(title=random.choice(answers), color=0xDEADBF))
 
     @commands.command()
-    async def botinfo(self, ctx, bot_user : int = None):
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def botinfo(self, ctx, bot_user : discord.Member = None):
         """Get Bot Info"""
         if bot_user == None:
-            bot_user = self.bot.user.id
-        url = f"https://discordbots.org/api/bots/{bot_user}"
+            bot_user = self.bot.user
+        await ctx.trigger_typing()
+        url = f"https://discordbots.org/api/bots/{bot_user.id}"
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 bot = await r.json()
-
-        em = discord.Embed(color=0xDEADBF, title=bot['username'] + "#" + bot['discriminator'], description=bot['shortdesc'])
         try:
-            em.add_field(name="Prefix", value=bot['prefix'])
+            em = discord.Embed(color=0xDEADBF, title=bot['username'] + "#" + bot['discriminator'],
+                               description=bot['shortdesc'])
+            try:
+                em.add_field(name="Prefix", value=bot['prefix'])
+            except:
+                pass
+            try:
+                em.add_field(name="Lib", value=bot['lib'])
+            except:
+                pass
+            try:
+                em.add_field(name="Owners", value=f"<@{bot['owners'][0]}>")
+            except:
+                pass
+            try:
+                em.add_field(name="Votes", value=bot['points'])
+            except:
+                pass
+            try:
+                em.add_field(name="Server Count", value=bot['server_count'])
+            except:
+                pass
+            try:
+                em.add_field(name="ID", value=bot['id'])
+            except:
+                pass
+            try:
+                em.add_field(name="Certified", value=bot['certifiedBot'])
+            except:
+                pass
+            try:
+                em.add_field(name="Links", value=f"[GitHub]({bot['github']}) - [Invite]({bot['invite']})")
+            except:
+                pass
+            try:
+                em.set_thumbnail(url=f"https://images.discordapp.net/avatars/{bot['id']}/{bot['avatar']}")
+            except:
+                pass
         except:
-            pass
-        try:
-            em.add_field(name="Lib", value=bot['lib'])
-        except:
-            pass
-        try:
-            em.add_field(name="Owners", value=f"<@{bot['owners'][0]}>")
-        except:
-            pass
-        try:
-            em.add_field(name="Votes", value=bot['points'])
-        except:
-            pass
-        try:
-            em.add_field(name="Server Count", value=bot['server_count'])
-        except:
-            pass
-        try:
-            em.add_field(name="ID", value=bot['id'])
-        except:
-            pass
-        try:
-            em.add_field(name="Certified", value=bot['certifiedBot'])
-        except:
-            pass
-        try:
-            em.add_field(name="Links", value=f"[GitHub]({bot['github']}) - [Invite]({bot['invite']})")
-        except:
-            pass
-        try:
-            em.set_thumbnail(url=f"https://images.discordapp.net/avatars/{bot['id']}/{bot['avatar']}")
-        except:
-            pass
+            return await ctx.send("Failed to get bot data.")
 
         await ctx.send(embed=em)
 
     @commands.command()
+    @commands.cooldown(1, 15, commands.BucketType.user)
     async def discriminfo(self, ctx):
         """Get some stats about the servers discrims"""
         discrim_list = [int(u.discriminator) for u in ctx.guild.members]
@@ -730,6 +739,7 @@ class General:
     # It's a converter, not a type annotation in this case
     # noinspection PyTypeChecker
     @commands.command()
+    @commands.cooldown(1, 15, commands.BucketType.user)
     async def discrim(self, ctx, discriminator: Discriminator = None,
                       *, selector: Selector = '='):
         """Search for specific discriminators.
@@ -829,13 +839,6 @@ class General:
             await ctx.send(f"`{e}`")
 
     @commands.command()
-    @commands.is_owner()
-    async def testlol(self, ctx):
-        allcogs = [cogs for cogs in self.bot.cogs]
-        for cog in allcogs:
-            print([str(i) for i in self.bot.commands if i.cog_name == cog])
-
-    @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def help(self, ctx, option: str = None):
         """Help Command OwO"""
@@ -859,7 +862,7 @@ class General:
             embed.add_field(name="General",
                             value="`help`, `discrim`, `discriminfo`, `botinfo`, `8ball`, `permissions`, `vote`, "
                                   "`qr`, `animepic`, `coffee`, `avatar`, `urban`, `channelinfo`, `userinfo`, "
-                                  "`serverinfo`, `whois`, `info`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `crypto`", inline=False)
+                                  "`serverinfo`, `whois`, `info`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
             embed.add_field(name="Moderation",
@@ -869,7 +872,7 @@ class General:
             embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `transfer`, "
                                                            "`coinflip`, `blackjack`, `top`", inline=False)
             embed.add_field(name="Fun",
-                            value="`deepfry`, `blurpify`, `blurplate`, `awooify`, `dragonic`, `dedragonic`,`food`, `bodypillow`, `weebify`, `toxicity`, `tweet`, `nichijou`, `ship`, `achievement`, `shitpost`, `meme`, `changemymind`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
+                            value="`deepfry`, `blurpify`, `awooify`, `dragonic`, `dedragonic`,`food`, `bodypillow`, `weebify`, `toxicity`, `tweet`, `nichijou`, `ship`, `achievement`, `shitpost`, `meme`, `changemymind`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
                                   "`bitconnect`, `feed`, `thiccen`, `widen`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `joke`, "
                                   "`b64`, `md5`, `kannagen`, `iphonex`, `baguette`, `owoify`, `lizard`, `duck`, `captcha`, `whowouldwin`, `threats`", inline=False)
 
@@ -894,87 +897,6 @@ class General:
             await ctx.message.add_reaction(emoji)
         except:
             pass
-
-    @commands.command()
-    @commands.cooldown(1, 30, commands.BucketType.user)
-    async def crypto(self, ctx, crypto: str):
-        """Get cryptocurrency info"""
-        coin = "USD,EUR,GBP,JPY,CHF,AUD,CAD,INR,IDR,NZD,ZAR,SEK,SGD,KRW,NOK,MXN,BRL,HKD,RUB,MYR,THB,"
-        tsyms = coin + "BTC,BCH,ETH,ETC,LTC,XMR,DASH,ZEC,DOGE,DCR"
-        url = f"https://min-api.cryptocompare.com/data/price?fsym={crypto.upper()}&tsyms={tsyms}"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
-        try:
-            USD  = res['USD']
-            EUR  = res['EUR']
-            GBP  = res['GBP']
-            JPY  = res['JPY']
-            CHF  = res['CHF']
-            AUD  = res['AUD']
-            CAD  = res['CAD']
-            INR  = res['INR']
-            IDR  = res['IDR']
-            NZD  = res['NZD']
-            ZAR  = res['ZAR']
-            SEK  = res['SEK']
-            SGD  = res['SGD']
-            KRW  = res['KRW']
-            NOK  = res['NOK']
-            MXN  = res['MXN']
-            BRL  = res['BRL']
-            HKD  = res['HKD']
-            RUB  = res['RUB']
-            MYR  = res['MYR']
-            THB  = res['THB']
-
-            BTC  = res['BTC']
-            BCH  = res['BCH']
-            ETH  = res['ETH']
-            LTC  = res['LTC']
-            XMR  = res['XMR']
-            DASH = res['DASH']
-            ZEC  = res['ZEC']
-            DOGE = res['DOGE']
-            DCR  = res['DCR']
-
-            e = discord.Embed(color=0xDEADBF, title=f"{crypto.upper()} Conversion",
-                              description=f"🇺🇸 US Dollar: **${USD}**\n"
-                                          f"🇪🇺 Euro: **€{EUR}**\n"
-                                          f"🇬🇧 British Pound: **£{GBP}**\n"
-                                          f"🇯🇵 Japanese Yen: **¥{JPY}**\n"
-                                          f"🇨🇭 Swiss Franc: **Fr.{CHF}**\n"
-                                          f"🇦🇺 Australian Dollar: **${AUD}**\n"
-                                          f"🇨🇦 Canadian Dollar: **${CAD}**\n"
-                                          f"🇮🇳 Indian Rupee: **₹{INR}**\n"
-                                          f"🇮🇩 Indonesian Rupiah: **IDR {IDR}**\n"
-                                          f"🇳🇿 New Zealand Dollar: **${NZD}**\n"
-                                          f"🇿🇦 South African Rand: **R{ZAR}**\n"
-                                          f"🇸🇪 Swedish Krona: **kr {SEK}**\n"
-                                          f"🇸🇬 Singapore Dollar: **${SGD}**\n"
-                                          f"🇰🇷 South Korean Won: **₩{KRW}**\n"
-                                          f"🇳🇴 Norwegian Krone: **kr {NOK}**\n"
-                                          f"🇲🇽 Mexican Peso: **Mex${MXN}**\n"
-                                          f"🇧🇷 Brazilian Real: **R${BRL}**\n"
-                                          f"🇭🇰 Hong Kong Dollar: **HK${HKD}**\n"
-                                          f"🇷🇺 Russian Ruble: **₽{RUB}**\n"
-                                          f"🇲🇾 Malaysian Ringgit: **RM {MYR}**\n"
-                                          f"🇹🇭 Thai Baht: **฿ {THB}**")
-            e.add_field(name="Cryptocurrency",
-                        value=f"<:bitcoin:423859742281302036> Bitcoin: **₿{BTC}**\n"
-                              f"<:bitcoincash:423863215840034817> Bitcoin Cash: {BCH}**\n"
-                              f"<:eth:423859767211982858> Ethereum: ♦{ETH}**\n"
-                              f"<:ltc:423859753698197507> Litecoin: Ł{LTC}**\n"
-                              f"<:monero:423859744936034314> Monero: ɱ{XMR}**\n"
-                              f"<:dash:423859742520377346> Dash: {DASH}**\n"
-                              f"<:yellowzcashlogo:423859752045379594> Zcash: ⓩ{ZEC}**\n"
-                              f"<:dogecoin:423859755384045569> Dogecoin: Đ{DOGE}**\n"
-                              f"<:decred:423859744361676801> Decred: {DCR}**", inline=True)
-        except:
-            e = discord.Embed(color=0xDEADBF, title="⚠ Error", description="Not a valid currency format.")
-        await ctx.send(embed=e)
-
-
 
 def setup(bot):
     if not hasattr(bot, 'socket_stats'):
