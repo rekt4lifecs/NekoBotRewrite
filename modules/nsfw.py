@@ -76,6 +76,22 @@ class NSFW:
         embed.set_image(url=data)
         await ctx.send(embed=embed.set_footer(text=f"Used by {ctx.message.author.name}"))
 
+    @commands.command(aliases=["DVA", "d.va"])
+    @commands.guild_only()
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def dva(self, ctx):
+        if not ctx.message.channel.is_nsfw():
+            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            return
+        self.counter["dva"] += 1
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://api.computerfreaker.cf/v1/dva") as r:
+                res = await r.json()
+        data = res['url']
+        embed = discord.Embed(color=0xDEADBF)
+        embed.set_image(url=data)
+        await ctx.send(embed=embed)
+
     @commands.command(name="4k")
     @commands.guild_only()
     async def _fourk(self, ctx):
