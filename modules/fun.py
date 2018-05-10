@@ -902,18 +902,5 @@ class Fun:
         except Exception as e:
             await ctx.send(f"**Error getting image data.** {e}")
 
-#    async def on_message(self, message):
- #       try:
-  #          try:
-   #             url = str(message.attachments[0].url)
-    #        except:
-     #           return
-      #      if not await self.execute(query=f'SELECT 1 FROM lastimg WHERE channel = {message.channel.id}', isSelect=True):
-       #         await self.execute(f"INSERT INTO lastimg VALUES ({message.channel.id}, \"{url}\")", commit=True)
-        #    else:
-         #       await self.execute(f"UPDATE lastimg SET url = \"{url}\" WHERE channel = {message.channel.id}", commit=True)
-#        except:
- #           return
-
 def setup(bot):
     bot.add_cog(Fun(bot))
