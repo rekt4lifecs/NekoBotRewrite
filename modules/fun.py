@@ -82,10 +82,7 @@ class Fun:
         await ctx.trigger_typing()
         if user is None:
             user = ctx.message.author
-        if user.is_avatar_animated():
-            url = f"https://cdn.discordapp.com/avatars/{user.id}/{user.avatar}.gif"
-        else:
-            url = f"https://cdn.discordapp.com/avatars/{user.id}/{user.avatar}.png"
+        url = user.avatar_url_as(format='png')
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://nekobot.xyz/api/imagegen?type=blurpify&image={url}") as r:
                 res = await r.json()
@@ -101,10 +98,11 @@ class Fun:
         if user.is_avatar_animated():
             url = f"https://cdn.discordapp.com/avatars/{user.id}/{user.avatar}.gif"
         else:
-            url = f"https://cdn.discordapp.com/avatars/{user.id}/{user.avatar}.png"
+            url = user.avatar_url_as('png')
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://nekobot.xyz/api/imagegen?type=blurpify&image={url}") as r:
                 res = await r.json()
+        async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://nekobot.xyz/api/imagegen?type=jpeg&url={res['message']}") as r:
                 res = await r.json()
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
