@@ -16,7 +16,7 @@ class Chatbot:
             if str(message.content[22:]) in commands or str(message.content[23:]) in commands:
                 return
             await channel.trigger_typing()
-            async with aiohttp.ClientSession(headers={"Authorization": "Bearer a7d6414f118443bc8653c9dc9f36dc06"}) as cs:
+            async with aiohttp.ClientSession(headers={"Authorization": "Bearer API TOKEN"}) as cs:
                 terms = str(message.content[22:]).replace(" ", "%20")
                 async with cs.get(f'https://api.dialogflow.com/v1/query?v=20150910&lang=en&query={terms}&sessionId=0') as r:
                     res = await r.json()
