@@ -31,19 +31,6 @@ class NSFW:
             return values
 
     @commands.command()
-    @commands.is_owner()
-    async def hasvoted(self, ctx):
-        votes = await self.execute("SELECT user FROM dbl", isSelect=True, fetchAll=True)
-        voters = []
-        for vote in votes:
-            voters.append(vote[0])
-        print(voters)
-        if str(ctx.message.author.id) in voters:
-            await ctx.send("yay")
-        else:
-            await ctx.send("Nay")
-
-    @commands.command()
     @commands.guild_only()
     @commands.cooldown(200, 20, commands.BucketType.user)
     async def pgif(self, ctx):

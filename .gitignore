@@ -11,3 +11,6 @@ config.py
 *.sql
 
 .config.json
+
+__pycache__
+
