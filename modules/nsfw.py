@@ -80,6 +80,7 @@ class NSFW:
     @commands.guild_only()
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def dva(self, ctx):
+        await ctx.trigger_typing()
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
