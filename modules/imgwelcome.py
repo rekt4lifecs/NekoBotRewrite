@@ -1,15 +1,9 @@
 from discord.ext import commands
-import discord, pymysql, config, requests
+import discord, pymysql, config, aiohttp
 from io import BytesIO
 from .utils import checks
 from PIL import Image, ImageFont, ImageDraw
-
-connection = pymysql.connect(user='root',
-                             password=config.dbpass,
-                             host='localhost',
-                             port=3306,
-                             database='nekobot')
-db = connection.cursor()
+import string
 
 class IMGWelcome:
     """IMGWelcome"""
@@ -17,17 +11,31 @@ class IMGWelcome:
     def __init__(self, bot):
         self.bot = bot
 
+    def forbiddencheck(self, text:str):
+        characters = string.ascii_letters + string.digits + " "
+        forbidden_char = 0
+        for letter in text:
+            if letter not in characters:
+                forbidden_char += 1
+        return forbidden_char
+
     @commands.command()
     @checks.is_admin()
     async def imgwelcome(self, ctx):
         embed = discord.Embed(color=0xDEABDF,
-                              title="The New IMGWelcomer")
+                              title="IMGWelcomer")
         embed.add_field(name="Instructions", value="Set your channel with **imgchannel**,\n"
                                                    "Step 2: Set your content with **imgcontent** such as \"Welcome user To server\",\n"
                                                    "Step 3: Change your background with **imgbg**\n"
                                                    "Step 4: Profit?!\n\n"
                                                    "To remove the welcomer use `n!imgdelete`.")
         await ctx.send(embed=embed)
+        connection = pymysql.connect(user='root',
+                                     password=config.dbpass,
+                                     host='localhost',
+                                     port=3306,
+                                     database='nekobot')
+        db = connection.cursor()
         if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
             username = "0 1"
             username.find("0")
@@ -39,6 +47,12 @@ class IMGWelcome:
     @checks.is_admin()
     async def imgchannel(self, ctx, channel : discord.TextChannel):
         """Select a IMG Welcoming text channel"""
+        connection = pymysql.connect(user='root',
+                                     password=config.dbpass,
+                                     host='localhost',
+                                     port=3306,
+                                     database='nekobot')
+        db = connection.cursor()
         if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
@@ -52,6 +66,12 @@ class IMGWelcome:
     @checks.is_admin()
     async def imgdelete(self, ctx):
         """Remove imgwelcomer from the server."""
+        connection = pymysql.connect(user='root',
+                                     password=config.dbpass,
+                                     host='localhost',
+                                     port=3306,
+                                     database='nekobot')
+        db = connection.cursor()
         if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
@@ -63,19 +83,16 @@ class IMGWelcome:
     @commands.command()
     @checks.is_admin()
     async def imgcontent(self, ctx, content:str=None):
+        connection = pymysql.connect(user='root',
+                                     password=config.dbpass,
+                                     host='localhost',
+                                     port=3306,
+                                     database='nekobot')
+        db = connection.cursor()
         if content == None:
             content = "Welcome user to server"
             await ctx.send('Content reset to default "Welcome user to server"')
         else:
-            if '"' in content:
-                print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-                return
-            elif "'" in content:
-                print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-                return
-            elif ";" in content:
-                print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-                return
             if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
                 await ctx.send("Use `imgwelcome` to initialize.")
                 return
@@ -88,15 +105,12 @@ class IMGWelcome:
     @checks.is_admin()
     async def imgbg(self, ctx, img : str = ""):
         """Change image BG, Image must be 500x150."""
-        if '"' in img:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif "'" in img:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif ";" in img:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
+        connection = pymysql.connect(user='root',
+                                     password=config.dbpass,
+                                     host='localhost',
+                                     port=3306,
+                                     database='nekobot')
+        db = connection.cursor()
         if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
@@ -106,7 +120,10 @@ class IMGWelcome:
             await ctx.send("Reset to default.")
             return
         if img.startswith("http") and img.endswith(".jpg") or img.endswith(".jpeg") or img.endswith(".png"):
-            if requests.get(img).status_code == 200:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(img) as r:
+                    status = r.status
+            if status == 200:
                 db.execute(f"UPDATE imgwelcome SET background = \"{img}\" WHERE server = {ctx.message.guild.id}")
                 connection.commit()
                 await ctx.send(f"Updated background to `{img}`")
@@ -118,6 +135,12 @@ class IMGWelcome:
 
     async def on_member_join(self, member):
         try:
+            connection = pymysql.connect(user='root',
+                                         password=config.dbpass,
+                                         host='localhost',
+                                         port=3306,
+                                         database='nekobot')
+            db = connection.cursor()
             server = member.guild
             if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(server.id)):
                 return
@@ -138,10 +161,15 @@ class IMGWelcome:
         if bg == "NONE":
             bg = Image.new('RGB', (500, 150), (255, 255, 255))
         else:
-            background = requests.get(bg).content
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(bg) as r:
+                    background = await r.read()
             bg = Image.open(BytesIO(background))
 
-        avatar = Image.open(BytesIO(requests.get(user.avatar_url).content))
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(user.avatar_url) as r:
+                avatardata = await r.read()
+        avatar = Image.open(BytesIO(avatardata))
 
         welcome_font = ImageFont.truetype("data/fonts/CaviarDreams.ttf", 40)
         name_font = ImageFont.truetype("data/fonts/CaviarDreams_Bold.ttf", 45)

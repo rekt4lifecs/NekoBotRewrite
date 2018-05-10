@@ -46,7 +46,7 @@ class economy:
             return values
 
     def forbiddencheck(self, text:str):
-        characters = string.ascii_letters + string.digits
+        characters = string.ascii_letters + string.digits + " "
         forbidden_char = 0
         for letter in text:
             if letter not in characters:
@@ -147,14 +147,12 @@ class economy:
         except:
             pass
         if await self.usercheck('levels', user) is False:
-            rep = 0
             level = 0
             xp = 0
             required = 0
             description = ""
         else:
             fetchlvl = await self.execute(f"SELECT rep, level, info FROM levels WHERE userid = {user.id}", isSelect=True, fetchAll=True)
-            rep = fetchlvl[0][0]
             xp = fetchlvl[0][1]
             description = fetchlvl[0][2]
             level = self._find_level(xp)
@@ -847,23 +845,6 @@ class economy:
             color = 0xff5630
         await msg.edit(
             embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
-
-    @commands.command()
-    @commands.is_owner()
-    async def messagexpcheck(self, ctx):
-        """Message XP Check"""
-        user = ctx.message.author
-        starttime = time.time()
-        try:
-            lastxp = await self.execute(f"SELECT lastxp FROM levels WHERE userid = {user.id}", isSelect=True)
-            if (int(time.time()) - int(lastxp[0])) > 120:
-                userxp = await self.execute(f"SELECT level FROM levels WHERE userid = {user.id}", isSelect=True)
-                await self.execute(f"UPDATE levels SET level = {int(userxp[0] + random.randint(15, 20))} WHERE userid = {user.id}", commit=True)
-                await ctx.send(f"Finished in {time.time() - starttime}")
-            else:
-                return await ctx.send(f"Under the time. Finished in {time.time() - starttime}")
-        except Exception as e:
-            await ctx.send(e)
 
 def setup(bot):
     n = economy(bot)

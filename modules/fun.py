@@ -88,25 +88,6 @@ class Fun:
                 res = await r.json()
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def blurplate(self, ctx, user:discord.Member=None):
-        """Blurpify and pixelate o.o"""
-        await ctx.trigger_typing()
-        if user is None:
-            user = ctx.message.author
-        if user.is_avatar_animated():
-            url = f"https://cdn.discordapp.com/avatars/{user.id}/{user.avatar}.gif"
-        else:
-            url = user.avatar_url_as('png')
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=blurpify&image={url}") as r:
-                res = await r.json()
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=jpeg&url={res['message']}") as r:
-                res = await r.json()
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
-
     @commands.command(aliases=['dragonify'])
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def dragonic(self, ctx, *, text:str):
