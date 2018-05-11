@@ -158,14 +158,14 @@ class Moderation:
             lang = "english"
         users_dehoisted = []
         users_failed = []
-        wordlist = open("/usr/share/dict/american-english").read().splitlines()
+        #wordlist = open("/usr/share/dict/american-english").read().splitlines()
         starttime = int(time.time())
         await ctx.send(getlang(lang)["mod"]["dehoist"]["start"])
         for user in ctx.message.guild.members:
             try:
                 if not user.display_name[0] in list(str(string.ascii_letters)):
-                    #await user.edit(nick=chr(55343) + chr(56482) + str(user.name), reason="Hoisting")
-                    await user.edit(nick=random.choice(wordlist), reason="Hoisting")
+                    await user.edit(nick=chr(55343) + chr(56482) + str(user.name), reason="Hoisting")
+                    #await user.edit(nick=random.choice(wordlist), reason="Hoisting")
                     users_dehoisted.append(f"{user.name}-{user.id}")
             except:
                 users_failed.append(user.id)
@@ -479,9 +479,13 @@ class Moderation:
         connection = await aiomysql.connect(host='localhost', port=3306,
                                             user='root', password=config.dbpass,
                                             db='nekobot')
-        finishedmsg = invite_rx.sub("[INVITE]", message.content) # Original Content :^)
+        finishedmsg = invite_rx.sub("[INVITE]", message.content)
         async with connection.cursor() as db:
             try:
+                optin = await self.bot.redis.get(f"{message.author.id}-snipe")
+                if optin is not None:
+                    if optin.decode('utf-8') == "false":
+                        return
                 if not await db.execute(f"SELECT 1 FROM snipe WHERE channel = {message.channel.id}"):
                     await db.execute(f"INSERT INTO snipe VALUES ({message.channel.id}, \"{message.content}\", {message.author.id})")
                 else:
@@ -495,13 +499,21 @@ class Moderation:
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def snipe(self, ctx):
+    async def snipe(self, ctx, optin:bool = None):
         """Snipe the last message."""
+        await ctx.trigger_typing()
         connection = await aiomysql.connect(host='localhost', port=3306,
                                             user='root', password=config.dbpass,
                                             db='nekobot')
         channel = ctx.message.channel
         async with connection.cursor() as db:
+            if optin is not None:
+                if optin:
+                    boolValue = "true"
+                else:
+                    boolValue = "false"
+                await self.bot.redis.set(f"{ctx.message.author.id}-snipe", boolValue)
+                return await ctx.send(f"**Snipe opt status updated to** `{boolValue}`")
             if not await db.execute(f"SELECT 1 FROM snipe WHERE channel = {channel.id}"):
                 return await ctx.send("**No message found to snipe.**")
             else:
