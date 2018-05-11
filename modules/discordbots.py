@@ -1,8 +1,14 @@
 from discord.ext import commands
 import asyncio, config, dbl, discord, random, aiohttp
-import pymysql
+import pymysql, time
 
 messages = ["OwO Whats this", "MonkaS", "OwO", "Haiiiii", ".help", "🤔🤔🤔", "HMMM🤔", "USE n! WEW", "n!HELP REE"]
+connection = pymysql.connect(host="localhost",
+                                     user="root",
+                                     password="rektdiscord",
+                                     db="nekobot",
+                                     port=3306)
+db = connection.cursor()
 
 class DiscordBotsOrgAPI:
     """Handles interactions with the discordbots.org API"""
@@ -20,6 +26,7 @@ class DiscordBotsOrgAPI:
                   " (╯_╰)", "㋡", "ˁ˚ᴥ˚ˀ", "\(^-^)/"]
         while True:
             print("Attempting to update server count.")
+            db.execute(f"INSERT INTO guildcount VALUES ({len(self.bot.guilds)}, {int(time.time())})")
             try:
                 await self.dblpy.post_server_count(shard_count=self.bot.shard_count, shard_no=self.bot.shard_id)
                 print("Posted server count. {}".format(len(self.bot.guilds)))
@@ -49,6 +56,7 @@ class DiscordBotsOrgAPI:
             except Exception as e:
                 print(f"Failed to post to terminal, {e}")
             await asyncio.sleep(1800)
+
 
     async def on_ready(self):
         await self.startdbl()
