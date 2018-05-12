@@ -1,6 +1,8 @@
 from discord.ext import commands
+from logging import INFO as loginfo
+from math import ceil
 import discord
-import logging, re, math
+import re
 import lavalink
 import config
 import json
@@ -33,7 +35,7 @@ class Audio:
                             host=config.lavalink['host'],
                             ws_port=8080,
                             password=config.lavalink['password'],
-                            loop=self.bot.loop, log_level=logging.INFO)
+                            loop=self.bot.loop, log_level=loginfo)
             self.bot.lavalink.register_hook(self.track_hook)
 
     async def track_hook(self, event):
@@ -190,7 +192,7 @@ class Audio:
             return await ctx.send(getlang(lang)["audio"]["no_queue"])
 
         items_per_page = 10
-        pages = math.ceil(len(player.queue) / items_per_page)
+        pages = ceil(len(player.queue) / items_per_page)
 
         start = (page - 1) * items_per_page
         end = start + items_per_page

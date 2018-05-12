@@ -1,7 +1,6 @@
 from discord.ext import commands
 import discord, aiohttp, asyncio, time, datetime, config, random, math, logging
 import aiomysql
-import pymysql
 import json
 import string
 
@@ -366,12 +365,6 @@ class economy:
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def top(self, ctx):
         """Get Top Users OwO"""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
         try:
             if await self.usercheck('levels', ctx.message.author) is False:
                 await self._create_user(ctx.message.author.id)
@@ -379,8 +372,8 @@ class economy:
             pass
         em = discord.Embed(color=0xDEADBF, title="Top Users | Economy", description="Loading...")
         msg = await ctx.send(embed=em)
-        db.execute("SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10")
-        allusers = db.fetchall()
+        query = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
+        allusers = await self.execute(query=query, isSelect=True, fetchAll=True)
         all_members = []
         for guild in self.bot.guilds:
             for member in guild.members:
@@ -467,12 +460,6 @@ class economy:
     @commands.command(aliases=['bj'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def blackjack(self, ctx, betting_amount: int):
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
         try:
             if await self.usercheck('levels', ctx.message.author) is False:
                 await self._create_user(ctx.message.author.id)
@@ -542,8 +529,7 @@ class economy:
             await ctx.send("You don't have a bank account...")
             return
 
-        db.execute(f"SELECT balance FROM economy WHERE userid = {author.id}")
-        author_balance = db.fetchone()
+        author_balance = await self.execute(f"SELECT balance FROM economy WHERE userid = {author.id}", isSelect=True)
         author_balance = int(author_balance[0])
 
         if betting_amount <= 0:
@@ -557,12 +543,11 @@ class economy:
             return
 
         # Take users moneylol
-        db.execute(f"UPDATE economy SET balance = {author_balance - betting_amount} WHERE userid = {author.id}")
-        connection.commit()
+        await self.execute(f"UPDATE economy SET balance = {author_balance - betting_amount} WHERE userid = {author.id}",
+                           commit=True)
 
         # Get New Author Balance
-        db.execute(f"SELECT balance FROM economy WHERE userid = {author.id}")
-        author_balance = db.fetchone()
+        author_balance = await self.execute(f"SELECT balance FROM economy WHERE userid = {author.id}", isSelect=True)
         author_balance = int(author_balance[0])
 
         card_choice1 = cards[random.choice(lst)]
@@ -599,7 +584,6 @@ class economy:
         e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ?", inline=True)
 
         msg = await ctx.send(embed=e)
-        msg
 
         def check(m):
             return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
@@ -610,8 +594,7 @@ class economy:
             if (int(amount1) + int(amount2)) > (int(amount3) + int(amount4)):
                 winner = author.name
                 color = 0xDEADBF
-                db.execute(f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
-                connection.commit()
+                await self.execute(f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}", commit=True)
             else:
                 winner = self.bot.user.name
                 color = 0xff5630
@@ -648,9 +631,8 @@ class economy:
             await msg.edit(embed=e)
             return
         elif (int(amount3) + int(amount4) + int(amount6)) > 21:
-            db.execute(
-                f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
-            connection.commit()
+            query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
+            await self.execute(query=query, commit=True)
             e = discord.Embed(color=0xff5630, title="Blackjack",
                               description=f"{self.bot.user.name} went over 21 and {author.name} won!")
             e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
@@ -668,7 +650,6 @@ class economy:
         e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ? | ?", inline=True)
 
         msg = await ctx.send(embed=e)
-        msg
 
         def check(m):
             return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
@@ -679,9 +660,8 @@ class economy:
             if (int(amount1) + int(amount2) + int(amount5)) > (int(amount3) + int(amount4) + int(amount6)):
                 winner = author.name
                 color = 0xDEADBF
-                db.execute(
-                    f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
-                connection.commit()
+                query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
+                await self.execute(query=query, commit=True)
             else:
                 winner = self.bot.user.name
                 color = 0xff5630
@@ -720,9 +700,8 @@ class economy:
             await msg.edit(embed=e)
             return
         elif (int(amount3) + int(amount4) + int(amount6) + int(amount8)) > 21:
-            db.execute(
-                f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
-            connection.commit()
+            query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
+            await self.execute(query=query, commit=True)
             e = discord.Embed(color=0xff5630, title="Blackjack",
                               description=f"{self.bot.user.name} went over 21 and {author.name} won!")
             e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
@@ -751,9 +730,8 @@ class economy:
             if (int(amount1) + int(amount2) + int(amount5) + int(amount7)) > (int(amount3) + int(amount4) + int(amount6) + int(amount8)):
                 winner = author.name
                 color = 0xDEADBF
-                db.execute(
-                    f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
-                connection.commit()
+                query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
+                await self.execute(query=query, commit=True)
             else:
                 winner = self.bot.user.name
                 color = 0xff5630
@@ -792,9 +770,8 @@ class economy:
             await msg.edit(embed=e)
             return
         elif (int(amount3) + int(amount4) + int(amount6) + int(amount10) + int(amount8)) > 21:
-            db.execute(
-                f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
-            connection.commit()
+            query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
+            await self.execute(query=query, commit=True)
             e = discord.Embed(color=0xff5630, title="Blackjack",
                               description=f"{self.bot.user.name} went over 21 and {author.name} won!")
             e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)}",
@@ -812,7 +789,6 @@ class economy:
         e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ? | ? | ? | ?", inline=True)
 
         msg = await ctx.send(embed=e)
-        msg
 
         def check(m):
             return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
@@ -823,9 +799,8 @@ class economy:
             if (int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)) > (int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)):
                 winner = author.name
                 color = 0xDEADBF
-                db.execute(
-                    f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
-                connection.commit()
+                query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
+                await self.execute(query=query, commit=True)
             else:
                 winner = self.bot.user.name
                 color = 0xff5630
@@ -837,9 +812,8 @@ class economy:
                 int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)):
             winner = author.name
             color = 0xDEADBF
-            db.execute(
-                f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}")
-            connection.commit()
+            query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
+            await self.execute(query=query, commit=True)
         else:
             winner = self.bot.user.name
             color = 0xff5630

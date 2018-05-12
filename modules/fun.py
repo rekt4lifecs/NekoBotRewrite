@@ -1,10 +1,9 @@
 from discord.ext import commands
-import discord, aiohttp, random, config, datetime, asyncio, base64, hashlib, textwrap, uuid
+import discord, aiohttp, random, config, datetime, base64, hashlib
 from io import BytesIO
-from PIL import Image, ImageEnhance
-import os, time
+from PIL import Image
+import os
 import aiomysql
-import json, math
 from googleapiclient import discovery
 
 key = config.weeb

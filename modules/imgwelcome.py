@@ -1,9 +1,10 @@
 from discord.ext import commands
-import discord, pymysql, config, aiohttp
+import discord, config, aiohttp
 from io import BytesIO
 from .utils import checks
 from PIL import Image, ImageFont, ImageDraw
 import string
+import aiomysql
 
 class IMGWelcome:
     """IMGWelcome"""
@@ -19,6 +20,22 @@ class IMGWelcome:
                 forbidden_char += 1
         return forbidden_char
 
+    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                              user='root', password=config.dbpass,
+                                              db='nekobot')
+        async with connection.cursor() as db:
+            await db.execute(query)
+            if isSelect:
+                if fetchAll:
+                    values = await db.fetchall()
+                else:
+                    values = await db.fetchone()
+            if commit:
+                await connection.commit()
+        if isSelect:
+            return values
+
     @commands.command()
     @checks.is_admin()
     async def imgwelcome(self, ctx):
@@ -30,35 +47,24 @@ class IMGWelcome:
                                                    "Step 4: Profit?!\n\n"
                                                    "To remove the welcomer use `n!imgdelete`.")
         await ctx.send(embed=embed)
-        connection = pymysql.connect(user='root',
-                                     password=config.dbpass,
-                                     host='localhost',
-                                     port=3306,
-                                     database='nekobot')
-        db = connection.cursor()
-        if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
+        if not await self.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id),
+                                  isSelect=True):
             username = "0 1"
             username.find("0")
-            db.execute(f"INSERT IGNORE INTO imgwelcome VALUES ({ctx.message.guild.id}, \"Welcome user to server!!!\", \"NONE\", \"arial.ttf\", \"NONE\")")
-            connection.commit()
+            await self.execute(f"INSERT IGNORE INTO imgwelcome VALUES ({ctx.message.guild.id}, \"Welcome user to server!!!\", \"NONE\", \"arial.ttf\", \"NONE\")", commit=True)
             print(f"Added {ctx.message.guild.name} ({ctx.message.guild.id})")
 
     @commands.command()
     @checks.is_admin()
     async def imgchannel(self, ctx, channel : discord.TextChannel):
         """Select a IMG Welcoming text channel"""
-        connection = pymysql.connect(user='root',
-                                     password=config.dbpass,
-                                     host='localhost',
-                                     port=3306,
-                                     database='nekobot')
-        db = connection.cursor()
-        if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
+        if not await self.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id),
+                                  isSelect=True):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
         else:
-            db.execute(f"UPDATE imgwelcome SET channel = \"{channel.id}\" WHERE server = {ctx.message.guild.id}")
-            connection.commit()
+            await self.execute(f"UPDATE imgwelcome SET channel = \"{channel.id}\" WHERE server = {ctx.message.guild.id}",
+                               commit=True)
             await ctx.send(f"Updated imgwelcome to {channel.name}")
             print(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - Channel to {channel.name} ({channel.id})")
 
@@ -66,57 +72,41 @@ class IMGWelcome:
     @checks.is_admin()
     async def imgdelete(self, ctx):
         """Remove imgwelcomer from the server."""
-        connection = pymysql.connect(user='root',
-                                     password=config.dbpass,
-                                     host='localhost',
-                                     port=3306,
-                                     database='nekobot')
-        db = connection.cursor()
-        if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
+        if not await self.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id),
+                                  isSelect=True):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
         else:
-            db.execute(f"DELETE FROM imgwelcome WHERE server = {ctx.message.guild.id}")
-            connection.commit()
+            await self.execute(f"DELETE FROM imgwelcome WHERE server = {ctx.message.guild.id}", commit=True)
             await ctx.send(f"Removed imgwelcome!")
 
     @commands.command()
     @checks.is_admin()
     async def imgcontent(self, ctx, content:str=None):
-        connection = pymysql.connect(user='root',
-                                     password=config.dbpass,
-                                     host='localhost',
-                                     port=3306,
-                                     database='nekobot')
-        db = connection.cursor()
         if content == None:
             content = "Welcome user to server"
             await ctx.send('Content reset to default "Welcome user to server"')
         else:
-            if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
+            if not await self.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id),
+                                      isSelect=True):
                 await ctx.send("Use `imgwelcome` to initialize.")
                 return
             await ctx.send(f"Updated content to {content}")
-        db.execute(f"UPDATE imgwelcome SET content = \"{content}\" WHERE server = {ctx.message.guild.id}")
-        connection.commit()
+        await self.execute(f"UPDATE imgwelcome SET content = \"{content}\" WHERE server = {ctx.message.guild.id}",
+                           commit=True)
         print(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - Content to {content}")
 
     @commands.command()
     @checks.is_admin()
     async def imgbg(self, ctx, img : str = ""):
         """Change image BG, Image must be 500x150."""
-        connection = pymysql.connect(user='root',
-                                     password=config.dbpass,
-                                     host='localhost',
-                                     port=3306,
-                                     database='nekobot')
-        db = connection.cursor()
-        if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id)):
+        if not await self.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id),
+                          isSelect=True):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
         if img == "":
-            db.execute(f"UPDATE imgwelcome SET background = \"NONE\" WHERE server = {ctx.message.guild.id}")
-            connection.commit()
+            await self.execute(f"UPDATE imgwelcome SET background = \"NONE\" WHERE server = {ctx.message.guild.id}",
+                       commit=True)
             await ctx.send("Reset to default.")
             return
         if img.startswith("http") and img.endswith(".jpg") or img.endswith(".jpeg") or img.endswith(".png"):
@@ -124,8 +114,8 @@ class IMGWelcome:
                 async with cs.get(img) as r:
                     status = r.status
             if status == 200:
-                db.execute(f"UPDATE imgwelcome SET background = \"{img}\" WHERE server = {ctx.message.guild.id}")
-                connection.commit()
+                await self.execute(f"UPDATE imgwelcome SET background = \"{img}\" WHERE server = {ctx.message.guild.id}",
+                           commit=True)
                 await ctx.send(f"Updated background to `{img}`")
                 print(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - BG to {img}")
             else:
@@ -135,21 +125,19 @@ class IMGWelcome:
 
     async def on_member_join(self, member):
         try:
-            connection = pymysql.connect(user='root',
-                                         password=config.dbpass,
-                                         host='localhost',
-                                         port=3306,
-                                         database='nekobot')
-            db = connection.cursor()
             server = member.guild
-            if not db.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(server.id)):
+            if not await self.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(server.id),
+                              isSelect=True):
                 return
-            db.execute("SELECT channel FROM imgwelcome WHERE server = {}".format(server.id))
-            channel = db.fetchone()[0]
-            db.execute("SELECT background FROM imgwelcome WHERE server = {}".format(server.id))
-            bg = db.fetchone()[0]
-            db.execute("SELECT content FROM imgwelcome WHERE server = {}".format(server.id))
-            content = db.fetchone()[0]
+            channel = await self.execute("SELECT channel FROM imgwelcome WHERE server = {}".format(server.id),
+                               isSelect=True)
+            channel = channel[0]
+            bg = await self.execute("SELECT background FROM imgwelcome WHERE server = {}".format(server.id),
+                                    isSelect=True)
+            bg = bg[0]
+            content = await self.execute("SELECT content FROM imgwelcome WHERE server = {}".format(server.id),
+                       isSelect=True)
+            content = content[0]
             await self._build_member_join(member, channel, bg, content, server)
             chan = self.bot.get_channel(int(channel))
             content = str(content).replace("user", f"{member.mention}").replace("server", f"{member.guild}")
