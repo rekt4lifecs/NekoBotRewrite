@@ -1,18 +1,28 @@
 from discord.ext import commands
-import discord, pymysql, config, aiohttp
+import discord, config, aiohttp
 import base64, json
-
-connection = pymysql.connect(user='root',
-                             password=config.dbpass,
-                             host='localhost',
-                             port=3306,
-                             database='nekobot')
-db = connection.cursor()
+import aiomysql
 
 class Games:
 
     def __init__(self, bot):
         self.bot = bot
+
+    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                              user='root', password=config.dbpass,
+                                              db='nekobot')
+        async with connection.cursor() as db:
+            await db.execute(query)
+            if isSelect:
+                if fetchAll:
+                    values = await db.fetchall()
+                else:
+                    values = await db.fetchone()
+            if commit:
+                await connection.commit()
+        if isSelect:
+            return values
 
     @commands.group()
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -38,13 +48,13 @@ class Games:
             print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
             return
         try:
-            if db.execute('SELECT 1 FROM osu WHERE userid = {}'.format(ctx.message.author.id)):
-                db.execute(f"UPDATE osu SET osu = \"{username}\" WHERE userid = {ctx.message.author.id}")
-                connection.commit()
+            if await self.execute('SELECT 1 FROM osu WHERE userid = {}'.format(ctx.message.author.id), isSelect=True):
+                await self.execute(f"UPDATE osu SET osu = \"{username}\" WHERE userid = {ctx.message.author.id}",
+                                   commit=True)
                 await ctx.send("Updated!")
             else:
-                db.execute(f"INSERT IGNORE INTO osu VALUES ({ctx.message.author.id}, \"{username}\")")
-                connection.commit()
+                await self.execute(f"INSERT IGNORE INTO osu VALUES ({ctx.message.author.id}, \"{username}\")",
+                           commit=True)
                 await ctx.send("Added user!")
         except:
             await ctx.send("Failed to add user.")
@@ -54,11 +64,11 @@ class Games:
         """Show player stats"""
         if user == None:
             user = ctx.message.author
-        if not db.execute('SELECT 1 FROM osu WHERE userid = {}'.format(user.id)):
+        if not await self.execute('SELECT 1 FROM osu WHERE userid = {}'.format(user.id), isSelect=True):
             await ctx.send("That user doesn't have a OSU user attached to your account. Use `n!osu add` to add a user.")
         else:
-            db.execute(f"SELECT osu FROM osu WHERE userid = {ctx.message.author.id}")
-            username = db.fetchone()[0]
+            x = await self.execute(f"SELECT osu FROM osu WHERE userid = {ctx.message.author.id}", isSelect=True)
+            username = x[0]
             await ctx.send(f"Getting results for \"{username}\"")
             try:
                 async with aiohttp.ClientSession() as cs:

@@ -1,4 +1,4 @@
-import discord, pymysql, random, time, datetime, asyncio
+import discord, aiomysql, random, time, datetime, asyncio
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
@@ -26,30 +26,41 @@ class CardGame:
     def __init__(self, bot):
         self.bot = bot
 
+    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                              user='root', password=config.dbpass,
+                                              db='nekobot')
+        async with connection.cursor() as db:
+            await db.execute(query)
+            if isSelect:
+                if fetchAll:
+                    values = await db.fetchall()
+                else:
+                    values = await db.fetchone()
+            if commit:
+                await connection.commit()
+        if isSelect:
+            return values
+
     async def usercheck(self, datab: str, user: discord.Member):
         user = user.id
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
-        if not db.execute(f'SELECT 1 FROM {datab} WHERE userid = {user}'):
-            return False
-        else:
-            return True
+        connection = await aiomysql.connect(host='localhost', port=3306,
+                                            user='root', password=config.dbpass,
+                                            db='nekobot')
+        async with connection.cursor() as db:
+            if not await db.execute(f'SELECT 1 FROM {datab} WHERE userid = {user}'):
+                return False
+            else:
+                return True
 
     async def _create_user(self, user_id: int, datab: str = "roleplay"):
         try:
-            connection = pymysql.connect(host="localhost",
-                                         user="root",
-                                         password="rektdiscord",
-                                         db="nekobot",
-                                         port=3306)
-            db = connection.cursor()
+            connection = await aiomysql.connect(host='localhost', port=3306,
+                                                user='root', password=config.dbpass,
+                                                db='nekobot')
+            async with connection.cursor() as db:
+                await db.execute(f"INSERT INTO {datab} VALUES ({user_id}, 0, 0, 0, 0, 0, 0, 0)")
             # userid, cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 lastdaily, key
-            db.execute(f"INSERT INTO {datab} VALUES ({user_id}, 0, 0, 0, 0, 0, 0, 0)")
-            connection.commit()
         except:
             pass
 
@@ -88,16 +99,10 @@ class CardGame:
             lang = lang.decode('utf8')
         else:
             lang = "english"
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
         author = ctx.message.author
-        if not db.execute(f"SELECT 1 FROM roleplay WHERE userid = {author.id}"):
+        if not await self.execute(f"SELECT 1 FROM roleplay WHERE userid = {author.id}", isSelect=True):
             return await ctx.send(f"{author.mention}, you don't have any cards!")
-        elif not db.execute(f"SELECT 1 FROM roleplay WHERE userid = {user.id}"):
+        elif not await self.execute(f"SELECT 1 FROM roleplay WHERE userid = {user.id}", isSelect=True):
             return await ctx.send(f"{user.name} doesn't have any cards.")
         await ctx.send(getlang(lang)["cardgame"]["battle"]["confirm"].format(user, author))
 
@@ -129,8 +134,8 @@ class CardGame:
                 return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid"])
             elif msgcontent > 6:
                 return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid"])
-            db.execute(f"SELECT cardid{msgcontent} FROM roleplay WHERE userid = {author.id}")
-            author_card = int(db.fetchone()[0])
+            x = await self.execute(f"SELECT cardid{msgcontent} FROM roleplay WHERE userid = {author.id}", isSelect=True)
+            author_card = int(x[0])
             if author_card == 0:
                 return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid_slot"].format(author))
             else:
@@ -147,19 +152,20 @@ class CardGame:
                     return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid"])
                 elif msgcontent > 6:
                     return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid"])
-                db.execute(f"SELECT cardid{msgcontent} FROM roleplay WHERE userid = {user.id}")
-                user_card = int(db.fetchone()[0])
+                x = await self.execute(f"SELECT cardid{msgcontent} FROM roleplay WHERE userid = {user.id}",
+                                       isSelect=True)
+                user_card = int(x[0])
                 if user_card == 0:
                     return await ctx.send(getlang(lang)["cardgame"]["battle"]["invalid_slot"].format(user))
                 else:
-                    db.execute(
-                        f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {author_card}")
-                    all_author_cards = db.fetchall()
+                    query = f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {author_card}"
+                    all_author_cards = await self.execute(query=query, isSelect=True, fetchAll=True)
                     author_card_name = all_author_cards[0][0]
                     author_card_attack = all_author_cards[0][1]
                     author_card_defense = all_author_cards[0][2]
-                    db.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {user_card}")
-                    all_user_cards = db.fetchall()
+                    x = await self.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {user_card}",
+                                           isSelect=True, fetchAll=True)
+                    all_user_cards = x
                     user_card_name = all_user_cards[0][0]
                     user_card_attack = all_user_cards[0][1]
                     user_card_defense = all_user_cards[0][2]
@@ -211,19 +217,13 @@ class CardGame:
                 res = await r.json()
         if not res['voted'] == 1:
             return await ctx.send(getlang(lang)["cardgame"]["daily"]["no_vote"])
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
-        i = db.execute(f"SELECT 1 FROM roleplay WHERE userid = {ctx.message.author.id}")
+        i = await self.execute(f"SELECT 1 FROM roleplay WHERE userid = {ctx.message.author.id}", isSelect=True)
         if i == 0:
-            db.execute(f"INSERT INTO roleplay VALUES ({ctx.message.author.id}, 0, 0, 0, 0, 0, 0, 0)")
-            connection.commit()
+            await self.execute(f"INSERT INTO roleplay VALUES ({ctx.message.author.id}, 0, 0, 0, 0, 0, 0, 0)",
+                               commit=True)
         author = ctx.message.author
-        db.execute(f"SELECT lastdaily FROM roleplay WHERE userid = {author.id}")
-        lastdaily = int(db.fetchone()[0])
+        lastdaily = await self.execute(f"SELECT lastdaily FROM roleplay WHERE userid = {author.id}", isSelect=True)
+        lastdaily = int(lastdaily[0])
         lastdaily = datetime.datetime.utcfromtimestamp(int(lastdaily)).strftime("%d")
         today = datetime.datetime.utcfromtimestamp(time.time()).strftime("%d")
         if today == lastdaily:
@@ -234,9 +234,8 @@ class CardGame:
             timeleft_m = time.strftime("%M", time.gmtime(delta.seconds))
             await ctx.send(getlang(lang)["cardgame"]["daily"]["wait_time"].format(timeleft, timeleft_m))
             return
-        db.execute(
-            f"SELECT cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 FROM roleplay WHERE userid = {author.id}")
-        allcards = db.fetchall()
+        all_ = f"SELECT cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 FROM roleplay WHERE userid = {author.id}"
+        allcards = await self.execute(query=all_, isSelect=True, fetchAll=True)
         cardid1 = int(allcards[0][0])
         cardid2 = int(allcards[0][1])
         cardid3 = int(allcards[0][2])
@@ -313,15 +312,12 @@ class CardGame:
         ]
         character_loli = str(random.choice(list_)).lower().replace(' ', '_')
         character_code = random.randint(0, 1000000000)
-        db.execute(f"UPDATE roleplay SET lastdaily = {int(time.time())} WHERE userid = {author.id}")
-        connection.commit()
-        db.execute(f"UPDATE roleplay SET {dailycard} = {character_code} WHERE userid = {author.id}")
-        connection.commit()
-        db.execute(f"INSERT INTO roleplay_cards VALUES ({character_code},"
+        await self.execute(f"UPDATE roleplay SET lastdaily = {int(time.time())} WHERE userid = {author.id}", commit=True)
+        await self.execute(f"UPDATE roleplay SET {dailycard} = {character_code} WHERE userid = {author.id}", commit=True)
+        await self.execute(f"INSERT INTO roleplay_cards VALUES ({character_code},"
                    f"\"{character_loli}\","
                    f"{random.randint(1, 50)},"
-                   f"{random.randint(1, 50)})")
-        connection.commit()
+                   f"{random.randint(1, 50)})", commit=True)
         await ctx.send(getlang(lang)["cardgame"]["daily"]["given_char"].format(character_loli.replace('_', ' ').title()))
 
     def _generate_card(self, character: str, num: int, attack: int, defense: int):
@@ -392,12 +388,7 @@ class CardGame:
 
     @card.command(name='sell')
     async def card_sell(self, ctx, num: int):
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
+        """Sell a card"""
         try:
             if await self.usercheck('roleplay', ctx.message.author) is False:
                 await self._create_user(ctx.message.author.id)
@@ -418,13 +409,13 @@ class CardGame:
         elif num == 6:
             cardnum = "cardid6"
         author = ctx.message.author
-        db.execute(f"SELECT {cardnum} FROM roleplay WHERE userid = {author.id}")
-        selectd = db.fetchone()[0]
+        x = await self.execute(f"SELECT {cardnum} FROM roleplay WHERE userid = {author.id}", isSelect=True)
+        selectd = x[0]
         if int(selectd) == 0:
             return await ctx.send("**No cards in that slot...**")
 
-        db.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(selectd)}")
-        allcards = db.fetchall()
+        allcards = await self.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(selectd)}",
+                                    isSelect=True, fetchAll=True)
 
         cardname = str(allcards[0][0])
         cardname_en = str(allcards[0][0]).replace('_', ' ').title()
@@ -446,41 +437,33 @@ class CardGame:
 
         await ctx.send(f"Sold {cardname} for {cardprice}")
 
-        hasaccount = db.execute(f"SELECT 1 FROM economy WHERE userid = {author.id}")
+        hasaccount = await self.execute(f"SELECT 1 FROM economy WHERE userid = {author.id}", isSelect=True)
         if hasaccount == 0:
-            db.execute(f"INSERT INTO economy VALUES ({author.id}, 0, 0)")
-            connection.commit()
+            await self.execute(f"INSERT INTO economy VALUES ({author.id}, 0, 0)", commit=True)
 
-        db.execute(f"SELECT balance FROM economy WHERE userid = {author.id}")
-        balance = int(db.fetchone()[0])
-        db.execute(f"UPDATE economy SET balance = {int(balance + cardprice)} WHERE userid = {author.id}")
-        connection.commit()
-        db.execute(f"UPDATE roleplay SET {cardnum} = 0 WHERE userid = {author.id}")
-        connection.commit()
+        x = await self.execute(f"SELECT balance FROM economy WHERE userid = {author.id}", isSelect=True)
+        balance = int(x[0])
+        await self.execute(f"UPDATE economy SET balance = {int(balance + cardprice)} WHERE userid = {author.id}",
+                           commit=True)
+        await self.execute(f"UPDATE roleplay SET {cardnum} = 0 WHERE userid = {author.id}", commit=True)
 
     @card.command(name='list')
     async def card_list(self, ctx):
         """List your cards"""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
         try:
             if await self.usercheck('roleplay', ctx.message.author) is False:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
         author = ctx.message.author
-        db.execute(
-            f"SELECT cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 FROM roleplay WHERE userid = {author.id}")
-        allcards = db.fetchall()[0]
+        query = f"SELECT cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 FROM roleplay WHERE userid = {author.id}"
+        allcards = await self.execute(query=query, isSelect=True, fetchAll=True)
+        allcards = allcards[0]
 
-        card1 = db.execute(
-            f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[0])}")
-        if card1 != 0:
-            all_ = db.fetchall()[0]
+        query = f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[0])}"
+        card1 = await self.execute(query=query, isSelect=True, fetchAll=True)
+        if card1:
+            all_ = card1[0]
             card1 = str(all_[0]).replace("_", " ").title()
             card1_a = all_[1]
             card1_d = all_[2]
@@ -489,10 +472,10 @@ class CardGame:
             card1_a = 0
             card1_d = 0
 
-        card2 = db.execute(
-            f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[1])}")
-        if card2 != 0:
-            all_ = db.fetchall()[0]
+        query = f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[1])}"
+        card2 = await self.execute(query=query, isSelect=True, fetchAll=True)
+        if card2:
+            all_ = card2[0]
             card2 = str(all_[0]).replace("_", " ").title()
             card2_a = all_[1]
             card2_d = all_[2]
@@ -501,10 +484,10 @@ class CardGame:
             card2_a = 0
             card2_d = 0
 
-        card3 = db.execute(
-            f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[2])}")
-        if card3 != 0:
-            all_ = db.fetchall()[0]
+        query = f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[2])}"
+        card3 = await self.execute(query=query, isSelect=True, fetchAll=True)
+        if card3:
+            all_ = card3[0]
             card3 = str(all_[0]).replace("_", " ").title()
             card3_a = all_[1]
             card3_d = all_[2]
@@ -513,10 +496,10 @@ class CardGame:
             card3_a = 0
             card3_d = 0
 
-        card4 = db.execute(
-            f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[3])}")
-        if card4 != 0:
-            all_ = db.fetchall()[0]
+        query = f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[3])}"
+        card4 = await self.execute(query=query, isSelect=True, fetchAll=True)
+        if card4:
+            all_ = card4[0]
             card4 = str(all_[0]).replace("_", " ").title()
             card4_a = all_[1]
             card4_d = all_[2]
@@ -525,10 +508,10 @@ class CardGame:
             card4_a = 0
             card4_d = 0
 
-        card5 = db.execute(
-            f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[4])}")
-        if card5 != 0:
-            all_ = db.fetchall()[0]
+        query = f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[4])}"
+        card5 = await self.execute(query=query, isSelect=True, fetchAll=True)
+        if card5:
+            all_ = card5[0]
             card5 = str(all_[0]).replace("_", " ").title()
             card5_a = all_[1]
             card5_d = all_[2]
@@ -537,10 +520,10 @@ class CardGame:
             card5_a = 0
             card5_d = 0
 
-        card6 = db.execute(
-            f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[5])}")
-        if card6 != 0:
-            all_ = db.fetchall()[0]
+        query = f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {int(allcards[5])}"
+        card6 = await self.execute(query=query, isSelect=True, fetchAll=True)
+        if card6:
+            all_ = card6[0]
             card6 = str(all_[0]).replace("_", " ").title()
             card6_a = all_[1]
             card6_d = all_[2]
@@ -562,12 +545,7 @@ class CardGame:
     @card.command(name='display')
     async def card_display(self, ctx, num: int):
         """Display your card(s)"""
-        connection = pymysql.connect(host="localhost",
-                                     user="root",
-                                     password="rektdiscord",
-                                     db="nekobot",
-                                     port=3306)
-        db = connection.cursor()
+        await ctx.trigger_typing()
         try:
             if await self.usercheck('roleplay', ctx.message.author) is False:
                 await self._create_user(ctx.message.author.id)
@@ -588,14 +566,14 @@ class CardGame:
         elif num == 6:
             cardnum = "cardid6"
         author = ctx.message.author
-        db.execute(f"SELECT {cardnum} FROM roleplay WHERE userid = {author.id}")
-        if int(db.fetchone()[0]) == 0:
+        x = await self.execute(f"SELECT {cardnum} FROM roleplay WHERE userid = {author.id}", isSelect=True)
+        if int(x[0]) == 0:
             return await ctx.send("**Empty Slot**")
         num = ctx.message.author.id
-        db.execute(f"SELECT {cardnum} FROM roleplay WHERE userid = {author.id}")
-        cardid = int(db.fetchone()[0])
-        db.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {cardid}")
-        allitems = db.fetchall()
+        x = await self.execute(f"SELECT {cardnum} FROM roleplay WHERE userid = {author.id}", isSelect=True)
+        cardid = int(x[0])
+        allitems = await self.execute(f"SELECT character_name, attack, defense FROM roleplay_cards WHERE cardid = {cardid}",
+                                      isSelect=True, fetchAll=True)
         character_name = str(allitems[0][0])
         character_name_en = str(allitems[0][0]).replace('_', ' ').title()
         attack = int(allitems[0][1])
