@@ -10,7 +10,7 @@ import string
 import time
 import config
 import aiomysql
-import re, json, random
+import re, json, inspect, datetime, collections
 
 startup_extensions = {
     'modules.audio',
@@ -75,6 +75,10 @@ class Moderation:
     def __init__(self, bot):
         self.bot = bot
         self._last_result = None
+
+        # The following is for the new repl
+        self.repl_sessions = {}
+        self.repl_embeds = {}
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
         connection = await aiomysql.connect(host='localhost', port=3306,
@@ -804,6 +808,225 @@ class Moderation:
         except:
             pass
         await channel.send(embed=embed)
+
+    # the following code is used with permissions from ry00001#3487.
+    # https://github.com/ry00001/Erio/blob/master/extensions/eshell.py
+    # (modified)
+    @commands.group(invoke_without_command=True, name="weebpl")
+    @commands.is_owner()
+    async def repl(self, ctx, *, name: str = None):
+        """New stylish repl command"""
+        session = ctx.message.channel.id
+
+        embed = discord.Embed(
+            description="_Enter code to execute or evaluate. "
+                        "`exit()` or `quit` to exit._",
+            timestamp=datetime.datetime.now())
+
+        embed.set_footer(
+            text="Interactive Python Shell",
+            icon_url="https://upload.wikimedia.org/wikipedia/commons/thumb"
+                     "/c/c3/Python-logo-notext.svg/1024px-Python-logo-notext"
+                     ".svg.png")
+
+        if name is not None:
+            embed.title = name.strip(" ")
+
+        history = collections.OrderedDict()
+
+        variables = {
+            'ctx': ctx,
+            'bot': self.bot,
+            'message': ctx.message,
+            'guild': ctx.message.guild,
+            'channel': ctx.message.channel,
+            'author': ctx.message.author,
+            'discord': discord,
+            '_': None
+        }
+
+        if session in self.repl_sessions:
+            return await ctx.send('There already is a repl in this channel.')
+
+        shell = await ctx.send(embed=embed)
+
+        self.repl_sessions[session] = shell
+        self.repl_embeds[shell] = embed
+
+        while True:
+            response = await self.bot.wait_for(
+                'message',
+                # formatting hard
+                check=lambda m: m.content.startswith(
+                    '`') and m.author == ctx.author and m.channel == ctx.channel
+            )
+
+            cleaned = self.cleanup_code(response.content)
+            shell = self.repl_sessions[session]
+
+            # Regular Bot Method
+            try:
+                await ctx.message.channel.get_message(
+                    self.repl_sessions[session].id)
+            except discord.NotFound:
+                new_shell = await ctx.send(embed=self.repl_embeds[shell])
+                self.repl_sessions[session] = new_shell
+
+                embed = self.repl_embeds[shell]
+                del self.repl_embeds[shell]
+                self.repl_embeds[new_shell] = embed
+
+                shell = self.repl_sessions[session]
+
+            try:
+                await response.delete()
+            except discord.Forbidden:
+                pass
+
+            if len(self.repl_embeds[shell].fields) >= 7:
+                self.repl_embeds[shell].remove_field(0)
+
+            if cleaned in ('quit', 'exit', 'exit()', 'stop', 'stop()'):
+                self.repl_embeds[shell].color = 16426522
+
+                if self.repl_embeds[shell].title is not discord.Embed.Empty:
+                    history_string = "History for {}\n\n\n".format(
+                        self.repl_embeds[shell].title)
+                else:
+                    history_string = "History for latest session\n\n\n"
+
+                for item in history.keys():
+                    history_string += ">>> {}\n{}\n\n".format(
+                        item,
+                        history[item])
+
+                haste_url = await hastebin(history_string)
+                return_msg = f"[`Leaving shell session. History hosted on " \
+                             f"hastebin.`]({haste_url}) "
+
+                self.repl_embeds[shell].add_field(
+                    name="`>>> {}`".format(cleaned),
+                    value=return_msg,
+                    inline=False)
+
+                await self.repl_sessions[session].edit(
+                    embed=self.repl_embeds[shell])
+
+                del self.repl_embeds[shell]
+                del self.repl_sessions[session]
+                return
+
+            executor = exec
+            if cleaned.count('\n') == 0:
+                # single statement, potentially 'eval'
+                try:
+                    code = compile(cleaned, '<repl session>', 'eval')
+                except SyntaxError:
+                    pass
+                else:
+                    executor = eval
+
+            if executor is exec:
+                try:
+                    code = compile(cleaned, '<repl session>', 'exec')
+                except SyntaxError as err:
+                    self.repl_embeds[shell].color = 15746887
+
+                    return_msg = self.get_syntax_error(err)
+
+                    history[cleaned] = return_msg
+
+                    if len(cleaned) > 800:
+                        cleaned = "<Too big to be printed>"
+                    if len(return_msg) > 800:
+                        haste_url = await hastebin(return_msg)
+                        return_msg = f'[`SyntaxError too big to be printed. ' \
+                                     f'Hosted on hastebin.`]({haste_url}) '
+
+                    self.repl_embeds[shell].add_field(
+                        name="`>>> {}`".format(cleaned),
+                        value=return_msg,
+                        inline=False)
+
+                    await self.repl_sessions[session].edit(
+                        embed=self.repl_embeds[shell])
+                    continue
+
+            variables['message'] = response
+
+            fmt = None
+            stdout = io.StringIO()
+
+            # noinspection PyBroadException
+            try:
+                with redirect_stdout(stdout):
+                    # probably fine
+                    # noinspection PyUnboundLocalVariable
+                    result = executor(code, variables)
+                    if inspect.isawaitable(result):
+                        result = await result
+            except Exception:
+                self.repl_embeds[shell].color = 15746887
+                value = stdout.getvalue()
+                fmt = '```py\n{}{}\n```'.format(
+                    value,
+                    traceback.format_exc())
+            else:
+                self.repl_embeds[shell].color = 4437377
+
+                value = stdout.getvalue()
+
+                if result is not None:
+                    fmt = '```py\n{}{}\n```'.format(
+                        value,
+                        result)
+
+                    variables['_'] = result
+                elif value:
+                    fmt = '```py\n{}\n```'.format(value)
+
+            history[cleaned] = fmt
+
+            if len(cleaned) > 800:
+                cleaned = "<Too big to be printed>"
+
+            try:
+                if fmt is not None:
+                    if len(fmt) >= 800:
+                        haste_url = await hastebin(fmt)
+                        self.repl_embeds[shell].add_field(
+                            name="`>>> {}`".format(cleaned),
+                            value=f"[`Content too big to be printed. Hosted "
+                                  f"on hastebin.`]({haste_url})",
+                            inline=False)
+
+                        await self.repl_sessions[session].edit(
+                            embed=self.repl_embeds[shell])
+                    else:
+                        self.repl_embeds[shell].add_field(
+                            name="`>>> {}`".format(cleaned),
+                            value=fmt,
+                            inline=False)
+
+                        await self.repl_sessions[session].edit(
+                            embed=self.repl_embeds[shell])
+                else:
+                    self.repl_embeds[shell].add_field(
+                        name="`>>> {}`".format(cleaned),
+                        value="_`No response`_",
+                        inline=False)
+
+                    await self.repl_sessions[session].edit(
+                        embed=self.repl_embeds[shell])
+
+            except discord.Forbidden:
+                pass
+
+            except discord.HTTPException as err:
+                error_embed = discord.Embed(
+                    color=15746887,
+                    description='**Error**: _{}_'.format(err))
+                await ctx.send(embed=error_embed)
 
     async def on_guild_remove(self, guild):
         if not guild.large:
