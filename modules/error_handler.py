@@ -1,5 +1,6 @@
 from discord.ext import commands
 import discord, traceback, sys
+import config, aiohttp
 
 class error_handler:
 
@@ -33,10 +34,19 @@ class error_handler:
                                title="Error",
                                description=f"Error in command {ctx.command.qualified_name}, "
                                            f"[Support Server](https://discord.gg/q98qeYN)")
-            await channel.send(embed=discord.Embed(color=0xff6f3f,
-                                                   title="Command Error").add_field(
-                name=f"Command: {ctx.command.qualified_name}",
-                value=f"```py\n{exception}```"))
+            webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
+            payload = {
+                "embeds": [
+                    {
+                        "title": f"Command: {ctx.command.qualified_name}",
+                        "description": f"```py\n{exception}\n```",
+                        "color": 16740159
+                    }
+                ]
+            }
+            async with aiohttp.ClientSession() as cs:
+                async with cs.post(webhook_url, json=payload) as r:
+                    await r.read()
             await ctx.send(embed=em)
             print('In {}:'.format(ctx.command.qualified_name), file=sys.stderr)
             traceback.print_tb(exception.original.__traceback__)
