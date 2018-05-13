@@ -547,8 +547,7 @@ class Fun:
         voters = []
         for vote in votes:
             voters.append(vote[0])
-        weebsh = self.bot.get_guild(300407204987666432)
-        if str(ctx.message.author.id) in voters or weebsh.get_member(ctx.message.author.id):
+        if str(ctx.message.author.id) in voters:
             await ctx.trigger_typing()
             url = f"https://nekobot.xyz/api/imagegen?type=changemymind&text={text}"
             async with aiohttp.ClientSession() as cs:
