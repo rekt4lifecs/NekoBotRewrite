@@ -32,7 +32,6 @@ class DiscordBotsOrgAPI:
             db.execute(f"INSERT INTO guildcount VALUES ({totalservers}, {int(time.time())})")
             connection.commit()
             try:
-                await self.dblpy.post_server_count(shard_count=self.bot.shard_count, shard_no=self.bot.shard_id)
                 url = "https://discordbots.org/api/bots/310039170792030211/stats"
                 payload = {
                     "server_count": int(totalservers)
