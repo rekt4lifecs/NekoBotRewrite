@@ -233,15 +233,12 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         self.counter['ass'] += 1
-        headers = {"Authorization": f"Client-ID {config.imgur}"}
-        url = f'https://api.imgur.com/3/gallery/r/asstastic/hot/{random.randint(1, 5)}'
+        url = "https://nekobot.xyz/api/image?type=ass"
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(url, headers=headers) as r:
+            async with cs.get(url) as r:
                 res = await r.json()
-        x = random.choice(res['data'])
-        em = discord.Embed(title=f"**{x['title']}**",
-                           color=0xDEADBF)
-        em.set_image(url=x['link'])
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=res['message'])
 
         await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
 
@@ -296,14 +293,12 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         self.counter['gonewild'] += 1
-        headers = {"Authorization": f"Client-ID {config.imgur}"}
-        url = f'https://api.imgur.com/3/gallery/r/gonewild/hot/{random.randint(1, 5)}'
+        url = "https://nekobot.xyz/api/image?type=gonewild"
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(url, headers=headers) as r:
+            async with cs.get(url) as r:
                 res = await r.json()
-        x = random.choice(res['data'])
-        em = discord.Embed(title=f"**{x['title']}**", color=0xDEADBF)
-        em.set_image(url=x['link'])
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=res['message'])
 
         await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
 
