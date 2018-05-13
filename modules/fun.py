@@ -678,12 +678,7 @@ class Fun:
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def gif(self, ctx, *keywords):
         """Retrieves first search result from giphy"""
-        if keywords:
-            keywords = "+".join(keywords)
-        else:
-            await self.bot.send_cmd_help(ctx)
-            return
-
+        keywords = "+".join(keywords)
         url = ("http://api.giphy.com/v1/gifs/search?&api_key={}&q={}&rating=g"
                "".format(config.giphy_key, keywords))
 
