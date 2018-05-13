@@ -89,6 +89,11 @@ class CardGame:
             lang = lang.decode('utf8')
         else:
             lang = "english"
+        try:
+            if await self.usercheck('roleplay', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
         await ctx.send(getlang(lang)["cardgame"]["coming_soon"], delete_after=5)
 
     @card.command(name='fight', aliases=['battle'])
@@ -100,6 +105,11 @@ class CardGame:
         else:
             lang = "english"
         author = ctx.message.author
+        try:
+            if await self.usercheck('roleplay', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
         if not await self.execute(f"SELECT 1 FROM roleplay WHERE userid = {author.id}", isSelect=True):
             return await ctx.send(f"{author.mention}, you don't have any cards!")
         elif not await self.execute(f"SELECT 1 FROM roleplay WHERE userid = {user.id}", isSelect=True):
@@ -191,19 +201,6 @@ class CardGame:
         else:
             return await ctx.send(getlang(lang)["cardgame"]["battle"]["cancelled"])
 
-    @card.command(name='check')
-    @commands.is_owner()
-    async def check_check_lol(self, ctx):
-        """Check test"""
-        author = ctx.message.author
-        await ctx.send("Check Start.")
-
-        def check(m):
-            return m.author == author and m.channel == ctx.message.channel
-
-        msg = await self.bot.wait_for('message', check=check)
-        await ctx.send(f"{msg.attachments[0]}")
-
     @card.command(name='daily')
     async def card_daily(self, ctx):
         """Get your card daily"""
@@ -212,6 +209,11 @@ class CardGame:
             lang = lang.decode('utf8')
         else:
             lang = "english"
+        try:
+            if await self.usercheck('roleplay', ctx.message.author) is False:
+                await self._create_user(ctx.message.author.id)
+        except:
+            pass
         async with aiohttp.ClientSession(headers={"Authorization": config.dbots_key}) as cs:
             async with cs.get(f'https://discordbots.org/api/bots/310039170792030211/check?userId={ctx.message.author.id}') as r:
                 res = await r.json()
