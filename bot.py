@@ -60,6 +60,10 @@ class NekoBot(commands.AutoShardedBot):
                 print("Failed to load {}.".format(extension), file=sys.stderr)
                 traceback.print_exc()
 
+    async def on_command_error(self, context, exception):
+        if isinstance(exception, commands.CommandNotFound):
+            return
+
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
             pages = await self.bot.formatter.format_help_for(ctx, ctx.invoked_subcommand)
@@ -100,6 +104,12 @@ class NekoBot(commands.AutoShardedBot):
                 print(res)
 
     async def on_ready(self):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.post("http://localhost:1212",
+                               json={"instance": 0,
+                                     "servers": len(self.guilds)}) as r:
+                res = await r.json()
+                print(res)
         print("             _         _           _   \n"
               "            | |       | |         | |  \n"
               "  _ __   ___| | _____ | |__   ___ | |_ \n"
