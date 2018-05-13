@@ -331,7 +331,7 @@ class NSFW:
     @commands.guild_only()
     async def hentai(self, ctx):
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>\nhttps://nekobot.xyz/hentai.png")
             return
         self.counter['hentai'] += 1
         # amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"', isSelect=True)
