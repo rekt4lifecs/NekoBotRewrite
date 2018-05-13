@@ -29,7 +29,7 @@ startup_extensions = {
     'modules.mod',
     'modules.nsfw',
     'modules.reactions',
-    'moduules.error_handler'
+    'modules.error_handler'
 }
 
 def _prefix_callable(bot, msg):
@@ -48,10 +48,10 @@ class NekoBot(commands.AutoShardedBot):
                          help_attrs={'hidden': True})
         self.counter = Counter()
 
-        async def _init_redis(self):
+        async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
 
-        self.loop.create_task(_init_redis(self))
+        self.loop.create_task(_init_redis())
 
         for extension in startup_extensions:
             try:
@@ -59,6 +59,16 @@ class NekoBot(commands.AutoShardedBot):
             except:
                 print("Failed to load {}.".format(extension), file=sys.stderr)
                 traceback.print_exc()
+
+    async def send_cmd_help(self, ctx):
+        if ctx.invoked_subcommand:
+            pages = await self.bot.formatter.format_help_for(ctx, ctx.invoked_subcommand)
+            for page in pages:
+                await ctx.send(page)
+        else:
+            pages = await self.bot.formatter.format_help_for(ctx, ctx.command)
+            for page in pages:
+                await ctx.send(page)
 
     async def on_message(self, message):
         self.counter["messages_read"] += 1
