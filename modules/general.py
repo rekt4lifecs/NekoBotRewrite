@@ -167,7 +167,10 @@ class General:
 
     @commands.command(aliases=['version'])
     async def info(self, ctx):
-        servers = len(self.bot.guilds)
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("http://localhost:1212") as r:
+                res = await r.json()
+        servers = res["count"]
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
