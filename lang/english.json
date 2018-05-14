@@ -91,6 +91,7 @@
     "welcome": "Welcome to the NekoBank!",
     "total_amount": "Total $",
     "user_amount": "Your amount",
+    "footer": "[Donate](https://www.patreon.com/NekoBot) or [Vote](https://discordbots.org/bot/nekobot) to get more currency daily OwO",
     "registered": "Registered a bank account!",
     "already_registered": "You already have a bank account <:nkoDed:422666465238319107>",
     "profile": {

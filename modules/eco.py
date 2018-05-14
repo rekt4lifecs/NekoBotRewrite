@@ -105,6 +105,7 @@ class economy:
         em.set_thumbnail(url=self.bot.user.avatar_url)
         em.add_field(name=getlang(lang)["eco"]["total_amount"], value=f"{total}")
         em.add_field(name=getlang(lang)["eco"]["user_amount"], value=balance)
+        em.add_field(name="owo", value=getlang(lang)["eco"]["footer"])
 
         await ctx.send(embed=em)
 
