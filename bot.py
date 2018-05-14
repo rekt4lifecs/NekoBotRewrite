@@ -3,7 +3,7 @@ import logging, traceback, sys, discord
 from datetime import date
 from collections import Counter
 import datetime
-import aiohttp, asyncio, aioredis
+import aiohttp, asyncio, aioredis, aiomysql
 import random
 import config
 
@@ -51,6 +51,12 @@ class NekoBot(commands.AutoShardedBot):
         async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
 
+        async def _init_sql():
+            self.sql_conn = await aiomysql.connect(host='localhost', port=3306,
+                                              user='root', password=config.dbpass,
+                                              db='nekobot')
+
+        self.loop.create_task(_init_sql())
         self.loop.create_task(_init_redis())
 
         for extension in startup_extensions:
