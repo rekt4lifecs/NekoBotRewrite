@@ -24,17 +24,19 @@ class DiscordBotsOrgAPI:
     async def startdbl(self):
         while True:
             print("Getting all servers.")
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get("http://localhost:1212") as r:
-                    total = await r.json()
-            totalservers = total["count"]
+            # async with aiohttp.ClientSession() as cs:
+            #     async with cs.get("http://localhost:1212") as r:
+            #         total = await r.json()
+            # totalservers = total["count"]
+            totalservers = len(self.bot.guilds)
             print("Attempting to update server count.")
             db.execute(f"INSERT INTO guildcount VALUES ({totalservers}, {int(time.time())})")
             connection.commit()
             try:
                 url = "https://discordbots.org/api/bots/310039170792030211/stats"
                 payload = {
-                    "server_count": int(totalservers)
+                    "server_count": int(totalservers),
+                    "shard_count": len(self.bot.shards)
                 }
                 async with aiohttp.ClientSession() as cs:
                     async with cs.post(url, json=payload, headers={"Authorization": config.dbots_key}) as r:
