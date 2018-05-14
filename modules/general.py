@@ -186,8 +186,7 @@ class General:
                                                                                           millify(len(set(
                                                                                               self.bot.get_all_channels()))),
                                                                                           self.bot.shard_count,
-                                                                                          len(
-                                                                                              self.bot.voice_clients),
+                                                                                          len(self.bot.lavalink.players._players),
                                                                                           self.get_bot_uptime(),
                                                                                           millify(self.bot.counter[
                                                                                                       'messages_read'])))
