@@ -90,7 +90,8 @@ class economy:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
-
+        x = await self.execute(f"SELECT balance FROM economy WHERE userid = {user.id}", isSelect=True)
+        balance = int(x[0])
         total = 0
         all_eco = await self.execute("SELECT balance FROM economy", isSelect=True, fetchAll=True)
         for x in all_eco:
@@ -100,6 +101,7 @@ class economy:
                            title=getlang(lang)["eco"]["welcome"])
         em.set_thumbnail(url=self.bot.user.avatar_url)
         em.add_field(name=getlang(lang)["eco"]["total_amount"], value=f"{total}")
+        em.add_field(name=getlang(lang)["eco"]["user_amount"], value=balance)
 
         await ctx.send(embed=em)
 
