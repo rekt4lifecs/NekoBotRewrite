@@ -11,6 +11,7 @@ import time
 import config
 import aiomysql
 import re, json, inspect, datetime, collections
+import random
 
 startup_extensions = {
     'modules.audio',
@@ -162,19 +163,20 @@ class Moderation:
             lang = "english"
         users_dehoisted = []
         users_failed = []
-        #wordlist = open("/usr/share/dict/american-english").read().splitlines()
+        wordlist = open("/usr/share/dict/american-english").read().splitlines()
         starttime = int(time.time())
         await ctx.send(getlang(lang)["mod"]["dehoist"]["start"])
         for user in ctx.message.guild.members:
             try:
                 if not user.display_name[0] in list(str(string.ascii_letters)):
-                    await user.edit(nick=chr(55343) + chr(56482) + str(user.name), reason="Hoisting")
-                    #await user.edit(nick=random.choice(wordlist), reason="Hoisting")
+                    #await user.edit(nick=chr(55343) + chr(56482) + str(user.name), reason="Hoisting")
+                    await user.edit(nick=random.choice(wordlist), reason="Hoisting")
                     users_dehoisted.append(f"{user.name}-{user.id}")
-            except:
+            except Exception as e:
+                users_failed.append(f"FAILED | {user.name}-{user.id} | {e}")
                 users_failed.append(user.id)
                 pass
-        hastepaste = await hastebin("\n".join(users_dehoisted))
+        hastepaste = await hastebin("\n".join(users_dehoisted) + "\n".join(users_failed))
         await ctx.send(getlang(lang)["mod"]["dehoist"]["end"].format(len(users_dehoisted),
                                                                      int(time.time() - starttime),
                                                                      len(users_failed),
