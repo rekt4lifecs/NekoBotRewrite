@@ -167,10 +167,11 @@ class General:
 
     @commands.command(aliases=['version'])
     async def info(self, ctx):
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("http://localhost:1212") as r:
-                res = await r.json()
-        servers = res["count"]
+        # async with aiohttp.ClientSession() as cs:
+        #     async with cs.get("http://localhost:1212") as r:
+        #         res = await r.json()
+        # servers = res["count"]
+        servers = len(self.bot.guilds)
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
@@ -186,8 +187,7 @@ class General:
                                                                                           millify(len(set(
                                                                                               self.bot.get_all_channels()))),
                                                                                           self.bot.shard_count,
-                                                                                          len(
-                                                                                              self.bot.voice_clients),
+                                                                                          len(self.bot.lavalink.players._players),
                                                                                           self.get_bot_uptime(),
                                                                                           millify(self.bot.counter[
                                                                                                       'messages_read'])))
@@ -898,6 +898,17 @@ class General:
         try:
             emoji = self.bot.get_emoji(408672929379909632)
             await ctx.message.add_reaction(emoji)
+        except:
+            pass
+
+    async def on_message(self, message):
+        try:
+            if message.channel.id == 445635075543924756:
+                descrip = message.embeds[0].description
+                clean = int(str(descrip).replace("<@", "").replace(">", "").replace("has voted and recieved 5000 credits!", ""))
+                user = self.bot.get_user(clean)
+                await user.send(embed=discord.Embed(color=0xDEADBF, description="You have recieved 5000 credits for voting!"))
+                print(f"[VOTE] {user} | Recieved")
         except:
             pass
 
