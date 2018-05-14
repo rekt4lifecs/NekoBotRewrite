@@ -90,6 +90,7 @@
   "eco": {
     "welcome": "Welcome to the NekoBank!",
     "total_amount": "Only has $",
+    "footer": "[Donate](https://www.patreon.com/NekoBot) or [Vote](https://discordbots.org/bot/nekobot) to get more c-currency you baka!",
     "user_amount": "Y-your amount",
     "registered": "Registered a new bank account don't spend everything at once!",
     "already_registered": "Y-Y-Y-You already have a bank account, hmpf <:nkoDed:422666465238319107>",
