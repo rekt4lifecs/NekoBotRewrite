@@ -90,8 +90,11 @@ class economy:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
-        x = await self.execute(f"SELECT balance FROM economy WHERE userid = {ctx.message.author.id}", isSelect=True)
-        balance = int(x[0])
+        try:
+            x = await self.execute(f"SELECT balance FROM economy WHERE userid = {ctx.message.author.id}", isSelect=True)
+            balance = int(x[0])
+        except:
+            balance = 0
         total = 0
         all_eco = await self.execute("SELECT balance FROM economy", isSelect=True, fetchAll=True)
         for x in all_eco:
