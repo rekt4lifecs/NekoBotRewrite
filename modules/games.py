@@ -96,6 +96,8 @@ class Games:
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def pubg(self, ctx, region:str, username:str):
         """Get PUBG Stats"""
+        if not commands.is_owner():
+            return await ctx.send("WIP")
         regions = ["krjp", "jp", "na", "eu", "oc", "kakao", "sea", "sa", "as"]
         if region not in regions:
             em = discord.Embed(color=0xDEADBF, title="Error", description="Invalid Region Code.")
