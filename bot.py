@@ -3,8 +3,8 @@ import logging, traceback, sys, discord
 from datetime import date
 from collections import Counter
 import datetime
-import aiohttp, asyncio, aioredis, aiomysql
-import random
+import aiohttp, aioredis, aiomysql
+import os
 import config
 
 log = logging.getLogger('NekoBot')
@@ -14,23 +14,15 @@ handler = logging.FileHandler(filename=f'NekoBot_{date}.log', encoding='utf-8', 
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 log.addHandler(handler)
 
-startup_extensions = {
-    'modules.audio',
-    'modules.cardgame',
-    'modules.chatbot',
-    'modules.discordbots',
-    'modules.donator',
-    'modules.eco',
-    'modules.fun',
-    'modules.games',
-    'modules.general',
-    'modules.imgwelcome',
-    'modules.marriage',
-    'modules.mod',
-    'modules.nsfw',
-    'modules.reactions',
-    'modules.error_handler'
-}
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 def _prefix_callable(bot, msg):
     prefixes = ['n!', 'N!']
@@ -44,7 +36,7 @@ class NekoBot(commands.AutoShardedBot):
                          pm_help=None,
                          shard_id=0,
                          status=discord.Status.dnd,
-                         max_messages=5000,
+                         max_messages=2500,
                          help_attrs={'hidden': True})
         self.counter = Counter()
 
@@ -54,17 +46,19 @@ class NekoBot(commands.AutoShardedBot):
         async def _init_sql():
             self.sql_conn = await aiomysql.create_pool(host='localhost', port=3306,
                                               user='root', password=config.dbpass,
-                                              db='nekobot', loop=self.loop)
+                                              db='nekobot', loop=self.loop, autocommit=True)
 
         self.loop.create_task(_init_sql())
         self.loop.create_task(_init_redis())
 
-        for extension in startup_extensions:
-            try:
-                self.load_extension(extension)
-            except:
-                print("Failed to load {}.".format(extension), file=sys.stderr)
-                traceback.print_exc()
+        for file in os.listdir("modules"):
+            if file.endswith(".py"):
+                name = file[:-3]
+                try:
+                    self.load_extension(f"modules.{name}")
+                except:
+                    print(bcolors.FAIL + "Failed to load {}.".format(name) + bcolors.ENDC, file=sys.stderr)
+                    traceback.print_exc()
 
     async def on_command_error(self, context, exception):
         if isinstance(exception, commands.CommandNotFound):
@@ -72,13 +66,17 @@ class NekoBot(commands.AutoShardedBot):
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
-            pages = await self.bot.formatter.format_help_for(ctx, ctx.invoked_subcommand)
+            pages = await self.formatter.format_help_for(ctx, ctx.invoked_subcommand)
             for page in pages:
                 await ctx.send(page)
         else:
-            pages = await self.bot.formatter.format_help_for(ctx, ctx.command)
+            pages = await self.formatter.format_help_for(ctx, ctx.command)
             for page in pages:
                 await ctx.send(page)
+
+    async def on_error(self, event_method, *args, **kwargs):
+        print(bcolors.FAIL + "[ERROR]" + bcolors.ENDC)
+        print(bcolors.FAIL + sys.exc_info() + bcolors.ENDC)
 
     async def on_message(self, message):
         self.counter["messages_read"] += 1
@@ -87,13 +85,14 @@ class NekoBot(commands.AutoShardedBot):
         await self.process_commands(message)
 
     async def close(self):
+        print(bcolors.FAIL + "[CLOSING]" + bcolors.ENDC)
         await super().close()
         await self.close()
 
     async def on_shard_ready(self, shard_id):
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
-        print(f"Shard {shard_id} Connected...")
+        print(bcolors.OKBLUE + f"Shard {shard_id} Connected..." + bcolors.ENDC)
         webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
         payload = {
             "embeds": [
@@ -110,20 +109,14 @@ class NekoBot(commands.AutoShardedBot):
                 print(res)
 
     async def on_ready(self):
-        async with aiohttp.ClientSession() as cs:
-            async with cs.post("http://localhost:1212",
-                               json={"instance": 0,
-                                     "servers": len(self.guilds)}) as r:
-                res = await r.json()
-                print(res)
-        print("             _         _           _   \n"
+        print(bcolors.HEADER + "             _         _           _   \n"
               "            | |       | |         | |  \n"
               "  _ __   ___| | _____ | |__   ___ | |_ \n"
               " | '_ \ / _ \ |/ / _ \| '_ \ / _ \| __|\n"
               " | | | |  __/   < (_) | |_) | (_) | |_ \n"
               " |_| |_|\___|_|\_\___/|_.__/ \___/ \__|\n"
               "                                       \n"
-              "                                       ")
+              "                                       " + bcolors.ENDC)
         print("Ready OwO")
         print(f"Shards: {self.shard_count}")
         print(f"Servers {len(self.guilds)}")
