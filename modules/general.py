@@ -66,23 +66,25 @@ class General:
         self.counter = Counter()
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        connection = await aiomysql.connect(host='localhost', port=3306,
-                                              user='root', password=config.dbpass,
-                                              db='nekobot')
-        async with connection.cursor() as db:
-            await db.execute(query)
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn as db:
+                await db.execute(query)
+                if isSelect:
+                    if fetchAll:
+                        values = await db.fetchall()
+                    else:
+                        values = await db.fetchone()
+                if commit:
+                    await conn.commit()
             if isSelect:
-                if fetchAll:
-                    values = await db.fetchall()
-                else:
-                    values = await db.fetchone()
-            if commit:
-                await connection.commit()
-        if isSelect:
-            return values
+                return values
 
     async def on_socket_response(self, msg):
         self.bot.socket_stats[msg.get('t')] += 1
+
+    @commands.command()
+    async def version(self, ctx):
+        await ctx.send("I am redboat:tm:")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
