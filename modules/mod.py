@@ -30,7 +30,7 @@ startup_extensions = {
     'modules.reactions'
 }
 
-invite_rx = re.compile("discord(?:app)?\.(?:gg|com\/invite)\/([a-z0-9]{1,16})", re.IGNORECASE)
+invite_rx = re.compile("discord(?:app)?\.(?:gg|com|me\/invite)\/([a-z0-9]{1,16})", re.IGNORECASE)
 
 class Arguments(argparse.ArgumentParser):
     def error(self, message):
