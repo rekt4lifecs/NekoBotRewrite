@@ -40,27 +40,34 @@ class CardGame:
             if isSelect:
                 return values
 
-    async def usercheck(self, datab: str, user: discord.Member):
-        user = user.id
-        connection = await aiomysql.connect(host='localhost', port=3306,
-                                            user='root', password=config.dbpass,
-                                            db='nekobot')
-        async with connection.cursor() as db:
-            if not await db.execute(f'SELECT 1 FROM {datab} WHERE userid = {user}'):
-                return False
-            else:
-                return True
+    # async def usercheck(self, datab: str, user: discord.Member):
+    #     user = user.id
+    #     async with self.bot.sql_conn.acquire() as conn:
+    #         async with connection.cursor() as db:
+    #             if not await db.execute(f'SELECT 1 FROM {datab} WHERE userid = {user}'):
+    #                 return False
+    #             else:
+    #                 return True
 
-    async def _create_user(self, user_id: int, datab: str = "roleplay"):
-        try:
-            connection = await aiomysql.connect(host='localhost', port=3306,
-                                                user='root', password=config.dbpass,
-                                                db='nekobot')
-            async with connection.cursor() as db:
-                await db.execute(f"INSERT INTO {datab} VALUES ({user_id}, 0, 0, 0, 0, 0, 0, 0)")
-            # userid, cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 lastdaily, key
-        except:
-            pass
+    # async def _create_user(self, user_id: int, datab: str = "roleplay"):
+    #     try:
+    #         connection = await aiomysql.connect(host='localhost', port=3306,
+    #                                             user='root', password=config.dbpass,
+    #                                             db='nekobot')
+    #         async with connection.cursor() as db:
+    #             await db.execute(f"INSERT INTO {datab} VALUES ({user_id}, 0, 0, 0, 0, 0, 0, 0)")
+    #         # userid, cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 lastdaily, key
+    #     except:
+    #         pass
+
+    async def usercheck(self, database:str, user:int):
+        if not await self.execute(f"SELECT 1 FROM {database} WHERE userid = {user}"):
+            return False
+        else:
+            return True
+
+    async def _create_user(self, user:int):
+        await self.execute(f"INSERT INTO roleplay VALUES ({user}, 0, 0, 0, 0, 0, 0, 0)", commit=True)
 
     @commands.group()
     @commands.cooldown(1, 7, commands.BucketType.user)
@@ -72,7 +79,7 @@ class CardGame:
         else:
             lang = "english"
         try:
-            if await self.usercheck('roleplay', ctx.message.author) is False:
+            if await self.usercheck('roleplay', ctx.message.author.id) is False:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
@@ -88,7 +95,7 @@ class CardGame:
         else:
             lang = "english"
         try:
-            if await self.usercheck('roleplay', ctx.message.author) is False:
+            if await self.usercheck('roleplay', ctx.message.author.id) is False:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
@@ -104,7 +111,7 @@ class CardGame:
             lang = "english"
         author = ctx.message.author
         try:
-            if await self.usercheck('roleplay', ctx.message.author) is False:
+            if await self.usercheck('roleplay', ctx.message.author.id) is False:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
@@ -208,7 +215,7 @@ class CardGame:
         else:
             lang = "english"
         try:
-            if await self.usercheck('roleplay', ctx.message.author) is False:
+            if await self.usercheck('roleplay', ctx.message.author.id) is False:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
@@ -390,7 +397,7 @@ class CardGame:
     async def card_sell(self, ctx, num: int):
         """Sell a card"""
         try:
-            if await self.usercheck('roleplay', ctx.message.author) is False:
+            if await self.usercheck('roleplay', ctx.message.author.id) is False:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
@@ -451,7 +458,7 @@ class CardGame:
     async def card_list(self, ctx):
         """List your cards"""
         try:
-            if await self.usercheck('roleplay', ctx.message.author) is False:
+            if await self.usercheck('roleplay', ctx.message.author.id) is False:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
@@ -547,7 +554,7 @@ class CardGame:
         """Display your card(s)"""
         await ctx.trigger_typing()
         try:
-            if await self.usercheck('roleplay', ctx.message.author) is False:
+            if await self.usercheck('roleplay', ctx.message.author.id) is False:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
