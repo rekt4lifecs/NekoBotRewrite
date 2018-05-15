@@ -67,7 +67,7 @@ class General:
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
         async with self.bot.sql_conn.acquire() as conn:
-            async with conn as db:
+            async with conn.cursor() as db:
                 await db.execute(query)
                 if isSelect:
                     if fetchAll:
@@ -81,10 +81,6 @@ class General:
 
     async def on_socket_response(self, msg):
         self.bot.socket_stats[msg.get('t')] += 1
-
-    @commands.command()
-    async def version(self, ctx):
-        await ctx.send("I am redboat:tm:")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
