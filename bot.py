@@ -52,9 +52,9 @@ class NekoBot(commands.AutoShardedBot):
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
 
         async def _init_sql():
-            self.sql_conn = await aiomysql.connect(host='localhost', port=3306,
+            self.sql_conn = await aiomysql.create_pool(host='localhost', port=3306,
                                               user='root', password=config.dbpass,
-                                              db='nekobot')
+                                              db='nekobot', loop=self.loop)
 
         self.loop.create_task(_init_sql())
         self.loop.create_task(_init_redis())

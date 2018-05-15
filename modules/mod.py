@@ -82,20 +82,18 @@ class Moderation:
         self.repl_embeds = {}
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        connection = await aiomysql.connect(host='localhost', port=3306,
-                                              user='root', password=config.dbpass,
-                                              db='nekobot')
-        async with connection.cursor() as db:
-            await db.execute(query)
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute(query)
+                if isSelect:
+                    if fetchAll:
+                        values = await db.fetchall()
+                    else:
+                        values = await db.fetchone()
+                if commit:
+                    await conn.commit()
             if isSelect:
-                if fetchAll:
-                    values = await db.fetchall()
-                else:
-                    values = await db.fetchone()
-            if commit:
-                await connection.commit()
-        if isSelect:
-            return values
+                return values
 
     def cleanup_code(self, content):
         """Automatically removes code blocks from the code."""
