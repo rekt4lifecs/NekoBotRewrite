@@ -95,7 +95,7 @@
     "registered": "Registered a bank account!",
     "already_registered": "You already have a bank account <:nkoDed:422666465238319107>",
     "profile": {
-      "title": "{0.display_name}'s Profile",
+      "title": "{0}'s Profile",
       "description": "`Balance:` **{0}**\n`Rep:` **{1}**\n`Level:` **{2}** | **{3}/{4}**\n\n```\n{5}```\nMarried to: **{6}**"
     },
     "no_account": "You don't have a bank account...",
