@@ -20,6 +20,61 @@ def getlang(lang:str):
     else:
         return None
 
+list_ = [
+    "Shiro",
+    "Kafuu Chino",
+    "Toujou Koneko",
+    "Aihara Enju",
+    "Yoshino",
+    "Takanashi Rikka",
+    "Tsutsukakushi Tsukiko",
+    "Aisaka Taiga",
+    "Oshino Shinobu",
+    "Hasegawa Kobato",
+    "Hibiki",
+    "Terminus Est",
+    "Tachibana Kanade",
+    "Noel",
+    "Itsuka Kotori",
+    "Illyasviel Von Einzbern",
+    "Sprout Tina",
+    "Yazawa Nico",
+    "Izumi Konata",
+    "Konjiki No Yami",
+    "Shana",
+    "Gokou Ruri",
+    "Sigtuna Yurie",
+    "Shimakaze",
+    "Yuuki Mikan",
+    "Victorique De Blois",
+    "Kanzaki Aria",
+    "Cirno",
+    "Wendy Marvell",
+    "Nakano Azusa",
+    "Akatsuki",
+    "Yaya",
+    "Yukihira Furano",
+    "Uni",
+    "Akatsuki",
+    "Nyaruko",
+    "Azuki Azusa",
+    "Hachikuji Mayoi",
+    "Amatsukaze",
+    "Flandre Scarlet",
+    "Hiiragi Kagami",
+    "Tatsumaki",
+    "Louise Fran\u00e7oise Le Blanc De La Valli\u00e8re",
+    "Kaname Madoka",
+    "Sakura Kyouko",
+    "Hoshimiya Kate",
+    "Fear Kubrick",
+    "Sengoku Nadeko",
+    "Kirima Sharo",
+    "Noumi Kudryavka",
+    "Kanna",
+    "chifuyu_himeki"
+]
+
 class CardGame:
     """Loli Card Gamelol"""
 
@@ -39,26 +94,6 @@ class CardGame:
                     await conn.commit()
             if isSelect:
                 return values
-
-    # async def usercheck(self, datab: str, user: discord.Member):
-    #     user = user.id
-    #     async with self.bot.sql_conn.acquire() as conn:
-    #         async with connection.cursor() as db:
-    #             if not await db.execute(f'SELECT 1 FROM {datab} WHERE userid = {user}'):
-    #                 return False
-    #             else:
-    #                 return True
-
-    # async def _create_user(self, user_id: int, datab: str = "roleplay"):
-    #     try:
-    #         connection = await aiomysql.connect(host='localhost', port=3306,
-    #                                             user='root', password=config.dbpass,
-    #                                             db='nekobot')
-    #         async with connection.cursor() as db:
-    #             await db.execute(f"INSERT INTO {datab} VALUES ({user_id}, 0, 0, 0, 0, 0, 0, 0)")
-    #         # userid, cardid1, cardid2, cardid3, cardid4, cardid5, cardid6 lastdaily, key
-    #     except:
-    #         pass
 
     async def usercheck(self, database:str, user:int):
         if not await self.execute(f"SELECT 1 FROM {database} WHERE userid = {user}"):
@@ -85,21 +120,6 @@ class CardGame:
             pass
         if ctx.invoked_subcommand is None:
             return await ctx.send(getlang(lang)["cardgame"]["card_help"])
-
-    @card.command(name='transfer')
-    async def card_transfer(self, ctx, card_num: int, user: discord.Member):
-        """Transfer a card to a user"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
-        try:
-            if await self.usercheck('roleplay', ctx.message.author.id) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
-        await ctx.send(getlang(lang)["cardgame"]["coming_soon"], delete_after=5)
 
     @card.command(name='fight', aliases=['battle'])
     async def card_battle(self, ctx, user: discord.Member):
@@ -263,60 +283,6 @@ class CardGame:
             dailycard = "cardid6"
         else:
             return await ctx.send(getlang(lang)["cardgame"]["daily"]["slots_full"])
-        list_ = [
-            "Shiro",
-            "Kafuu Chino",
-            "Toujou Koneko",
-            "Aihara Enju",
-            "Yoshino",
-            "Takanashi Rikka",
-            "Tsutsukakushi Tsukiko",
-            "Aisaka Taiga",
-            "Oshino Shinobu",
-            "Hasegawa Kobato",
-            "Hibiki",
-            "Terminus Est",
-            "Tachibana Kanade",
-            "Noel",
-            "Itsuka Kotori",
-            "Illyasviel Von Einzbern",
-            "Sprout Tina",
-            "Yazawa Nico",
-            "Izumi Konata",
-            "Konjiki No Yami",
-            "Shana",
-            "Gokou Ruri",
-            "Sigtuna Yurie",
-            "Shimakaze",
-            "Yuuki Mikan",
-            "Victorique De Blois",
-            "Kanzaki Aria",
-            "Cirno",
-            "Wendy Marvell",
-            "Nakano Azusa",
-            "Akatsuki",
-            "Yaya",
-            "Yukihira Furano",
-            "Uni",
-            "Akatsuki",
-            "Nyaruko",
-            "Azuki Azusa",
-            "Hachikuji Mayoi",
-            "Amatsukaze",
-            "Flandre Scarlet",
-            "Hiiragi Kagami",
-            "Tatsumaki",
-            "Louise Fran\u00e7oise Le Blanc De La Valli\u00e8re",
-            "Kaname Madoka",
-            "Sakura Kyouko",
-            "Hoshimiya Kate",
-            "Fear Kubrick",
-            "Sengoku Nadeko",
-            "Kirima Sharo",
-            "Noumi Kudryavka",
-            "Kanna",
-            "chifuyu_himeki"
-        ]
         character_loli = str(random.choice(list_)).lower().replace(' ', '_')
         character_code = random.randint(0, 1000000000)
         await self.execute(f"UPDATE roleplay SET lastdaily = {int(time.time())} WHERE userid = {author.id}", commit=True)
