@@ -149,6 +149,17 @@ class economy:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
+        isdonator = False
+        support = self.bot.get_guild(221989003400970241)
+        for userx in support.members:
+            if userx.id == ctx.message.author.id:
+                for role in userx.roles:
+                    if role.name == "Supporter":
+                        isdonator = True
+        if isdonator:
+            username = f"❤ {user.name}"
+        else:
+            username = str(user.name)
         if await self.usercheck('levels', user) is False:
             level = 0
             xp = 0
@@ -175,7 +186,7 @@ class economy:
             async with cs.get(f"https://api.weeb.sh/reputation/{self.bot.user.id}/{user.id}",
                                headers={"Authorization": "Wolke " + config.weeb}) as r:
                 data = await r.json()
-        embed = discord.Embed(color=0xDEABDF, title=getlang(lang)["eco"]["profile"]["title"].format(user),
+        embed = discord.Embed(color=0xDEABDF, title=getlang(lang)["eco"]["profile"]["title"].format(username),
                               description=getlang(lang)["eco"]["profile"]["description"].format(balance,
                                                                                           data['user']['reputation'],
                                                                                           level, xp, required,
