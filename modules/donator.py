@@ -45,6 +45,13 @@ class Donator:
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
 
+    @commands.command()
+    @commands.is_owner()
+    async def sendkey(self, ctx, user:discord.Member, *, key:str):
+        """Send a user their donation key."""
+        await ctx.message.add_reaction("👌")
+        await user.send(f"Your donation key:\n`{key}`")
+
     @commands.command(name='trapcard')
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def donator_trapcard(self, ctx, user: discord.Member):
