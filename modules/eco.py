@@ -182,6 +182,16 @@ class economy:
             balance = int(x[0])
         else:
             balance = 0
+        xp = await self.bot.redis.get(f"{ctx.message.author.id}-xp")
+        if xp:
+            xp = int(xp)
+            level = self._find_level(xp)
+            required = self._level_exp(level + 1)
+        else:
+            xp = 0
+            level = 0
+            required = 0
+
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://api.weeb.sh/reputation/{self.bot.user.id}/{user.id}",
                                headers={"Authorization": "Wolke " + config.weeb}) as r:
@@ -834,6 +844,15 @@ class economy:
             color = 0xff5630
         await msg.edit(
             embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
+
+    async def on_message(self, message):
+        if random.randint(1, 200) == 1:
+            if not await self.bot.redis.get(f"{message.author.id}-xp"):
+                await self.bot.redis.set(f"{message.author.id}-xp", 0)
+            currxp = await self.bot.redis.get(f"{message.author.id}-xp")
+            currxp = int(currxp)
+            newxp = random.randint(1, 10)
+            await self.bot.redis.set(f"{message.author.id}-xp", currxp + newxp)
 
 def setup(bot):
     n = economy(bot)
