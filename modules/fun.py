@@ -73,7 +73,7 @@ class Fun:
                 return values
 
     @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def blurpify(self, ctx, user:discord.Member=None):
         """Blurpify a users avatar"""
         await ctx.trigger_typing()
@@ -238,7 +238,7 @@ class Fun:
             pass
 
     @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def tweet(self, ctx, username:str, *, text:str):
         """Tweet as someone."""
         url = f"https://nekobot.xyz/api/imagegen?type=tweet&username={username}&text={text}"
@@ -251,7 +251,7 @@ class Fun:
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
     @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 20, commands.BucketType.user)
     async def nichijou(self, ctx, text:str):
         """Tweet as someone."""
         url = f"https://nekobot.xyz/api/imagegen?type=nichijou&text={text}"
@@ -290,7 +290,7 @@ class Fun:
         await ctx.send(embed=em.set_image(url=res['message']))
 
     @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def baguette(self, ctx, user:discord.Member):
         """:^)"""
         await ctx.trigger_typing()
@@ -308,7 +308,7 @@ class Fun:
             pass
 
     @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 7, commands.BucketType.user)
     async def deepfry(self, ctx, user:discord.Member):
         """Deepfry a user"""
         await ctx.trigger_typing()
