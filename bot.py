@@ -74,9 +74,9 @@ class NekoBot(commands.AutoShardedBot):
             for page in pages:
                 await ctx.send(page)
 
-    async def on_error(self, event_method, *args, **kwargs):
-        print(bcolors.FAIL + "[ERROR]" + bcolors.ENDC)
-        print(bcolors.FAIL + sys.exc_info() + bcolors.ENDC)
+    # async def on_error(self, event_method, *args, **kwargs):
+    #     print(bcolors.FAIL + "[ERROR]" + bcolors.ENDC)
+    #     sys.exc_info()
 
     async def on_message(self, message):
         self.counter["messages_read"] += 1
