@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord, config, aiohttp
 import base64, json
-import aiomysql
+import os
 
 class Games:
 
@@ -94,28 +94,54 @@ class Games:
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def pubg(self, ctx, region:str, username:str):
         """Get PUBG Stats"""
-        if not commands.is_owner():
-            return await ctx.send("WIP")
-        regions = ["krjp", "jp", "na", "eu", "oc", "kakao", "sea", "sa", "as"]
-        if region not in regions:
-            em = discord.Embed(color=0xDEADBF, title="Error", description="Invalid Region Code.")
-            return await ctx.send(embed=em)
-        base = f"https://api.playbattlegrounds.com/shards/pc-{region}"
-        headers = {"Authorization": f"Bearer {config.pubg}",
-                   "Accept": "application/vnd.api+json"}
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"{base}/players?filter[playerNames]={username}", headers=headers) as r:
-                res = await r.json()
-                if r.status == 404:
-                    em = discord.Embed(color=0xDEADBF, title="Error", description="User not found.")
-                    return await ctx.send(embed=em)
-            lastmatch = res["data"][0]["relationships"]["matches"]["data"][0]["id"]
-            async with cs.get(f"{base}/matches/{lastmatch}", headers=headers) as m:
-                matchdata = await m.json()
-        for player in matchdata["included"]:
-            if player["type"] == "participant":
-                if player["attributes"]["stats"]["playerId"] == res["data"][0]["id"]:
-                    await ctx.send(str(player))
+        await ctx.trigger_typing()
+        try:
+            regions = ["krjp", "jp", "na", "eu", "oc", "kakao", "sea", "sa", "as"]
+            if region not in regions:
+                em = discord.Embed(color=0xDEADBF, title="Error", description="Invalid Region Code.")
+                return await ctx.send(embed=em)
+            base = f"https://api.playbattlegrounds.com/shards/pc-{region}"
+            headers = {"Authorization": f"Bearer {config.pubg}",
+                       "Accept": "application/vnd.api+json"}
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f"{base}/players?filter[playerNames]={username}", headers=headers) as r:
+                    res = await r.read()
+                    if r.status == 404:
+                        em = discord.Embed(color=0xDEADBF, title="Error", description="User not found.")
+                        return await ctx.send(embed=em)
+                res = json.loads(res)
+                lastmatch = res["data"][0]["relationships"]["matches"]["data"][0]["id"]
+                if not os.path.exists(f"data/pubg-cache/{lastmatch}.json"):
+                    async with cs.get(f"{base}/matches/{lastmatch}", headers=headers) as m:
+                        matchdata = await m.read()
+                        matchdata = json.loads(matchdata)
+                        with open(f"data/pubg-cache/{lastmatch}.json", "w") as outfile:
+                            json.dump(matchdata, outfile)
+                else:
+                    matchdata = json.load(open(f"data/pubg-cache/{lastmatch}.json"))
+            for player in matchdata["included"]:
+                if player["type"] == "participant":
+                    if player["attributes"]["stats"]["playerId"] == res["data"][0]["id"]:
+                        assists = player["attributes"]["stats"]["assists"]
+                        damageDealt = player["attributes"]["stats"]["damageDealt"]
+                        headshotKills = player["attributes"]["stats"]["headshotKills"]
+                        heals = player["attributes"]["stats"]["heals"]
+                        kills = player["attributes"]["stats"]["kills"]
+                        longestKill = player["attributes"]["stats"]["longestKill"]
+                        walkDistance = player["attributes"]["stats"]["walkDistance"]
+                        winPlace = player["attributes"]["stats"]["winPlace"]
+            em = discord.Embed(color=0xDEADBF, title=f"Last Game Stats for {username}")
+            em.add_field(name="Kills", value=kills)
+            em.add_field(name="Headshots", value=headshotKills)
+            em.add_field(name="Assists", value=assists)
+            em.add_field(name="Longest Kill", value=longestKill)
+            em.add_field(name="Damage Dealt", value=damageDealt)
+            em.add_field(name="Win Place", value=winPlace)
+            em.add_field(name="Walk Distance", value=walkDistance)
+            em.add_field(name="Heals", value=heals)
+            await ctx.send(embed=em)
+        except Exception as e:
+            await ctx.send("Failed to get data, error: `{e}`")
 
     @commands.command()
     @commands.cooldown(1, 25, commands.BucketType.user)
