@@ -840,6 +840,21 @@ class General:
             await ctx.send(f"`{e}`")
 
     @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def shorten(self, ctx, *, url:str):
+        """Shorten a URL"""
+        url = f"https://api-ssl.bitly.com/v3/shorten?access_token={config.bitly}&longUrl={url}"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+        if res["status_code"] != 200:
+            em = discord.Embed(color=0xDEADBF, title="Error",
+                               description=f"Error: {res['status_txt']}\nMake sure the URL starts with http(s)://")
+            return await ctx.send(embed=em)
+        em = discord.Embed(color=0xDEADBF, title="Shortened URL", description=res["data"]["url"])
+        await ctx.send(embed=em)
+
+    @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def help(self, ctx, option: str = None):
         """Help Command OwO"""
@@ -863,7 +878,7 @@ class General:
             embed.add_field(name="General",
                             value="`help`, `discrim`, `discriminfo`, `botinfo`, `8ball`, `permissions`, `vote`, "
                                   "`qr`, `animepic`, `coffee`, `avatar`, `urban`, `channelinfo`, `userinfo`, "
-                                  "`serverinfo`, `whois`, `info`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`", inline=False)
+                                  "`serverinfo`, `whois`, `info`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
             embed.add_field(name="Moderation",
