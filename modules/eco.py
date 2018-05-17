@@ -846,7 +846,7 @@ class economy:
             embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
 
     async def on_message(self, message):
-        if random.randint(1, 200) == 1:
+        if random.randint(1, 100) == 1:
             if not await self.bot.redis.get(f"{message.author.id}-xp"):
                 await self.bot.redis.set(f"{message.author.id}-xp", 0)
             currxp = await self.bot.redis.get(f"{message.author.id}-xp")
