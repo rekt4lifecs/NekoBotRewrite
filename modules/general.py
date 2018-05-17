@@ -887,7 +887,7 @@ class General:
                                   "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`, `rem`, `poi`, `greet`, "
                                   "`insultwaifu`, `foxgirl`, `jojo`, `megumin`, `pout`, `shrug`, `sleepy`, `sumfuk`, `initiald`, `deredere`, `triggered`", inline=False)
             embed.add_field(name="Game Stats",
-                            value="`osu`, `overwatch`, `fortnite`, `minecraft`", inline=False)
+                            value="`osu`, `overwatch`, `fortnite`, `minecraft`, `pubg`", inline=False)
             embed.add_field(name="Marriage", value="`marry`, `divorce`", inline=False)
 
             await ctx.send(embed=embed)
