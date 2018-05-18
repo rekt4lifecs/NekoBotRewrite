@@ -855,6 +855,13 @@ class General:
         await ctx.send(embed=em)
 
     @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def invite(self, ctx):
+        """Get the bots invite"""
+        await ctx.send("**Invite the bot:** <https://uwu.whats-th.is/32dde7>\n"
+                       "**Support Server:** <https://discord.gg/q98qeYN>")
+
+    @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def help(self, ctx, option: str = None):
         """Help Command OwO"""
@@ -878,7 +885,7 @@ class General:
             embed.add_field(name="General",
                             value="`help`, `discrim`, `discriminfo`, `botinfo`, `8ball`, `permissions`, `vote`, "
                                   "`qr`, `animepic`, `coffee`, `avatar`, `urban`, `channelinfo`, `userinfo`, "
-                                  "`serverinfo`, `whois`, `info`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`", inline=False)
+                                  "`serverinfo`, `whois`, `info`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`, `invite`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
             embed.add_field(name="Moderation",
