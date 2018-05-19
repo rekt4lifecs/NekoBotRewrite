@@ -128,10 +128,6 @@ class Audio:
         if not player.is_playing:
             return await ctx.send(getlang(lang)["audio"]["not_playing"])
 
-        listx = []
-        for user in ctx.author.voice.channel.members:
-            listx.append(user)
-
         await ctx.send('⏭ | Skipped.')
         await player.skip()
 
@@ -147,10 +143,6 @@ class Audio:
 
         if not player.is_playing:
             return await ctx.send(getlang(lang)["audio"]["not_playing"])
-
-        listx = []
-        for user in ctx.author.voice.channel.members:
-            listx.append(user)
 
         player.queue.clear()
         await player.stop()
@@ -220,10 +212,6 @@ class Audio:
         if not player.is_playing:
             return await ctx.send(getlang(lang)["audio"]["not_playing"])
 
-        listx = []
-        for user in ctx.author.voice.channel.members:
-            listx.append(user)
-
         if player.paused:
             await player.set_pause(False)
             await ctx.send('⏯ | Resumed')
@@ -238,10 +226,6 @@ class Audio:
 
         if not volume:
             return await ctx.send(f'🔈 | {player.volume}%')
-
-        listx = []
-        for user in ctx.author.voice.channel.members:
-            listx.append(user)
 
         await player.set_volume(volume)
         await ctx.send(f'🔈 | Set to {player.volume}%')
@@ -259,10 +243,6 @@ class Audio:
         if not player.is_playing:
             return await ctx.send(getlang(lang)["audio"]["not_playing"])
 
-        listx = []
-        for user in ctx.author.voice.channel.members:
-            listx.append(user)
-
         player.shuffle = not player.shuffle
 
         await ctx.send('🔀 | Shuffle ' + ('enabled' if player.shuffle else 'disabled'))
@@ -279,10 +259,6 @@ class Audio:
 
         if not player.is_playing:
             return await ctx.send(getlang(lang)["audio"]["not_playing"])
-
-        listx = []
-        for user in ctx.author.voice.channel.members:
-            listx.append(user)
 
         player.repeat = not player.repeat
 
@@ -329,10 +305,6 @@ class Audio:
 
         if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
             return await ctx.send(getlang(lang)["audio"]["not_in_my_vc"])
-
-        listx = []
-        for user in ctx.author.voice.channel.members:
-            listx.append(user)
 
         await player.disconnect()
         await ctx.send('*⃣ | Disconnected.')
