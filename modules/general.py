@@ -896,7 +896,7 @@ class General:
                                                            "`coinflip`, `blackjack`, `top`", inline=False)
             embed.add_field(name="Fun",
                             value="`deepfry`, `blurpify`, `awooify`, `dragonic`, `dedragonic`,`food`, `bodypillow`, `weebify`, `toxicity`, `tweet`, `nichijou`, `ship`, `achievement`, `shitpost`, `meme`, `changemymind`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
-                                  "`bitconnect`, `feed`, `thiccen`, `widen`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `joke`, "
+                                  "`bitconnect`, `feed`, `lovecalculator`, `butts`, `boom`, `rude`, `fight`, `clyde`, `monkaS`, `joke`, "
                                   "`b64`, `md5`, `kannagen`, `iphonex`, `baguette`, `owoify`, `lizard`, `duck`, `captcha`, `whowouldwin`, `threats`", inline=False)
 
             embed.add_field(name="NSFW",
