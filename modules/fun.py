@@ -3,7 +3,6 @@ import discord, aiohttp, random, config, datetime, base64, hashlib
 from io import BytesIO
 from PIL import Image
 import os
-import aiomysql
 from googleapiclient import discovery
 
 key = config.weeb
@@ -221,21 +220,17 @@ class Fun:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def achievement(self, ctx, *, achievement:str):
         """Achievement Generator"""
-        if not os.path.isfile(f"data/achievement/{achievement.lower().replace(' ', '%20')}.png"):
-            try:
-                url = f"https://www.minecraftskinstealer.com/achievement/a.php?i=2&h=Achievement%20Get!" \
-                      f"&t={achievement.replace(' ', '%20')}"
-                async with aiohttp.ClientSession() as cs:
-                    async with cs.get(url) as r:
-                        res = await r.read()
-                img = Image.open(BytesIO(res))
-                img.save(f"data/achievement/{achievement.lower().replace(' ', '-')}.png")
-            except Exception as e:
-                return await ctx.send(f"**{e}**")
+        await ctx.trigger_typing()
         try:
-            await ctx.send(file=discord.File(f"data/achievement/{achievement.lower().replace(' ', '-')}.png"))
-        except discord.Forbidden:
-            pass
+            url = f"https://dev.anidiots.guide/generators/achievement?avatar={ctx.message.author.avatar_url_as(format='png')}&text={achievement}"
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(url, headers={"Authorization": config.idiotic_api}) as r:
+                    res = await r.json()
+            file = discord.File(BytesIO(bytes(res["data"])), filename="image.png")
+            em = discord.Embed(color=0xDEADBF)
+            await ctx.send(file=file, embed=em.set_image(url="attachment://image.png"))
+        except:
+            await ctx.send(f"Failed to get data, `{res['errors'][0]['message']}`")
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -562,18 +557,21 @@ class Fun:
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def owoify(self, ctx, *, text:str = None):
-        if text is None:
-            return await ctx.send("oopsie whoopsie you made a fucky wucky, you gave me no text to owoify")
-        else:
-            text = text.replace(' ', '%20')
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"https://nekos.life/api/v2/owoify?text={text}") as r:
-                res = await r.json()
         try:
-            em = discord.Embed(color=0xDEADBF, description=f"{res['owo']}", title="OwOified Text")
-            await ctx.send(embed=em)
+            if text is None:
+                return await ctx.send("oopsie whoopsie you made a fucky wucky, you gave me no text to owoify")
+            else:
+                text = text.replace(' ', '%20')
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(f"https://nekos.life/api/v2/owoify?text={text}") as r:
+                    res = await r.json()
+            try:
+                em = discord.Embed(color=0xDEADBF, description=f"{res['owo']}", title="OwOified Text")
+                await ctx.send(embed=em)
+            except:
+                return await ctx.send("Failed to get the OwOified Text or you input is over 100 characters.")
         except:
-            return await ctx.send("Failed to get the OwOified Text or you input is over 100 characters.")
+            await ctx.send("Failed to owoify.")
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -813,64 +811,6 @@ class Fun:
         em.add_field(name=f"Round | {user1.name} vs {user2.name}",
                      value=f"***pew pew*** {random.choice([user1.name, user2.name])} got the first hit and won OwO")
         await ctx.send(embed=em)
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def thiccen(self, ctx, url:str=None):
-        """Thiccen an image"""
-        await ctx.trigger_typing()
-        if url is None:
-            if not await self.execute(f"SELECT 1 FROM lastimg WHERE channel = {ctx.message.channel.id}", isSelect=True):
-                return await ctx.send("**No recent images found.**")
-            lastimg = await self.execute(f"SElECT url FROM lastimg WHERE channel = {ctx.message.channel.id}", isSelect=True)
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(lastimg[0]) as r:
-                    res = await r.read()
-        else:
-            try:
-                async with aiohttp.ClientSession() as cs:
-                    async with cs.get(url) as r:
-                        res = await r.read()
-            except:
-                return await ctx.send("Not a valid URL.")
-        try:
-            img = Image.open(BytesIO(res)).convert("RGBA")
-            x, y = img.size
-            img = img.resize((int((x*3)), (int(y))))
-            img.save("temp.png")
-            await ctx.send(file=discord.File("temp.png"))
-            os.remove("temp.png")
-        except Exception as e:
-            await ctx.send(f"**Error getting image data.** {e}")
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def widen(self, ctx, url:str=None):
-        """Widen an image"""
-        await ctx.trigger_typing()
-        if url is None:
-            if not await self.execute(f"SELECT 1 FROM lastimg WHERE channel = {ctx.message.channel.id}", isSelect=True):
-                return await ctx.send("**No recent images found.**")
-            lastimg = await self.execute(f"SElECT url FROM lastimg WHERE channel = {ctx.message.channel.id}", isSelect=True)
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(lastimg[0]) as r:
-                    res = await r.read()
-        else:
-            try:
-                async with aiohttp.ClientSession() as cs:
-                    async with cs.get(url) as r:
-                        res = await r.read()
-            except:
-                return await ctx.send("Not a valid URL.")
-        try:
-            img = Image.open(BytesIO(res)).convert("RGBA")
-            x, y = img.size
-            img = img.resize((int((x)), (int(y*3))))
-            img.save("temp.png")
-            await ctx.send(file=discord.File("temp.png"))
-            os.remove("temp.png")
-        except Exception as e:
-            await ctx.send(f"**Error getting image data.** {e}")
 
 def setup(bot):
     bot.add_cog(Fun(bot))
