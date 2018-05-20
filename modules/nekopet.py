@@ -78,7 +78,6 @@ class NekoPet:
                     return False
 
     @commands.group()
-    @commands.is_owner()
     @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def pet(self, ctx):
