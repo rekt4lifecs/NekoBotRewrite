@@ -211,8 +211,8 @@ class NekoPet:
             if await self.check(message.author.id):
                 data = await self.execute(f"SELECT food, play FROM nekopet WHERE userid = {message.author.id}",
                                           isSelect=True)
-                await self.execute(f"UPDATE nekopet SET food = {int(data[0]) + random.randint(1, 20)} WHERE userid = {message.author.id}")
-                await self.execute(f"UPDATE nekopet SET play = {int(data[1]) + random.randint(1, 20)} WHERE userid = {message.author.id}")
+                await self.execute(f"UPDATE nekopet SET food = {int(data[0]) - random.randint(1, 20)} WHERE userid = {message.author.id}")
+                await self.execute(f"UPDATE nekopet SET play = {int(data[1]) - random.randint(1, 20)} WHERE userid = {message.author.id}")
 
 def setup(bot):
     bot.add_cog(NekoPet(bot))
