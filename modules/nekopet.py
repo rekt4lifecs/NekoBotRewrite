@@ -136,7 +136,7 @@ class NekoPet:
         def check(m):
             return m.channel == ctx.message.channel and m.author == ctx.message.author
         em = discord.Embed(color=0xDEADBF, title="Neko Shop",
-                           description="1 = Buy a Neko").set_footer(text="More coming soon...")
+                           description="1 = Buy a Neko ($50,000)").set_footer(text="More coming soon...")
         em.set_footer(text="Type a number.")
         strt = await ctx.send(embed=em)
         try:
@@ -162,7 +162,7 @@ class NekoPet:
                 return await strt.edit(content="**Timed out...**", embed=None)
             if msg.content.lower() == "yes":
                 if not await self.bal_check(ctx.message.author.id, 50000):
-                    return await strt.edit("**You don't have enough $ ;c**")
+                    return await strt.edit(content="**You don't have enough $ ;c**")
                 await self.remove_balance(ctx.message.author.id, 50000)
                 await self.create(ctx.message.author.id, name=f"{ctx.message.author.name}'s Neko", update=owned)
                 return await strt.edit(content="Successfully bought a neko!")
