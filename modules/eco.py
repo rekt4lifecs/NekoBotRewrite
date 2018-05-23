@@ -399,7 +399,18 @@ class economy:
         msg = await ctx.send(embed=em)
         query = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
         allusers = await self.execute(query=query, isSelect=True, fetchAll=True)
-        all_members = []
+
+        user1 = "User Not Found"
+        user2 = "User Not Found"
+        user3 = "User Not Found"
+        user4 = "User Not Found"
+        user5 = "User Not Found"
+        user6 = "User Not Found"
+        user7 = "User Not Found"
+        user8 = "User Not Found"
+        user9 = "User Not Found"
+        user10 = "User Not Found"
+
         for guild in self.bot.guilds:
             for member in guild.members:
                 if member.id == int(allusers[0][0]):
@@ -422,6 +433,7 @@ class economy:
                     user9 = member.name
                 elif member.id == int(allusers[9][0]):
                     user10 = member.name
+
         embed = discord.Embed(color=0xDEADBF, title="Top Users",
                               description=f"`1. ♔{user1}♔ - ${int(allusers[0][1])}`\n"
                                           f"`2. ♕{user2}♕ - ${int(allusers[1][1])}`\n"
