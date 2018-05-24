@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord, config, aiohttp
 from collections import Counter
+from io import BytesIO
 import random
 
 key = config.weeb
@@ -37,6 +38,15 @@ class Reactions:
                                    color=0xDEADBF)
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def gasm(self, ctx):
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekos.life/api/v2/img/gasm") as r:
+                res = await r.json()
+        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res["url"]))
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
