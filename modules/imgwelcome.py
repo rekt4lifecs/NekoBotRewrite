@@ -16,7 +16,8 @@ class IMGWelcome:
         async with self.bot.sql_conn.acquire() as conn:
             async with conn.cursor() as db:
                 if not await db.execute(f"SELECT 1 FROM newimgwelcome WHERE server = {ctx.message.guild.id}"):
-                    await db.execute(f"INSERT INTO newimgwelcome VALUES ({ctx.message.guild.id}, {ctx.message.channel.id}, \"Welcome {0} to {1}!\")")
+                    content = "Welcome {0} to {1}!"
+                    await db.execute(f"INSERT INTO newimgwelcome VALUES ({ctx.message.guild.id}, {ctx.message.channel.id}, \"{content}\")")
         if ctx.invoked_subcommand is None:
             em = discord.Embed(color=0xDEADBF, title="IMG Welcomer",
                                description="**n!imgwelcome img** - Set the background image\n"
