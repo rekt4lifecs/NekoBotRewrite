@@ -44,7 +44,7 @@ class NekoPet:
                     await db.execute(f"UPDATE nekopet SET type = {type} WHERE userid = {user}")
                     await db.execute(f"UPDATE nekopet SET level = 0 WHERE userid = {user}")
                 else:
-                    await db.execute(f"INSERT INTO nekopet VALUES ({user}, \"{name}\", 0, {type}, 100, 100)")
+                    await db.execute(f"INSERT INTO nekopet VALUES ({user}, \"neko\", 0, {type}, 100, 100)")
 
     async def remove_balance(self, user:int, amount:int):
         async with self.bot.sql_conn.acquire() as conn:
