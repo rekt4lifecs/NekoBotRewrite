@@ -363,15 +363,6 @@ class Fun:
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def monkaS(self, ctx):
-        try:
-            emoji = self.bot.get_emoji(385481793853194240)
-            await ctx.message.add_reaction(emoji)
-        except:
-            pass
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
     async def joke(self, ctx):
         """Sends a Joke OwO"""
         async with aiohttp.ClientSession(headers={"Accept": "application/json"}) as cs:
@@ -773,29 +764,6 @@ class Fun:
         if res['success'] != True:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
-
-    @commands.command()
-    @commands.cooldown(1, 3, commands.BucketType.user)
-    async def butts(self, ctx):
-        await ctx.send("ლ(́◉◞౪◟◉‵ლ)")
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def boom(self, ctx):
-        """BOOM"""
-        await ctx.message.add_reaction("🅱")
-        await ctx.message.add_reaction("🇴")
-        await ctx.message.add_reaction("💥")
-        await ctx.message.add_reaction("🇲")
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def rude(self, ctx):
-        """RUDE"""
-        await ctx.message.add_reaction("🇷")
-        await ctx.message.add_reaction("🇺")
-        await ctx.message.add_reaction("🇩")
-        await ctx.message.add_reaction("🇪")
 
     @commands.command(aliases=['fite', 'rust'])
     @commands.cooldown(1, 7, commands.BucketType.user)
