@@ -269,17 +269,14 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        sub = random.choice(["thighhighs", "stockings"])
         self.counter['thighs'] += 1
-        headers = {"Authorization": f"Client-ID {config.imgur}"}
-        url = f'https://api.imgur.com/3/gallery/r/{sub}/hot/{random.randint(1, 5)}'
+        url = 'https://nekobot.xyz/api/image?type=thigh'
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(url, headers=headers) as r:
+            async with cs.get(url) as r:
                 res = await r.json()
-        x = random.choice(res['data'])
-        em = discord.Embed(title=f"**{x['title']}**",
-                           color=0xDEADBF)
-        em.set_image(url=x['link'])
+        x = res['message']
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=x)
 
         await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
 
