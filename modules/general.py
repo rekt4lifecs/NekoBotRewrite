@@ -885,7 +885,7 @@ class General:
             embed.add_field(name="General",
                             value="`help`, `discrim`, `discriminfo`, `botinfo`, `8ball`, `permissions`, `vote`, "
                                   "`qr`, `animepic`, `coffee`, `avatar`, `urban`, `channelinfo`, `userinfo`, "
-                                  "`serverinfo`, `whois`, `info`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`, `invite`", inline=False)
+                                  "`serverinfo`, `whois`, `info`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`, `invite`, `latency`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
             embed.add_field(name="Moderation",
