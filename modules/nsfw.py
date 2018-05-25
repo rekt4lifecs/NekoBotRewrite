@@ -12,7 +12,6 @@ class NSFW:
 
     def __init__(self, bot):
         self.bot = bot
-        self.counter = Counter()
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
         async with self.bot.sql_conn.acquire() as conn:
@@ -41,7 +40,6 @@ class NSFW:
             if not ctx.message.channel.is_nsfw():
                 await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
                 return
-            self.counter['pgif'] += 1
             async with aiohttp.ClientSession() as cs:
                 async with cs.get("https://nekobot.xyz/api/image?type=pgif") as r:
                     res = await r.json()
@@ -65,7 +63,6 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        self.counter["anal"] += 1
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://nekobot.xyz/api/image?type=anal") as r:
                 res = await r.json()
@@ -82,7 +79,6 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        self.counter["dva"] += 1
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://api.computerfreaker.cf/v1/dva") as r:
                 res = await r.json()
@@ -98,7 +94,6 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        self.counter["4k"] += 1
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://nekobot.xyz/api/image?type=4k") as r:
                 res = await r.json()
@@ -115,7 +110,6 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         try:
-            self.counter["phsearch"] += 1
             searchurl = "https://www.pornhub.com/video/search?search={}".format(terms.replace(" ", "+"))
             url = requests.get(searchurl).text
             soup = bs(url)
@@ -142,7 +136,6 @@ class NSFW:
             await ctx.send(":warning: Tags are missing.")
         else:
             try:
-                self.counter["yandere"] += 1
                 tags = ("+").join(tags)
                 query = ("https://yande.re/post.json?limit=42&tags=" + tags)
                 async with aiohttp.ClientSession() as cs:
@@ -167,7 +160,6 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         try:
-            self.counter["boobs"] += 1
             rdm = random.randint(0, 11545)
             search = ("http://api.oboobs.ru/boobs/{}".format(rdm))
             async with aiohttp.ClientSession() as cs:
@@ -188,7 +180,6 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        self.counter['girl'] += 1
         headers = {"Authorization": f"Client-ID {config.imgur}"}
         url = f'https://api.imgur.com/3/gallery/r/bodyperfection/hot/{random.randint(1, 5)}'
         async with aiohttp.ClientSession() as cs:
@@ -209,7 +200,6 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        self.counter['bigboobs'] += 1
         sub = random.choice(["bigboobs", "BigBoobsGW"])
         headers = {"Authorization": f"Client-ID {config.imgur}"}
         url = f'https://api.imgur.com/3/gallery/r/{sub}/hot/{random.randint(1, 5)}'
@@ -230,7 +220,6 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        self.counter['ass'] += 1
         url = "https://nekobot.xyz/api/image?type=ass"
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
@@ -248,7 +237,6 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        self.counter['cum'] += 1
         headers = {"Authorization": f"Client-ID {config.imgur}"}
         url = f'https://api.imgur.com/3/gallery/r/cumsluts/hot/{random.randint(1, 5)}'
         async with aiohttp.ClientSession() as cs:
@@ -261,7 +249,7 @@ class NSFW:
 
         await ctx.send(embed=embed.set_footer(text=f"Used by {ctx.message.author.name}"))
 
-    @commands.command()
+    @commands.command(aliases=["thigh"])
     @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def thighs(self, ctx):
@@ -269,7 +257,6 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        self.counter['thighs'] += 1
         url = 'https://nekobot.xyz/api/image?type=thigh'
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
@@ -287,7 +274,6 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        self.counter['gonewild'] += 1
         url = "https://nekobot.xyz/api/image?type=gonewild"
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
@@ -328,7 +314,6 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>\nhttps://nekobot.xyz/hentai.png")
             return
-        self.counter['hentai'] += 1
         # amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"', isSelect=True)
         # if amount:
         votes = await self.execute("SELECT user FROM dbl", isSelect=True, fetchAll=True)
