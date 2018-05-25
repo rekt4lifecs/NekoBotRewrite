@@ -13,23 +13,6 @@ import aiomysql
 import re, json, inspect, datetime, collections
 import random
 
-startup_extensions = {
-    'modules.audio',
-    'modules.cardgame',
-    'modules.chatbot',
-    'modules.discordbots',
-    'modules.donator',
-    'modules.eco',
-    'modules.fun',
-    'modules.games',
-    'modules.general',
-    'modules.imgwelcome',
-    'modules.marriage',
-    'modules.mod',
-    'modules.nsfw',
-    'modules.reactions'
-}
-
 invite_rx = re.compile("discord(?:app)?\.(?:gg|com|me\/invite)\/([a-z0-9]{1,16})", re.IGNORECASE)
 
 class Arguments(argparse.ArgumentParser):
@@ -330,7 +313,7 @@ class Moderation:
         except Exception as e:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
-            await ctx.send('👌💯🔥')
+            await ctx.send('Loaded <a:forsenPls:444882132343717898>')
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -342,21 +325,12 @@ class Moderation:
         except Exception as e:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
-            await ctx.send('👌💯🔥')
+            await ctx.send('Unloaded <a:forsenPls:444882132343717898>')
 
     @commands.command(name='reload', hidden=True)
     @commands.is_owner()
     async def _reload(self, ctx, *, module):
         """Reloads a module."""
-        if module == "all":
-            for ext in startup_extensions:
-                try:
-                    self.bot.unload_extension(ext)
-                    self.bot.load_extension(ext)
-                except:
-                    pass
-            return await ctx.send('Reloaded All 👌💯🔥')
-
         module = "modules." + module
         try:
             self.bot.unload_extension(module)
@@ -364,15 +338,14 @@ class Moderation:
         except Exception as e:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
-            await ctx.send('👌💯🔥')
+            await ctx.send('Reloaded <a:forsenPls:444882132343717898>')
 
-    @commands.command()
+    @commands.command(aliases=["ping"])
     async def latency(self, ctx):
-        if not ctx.message.author.id in [266277541646434305, 270133511325876224]:
-            return
         xd = '\n'.join(f'Shard {shard}: '+str(round(self.bot.latencies[shard][1]*1000)) + 'ms' for shard in self.bot.shards)
-        for page in pagify(xd):
-            await ctx.send(page)
+        em = discord.Embed(color=0xDEADBF, title="Latency",
+                           description=f"```\n{xd}\n```")
+        await ctx.send(embed=em)
 
     @commands.command(hidden=True, aliases=['exec'])
     @commands.is_owner()
