@@ -269,6 +269,24 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def pussy(self, ctx):
+        """Pussy owo"""
+        if not ctx.message.channel.is_nsfw():
+            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            return
+        url = 'https://nekobot.xyz/api/image?type=pussy'
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+        x = res['message']
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=x)
+
+        await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+
+    @commands.command()
+    @commands.guild_only()
     async def gonewild(self, ctx):
         """r/GoneWild"""
         if not ctx.message.channel.is_nsfw():
