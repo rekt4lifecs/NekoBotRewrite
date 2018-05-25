@@ -39,6 +39,7 @@ class NekoBot(commands.AutoShardedBot):
                          max_messages=2500,
                          help_attrs={'hidden': True})
         self.counter = Counter()
+        self.command_usage = Counter()
 
         async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
@@ -63,6 +64,9 @@ class NekoBot(commands.AutoShardedBot):
     async def on_command_error(self, context, exception):
         if isinstance(exception, commands.CommandNotFound):
             return
+
+    async def on_command(self, ctx):
+        self.command_usage[str(ctx.command)] += 1
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
