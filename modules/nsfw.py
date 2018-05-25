@@ -144,7 +144,7 @@ class NSFW:
                 if res != []:
                     em = discord.Embed(color=0xDEADBF)
                     em.set_image(url=random.choice(res)['jpeg_url'])
-                    await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+                    await ctx.send(embed=em)
                 else:
                     e = discord.Embed(color=0xDEADBF, title="⚠ Error",
                                       description="Yande.re has no images for requested tags.")
@@ -169,7 +169,7 @@ class NSFW:
                     boob = "http://media.oboobs.ru/{}".format(boob["preview"])
                     em = discord.Embed(color=0xDEADBF)
                     em.set_image(url=boob)
-                    await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+                    await ctx.send(embed=em)
         except Exception as e:
             await ctx.send("**`{}`**".format(e))
 
@@ -191,7 +191,7 @@ class NSFW:
                            color=0xDEADBF)
         em.set_image(url=x['link'])
 
-        await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.guild_only()
@@ -211,7 +211,7 @@ class NSFW:
                            color=0xDEADBF)
         em.set_image(url=x['link'])
 
-        await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.guild_only()
@@ -227,7 +227,7 @@ class NSFW:
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=res['message'])
 
-        await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+        await ctx.send(embed=em)
 
     @commands.command(aliases=["cum"])
     @commands.guild_only()
@@ -247,7 +247,7 @@ class NSFW:
                               title=f"**{x['title']}**")
         embed.set_image(url=x['link'])
 
-        await ctx.send(embed=embed.set_footer(text=f"Used by {ctx.message.author.name}"))
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=["thigh"])
     @commands.guild_only()
@@ -265,7 +265,7 @@ class NSFW:
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=x)
 
-        await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.guild_only()
@@ -283,7 +283,7 @@ class NSFW:
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=x)
 
-        await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.guild_only()
@@ -299,7 +299,7 @@ class NSFW:
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=res['message'])
 
-        await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.guild_only()
@@ -310,7 +310,7 @@ class NSFW:
             return
         else:
             url = "http://nhentai.net/random/"
-            await ctx.send(embed=discord.Embed(color=0xDEADBF, description=f"{url}").set_footer(text=f"Used by {ctx.message.author.name}"))
+            await ctx.send(embed=discord.Embed(color=0xDEADBF, description=f"{url}"))
 
     @commands.command()
     @commands.guild_only()
@@ -324,7 +324,7 @@ class NSFW:
                     res = await r.json()
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=res['message'])
-        await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.guild_only()
@@ -344,7 +344,7 @@ class NSFW:
                     res = await r.json()
                     em = discord.Embed(color=0xDEADBF)
                     em.set_image(url=res['message'])
-                    await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+                    await ctx.send(embed=em)
         else:
             embed = discord.Embed(color=0xDEADBF,
                                   title="oof",
@@ -371,7 +371,7 @@ class NSFW:
             img = f"https://img.rule34.xxx/images/{response['directory']}/{response['image']}"
             em = discord.Embed(color=0xDEADBF)
             em.set_image(url=img)
-            await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+            await ctx.send(embed=em)
         except json.JSONDecodeError:
             await ctx.send(":x: No image found. Sorry :/")
 
