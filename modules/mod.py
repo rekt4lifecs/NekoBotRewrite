@@ -1045,5 +1045,22 @@ class Moderation:
         except:
             pass
 
+    @commands.command()
+    @commands.is_owner()
+    async def imagecatch(self, ctx, limit:int):
+        msgs = ""
+        caught = 0
+        strt = await ctx.send(f"Catching `{limit}` messages. <a:forsenPls:444882132343717898>")
+        try:
+            async for msg in ctx.message.channel.history(limit=limit):
+                if len(msg.attachments) >= 1:
+                    for attachment in msg.attachments:
+                        msgs += f"{attachment.url}\n"
+                        caught += 1
+            haste = await hastebin(msgs)
+            await strt.edit(content=f"Caught `{caught}`, {haste}")
+        except Exception as e:
+            await strt.edit(content=f"Error: `{e}`")
+
 def setup(bot):
     bot.add_cog(Moderation(bot))
