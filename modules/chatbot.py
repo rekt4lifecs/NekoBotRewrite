@@ -14,7 +14,11 @@ class Chatbot:
             commands = []
             for command in self.bot.commands:
                 commands.append(command.name)
-            if str(message.content[22:]) in commands or str(message.content[23:]) in commands:
+            hascommand = 0
+            for command in commands:
+                if str(message.content[22:]).startswith(command) or str(message.content[23:]).startswith(command):
+                    hascommand += 1
+            if hascommand >= 1:
                 return
             await channel.trigger_typing()
             async with aiohttp.ClientSession(headers={"Authorization": config.chatbot}) as cs:
