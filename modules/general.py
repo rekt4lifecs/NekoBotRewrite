@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord
-import datetime, random, config, math, aiohttp, aiomysql
+import datetime, random, config, math, aiohttp, psutil
 from collections import Counter
 from .utils.chat_formatting import pagify
 from urllib.parse import quote_plus
@@ -863,6 +863,26 @@ class General:
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
+    async def system(self, ctx):
+        """Get Bot System Info"""
+        try:
+            cpu_per = psutil.cpu_percent()
+            cores = psutil.cpu_count()
+            memory = psutil.virtual_memory().total >> 20
+            mem_usage = psutil.virtual_memory().used >> 20
+            storage = psutil.disk_usage('/').total >> 30
+            storage_free = psutil.disk_usage('/').free >> 30
+            em = discord.Embed(color=0xDEADBF, title="System Stats",
+                               description=f"Cores: **{cores}**\n"
+                                           f"CPU%: **{cpu_per}**\n"
+                                           f"RAM Usage: **{mem_usage}/{memory} MB**\n"
+                                           f"Storage: **{storage_free}/{storage} GB**")
+            await ctx.send(embed=em)
+        except Exception as e:
+            await ctx.send(f"Failed to get system info,\nError: {e}")
+
+    @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def help(self, ctx, option: str = None):
         """Help Command OwO"""
         color = 0xDEADBF
@@ -885,7 +905,7 @@ class General:
             embed.add_field(name="General",
                             value="`help`, `discrim`, `discriminfo`, `botinfo`, `8ball`, `permissions`, `vote`, "
                                   "`qr`, `animepic`, `coffee`, `avatar`, `urban`, `channelinfo`, `userinfo`, "
-                                  "`serverinfo`, `whois`, `info`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`, `invite`, `latency`", inline=False)
+                                  "`serverinfo`, `whois`, `info`, `system`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`, `invite`, `latency`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
             embed.add_field(name="Moderation",
