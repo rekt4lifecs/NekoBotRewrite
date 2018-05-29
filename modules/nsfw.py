@@ -376,6 +376,31 @@ class NSFW:
             await ctx.send(":x: No image found. Sorry :/")
 
     @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.guild_only()
+    async def e621(self, ctx, tag:str):
+        """Search e621"""
+        if not ctx.message.channel.is_nsfw():
+            return await ctx.send("This is not an NSFW channel...", delete_after=5)
+        try:
+            ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:62.0) Gecko/20100101 Firefox/62.0"
+            async with ctx.typing():
+                async with aiohttp.ClientSession() as cs:
+                    async with cs.get(f"https://e621.net/post/index.json?limit=15&tags={tag}",
+                                      headers={"User-Agent": ua}) as r:
+                        res = await r.json()
+                data = random.choice(res)
+                if data == []:
+                    return await ctx.send("**No images found**")
+                if data["has_children"]:
+                    return await ctx.send("**Children found in image.**")
+                em = discord.Embed(color=0xDEADBF)
+                em.set_image(url=data["file_url"])
+                await ctx.send(embed=em)
+        except:
+            await ctx.send("**Failed to connect to e621**")
+
+    @commands.command()
     @commands.guild_only()
     @checks.is_admin()
     async def nsfw(self, ctx, channel:discord.TextChannel = None):
