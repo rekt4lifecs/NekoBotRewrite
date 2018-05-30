@@ -780,5 +780,12 @@ class Fun:
                      value=f"***pew pew*** {random.choice([user1.name, user2.name])} got the first hit and won OwO")
         await ctx.send(embed=em)
 
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def clap(self, ctx, *, text:str):
+        """Clap meme"""
+        text = text.replace(" ", "👏")
+        await ctx.send(embed=discord.Embed(color=0xDEADBF, description=text))
+
 def setup(bot):
     bot.add_cog(Fun(bot))

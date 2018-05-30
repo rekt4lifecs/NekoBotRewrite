@@ -132,8 +132,6 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        if tags == ():
-            await ctx.send(":warning: Tags are missing.")
         else:
             try:
                 tags = ("+").join(tags)
