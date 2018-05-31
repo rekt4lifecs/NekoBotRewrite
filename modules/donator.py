@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord, aiohttp
 import random, string, time
 import datetime
-import aiomysql
+from .utils.hastebin import post as hastepost
 import config
 import os, json
 
@@ -194,6 +194,28 @@ class Donator:
         else:
             return await ctx.send(embed=discord.Embed(color=0xff5630, title=getlang(lang)["donator"]["whats_this"],
                                                   description=getlang(lang)["donator"]["donate"]))
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def haste(self, ctx, *, text:str):
+        """Upload text uwu"""
+        author = ctx.message.author
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+
+        alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
+        tokenlist = []
+        for x in range(len(alltokens)):
+            tokenlist.append(int(alltokens[x][0]))
+
+        if author.id not in tokenlist:
+            return await ctx.send(embed=discord.Embed(color=0xff5630, title=getlang(lang)["donator"]["error"]["error"],
+                                                      description=getlang(lang)["donator"]["error"]["message"]))
+
+        await ctx.send(await hastepost(text))
 
     @commands.command(name='upload')
     @commands.cooldown(1, 15, commands.BucketType.user)
