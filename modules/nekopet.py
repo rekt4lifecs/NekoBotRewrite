@@ -1,5 +1,6 @@
 from discord.ext import commands
-import discord, random, time
+import discord, random, os
+from PIL import Image, ImageFont, ImageDraw
 
 #
 # Formatting
@@ -112,21 +113,45 @@ class NekoPet:
     @pet.command(name="show")
     async def neko_show(self, ctx):
         """Show your pet"""
+        await ctx.trigger_typing()
         if not await self.check(ctx.message.author.id):
             return await ctx.send("You don't have a pet to play with ;c, buy one with `n!shop`")
         items = await self.execute(f"SELECT level, food, play, type FROM nekopet WHERE userid = {ctx.message.author.id}",
                                    isSelect=True)
-        level = items[0]
+        userpath = f"data/nekopet/{ctx.message.author.id}.png"
+
+        if os.path.exists(userpath):
+            os.remove(userpath)
+
         food = items[1]
         play = items[2]
         type = items[3]
 
+        data_folder = "data/nekopet/"
+        background = Image.open(data_folder + "background.png").convert("RGBA")
+        font = ImageFont.truetype("data/fonts/Neko.ttf", 30)
+
+        if int(type) == 1:
+            neko = data_folder + "neko1.png"
+        elif int(type) == 2:
+            neko = data_folder + "neko2.png"
+        elif int(type) == 3:
+            neko = data_folder + "neko3.png"
+        else:
+            neko = None
+
+        draw = ImageDraw.Draw(background)
+        neko = Image.open(neko).resize((250, background.size[1]))
+
+        background.alpha_composite(neko)
+        draw.text((225, 5), f"{food}% Food", (255, 255, 255), font)
+        draw.text((225, 45), f"{play}% Play", (255, 255, 255), font)
+
+        background.save(userpath)
+
         em = discord.Embed(color=0xDEADBF, title=f"{ctx.message.author.name}'s Neko")
-        em.add_field(name="Level", value=level)
-        em.add_field(name="Food %", value=food)
-        em.add_field(name="Play %", value=play)
-        em.add_field(name="Type", value=type)
-        await ctx.send(embed=em)
+        await ctx.send(file=discord.File(userpath),
+                       embed=em.set_image(url=f"attachment://{ctx.message.author.id}.png"))
 
     @pet.command(name="shop")
     async def neko_shop(self, ctx):
@@ -180,12 +205,13 @@ class NekoPet:
         food = int(food[0])
         if food >= 90:
             return await ctx.send("**Your neko already has enough food!**")
-        if not self.bal_check(ctx.message.author.id, 2500):
+        payamount = random.randint(1000, 5000)
+        if not self.bal_check(ctx.message.author.id, payamount):
             return await ctx.send("**You don't have enough food to give your pet ;c*")
         try:
-            await self.remove_balance(ctx.message.author.id, 2500)
+            await self.remove_balance(ctx.message.author.id, payamount)
             await self.execute(f"UPDATE nekopet SET food = 100 WHERE userid = {ctx.message.author.id}", commit=True)
-            await ctx.send("**Paid 2500 for your nekos food!**")
+            await ctx.send(f"**Paid {payamount} for your nekos food!**")
         except Exception as e:
             await ctx.send(f"**Failed to remove balance. `{e}`")
 
@@ -211,6 +237,8 @@ class NekoPet:
             if await self.check(message.author.id):
                 data = await self.execute(f"SELECT food, play FROM nekopet WHERE userid = {message.author.id}",
                                           isSelect=True)
+                if data[1] <= 0:
+                    await self.execute(f"UPDATE nekopet SET play = 0 WHERE userid = {message.author.id}")
                 await self.execute(f"UPDATE nekopet SET food = {int(data[0]) - random.randint(1, 20)} WHERE userid = {message.author.id}")
                 await self.execute(f"UPDATE nekopet SET play = {int(data[1]) - random.randint(1, 20)} WHERE userid = {message.author.id}")
                 if data[0] <= 0:
