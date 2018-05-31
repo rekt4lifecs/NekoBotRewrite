@@ -907,7 +907,7 @@ class General:
                                   "`qr`, `animepic`, `coffee`, `avatar`, `urban`, `channelinfo`, `userinfo`, "
                                   "`serverinfo`, `whois`, `info`, `system`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`, `invite`, `latency`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
-            embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`")
+            embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`, `haste`")
             embed.add_field(name="Moderation",
                             value="`kick`, `ban`, `massban`, `unban`, `rename`, `snipe`, `poll`, `purge`, `mute`, `unmute`, `dehoist`", inline=False)
             embed.add_field(name="Roleplay", value="`card`,  `pet`")
