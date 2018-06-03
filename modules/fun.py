@@ -373,6 +373,16 @@ class Fun:
                 await ctx.send(embed=e)
 
     @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def bigletter(self, ctx, *, text:str):
+        """Big Letter Generator"""
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("http://nekobot.xyz/api/text?type=bigletter&text="+text) as r:
+                res = await r.json()
+        return await ctx.send(res["message"])
+
+    @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def ship(self, ctx, user1: discord.Member, user2: discord.Member = None):
         """Ship OwO"""
