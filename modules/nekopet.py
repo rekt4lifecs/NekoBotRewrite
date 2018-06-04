@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, random, os
+import discord, random, os, math
 from PIL import Image, ImageFont, ImageDraw
 
 #
@@ -95,7 +95,7 @@ class NekoPet:
     async def neko_play(self, ctx):
         """Play with your neko!"""
         if not await self.check(ctx.message.author.id):
-            return await ctx.send("You don't have a pet to play with ;c, buy one with `n!shop`")
+            return await ctx.send("You don't have a pet to play with ;c, buy one with `n!pet shop`")
         play = await self.execute(f"SELECT play FROM nekopet WHERE userid = {ctx.message.author.id}", isSelect=True)
         play = int(play[0])
         if play >= 90:
@@ -110,12 +110,23 @@ class NekoPet:
         else:
             await ctx.send("**Your neko doesn't feel like playing, maybe try again later.**")
 
+    def _required_exp(self, level: int):
+        if level < 0:
+            return 0
+        return 139 * level + 65
+
+    def _level_exp(self, level: int):
+        return level * 65 + 139 * level * (level - 1) // 2
+
+    def _find_level(self, total_exp):
+        return int((1 / 278) * (9 + math.sqrt(81 + 1112 * (total_exp))))
+
     @pet.command(name="show")
     async def neko_show(self, ctx):
         """Show your pet"""
         await ctx.trigger_typing()
         if not await self.check(ctx.message.author.id):
-            return await ctx.send("You don't have a pet to play with ;c, buy one with `n!shop`")
+            return await ctx.send("You don't have a pet to play with ;c, buy one with `n!pet shop`")
         items = await self.execute(f"SELECT level, food, play, type FROM nekopet WHERE userid = {ctx.message.author.id}",
                                    isSelect=True)
         userpath = f"data/nekopet/{ctx.message.author.id}.png"
@@ -123,6 +134,7 @@ class NekoPet:
         if os.path.exists(userpath):
             os.remove(userpath)
 
+        level = items[0]
         food = items[1]
         play = items[2]
         type = items[3]
@@ -146,10 +158,12 @@ class NekoPet:
         background.alpha_composite(neko)
         draw.text((225, 5), f"{food}% Food", (255, 255, 255), font)
         draw.text((225, 45), f"{play}% Play", (255, 255, 255), font)
+        draw.text((225, 85), f"Level {self._find_level(int(level))}", (255, 255, 255), font)
 
         background.save(userpath)
 
         em = discord.Embed(color=0xDEADBF, title=f"{ctx.message.author.name}'s Neko")
+        em.set_footer(text=f"Level: {self._find_level(int(level))}, XP: {level}")
         await ctx.send(file=discord.File(userpath),
                        embed=em.set_image(url=f"attachment://{ctx.message.author.id}.png"))
 
@@ -200,7 +214,7 @@ class NekoPet:
     async def neko_feed(self, ctx):
         """Feed your neko"""
         if not await self.check(ctx.message.author.id):
-            return await ctx.send("You don't have a pet to play with ;c, buy one with `n!shop`")
+            return await ctx.send("You don't have a pet to play with ;c, buy one with `n!pet shop`")
         food = await self.execute(f"SELECT food FROM nekopet WHERE userid = {ctx.message.author.id}", isSelect=True)
         food = int(food[0])
         if food >= 90:
@@ -218,13 +232,13 @@ class NekoPet:
     @pet.command(name="train")
     async def neko_train(self, ctx):
         if not await self.check(ctx.message.author.id):
-            return await ctx.send("You don't have a pet to play with ;c, buy one with `n!shop`")
+            return await ctx.send("You don't have a pet to play with ;c, buy one with `n!pet shop`")
         level = await self.execute(f"SELECT level FROM nekopet WHERE userid = {ctx.message.author.id}", isSelect=True)
         level = int(level[0])
         if random.randint(1, 5) == 1:
             am = random.randint(10, 30)
             newlvl = level + am
-            await self.execute(f"UPDATE nekopet SET play = {newlvl} WHERE userid = {ctx.message.author.id}",
+            await self.execute(f"UPDATE nekopet SET level = {newlvl} WHERE userid = {ctx.message.author.id}",
                                commit=True)
             await ctx.send(f"**Your neko learnt new tricks owo ({am} score)**")
         else:
