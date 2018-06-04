@@ -72,6 +72,18 @@ class Fun:
                 return values
 
     @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def catgirlmeme(self, ctx):
+        """Everything is a dollar not spent on genetically engendering catgirls for domestic ownership"""
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekos.life/api/v2/img/gecg") as r:
+                res = await r.json()
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=res["url"])
+        em.set_footer(text="nekos.life owo")
+        await ctx.send(embed=em)
+
+    @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def blurpify(self, ctx, user:discord.Member=None):
         """Blurpify a users avatar"""
