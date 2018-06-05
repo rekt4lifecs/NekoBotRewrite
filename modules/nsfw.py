@@ -1,10 +1,8 @@
 from discord.ext import commands
 import discord, random, aiohttp, requests
 from bs4 import BeautifulSoup as bs
-from collections import Counter
 from .utils import checks
 import config
-import aiomysql
 import json
 
 class NSFW:
@@ -397,6 +395,20 @@ class NSFW:
                 await ctx.send(embed=em)
         except:
             await ctx.send("**Failed to connect to e621**")
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(1, 2, commands.BucketType.user)
+    async def futa(self, ctx):
+        """Grils with peepee's"""
+        if not ctx.message.channel.is_nsfw():
+            return await ctx.send("This is not an NSFW channel...", delete_after=5)
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(config.boobbot["base"] + "futa", headers={"key": config.boobbot["key"]}) as r:
+                res = await r.json()
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=res["url"])
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.guild_only()
