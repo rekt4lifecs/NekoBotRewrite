@@ -909,7 +909,7 @@ class General:
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`, `haste`")
             embed.add_field(name="Moderation",
-                            value="`kick`, `ban`, `massban`, `unban`, `rename`, `snipe`, `poll`, `purge`, `mute`, `unmute`, `dehoist`", inline=False)
+                            value="`kick`, `ban`, `massban`, `unban`, `rename`, `snipe`, `poll`, `purge`, `mute`, `unmute`, `dehoist`, `autorole`", inline=False)
             embed.add_field(name="Roleplay", value="`card`,  `pet`")
             embed.add_field(name="IMGWelcomer", value="`imgwelcome`", inline=False)
             embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `transfer`, "
