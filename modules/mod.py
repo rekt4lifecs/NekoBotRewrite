@@ -1001,6 +1001,16 @@ class Moderation:
                     description='**Error**: _{}_'.format(err))
                 await ctx.send(embed=error_embed)
 
+    async def on_member_update(self, before, after):
+        try:
+            if not before.guild.id == 221989003400970241:
+                return
+            if not before.display_name == after.display_name:
+                if not after.display_name[0] in list(str(string.ascii_letters)):
+                    await after.edit(nick="Hoister", reason="Hoisting")
+        except:
+            pass
+
     async def on_guild_remove(self, guild):
         if not guild.large:
             return
