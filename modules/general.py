@@ -921,7 +921,7 @@ class General:
 
             embed.add_field(name="NSFW",
                             value="`pgif`, `4k`, `phsearch`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
-                                  " `gonewild`, `nsfw`, `doujin`, `girl`, `hentai`, `rule34`, `lewdkitsune`, `lewdneko`, `anal`, `dva`, `pussy`, `e621`, `futa`", inline=False)
+                                  " `gonewild`, `nsfw`, `doujin`, `girl`, `hentai`, `rule34`, `lewdkitsune`, `lewdneko`, `anal`, `dva`, `pussy`, `e621`, `futa`, `collared`", inline=False)
 
             embed.add_field(name="Reactions",
                             value="`awoo`, `blush`, `confused`, `cry`, `dance`, `insult`, `cry`, `hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"

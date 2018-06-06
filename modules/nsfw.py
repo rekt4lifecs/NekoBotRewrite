@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord, random, aiohttp, requests
 from bs4 import BeautifulSoup as bs
 from .utils import checks
-import config
+import config, aiofiles
 import json
 
 class NSFW:
@@ -153,21 +153,13 @@ class NSFW:
     async def boobs(self, ctx):
         """Get Random Boobs OwO"""
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-            return
-        try:
-            rdm = random.randint(0, 11545)
-            search = ("http://api.oboobs.ru/boobs/{}".format(rdm))
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(search) as r:
-                    res = await r.json()
-                    boob = random.choice(res)
-                    boob = "http://media.oboobs.ru/{}".format(boob["preview"])
-                    em = discord.Embed(color=0xDEADBF)
-                    em.set_image(url=boob)
-                    await ctx.send(embed=em)
-        except Exception as e:
-            await ctx.send("**`{}`**".format(e))
+            return await ctx.send("This is not an NSFW channel...", delete_after=5)
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(config.boobbot["base"] + "boobs", headers={"key": config.boobbot["key"]}) as r:
+                res = await r.json()
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=res["url"])
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.guild_only()
@@ -410,6 +402,19 @@ class NSFW:
         em.set_image(url=res["url"])
         await ctx.send(embed=em)
 
+    @commands.command(aliases=["collar"])
+    @commands.guild_only()
+    @commands.cooldown(1, 2, commands.BucketType.user)
+    async def collared(self, ctx):
+        if not ctx.message.channel.is_nsfw():
+            return await ctx.send("This is not an NSFW channel...", delete_after=5)
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(config.boobbot["base"] + "collared", headers={"key": config.boobbot["key"]}) as r:
+                res = await r.json()
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=res["url"])
+        await ctx.send(embed=em)
+
     @commands.command()
     @commands.guild_only()
     @checks.is_admin()
@@ -430,6 +435,16 @@ class NSFW:
                 await ctx.send("I can't make that channel NSFW or don't have permissions to ;c")
             except:
                 pass
+
+    async def on_message(self, message):
+        if message.channel.id == 445987532648349701 or message.channel.id == 440900958936104970:
+            if len(message.attachments) >= 1:
+                for attachment in message.attachments:
+                    async with aiohttp.ClientSession() as cs:
+                        async with cs.get(attachment.url) as r:
+                            res = await r.read()
+                    async with aiofiles.open(f"data/other/{str(attachment.url).rpartition('/')[2]}", mode="wb") as f:
+                        await f.write(res)
 
 def setup(bot):
     bot.add_cog(NSFW(bot))
