@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord, random, aiohttp, requests
 from bs4 import BeautifulSoup as bs
+from time import time
 from .utils import checks
 import config, aiofiles
 import json
@@ -443,7 +444,7 @@ class NSFW:
                     async with aiohttp.ClientSession() as cs:
                         async with cs.get(attachment.url) as r:
                             res = await r.read()
-                    async with aiofiles.open(f"data/other/{str(attachment.url).rpartition('/')[2]}", mode="wb") as f:
+                    async with aiofiles.open(f"data/other/{int(time())}-{str(attachment.url).rpartition('/')[2]}", mode="wb") as f:
                         await f.write(res)
 
 def setup(bot):
