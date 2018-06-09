@@ -75,9 +75,12 @@ class Fun:
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def catgirlmeme(self, ctx):
         """Everything is a dollar not spent on genetically engendering catgirls for domestic ownership"""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://nekos.life/api/v2/img/gecg") as r:
-                res = await r.json()
+        while True:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get("https://nekos.life/api/v2/img/gecg") as r:
+                    res = await r.json()
+                    if not res["url"] == "https://cdn.nekos.life/gecg/15_00000.jpg":
+                        break
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=res["url"])
         em.set_footer(text="nekos.life owo")
