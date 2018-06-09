@@ -169,6 +169,7 @@ class General:
         #     async with cs.get("http://localhost:1212") as r:
         #         res = await r.json()
         # servers = res["count"]
+        await ctx.trigger_typing()
         servers = len(self.bot.guilds)
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
@@ -223,6 +224,19 @@ class General:
         embed = discord.Embed(color=0xDEADBF, description=text)
         embed.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=embed)
+
+    @commands.command(aliases=["emojiinfo", "emote"])
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def emoteinfo(self, ctx, emote:discord.Emoji):
+        """Get Emote Info"""
+        em = discord.Embed(color=0xDEADBF)
+        em.add_field(name="Name", value=emote.name, inline=False)
+        em.add_field(name="ID", value=emote.id, inline=False)
+        em.add_field(name="Animated?", value=str(emote.animated), inline=False)
+        guild = emote.guild
+        em.add_field(name="Server", value=f"{guild.name} ({guild.id})", inline=False)
+        em.set_thumbnail(url=emote.url)
+        await ctx.send(embed=em)
 
     @commands.command(aliases=['user'])
     @commands.guild_only()
@@ -905,7 +919,7 @@ class General:
             embed.add_field(name="General",
                             value="`help`, `discrim`, `discriminfo`, `botinfo`, `8ball`, `permissions`, `vote`, "
                                   "`qr`, `animepic`, `coffee`, `avatar`, `urban`, `channelinfo`, `userinfo`, "
-                                  "`serverinfo`, `whois`, `info`, `system`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`, `invite`, `latency`", inline=False)
+                                  "`serverinfo`, `emoteinfo`, `whois`, `info`, `system`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`, `invite`, `latency`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`, `haste`")
             embed.add_field(name="Moderation",
