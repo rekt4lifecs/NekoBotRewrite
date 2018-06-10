@@ -329,7 +329,7 @@ class economy:
             except:
                 await ctx.send(getlang(lang)["eco"]["set_desc"]["failed"])
 
-    @commands.command(aliases=['del'])
+    @commands.command(aliases=['del'], hidden=True)
     @commands.is_owner()
     async def poof(self, ctx, _id : int):
         await self.execute(f"DELETE FROM levels WHERE userid = {_id}", commit=True)

@@ -235,11 +235,10 @@ class Moderation:
             await ctx.send(getlang(lang)["mod"]["unbanned"].format(member))
 
     @commands.is_owner()
-    @commands.command()
-    async def presence(self, ctx, type: int, *, changeto : str):
+    @commands.command(hidden=True)
+    async def presence(self, ctx, *, changeto : str):
         await ctx.send("changed")
-        game = discord.Game(name=changeto, url="https://www.twitch.tv/rekt4lifecs",
-                            type=type)
+        game = discord.Streaming(name=changeto, url="https://www.twitch.tv/rektdevlol")
         await self.bot.change_presence(activity=game)
 
     @commands.command()
@@ -291,12 +290,12 @@ class Moderation:
         else:
             await ctx.send('Unmuted user.')
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def say(self, ctx, *, what_to_say : str):
         await ctx.send(what_to_say)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def shutdown(self, ctx):
         """Shutdown Bot"""
@@ -737,7 +736,7 @@ class Moderation:
                                                                                        f"{reason}```")
                 await channel.send(embed=embed)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def sql(self, ctx, *, sql: str):
         """Inject SQL"""
@@ -747,7 +746,7 @@ class Moderation:
         except Exception as e:
             await ctx.send(f"`{e}`")
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def select(self, ctx, *, sql: str):
         """Inject SQL"""
@@ -785,7 +784,7 @@ class Moderation:
     # the following code is used with permissions from ry00001#3487.
     # https://github.com/ry00001/Erio/blob/master/extensions/eshell.py
     # (modified)
-    @commands.group(invoke_without_command=True, name="weebpl")
+    @commands.group(invoke_without_command=True, name="weebpl", hidden=True)
     @commands.is_owner()
     async def repl(self, ctx, *, name: str = None):
         """New stylish repl command"""
@@ -1091,7 +1090,7 @@ class Moderation:
         except:
             pass
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def imagecatch(self, ctx, limit:int):
         msgs = ""

@@ -45,7 +45,7 @@ class Donator:
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def sendkey(self, ctx, user:discord.Member, *, key:str):
         """Send a user their donation key."""
@@ -85,7 +85,7 @@ class Donator:
                 t = await response.json()
                 await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=t['message']))
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def createkey(self, ctx):
         """Create a key"""
@@ -139,7 +139,7 @@ class Donator:
                                                                f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
             return await ctx.send(getlang(lang)["donator"]["error"]["in_use"])
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def keys(self, ctx):
         """View all keys + expiry"""
@@ -152,7 +152,7 @@ class Donator:
         text += "```"
         await ctx.send(text)
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def delkey(self, ctx, *, key:str):
         """Delete a key"""
