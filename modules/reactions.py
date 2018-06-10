@@ -490,7 +490,7 @@ class Reactions:
 
     @commands.cooldown(1, 3, commands.BucketType.user)
     @commands.guild_only()
-    @commands.command(pass_context=True, aliases=["neko", "nko", "lewdneko"])
+    @commands.command(pass_context=True, aliases=["neko", "nko", "lewdneko", "nya"])
     async def kemonomimi(self, ctx):
         """Girls with animal characteristics OwO"""
         if not ctx.message.channel.is_nsfw():
