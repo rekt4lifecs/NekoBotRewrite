@@ -99,6 +99,20 @@ class Fun:
                 res = await r.json()
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def phcomment(self, ctx, *, comment:str):
+        """PronHub Comment Image"""
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=phcomment"
+                              f"&image={ctx.author.avatar_url_as(format='png')}"
+                              f"&text={comment}&username={ctx.author.name}") as r:
+                res = await r.json()
+        if not res["success"]:
+            return await ctx.send("**Failed to successfully get image.**")
+        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res["message"]))
+
     @commands.command(aliases=['dragonify'])
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def dragonic(self, ctx, *, text:str):
