@@ -9,6 +9,7 @@ from .utils.paginator import EmbedPages, Pages
 from scipy import stats
 import numpy
 from .utils.paginator import HelpPaginator
+from prettytable import PrettyTable
 from colorthief import ColorThief
 from io import BytesIO
 from .utils import checks
@@ -64,6 +65,8 @@ class General:
     def __init__(self, bot):
         self.bot = bot
         self.counter = Counter()
+        if not hasattr(bot, "games"):
+            self.bot.games = Counter()
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
         async with self.bot.sql_conn.acquire() as conn:
@@ -162,6 +165,32 @@ class General:
                 fmt = '{d}d ' + fmt
 
         return fmt.format(d=days, h=hours, m=minutes, s=seconds)
+
+    async def on_member_update(self, before, after):
+        if before.bot:
+            return
+        if before.activity == after.activity:
+            return
+        if after.activity:
+            self.bot.games[str(after.activity.name)] += 1
+        if before.activity:
+            self.bot.games[str(before.activity.name)] -= 1
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def topgames(self, ctx):
+        """Get top games played."""
+        em = discord.Embed(color=0xDEADBF)
+        games = self.bot.games.most_common(10)
+
+        table = PrettyTable()
+        table.field_names = ["Game Name", "Players"]
+
+        for game in games:
+            table.add_row([game[0], game[1]])
+        em.title = "Top Games Played"
+        em.description = f"```\n{table}```"
+        await ctx.send(embed=em)
 
     @commands.command(aliases=['version'])
     async def info(self, ctx):
@@ -919,7 +948,7 @@ class General:
             embed.add_field(name="General",
                             value="`help`, `discrim`, `discriminfo`, `botinfo`, `8ball`, `permissions`, `vote`, "
                                   "`qr`, `animepic`, `coffee`, `avatar`, `urban`, `channelinfo`, `userinfo`, "
-                                  "`serverinfo`, `emoteinfo`, `whois`, `info`, `system`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`, `invite`, `latency`", inline=False)
+                                  "`serverinfo`, `emoteinfo`, `whois`, `info`, `system`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`, `invite`, `latency`, `topgames`", inline=False)
             embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
             embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`, `haste`")
             embed.add_field(name="Moderation",
