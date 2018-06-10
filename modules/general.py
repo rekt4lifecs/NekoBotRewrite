@@ -13,6 +13,7 @@ from prettytable import PrettyTable
 from colorthief import ColorThief
 from io import BytesIO
 from .utils import checks
+import qrcode, os, uuid
 
 LOWERCASE, UPPERCASE = 'x', 'X'
 def triplet(rgb, lettercase=LOWERCASE):
@@ -481,15 +482,13 @@ class General:
             await msg.edit(embed=em.set_image(url=res['url']))
 
     @commands.command()
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def qr(self, ctx, *, message: str):
         """Generate a QR Code"""
-        new_message = message.replace(" ", "+")
-        url = f"http://api.qrserver.com/v1/create-qr-code/?data={new_message}"
-
-        embed = discord.Embed(color=0xDEADBF)
-        embed.set_image(url=url)
-        await ctx.send(embed=embed)
+        name = str(uuid.uuid4())
+        qrcode.make(message).save(f"{name}.png")
+        await ctx.send(file=discord.File(f"{name}.png"))
+        os.remove(f"{name}.png")
 
     @commands.command()
     async def vote(self, ctx):
