@@ -410,8 +410,7 @@ class CardGame:
 
         await ctx.send(f"Sold {cardname} for {cardprice}")
 
-        hasaccount = await self.execute(f"SELECT 1 FROM economy WHERE userid = {author.id}", isSelect=True)
-        if hasaccount == 0:
+        if not await self.execute(f"SELECT 1 FROM economy WHERE userid = {author.id}", isSelect=True):
             await self.execute(f"INSERT INTO economy VALUES ({author.id}, 0, 0)", commit=True)
 
         x = await self.execute(f"SELECT balance FROM economy WHERE userid = {author.id}", isSelect=True)
