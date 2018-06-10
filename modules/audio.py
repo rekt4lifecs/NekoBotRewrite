@@ -32,7 +32,7 @@ class Audio:
 
         if not hasattr(bot, 'lavalink'):
             lavalink.Client(bot=bot,
-                            host=config.lavalink['host'],
+                            host="0.0.0.0",
                             ws_port=3232,
                             password=config.lavalink['password'],
                             loop=self.bot.loop, log_level=loginfo)
@@ -44,8 +44,7 @@ class Audio:
             if c:
                 c = self.bot.get_channel(c)
                 if c:
-                    embed = discord.Embed(colour=0xDEADBF,
-                                          title='Now Playing',
+                    embed = discord.Embed(colour=0xDEADBF, title='Now Playing',
                                           description=event.track.title)
                     embed.set_thumbnail(url=event.track.thumbnail)
                     await c.send(embed=embed)
@@ -53,9 +52,10 @@ class Audio:
             c = event.player.fetch('channel')
             if c:
                 c = self.bot.get_channel(c)
-                if c:
-                    await c.send('**Queue Ended**')
-                    await event.player.disconnect()
+
+            if c:
+                await c.send('**Queue Ended**')
+                await event.player.disconnect()
 
     @commands.command()
     @commands.guild_only()
@@ -81,7 +81,6 @@ class Audio:
 
             player.store('channel', ctx.channel.id)
             await player.connect(ctx.author.voice.channel.id)
-
         else:
             if not ctx.author.voice or not ctx.author.voice.channel or player.connected_channel.id != ctx.author.voice.channel.id:
                 return await ctx.send(getlang(lang)["audio"]["join_bot"])
@@ -91,25 +90,28 @@ class Audio:
         if not query.startswith('http'):
             query = f'ytsearch:{query}'
 
-        tracks = await self.bot.lavalink.get_tracks(query)
+        audio_data = await self.bot.lavalink.get_tracks(query)
 
-        if not tracks:
+        if not audio_data or not audio_data['tracks']:
             return await ctx.send(getlang(lang)["audio"]["nothing_found"])
 
         embed = discord.Embed(colour=0xDEADBF)
 
-        if 'list' in query and 'ytsearch:' not in query:
+        if audio_data['isPlaylist']:
+            tracks = audio_data['tracks']
+
             for track in tracks:
                 player.add(requester=ctx.author.id, track=track)
 
-            embed.title = getlang(lang)["audio"]["playlist_enqueued"]
-            embed.description = getlang(lang)["audio"]["imported_tracks"].format(len(tracks))
+            embed.title = "Playlist Enqueued!"
+            embed.description = f"{audio_data['playlistInfo']['name']} - {len(tracks)} tracks"
             await ctx.send(embed=embed)
         else:
-            embed.title = getlang(lang)["audio"]["track_enqueued"]
-            embed.description = f'[{tracks[0]["info"]["title"]}]({tracks[0]["info"]["uri"]})'
+            track = audio_data['tracks'][0]
+            embed.title = "Track Enqueued"
+            embed.description = f'[{track["info"]["title"]}]({track["info"]["uri"]})'
             await ctx.send(embed=embed)
-            player.add(requester=ctx.author.id, track=tracks[0])
+            player.add(requester=ctx.author.id, track=track)
 
         if not player.is_playing:
             await player.play()
