@@ -1070,26 +1070,6 @@ class Moderation:
         except:
             pass
 
-    async def on_message_edit(self, before, after):
-        if before.author.bot:
-            return
-        if before.content == after.content:
-            return
-        guild = before.guild
-        try:
-            if guild.id == 221989003400970241:
-                channel = self.bot.get_channel(431887286246834178)
-                embed = discord.Embed(color=0xffa230, title="Message Edited",
-                                      description=f"```\n"
-                                                  f"Author:     {before.author}\n"
-                                                  f"Channel:    {before.channel.name} ({before.channel.id})\n"
-                                                  f"Before:     {before.content}\n"
-                                                  f"After:      {after.content}```")
-                embed.set_footer(text=f"Edited at {after.edited_at}")
-                await channel.send(embed=embed)
-        except:
-            pass
-
     @commands.command(hidden=True)
     @commands.is_owner()
     async def imagecatch(self, ctx, limit:int):
