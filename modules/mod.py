@@ -1033,7 +1033,8 @@ class Moderation:
                         role = role[0]
             role = discord.utils.get(server.roles, id=int(role))
             await member.add_roles(role, reason="Autorole")
-        except:
+        except Exception as e:
+            print(e)
             pass
 
     async def on_member_update(self, before, after):
