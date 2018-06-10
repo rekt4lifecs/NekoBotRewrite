@@ -269,6 +269,8 @@ class Audio:
     @commands.command()
     @commands.guild_only()
     async def find(self, ctx, *, query):
+        """Find songs (not playing them)"""
+
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
@@ -277,12 +279,12 @@ class Audio:
         if not query.startswith('ytsearch:') and not query.startswith('scsearch:'):
             query = 'ytsearch:' + query
 
-        tracks = await self.bot.lavalink.get_tracks(query)
+        results = await self.bot.lavalink.get_tracks(query)
 
-        if not tracks:
+        if not results or not results['tracks']:
             return await ctx.send(getlang(lang)["audio"]["nothing_found"])
 
-        tracks = tracks[:10]  # First 10 results
+        tracks = results['tracks'][:10]  # First 10 results
 
         o = ''
         for i, t in enumerate(tracks, start=1):
