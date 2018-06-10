@@ -558,7 +558,7 @@ class CardGame:
 
         await ctx.send(file=discord.File(f'data/cards/{num}.png'), embed=embed.set_image(url=f'attachment://{num}.png'))
 
-    @card.command(name='generate')
+    @card.command(name='generate', hidden=True)
     @commands.is_owner()
     async def card_gen(self, ctx, character: str = "shiro", attack: int = 1, defense: int = 1):
         """Recieve your dailies"""

@@ -95,7 +95,7 @@ class IMGWelcome:
                 await db.execute(f"UPDATE newimgwelcome SET content = \"{newtext}\" WHERE server = {ctx.message.guild.id}")
         await ctx.send("Updated!")
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def imggen(self, ctx, member:discord.Member=None):
         if member is None:
