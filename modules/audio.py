@@ -1,6 +1,7 @@
 from discord.ext import commands
 from logging import INFO as loginfo
 from math import ceil
+from .utils.hastebin import post as haste
 import discord
 import re
 import lavalink
@@ -100,14 +101,29 @@ class Audio:
         if audio_data['isPlaylist']:
             tracks = audio_data['tracks']
 
+            toplay = []
+            removedtracks = 0
+
             for track in tracks:
+                if not track["info"]["length"] >= 2700000:
+                    toplay.append(track)
+                else:
+                    removedtracks += 1
+
+            for track in toplay:
                 player.add(requester=ctx.author.id, track=track)
 
             embed.title = "Playlist Enqueued!"
-            embed.description = f"{audio_data['playlistInfo']['name']} - {len(tracks)} tracks"
+            if not removedtracks >= 1:
+                embed.description = f"{audio_data['playlistInfo']['name']} - {len(tracks)} tracks"
+            else:
+                embed.description = f"{audio_data['playlistInfo']['name']} - {len(tracks)} tracks (Removed {removedtracks} track(s) for being over 45 minutes.)"
             await ctx.send(embed=embed)
         else:
             track = audio_data['tracks'][0]
+            if track["info"]["length"] >= 2700000:
+                em = discord.Embed(color=0xDEADBF, title="Error", description="Tracks must be at least under 45 minutes.")
+                return await ctx.send(embed=em)
             embed.title = "Track Enqueued"
             embed.description = f'[{track["info"]["title"]}]({track["info"]["uri"]})'
             await ctx.send(embed=embed)
