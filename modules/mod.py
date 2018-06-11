@@ -724,36 +724,15 @@ class Moderation:
         args.search = max(0, min(2000, args.search)) # clamp from 0-2000
         await self.do_removal(ctx, args.search, predicate, before=args.before, after=args.after)
 
-    @commands.command()
-    async def traceback(self, ctx, *, reason: str):
-        """Traceback Check"""
-        user = ctx.message.author
-        for role in user.roles:
-            if role.id == 404595507554549760:
-                channel = self.bot.get_channel(431987399581499403)
-                embed = discord.Embed(color=0x8bff87, title="Issue Fixed", description=f"Issue fixed by {user.id}\n"
-                                                                                       f"Reason:\n```\n"
-                                                                                       f"{reason}```")
-                await channel.send(embed=embed)
-
     @commands.command(hidden=True)
     @commands.is_owner()
     async def sql(self, ctx, *, sql: str):
         """Inject SQL"""
         try:
-            await self.execute(query=sql, commit=True)
+            x = await self.execute(query=sql, commit=True, isSelect=True, fetchAll=True)
             await ctx.message.add_reaction("✅")
-        except Exception as e:
-            await ctx.send(f"`{e}`")
-
-    @commands.command(hidden=True)
-    @commands.is_owner()
-    async def select(self, ctx, *, sql: str):
-        """Inject SQL"""
-        try:
-            x = await self.execute(query=f"SELECT {sql} LIMIT 10", isSelect=True, fetchAll=True)
-            await ctx.send(x)
-            await ctx.message.add_reaction("✅")
+            em = discord.Embed(color=0xDEADBF, title="SQL Result", description=f"```\n{x}\n```")
+            await ctx.send(embed=em)
         except Exception as e:
             await ctx.send(f"`{e}`")
 
