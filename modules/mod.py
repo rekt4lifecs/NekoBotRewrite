@@ -459,12 +459,12 @@ class Moderation:
                 if optin is not None:
                     if optin.decode('utf-8') == "false":
                         return
-                if not await db.execute(f"SELECT 1 FROM snipe WHERE channel = {message.channel.id}"):
-                    await db.execute(f"INSERT INTO snipe VALUES ({message.channel.id}, \"{message.content}\", {message.author.id})")
+                if not await db.execute("SELECT 1 FROM snipe WHERE channel = %s", (message.channel.id,)):
+                    await db.execute("INSERT INTO snipe VALUES (%s, \"%s\", %s)", (message.channel.id, message.content, message.author.id,))
                 else:
-                    await db.execute(f"UPDATE snipe SET message = \"{finishedmsg}\" WHERE channel = {message.channel.id}")
+                    await db.execute("UPDATE snipe SET message = \"%s\" WHERE channel = %s", (finishedmsg, message.channel.id,))
                     await connection.commit()
-                    await db.execute(f"UPDATE snipe SET author = \"{message.author.id}\" WHERE channel = {message.channel.id}")
+                    await db.execute("UPDATE snipe SET author = \"%s\" WHERE channel = %s", (message.author.id, message.channel.id,))
                 await connection.commit()
             except:
                 pass
