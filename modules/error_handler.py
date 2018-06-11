@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord, traceback, sys
-import config, aiohttp
+import config, aiohttp, json
 
 class error_handler:
 
