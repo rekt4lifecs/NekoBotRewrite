@@ -917,7 +917,7 @@ class General:
             em = discord.Embed(color=0xDEADBF, title="System Stats",
                                description=f"Cores: **{cores}**\n"
                                            f"CPU%: **{cpu_per}**\n"
-                                           f"RAM Usage: **{mem_usage}/{memory} MB**\n"
+                                           f"RAM Usage: **{mem_usage}/{memory} MB** ({int(memory - mem_usage)}MB free)\n"
                                            f"Storage: **{storage_free}/{storage} GB**")
             await ctx.send(embed=em)
         except Exception as e:
