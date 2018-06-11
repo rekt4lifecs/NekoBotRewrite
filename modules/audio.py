@@ -46,6 +46,7 @@ class Audio:
                 c = self.bot.get_channel(c)
                 if c:
                     if len(event.player.connected_channel.members) <= 1:
+                        await event.player.stop()
                         await event.player.disconnect()
                         return await c.send("**Leaving due to nobody being in the vc channel.**")
                     embed = discord.Embed(colour=0xDEADBF, title='Now Playing',
