@@ -9,6 +9,8 @@ class Chatbot:
     async def message_handler(self, message):
         channel = message.channel
         content = message.content
+        if message.author.bot:
+            return
 
         if content.startswith("<@310039170792030211> ") or content.startswith("<@!310039170792030211> "):
             commands = []
