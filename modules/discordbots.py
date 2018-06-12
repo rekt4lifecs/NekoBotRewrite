@@ -58,16 +58,6 @@ class DiscordBotsOrgAPI:
                         print(t)
             except Exception as e:
                 print(f"Failed to post to pw, {e}")
-
-            try:
-                async with aiohttp.ClientSession() as session:
-                    async with session.post('https://ls.terminal.ink/api/v1/bots/310039170792030211',
-                                            headers={'Authorization': f'{config.terminal_key}'},
-                                            data={"server_count": int(totalservers)}) as response:
-                        t = await response.json()
-                        print(t)
-            except Exception as e:
-                print(f"Failed to post to terminal, {e}")
             await asyncio.sleep(1800)
 
 
