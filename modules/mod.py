@@ -3,7 +3,6 @@ import discord, argparse, re, shlex, traceback, io, textwrap, asyncio
 from .utils import checks
 from contextlib import redirect_stdout
 from collections import Counter
-from .utils.chat_formatting import pagify, box
 from .utils.hastebin import post as hastebin
 import math
 import string
@@ -11,7 +10,9 @@ import time
 import config
 import aiomysql
 import re, json, inspect, datetime, collections
-import random
+import logging
+
+log = logging.getLogger()
 
 invite_rx = re.compile("discord(?:app)?\.(?:gg|com|me\/invite)\/([a-z0-9]{1,16})", re.IGNORECASE)
 
@@ -1013,7 +1014,7 @@ class Moderation:
             role = discord.utils.get(server.roles, id=int(role))
             await member.add_roles(role, reason="Autorole")
         except Exception as e:
-            print(e)
+            log.warning(e)
             pass
 
     async def on_member_update(self, before, after):

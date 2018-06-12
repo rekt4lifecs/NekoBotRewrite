@@ -117,7 +117,7 @@ class NekoBot(commands.AutoShardedBot):
                 try:
                     self.load_extension(f"modules.{name}")
                 except:
-                    print(bcolors.FAIL + "Failed to load {}.".format(name) + bcolors.ENDC, file=sys.stderr)
+                    logger.warning(bcolors.FAIL + "Failed to load {}.".format(name) + bcolors.ENDC, file=sys.stderr)
                     traceback.print_exc()
 
     async def on_command_error(self, context, exception):
@@ -152,7 +152,7 @@ class NekoBot(commands.AutoShardedBot):
         await self.close()
 
     async def on_shard_ready(self, shard_id):
-        print(bcolors.OKBLUE + f"Shard {shard_id} Connected..." + bcolors.ENDC)
+        logger.info(bcolors.OKBLUE + f"Shard {shard_id} Connected..." + bcolors.ENDC)
         webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
         payload = {
             "embeds": [
@@ -166,7 +166,6 @@ class NekoBot(commands.AutoShardedBot):
         async with aiohttp.ClientSession() as cs:
             async with cs.post(webhook_url, json=payload) as r:
                 res = await r.read()
-                print(res)
 
     async def on_ready(self):
         if not hasattr(self, 'uptime'):
@@ -179,10 +178,10 @@ class NekoBot(commands.AutoShardedBot):
               " |_| |_|\___|_|\_\___/|_.__/ \___/ \__|\n"
               "                                       \n"
               "                                       " + bcolors.ENDC)
-        print("Ready OwO")
-        print(f"Shards: {self.shard_count}")
-        print(f"Servers {len(self.guilds)}")
-        print(f"Users {len(set(self.get_all_members()))}")
+        logger.info("Ready OwO")
+        logger.info(f"Shards: {self.shard_count}")
+        logger.info(f"Servers {len(self.guilds)}")
+        logger.info(f"Users {len(set(self.get_all_members()))}")
         await self.change_presence(status=discord.Status.idle)
         
     def run(self):
