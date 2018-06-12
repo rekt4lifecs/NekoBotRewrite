@@ -626,7 +626,7 @@ class Fun:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def lizard(self, ctx):
         """Get a lizard owo"""
-        url = "https://nekos.life/api/lizard"
+        url = "https://nekos.life/api/v2/img/lizard"
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 res = await r.json()
