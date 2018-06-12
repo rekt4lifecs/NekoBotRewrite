@@ -270,7 +270,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 res = await r.json()
-        if res['success'] != True:
+        if not res['success']:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
@@ -283,7 +283,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 res = await r.json()
-        if res['success'] != True:
+        if not res['success']:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
@@ -295,7 +295,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://nekobot.xyz/api/imagegen?type=threats&url={userurl}") as r:
                 res = await r.json()
-        if res['success'] != True:
+        if not res['success']:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         await ctx.send( embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
@@ -308,7 +308,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://nekobot.xyz/api/imagegen?type=bodypillow&url={userurl}") as r:
                 res = await r.json()
-        if res['success'] != True:
+        if not res['success']:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         em = discord.Embed(color=0xDEADBF, title=f"{user.name}'s body pillow.")
         await ctx.send(embed=em.set_image(url=res['message']))
@@ -324,7 +324,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://nekobot.xyz/api/imagegen?type=baguette&url={userurl}") as r:
                 res = await r.json()
-        if res['success'] != True:
+        if not res['success']:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         try:
             await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
@@ -342,7 +342,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://nekobot.xyz/api/imagegen?type=deepfry&image={userurl}") as r:
                 res = await r.json()
-        if res['success'] != True:
+        if not res['success']:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         try:
             await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
@@ -383,7 +383,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://nekobot.xyz/api/imagegen?type=clyde&text={text}") as r:
                 res = await r.json()
-        if res['success'] != True:
+        if not res['success']:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         try:
             await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
@@ -466,7 +466,7 @@ class Fun:
             e = discord.Embed(color=0xDEADBF, title=f'{user1.name} ❤ {user2.name}', description=f"**Love %**\n"
                                                                                                 f"`{counter_}` **{score}%**\n\n"
                                                                                                 f"{finalName}")
-            if res['success'] != True:
+            if not res['success']:
                 return await ctx.send(
                     embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
             await ctx.send(content="{}".format(finalName),
@@ -523,7 +523,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://nekobot.xyz/api/imagegen?type=captcha&url={url}&username={user.name}") as r:
                 res = await r.json()
-        if res['success'] != True:
+        if not res['success']:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
@@ -539,7 +539,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://nekobot.xyz/api/imagegen?type=whowouldwin&user1={user1url}&user2={user2url}") as r:
                 res = await r.json()
-        if res['success'] != True:
+        if not res['success']:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
@@ -552,7 +552,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://nekobot.xyz/api/imagegen?type=awooify&url={user1url}") as r:
                 res = await r.json()
-        if res['success'] != True:
+        if not res['success']:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
@@ -581,7 +581,7 @@ class Fun:
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
                     res = await r.json()
-            if res['success'] != True:
+            if not res['success']:
                 return await ctx.send(
                     embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
             await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
@@ -698,7 +698,7 @@ class Fun:
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
                     res = await r.json()
-        if res['success'] != True:
+        if not res['success']:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         try:
             if not await self.execute(query=f'SELECT 1 FROM lastimg WHERE channel = {ctx.message.channel.id}', isSelect=True):
@@ -806,7 +806,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(f"https://nekobot.xyz/api/imagegen?type=iphonex&url={url}") as r:
                 res = await r.json()
-        if res['success'] is False:
+        if not res['success']:
             return await ctx.send("**Error generating image with that url.**")
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
@@ -819,7 +819,7 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 res = await r.json()
-        if res['success'] != True:
+        if not res['success']:
             return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
