@@ -1,6 +1,8 @@
 from discord.ext import commands
-import discord, random, os, math
+import discord, random, os, math, logging
 from PIL import Image, ImageFont, ImageDraw
+
+log = logging.getLogger()
 
 #
 # Formatting
@@ -257,7 +259,7 @@ class NekoPet:
                 await self.execute(f"UPDATE nekopet SET play = {int(data[1]) - random.randint(1, 20)} WHERE userid = {message.author.id}")
                 if data[0] <= 0:
                     await self.execute(f"DELETE FROM nekopet WHERE userid = {message.author.id}")
-                    print(f"{message.author.name} Neko Died.")
+                    log.info(f"{message.author.name} Neko Died.")
 
 def setup(bot):
     bot.add_cog(NekoPet(bot))
