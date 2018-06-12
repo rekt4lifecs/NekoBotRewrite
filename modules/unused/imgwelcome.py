@@ -4,7 +4,9 @@ from io import BytesIO
 from modules.utils import checks
 from PIL import Image, ImageFont, ImageDraw
 import string
-import aiomysql
+import logging
+
+log = logging.getLogger()
 
 class IMGWelcome:
     """IMGWelcome"""
@@ -50,7 +52,7 @@ class IMGWelcome:
             username = "0 1"
             username.find("0")
             await self.execute(f"INSERT IGNORE INTO imgwelcome VALUES ({ctx.message.guild.id}, \"Welcome user to server!!!\", \"NONE\", \"arial.ttf\", \"NONE\")", commit=True)
-            print(f"Added {ctx.message.guild.name} ({ctx.message.guild.id})")
+            log.info(f"Added {ctx.message.guild.name} ({ctx.message.guild.id})")
 
     @commands.command()
     @checks.is_admin()
@@ -64,7 +66,7 @@ class IMGWelcome:
             await self.execute(f"UPDATE imgwelcome SET channel = \"{channel.id}\" WHERE server = {ctx.message.guild.id}",
                                commit=True)
             await ctx.send(f"Updated imgwelcome to {channel.name}")
-            print(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - Channel to {channel.name} ({channel.id})")
+            log.info(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - Channel to {channel.name} ({channel.id})")
 
     @commands.command()
     @checks.is_admin()
@@ -92,7 +94,7 @@ class IMGWelcome:
             await ctx.send(f"Updated content to {content}")
         await self.execute(f"UPDATE imgwelcome SET content = \"{content}\" WHERE server = {ctx.message.guild.id}",
                            commit=True)
-        print(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - Content to {content}")
+        log.info(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - Content to {content}")
 
     @commands.command()
     @checks.is_admin()
@@ -115,7 +117,7 @@ class IMGWelcome:
                 await self.execute(f"UPDATE imgwelcome SET background = \"{img}\" WHERE server = {ctx.message.guild.id}",
                            commit=True)
                 await ctx.send(f"Updated background to `{img}`")
-                print(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - BG to {img}")
+                log.info(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - BG to {img}")
             else:
                 await ctx.send("Can't get that website.")
         else:
