@@ -222,7 +222,7 @@ class NekoPet:
         if food >= 90:
             return await ctx.send("**Your neko already has enough food!**")
         payamount = random.randint(1000, 5000)
-        if not self.bal_check(ctx.message.author.id, payamount):
+        if not await self.bal_check(ctx.message.author.id, payamount):
             return await ctx.send("**You don't have enough food to give your pet ;c*")
         try:
             await self.remove_balance(ctx.message.author.id, payamount)
