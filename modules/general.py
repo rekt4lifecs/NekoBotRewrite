@@ -14,6 +14,9 @@ from colorthief import ColorThief
 from io import BytesIO
 from .utils import checks
 import qrcode, os, uuid
+import logging
+
+log = logging.getLogger()
 
 LOWERCASE, UPPERCASE = 'x', 'X'
 def triplet(rgb, lettercase=LOWERCASE):
@@ -990,7 +993,7 @@ class General:
                 clean = int(str(descrip).replace("<@", "").replace(">", "").replace("has voted and recieved 5000 credits!", ""))
                 user = self.bot.get_user(clean)
                 await user.send(embed=discord.Embed(color=0xDEADBF, description="You have recieved 5000 credits for voting!"))
-                print(f"[VOTE] {user} | Recieved")
+                log.info(f"{user} | Voted")
         except:
             pass
 
