@@ -36,6 +36,7 @@ class NekoBot(commands.AutoShardedBot):
                          pm_help=None,
                          shard_id=0,
                          status=discord.Status.dnd,
+                         fetch_offline_members=False,
                          max_messages=2500,
                          help_attrs={'hidden': True})
         self.counter = Counter()
