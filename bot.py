@@ -1,18 +1,17 @@
 from discord.ext import commands
 import logging, traceback, sys, discord
-from datetime import date
 from collections import Counter
 import datetime
 import aiohttp, aioredis, aiomysql
 import os
 import config
 
-log = logging.getLogger('NekoBot')
+log = logging.getLogger()
 log.setLevel(logging.INFO)
-date = f"{date.today().timetuple()[0]}_{date.today().timetuple()[1]}_{date.today().timetuple()[2]}"
-handler = logging.FileHandler(filename=f'NekoBot_{date}.log', encoding='utf-8', mode='w')
-handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-log.addHandler(handler)
+logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+log.addHandler(consoleHandler)
 
 class bcolors:
     HEADER = '\033[95m'
