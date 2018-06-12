@@ -96,8 +96,6 @@ class NekoBot(commands.AutoShardedBot):
         await self.close()
 
     async def on_shard_ready(self, shard_id):
-        if not hasattr(self, 'uptime'):
-            self.uptime = datetime.datetime.utcnow()
         print(bcolors.OKBLUE + f"Shard {shard_id} Connected..." + bcolors.ENDC)
         webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
         payload = {
@@ -115,6 +113,8 @@ class NekoBot(commands.AutoShardedBot):
                 print(res)
 
     async def on_ready(self):
+        if not hasattr(self, 'uptime'):
+            self.uptime = datetime.datetime.utcnow()
         print(bcolors.HEADER + "             _         _           _   \n"
               "            | |       | |         | |  \n"
               "  _ __   ___| | _____ | |__   ___ | |_ \n"
