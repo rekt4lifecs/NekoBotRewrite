@@ -10,7 +10,10 @@ import time
 import config
 import aiomysql
 import re, json, inspect, datetime, collections
-import logging
+import logging, os
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 log = logging.getLogger()
 
@@ -979,6 +982,26 @@ class Moderation:
                     color=15746887,
                     description='**Error**: _{}_'.format(err))
                 await ctx.send(embed=error_embed)
+
+    @commands.command(hidden=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def guildcount(self, ctx):
+        """Get bot guild graph"""
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("SELECT * FROM guildcount ORDER BY posttime DESC LIMIT 100")
+                data = await db.fetchall()
+        plots = []
+        time_data = []
+        for date in reversed(data):
+            plots.append(date[0])
+            time_data.append(date[1])
+        plt.plot(plots)
+        plt.ylabel("Guilds")
+        plt.xlabel("Date")
+        plt.savefig("guilds.png")
+        await ctx.send(file=discord.File("guilds.png"))
+        os.remove("guilds.png")
 
     @commands.command()
     @commands.guild_only()
