@@ -3,7 +3,7 @@ import logging, traceback, sys, discord
 from collections import Counter
 import datetime
 import aioredis, aiomysql
-import os
+import os, asyncio
 import config
 
 # logger = logging.getLogger()
@@ -172,6 +172,16 @@ class NekoBot(commands.AutoShardedBot):
         logger.info(f"Servers {len(self.guilds)}")
         logger.info(f"Users {len(set(self.get_all_members()))}")
         await self.change_presence(status=discord.Status.idle)
+
+        if not hasattr(self, "instancePoster"):
+            self.instancePoster = True
+            while self.instancePoster:
+                async with self.sql_conn.acquire() as conn:
+                    async with conn.cursor() as db:
+                        await db.execute("UPDATE instances SET guilds = %s WHERE instance = %s", (len(self.guilds),
+                                                                                                  self.instance,))
+                logger.info(f"Updated Instance {self.instance}'s Guild Count with {len(self.guilds)}")
+                await asyncio.sleep(120)
 
     def run(self):
         super().run(config.token)
