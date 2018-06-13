@@ -1,7 +1,6 @@
 from discord.ext import commands
 from logging import INFO as loginfo
 from math import ceil
-from .utils.hastebin import post as haste
 import discord
 import re
 import lavalink
