@@ -198,10 +198,7 @@ class General:
 
     @commands.command(aliases=['version'])
     async def info(self, ctx):
-        # async with aiohttp.ClientSession() as cs:
-        #     async with cs.get("http://localhost:1212") as r:
-        #         res = await r.json()
-        # servers = res["count"]
+        """Get Bot's Info"""
         await ctx.trigger_typing()
         servers = len(self.bot.guilds)
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
@@ -258,7 +255,7 @@ class General:
         embed.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=["emojiinfo", "emote"])
+    @commands.command(aliases=["emojiinfo", "emote", "emoji"])
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def emoteinfo(self, ctx, emote:discord.Emoji):
         """Get Emote Info"""
