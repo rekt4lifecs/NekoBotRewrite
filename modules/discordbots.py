@@ -31,10 +31,12 @@ class DiscordBotsOrgAPI:
                 return values
 
     async def startdbl(self):
+        if self.bot.instance != 0:
+            return
         while True:
             log.info("Getting all servers.")
             log.info("Attempting to update server count.")
-            servers = await self.execute("SELECT sum(guilds) FROM instances", isSelect=True)
+            servers = (await self.execute("SELECT sum(guilds) FROM instances", isSelect=True))[0]
             try:
                 url = "https://discordbots.org/api/bots/310039170792030211/stats"
                 payload = {
