@@ -301,7 +301,7 @@ class Moderation:
     async def shutdown(self, ctx):
         """Shutdown Bot"""
         await ctx.send("Bai bai")
-        await self.bot.close()
+        await self.bot.logout()
 
     @commands.command(hidden=True)
     @commands.is_owner()

@@ -34,6 +34,7 @@ class DiscordBotsOrgAPI:
                 url = "https://discordbots.org/api/bots/310039170792030211/stats"
                 payload = {
                     "server_count": int(totalservers),
+                    "shard_id": self.bot.shard_id,
                     "shard_count": len(self.bot.shards)
                 }
                 async with aiohttp.ClientSession() as cs:
