@@ -301,7 +301,7 @@ class Moderation:
     async def shutdown(self, ctx):
         """Shutdown Bot"""
         await ctx.send("Bai bai")
-        await self.bot.logout()
+        await self.bot.close()
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -310,7 +310,7 @@ class Moderation:
         module = "modules." + module
         try:
             self.bot.load_extension(module)
-        except Exception as e:
+        except Exception:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
             await ctx.send('Loaded <a:forsenPls:444882132343717898>')
@@ -322,7 +322,7 @@ class Moderation:
         module = "modules." + module
         try:
             self.bot.unload_extension(module)
-        except Exception as e:
+        except Exception:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
             await ctx.send('Unloaded <a:forsenPls:444882132343717898>')
@@ -335,7 +335,7 @@ class Moderation:
         try:
             self.bot.unload_extension(module)
             self.bot.load_extension(module)
-        except Exception as e:
+        except Exception:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
             await ctx.send('Reloaded <a:forsenPls:444882132343717898>')
