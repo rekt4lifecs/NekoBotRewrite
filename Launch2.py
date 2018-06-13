@@ -178,9 +178,70 @@ class NekoBot(commands.AutoShardedBot):
             while self.instancePoster:
                 async with self.sql_conn.acquire() as conn:
                     async with conn.cursor() as db:
+                        topbalquery = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
                         await db.execute("UPDATE instances SET guilds = %s WHERE instance = %s", (len(self.guilds),
                                                                                                   self.instance,))
+                        await db.execute(topbalquery)
+                        allusers = await db.fetchall()
                 logger.info(f"Updated Instance {self.instance}'s Guild Count with {len(self.guilds)}")
+
+                user1 = None
+                user2 = None
+                user3 = None
+                user4 = None
+                user5 = None
+                user6 = None
+                user7 = None
+                user8 = None
+                user9 = None
+                user10 = None
+
+                for guild in self.guilds:
+                    for member in guild.members:
+                        if member.id == int(allusers[0][0]):
+                            user1 = member.name
+                        elif member.id == int(allusers[1][0]):
+                            user2 = member.name
+                        elif member.id == int(allusers[2][0]):
+                            user3 = member.name
+                        elif member.id == int(allusers[3][0]):
+                            user4 = member.name
+                        elif member.id == int(allusers[4][0]):
+                            user5 = member.name
+                        elif member.id == int(allusers[5][0]):
+                            user6 = member.name
+                        elif member.id == int(allusers[6][0]):
+                            user7 = member.name
+                        elif member.id == int(allusers[7][0]):
+                            user8 = member.name
+                        elif member.id == int(allusers[8][0]):
+                            user9 = member.name
+                        elif member.id == int(allusers[9][0]):
+                            user10 = member.name
+
+                async with self.sql_conn.acquire() as conn:
+                    async with conn.cursor() as db:
+                        if user1:
+                            await db.execute("UPDATE ecotop SET user1 = %s", (user1,))
+                        if user2:
+                            await db.execute("UPDATE ecotop SET user2 = %s", (user2,))
+                        if user3:
+                            await db.execute("UPDATE ecotop SET user3 = %s", (user3,))
+                        if user4:
+                            await db.execute("UPDATE ecotop SET user4 = %s", (user4,))
+                        if user5:
+                            await db.execute("UPDATE ecotop SET user5 = %s", (user5,))
+                        if user6:
+                            await db.execute("UPDATE ecotop SET user6 = %s", (user6,))
+                        if user7:
+                            await db.execute("UPDATE ecotop SET user7 = %s", (user7,))
+                        if user8:
+                            await db.execute("UPDATE ecotop SET user8 = %s", (user8,))
+                        if user9:
+                            await db.execute("UPDATE ecotop SET user9 = %s", (user9,))
+                        if user10:
+                            await db.execute("UPDATE ecotop SET user10 = %s", (user10,))
+
                 await asyncio.sleep(120)
 
     def run(self):
