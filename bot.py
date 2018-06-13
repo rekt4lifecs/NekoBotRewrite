@@ -152,20 +152,7 @@ class NekoBot(commands.AutoShardedBot):
         await self.close()
 
     async def on_shard_ready(self, shard_id):
-        logger.info(bcolors.OKBLUE + f"Shard {shard_id} Connected..." + bcolors.ENDC)
-        webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
-        payload = {
-            "embeds": [
-                {
-                    "title": "Shard Connect.",
-                    "description": f"Shard {shard_id} has connected.",
-                    "color": 14593471
-                }
-            ]
-        }
-        async with aiohttp.ClientSession() as cs:
-            async with cs.post(webhook_url, json=payload) as r:
-                res = await r.read()
+        logger.info(f"Shard {shard_id} connected.")
 
     async def on_ready(self):
         if not hasattr(self, 'uptime'):
