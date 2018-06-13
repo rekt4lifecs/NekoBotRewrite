@@ -632,7 +632,7 @@ class Moderation:
         """A more advanced purge command.
 
         This command uses a powerful "command line" syntax.
-        Thank You R.Danny
+        >w<
 
         The following options are valid.
 
