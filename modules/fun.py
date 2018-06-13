@@ -1,7 +1,6 @@
 from discord.ext import commands
 import discord, aiohttp, random, config, datetime, base64, hashlib
 from io import BytesIO
-from PIL import Image
 import os
 from googleapiclient import discovery
 

@@ -6,7 +6,6 @@ from .utils.hastebin import post as hastepost
 import config
 import os, json
 
-
 # Languages
 languages = ["english", "weeb", "tsundere"]
 english = json.load(open("lang/english.json"))

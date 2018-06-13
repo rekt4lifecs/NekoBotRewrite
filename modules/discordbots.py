@@ -1,5 +1,4 @@
-from discord.ext import commands
-import asyncio, config, dbl, discord, random, aiohttp
+import asyncio, config, discord, random, aiohttp
 import pymysql, time
 
 messages = ["OwO Whats this", "MonkaS", "OwO", "Haiiiii", ".help", "🤔🤔🤔", "HMMM🤔", "USE n! WEW", "n!HELP REE"]

@@ -926,66 +926,6 @@ class General:
         except Exception as e:
             await ctx.send(f"Failed to get system info,\nError: {e}")
 
-    # @commands.command()
-    # @commands.cooldown(1, 10, commands.BucketType.user)
-    # async def help(self, ctx, option: str = None):
-    #     """Help Command OwO"""
-    #     color = 0xDEADBF
-    #     if not option is None:
-    #         entity = self.bot.get_cog(option) or self.bot.get_command(option)
-    #
-    #         if entity is None:
-    #             clean = option.replace('@', '@\u200b')
-    #             return await ctx.send(f'Command or category "{clean}" not found.')
-    #         elif isinstance(entity, commands.Command):
-    #             p = await HelpPaginator.from_command(ctx, entity)
-    #         else:
-    #             p = await HelpPaginator.from_cog(ctx, entity)
-    #         return await p.paginate()
-    #     try:
-    #         embed = discord.Embed(color=color)
-    #         embed.set_author(name="NekoBot",
-    #                          icon_url=self.bot.user.avatar_url_as(format='png'))
-    #
-    #         embed.add_field(name="General",
-    #                         value="`help`, `discrim`, `discriminfo`, `botinfo`, `8ball`, `permissions`, `vote`, "
-    #                               "`qr`, `animepic`, `coffee`, `avatar`, `urban`, `channelinfo`, `userinfo`, "
-    #                               "`serverinfo`, `emoteinfo`, `whois`, `info`, `system`, `flip`, `keygen`, `cookie`, `lmgtfy`, `setlang`, `shorten`, `invite`, `latency`, `topgames`", inline=False)
-    #         embed.add_field(name="Audio", value="`play`, `skip`, `stop`, `now`, `queue`, `pause`, `volume`, `shuffle`, `repeat`, `find`, `disconnect`", inline=True)
-    #         embed.add_field(name="Donator", value="`donate`, `redeem`, `upload`, `trapcard`, `haste`")
-    #         embed.add_field(name="Moderation",
-    #                         value="`kick`, `ban`, `massban`, `unban`, `rename`, `snipe`, `poll`, `purge`, `mute`, `unmute`, `dehoist`, `autorole`", inline=False)
-    #         embed.add_field(name="Roleplay", value="`card`,  `pet`")
-    #         embed.add_field(name="IMGWelcomer", value="`imgwelcome`", inline=False)
-    #         embed.add_field(name="Levels & Economy", value="`bank`, `register`, `profile`, `daily`, `rep`, `setdesc`, `transfer`, "
-    #                                                        "`coinflip`, `blackjack`, `top`", inline=False)
-    #         embed.add_field(name="Fun",
-    #                         value="`deepfry`, `blurpify`, `awooify`, `dragonic`, `dedragonic`,`food`, `bodypillow`, `weebify`, `toxicity`, `tweet`, `nichijou`, `ship`, `achievement`, `shitpost`, `meme`, `changemymind`, `penis`, `vagina`, `jpeg`, `isnowillegal`, `gif`, `cat`, `dog`, "
-    #                               "`bitconnect`, `feed`, `lovecalculator`, `fight`, `clyde`, `joke`, "
-    #                               "`b64`, `md5`, `kannagen`, `iphonex`, `baguette`, `owoify`, `lizard`, `duck`, `captcha`, `whowouldwin`, `threats`, `clap`, `bigletter`, `catgirlmeme`, `phcomment`", inline=False)
-    #
-    #         embed.add_field(name="NSFW",
-    #                         value="`pgif`, `4k`, `phsearch`, `yandere`, `boobs`, `bigboobs`, `ass`, `cumsluts`, `thighs`,"
-    #                               " `gonewild`, `nsfw`, `doujin`, `girl`, `hentai`, `rule34`, `lewdkitsune`, `lewdneko`, `anal`, `dva`, `pussy`, `e621`, `futa`, `collared`", inline=False)
-    #
-    #         embed.add_field(name="Reactions",
-    #                         value="`awoo`, `blush`, `confused`, `cry`, `dance`, `insult`, `cry`, `hug`, `kiss`, `pat`, `cuddle`, `tickle`, `bite`, `slap`, `punch`,"
-    #                               "`poke`, `nom`, `lick`, `lewd`, `trap`, `owo`, `wasted`, `banghead`,"
-    #                               "`discordmeme`, `stare`, `thinking`, `dab`, `kemonomimi`, `why`, `rem`, `poi`, `greet`, "
-    #                               "`insultwaifu`, `foxgirl`, `jojo`, `megumin`, `pout`, `shrug`, `sleepy`, `sumfuk`, `initiald`, `deredere`, `triggered`, `gasm`", inline=False)
-    #         embed.add_field(name="Game Stats",
-    #                         value="`osu`, `overwatch`, `fortnite`, `minecraft`, `pubg`", inline=False)
-    #         embed.add_field(name="Marriage", value="`marry`, `divorce`", inline=False)
-    #
-    #         await ctx.send(embed=embed)
-    #     except:
-    #         await ctx.send("I can't send embeds.")
-    #     try:
-    #         emoji = self.bot.get_emoji(408672929379909632)
-    #         await ctx.message.add_reaction(emoji)
-    #     except:
-    #         pass
-
     async def on_message(self, message):
         try:
             if message.channel.id == 445635075543924756:
