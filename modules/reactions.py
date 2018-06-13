@@ -1,7 +1,6 @@
 from discord.ext import commands
 import discord, config, aiohttp
 from collections import Counter
-from io import BytesIO
 import random
 
 key = config.weeb

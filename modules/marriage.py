@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, asyncio, aiomysql, config
+import discord, asyncio
 import json
 
 # Languages
