@@ -3,6 +3,7 @@ import discord, aiohttp, asyncio, time, datetime, config, random, math, logging
 import aiomysql
 import json
 import string
+from prettytable import PrettyTable
 
 log = logging.getLogger("NekoBot")
 
@@ -434,18 +435,21 @@ class economy:
                 elif member.id == int(allusers[9][0]):
                     user10 = member.name
 
-        embed = discord.Embed(color=0xDEADBF, title="Top Users",
-                              description=f"`1. ♔{user1}♔ - ${int(allusers[0][1])}`\n"
-                                          f"`2. ♕{user2}♕ - ${int(allusers[1][1])}`\n"
-                                          f"`3. ♖{user3}♖ - ${int(allusers[2][1])}`\n"
-                                          f"`4. {user4} - ${int(allusers[3][1])}`\n"
-                                          f"`5. {user5} - ${int(allusers[4][1])}`\n"
-                                          f"`6. {user6} - ${int(allusers[5][1])}`\n"
-                                          f"`7. {user7} - ${int(allusers[6][1])}`\n"
-                                          f"`8. {user8} - ${int(allusers[7][1])}`\n"
-                                          f"`9. {user9} - ${int(allusers[8][1])}`\n"
-                                          f"`10. {user10} - ${int(allusers[9][1])}`\n")
-        return await msg.edit(embed=embed)
+        table = PrettyTable()
+        table.field_names = ["Username", "Balance"]
+
+        table.add_row([user1, int(allusers[0][1])])
+        table.add_row([user2, int(allusers[1][1])])
+        table.add_row([user3, int(allusers[2][1])])
+        table.add_row([user4, int(allusers[3][1])])
+        table.add_row([user5, int(allusers[4][1])])
+        table.add_row([user6, int(allusers[5][1])])
+        table.add_row([user7, int(allusers[6][1])])
+        table.add_row([user8, int(allusers[7][1])])
+        table.add_row([user9, int(allusers[8][1])])
+        table.add_row([user10, int(allusers[9][1])])
+
+        await msg.edit(content=f"```\n{table}\n```", embed=None)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
