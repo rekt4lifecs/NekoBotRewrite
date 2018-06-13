@@ -150,17 +150,7 @@ class economy:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
-        isdonator = False
-        support = self.bot.get_guild(221989003400970241)
-        for userx in support.members:
-            if userx.id == ctx.message.author.id:
-                for role in userx.roles:
-                    if role.name == "Supporter":
-                        isdonator = True
-        if isdonator:
-            username = f"❤ {user.name}"
-        else:
-            username = str(user.name)
+        username = str(user.name)
         if await self.usercheck('levels', user) is False:
             level = 0
             xp = 0
@@ -400,54 +390,21 @@ class economy:
         msg = await ctx.send(embed=em)
         query = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
         allusers = await self.execute(query=query, isSelect=True, fetchAll=True)
-
-        user1 = "User Not Found"
-        user2 = "User Not Found"
-        user3 = "User Not Found"
-        user4 = "User Not Found"
-        user5 = "User Not Found"
-        user6 = "User Not Found"
-        user7 = "User Not Found"
-        user8 = "User Not Found"
-        user9 = "User Not Found"
-        user10 = "User Not Found"
-
-        for guild in self.bot.guilds:
-            for member in guild.members:
-                if member.id == int(allusers[0][0]):
-                    user1 = member.name
-                elif member.id == int(allusers[1][0]):
-                    user2 = member.name
-                elif member.id == int(allusers[2][0]):
-                    user3 = member.name
-                elif member.id == int(allusers[3][0]):
-                    user4 = member.name
-                elif member.id == int(allusers[4][0]):
-                    user5 = member.name
-                elif member.id == int(allusers[5][0]):
-                    user6 = member.name
-                elif member.id == int(allusers[6][0]):
-                    user7 = member.name
-                elif member.id == int(allusers[7][0]):
-                    user8 = member.name
-                elif member.id == int(allusers[8][0]):
-                    user9 = member.name
-                elif member.id == int(allusers[9][0]):
-                    user10 = member.name
+        users = await self.execute("SELECT * FROM ecotop", isSelect=True)
 
         table = PrettyTable()
         table.field_names = ["Username", "Balance"]
 
-        table.add_row([user1, int(allusers[0][1])])
-        table.add_row([user2, int(allusers[1][1])])
-        table.add_row([user3, int(allusers[2][1])])
-        table.add_row([user4, int(allusers[3][1])])
-        table.add_row([user5, int(allusers[4][1])])
-        table.add_row([user6, int(allusers[5][1])])
-        table.add_row([user7, int(allusers[6][1])])
-        table.add_row([user8, int(allusers[7][1])])
-        table.add_row([user9, int(allusers[8][1])])
-        table.add_row([user10, int(allusers[9][1])])
+        table.add_row([users[0], int(allusers[0][1])])
+        table.add_row([users[1], int(allusers[1][1])])
+        table.add_row([users[2], int(allusers[2][1])])
+        table.add_row([users[3], int(allusers[3][1])])
+        table.add_row([users[4], int(allusers[4][1])])
+        table.add_row([users[5], int(allusers[5][1])])
+        table.add_row([users[6], int(allusers[6][1])])
+        table.add_row([users[7], int(allusers[7][1])])
+        table.add_row([users[8], int(allusers[8][1])])
+        table.add_row([users[9], int(allusers[9][1])])
 
         await msg.edit(content=f"```\n{table}\n```", embed=None)
 
