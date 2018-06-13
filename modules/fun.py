@@ -193,58 +193,6 @@ class Fun:
             await ctx.send("Failed to connect.")
 
     @commands.command()
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def food(self, ctx):
-        """Grabs Random Food Recipes"""
-        url = "https://www.themealdb.com/api/json/v1/1/random.php"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
-                res = res['meals'][0]
-        meal = res['strMeal']
-        meal_type = res['strCategory']
-        instructions = res['strInstructions']
-        thumb = res['strMealThumb']
-
-        ingredient1 = res['strIngredient1']
-        ingredient2 = res['strIngredient2']
-        ingredient3 = res['strIngredient3']
-        ingredient4 = res['strIngredient4']
-        ingredient5 = res['strIngredient5']
-        ingredient6 = res['strIngredient6']
-        ingredient7 = res['strIngredient7']
-        ingredient8 = res['strIngredient8']
-        ingredient9 = res['strIngredient9']
-        ingredient10 = res['strIngredient10']
-        ingredient11 = res['strIngredient11']
-        ingredient12 = res['strIngredient12']
-        ingredient13 = res['strIngredient13']
-        ingredient14 = res['strIngredient14']
-        ingredient15 = res['strIngredient15']
-        ingredient16 = res['strIngredient16']
-        ingredient17 = res['strIngredient17']
-        ingredient18 = res['strIngredient18']
-        ingredient19 = res['strIngredient19']
-        ingredient20 = res['strIngredient20']
-
-        e = discord.Embed(color=0xDEADBF,
-                          title=f"{meal} | {meal_type}",
-                          description=instructions)
-        e.add_field(name="Ingredients:", value=f"{ingredient1} {ingredient2} {ingredient3} {ingredient4} {ingredient5}"
-                                               f" {ingredient6} {ingredient7} {ingredient8} {ingredient9} {ingredient10}"
-                                               f" {ingredient11} {ingredient12} {ingredient13} {ingredient14} {ingredient15}"
-                                               f" {ingredient16} {ingredient17} {ingredient18} {ingredient19} {ingredient20}")
-
-        e.set_image(url=thumb)
-
-        try:
-            await ctx.send(embed=e)
-        except discord.Forbidden:
-            pass
-        except:
-            await ctx.send("There was an error. Please try again.")
-
-    @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def achievement(self, ctx, *, achievement:str):
         """Achievement Generator"""
