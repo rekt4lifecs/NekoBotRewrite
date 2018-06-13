@@ -2,7 +2,7 @@ from discord.ext import commands
 import logging, traceback, sys, discord
 from collections import Counter
 import datetime
-import aiohttp, aioredis, aiomysql
+import aioredis, aiomysql
 import os
 import config
 
@@ -65,7 +65,7 @@ color_format = formatter_message(FORMAT, True)
 logging.setLoggerClass(ColoredLogger)
 color_formatter = ColoredFormatter(color_format)
 console = logging.StreamHandler()
-file = logging.FileHandler(filename=f'logs/nko.log', encoding='utf-8', mode='w')
+file = logging.FileHandler(filename=f'logs/{datetime.datetime.utcnow()}.log', encoding='utf-8', mode='w')
 console.setFormatter(color_formatter)
 file.setFormatter(color_formatter)
 logger.addHandler(console)
