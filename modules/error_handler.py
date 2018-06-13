@@ -18,7 +18,6 @@ class error_handler:
                 await ctx.send(page)
 
     async def on_command_error(self, ctx, exception):
-        channel = self.bot.get_channel(431987399581499403)
         if str(exception) == "Command raised an exception: NotFound: NOT FOUND (status code: 404): Unknown Channel":
             return
         if isinstance(exception, commands.NoPrivateMessage):
@@ -64,7 +63,7 @@ class error_handler:
         elif isinstance(exception, commands.CommandNotFound):
             return
         else:
-            await channel.send(embed=discord.Embed(color=0xff6f3f, title="Unknown Error", description=f"{exception}"))
+            return
 
 def setup(bot):
     bot.add_cog(error_handler(bot))
