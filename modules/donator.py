@@ -122,16 +122,20 @@ class Donator:
         if int(user[0]) == 0:
             await self.execute(query=f"UPDATE donator SET userid = {ctx.message.author.id} WHERE token = \"{key}\"",
                                    commit=True)
-            channel = self.bot.get_channel(431887286246834178)
-            await channel.send(embed=discord.Embed(color=0x8bff87,
+            async with aiohttp.ClientSession() as cs:
+                webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
+                                                   adapter=discord.AsyncWebhookAdapter(cs))
+                await webhook.send(embed=discord.Embed(color=0x8bff87,
                                                    title="Token Accepted",
                                                    description=f"```css\n"
                                                                f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
                                                                f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
             return await ctx.send("**Token Accepted!**")
         else:
-            channel = self.bot.get_channel(431887286246834178)
-            await channel.send(embed=discord.Embed(color=0xff6f3f,
+            async with aiohttp.ClientSession() as cs:
+                webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
+                                                   adapter=discord.AsyncWebhookAdapter(cs))
+                await webhook.send(embed=discord.Embed(color=0xff6f3f,
                                                    title="Token Denied",
                                                    description=f"```css\n"
                                                                f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
