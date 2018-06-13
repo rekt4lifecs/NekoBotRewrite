@@ -170,8 +170,10 @@ class Donator:
                                   description=f"```css\n"
                                               f"Key: [ {key} ] \n"
                                               f"```")
-            channel = self.bot.get_channel(431887286246834178)
-            return await channel.send(embed=embed)
+            async with aiohttp.ClientSession() as cs:
+                webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
+                                                   adapter=discord.AsyncWebhookAdapter(cs))
+                await webhook.send(embed=embed)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
