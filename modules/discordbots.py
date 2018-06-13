@@ -1,5 +1,8 @@
 import asyncio, config, discord, random, aiohttp
 import pymysql, time
+import logging
+
+log = logging.getLogger()
 
 messages = ["OwO Whats this", "MonkaS", "OwO", "Haiiiii", ".help", "🤔🤔🤔", "HMMM🤔", "USE n! WEW", "n!HELP REE"]
 connection = pymysql.connect(host="localhost",
@@ -22,13 +25,9 @@ class DiscordBotsOrgAPI:
 
     async def startdbl(self):
         while True:
-            print("Getting all servers.")
-            # async with aiohttp.ClientSession() as cs:
-            #     async with cs.get("http://localhost:1212") as r:
-            #         total = await r.json()
-            # totalservers = total["count"]
+            log.info("Getting all servers.")
             totalservers = len(self.bot.guilds)
-            print("Attempting to update server count.")
+            log.info("Attempting to update server count.")
             db.execute(f"INSERT INTO guildcount VALUES ({totalservers}, {int(time.time())})")
             connection.commit()
             try:
@@ -38,25 +37,21 @@ class DiscordBotsOrgAPI:
                     "shard_count": len(self.bot.shards)
                 }
                 async with aiohttp.ClientSession() as cs:
-                    async with cs.post(url, json=payload, headers={"Authorization": config.dbots_key}) as r:
-                        res = await r.json()
-                print(res)
-                print("Posted server count. {}".format(totalservers))
+                    await cs.post(url, json=payload, headers={"Authorization": config.dbots_key})
+                log.info("Posted server count. {}".format(totalservers))
                 game = discord.Streaming(name=random.choice(stats2), url="https://www.twitch.tv/rektdevlol")
                 await self.bot.change_presence(activity=game)
             except Exception as e:
-                print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
+                log.warning('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
 
             try:
                 async with aiohttp.ClientSession() as session:
-                    async with session.post('https://bots.discord.pw/api/bots/310039170792030211/stats',
+                    await session.post('https://bots.discord.pw/api/bots/310039170792030211/stats',
                                             headers={'Authorization': f'{config.dpw_key}'},
                                             json={"server_count": int(totalservers),
-                                                  "shard_count": self.bot.shard_count}) as response:
-                        t = await response.read()
-                        print(t)
+                                                  "shard_count": self.bot.shard_count})
             except Exception as e:
-                print(f"Failed to post to pw, {e}")
+                log.warning(f"Failed to post to pw, {e}")
             await asyncio.sleep(1800)
 
 
