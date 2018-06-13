@@ -8,7 +8,7 @@ import math
 import string
 import time
 import config
-import aiomysql
+import aiomysql, aiohttp
 import re, json, inspect, datetime, collections
 import logging
 
@@ -740,8 +740,8 @@ class Moderation:
     async def on_guild_join(self, guild):
         if not guild.large:
             return
+        log.info(f"Joined Large Guild, {guild.name} ({guild.id}), {len(set(guild.members))} members")
         try:
-            channel = self.bot.get_channel(431887286246834178)
             owner = self.bot.get_user(guild.owner_id)
             embed = discord.Embed(color=0x8bff87, title="Guild Join",
                                   description=f"```\n"
@@ -757,7 +757,10 @@ class Moderation:
                 embed.set_thumbnail(url=guild.icon_url)
             except:
                 pass
-            await channel.send(embed=embed)
+            async with aiohttp.ClientSession() as cs:
+                webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
+                                                   adapter=discord.AsyncWebhookAdapter(cs))
+                await webhook.send(embed=embed)
         except:
             pass
 
@@ -1030,8 +1033,8 @@ class Moderation:
     async def on_guild_remove(self, guild):
         if not guild.large:
             return
+        log.info(f"Left Large Guild, {guild.name} ({guild.id}), {len(set(guild.members))} members")
         try:
-            channel = self.bot.get_channel(431887286246834178)
             owner = self.bot.get_user(guild.owner_id)
             embed = discord.Embed(color=0xff6f3f, title="Guild Leave",
                                   description=f"```\n"
@@ -1047,7 +1050,10 @@ class Moderation:
                 embed.set_thumbnail(url=guild.icon_url)
             except:
                 pass
-            await channel.send(embed=embed)
+            async with aiohttp.ClientSession() as cs:
+                webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
+                                                   adapter=discord.AsyncWebhookAdapter(cs))
+                await webhook.send(embed=embed)
         except:
             pass
 
