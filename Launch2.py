@@ -6,94 +6,83 @@ import aioredis, aiomysql
 import os
 import config
 
-# BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
-# RESET_SEQ = "\033[0m"
-# COLOR_SEQ = "\033[1;%dm"
-# BOLD_SEQ = "\033[1m"
-# TIME_SEQ = COLOR_SEQ % (30 + MAGENTA)
-# NAME_SEQ = COLOR_SEQ % (30 + CYAN)
-# FORMAT = "[$TIME_SEQ%(asctime)-3s$RESET]" \
-#          "[$NAME_SEQ$BOLD%(name)-2s$RESET]" \
-#          "[%(levelname)-1s]" \
-#          "[%(message)s]" \
-#          "[($BOLD%(filename)s$RESET:%(lineno)d)]"
-#
-#
-# def formatter_message(message: str, colored: bool = True):
-#     if colored:
-#         message = message.replace("$RESET", RESET_SEQ)
-#         message = message.replace("$BOLD", BOLD_SEQ)
-#         message = message.replace("$TIME_SEQ", TIME_SEQ)
-#         message = message.replace("$NAME_SEQ", NAME_SEQ)
-#         return message
-#     else:
-#         message = message.replace("$RESET", "")
-#         message = message.replace("$BOLD", "")
-#         return message
-#
-#
-# class ColoredFormatter(logging.Formatter):
-#     def __init__(self, msg, use_color=True):
-#         logging.Formatter.__init__(self, msg)
-#         self.use_color = use_color
-#
-#     def format(self, record):
-#         level_name = record.levelname
-#         if self.use_color and level_name in COLORS:
-#             level_name_color = COLOR_SEQ % (30 + COLORS[level_name]) + level_name + RESET_SEQ
-#             record.levelname = level_name_color
-#         message = record.msg
-#         if self.use_color and level_name in COLORS:
-#             message_color = COLOR_SEQ % (30 + BLUE) + message + RESET_SEQ
-#             record.msg = message_color
-#         return logging.Formatter.format(self, record)
-#
-#
-# class ColoredLogger(logging.Logger):
-#     def __init__(self, name):
-#         logging.Logger.__init__(self, name, logging.INFO)
-#         return
-#
-#
-# COLORS = {
-#     'WARNING': YELLOW,
-#     'INFO': BLUE,
-#     'DEBUG': WHITE,
-#     'CRITICAL': YELLOW,
-#     'ERROR': RED
-# }
-#
 # logger = logging.getLogger()
-# color_format = formatter_message(FORMAT, True)
-# logging.setLoggerClass(ColoredLogger)
-# color_formatter = ColoredFormatter(color_format)
-# console = logging.StreamHandler()
+# logger.setLevel(logging.INFO)
+# logFormat = logging.Formatter("[%(asctime)s] [%(levelname)s] %(name)s: %(message)s")
 # file = logging.FileHandler(filename=f'logs/{datetime.datetime.utcnow()}.log', encoding='utf-8', mode='w')
-# console.setFormatter(color_formatter)
-# file.setFormatter(color_formatter)
+# file.setFormatter(logFormat)
+# console = logging.StreamHandler()
+# console.setFormatter(logFormat)
 # logger.addHandler(console)
 # logger.addHandler(file)
 
+BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
+RESET_SEQ = "\033[0m"
+COLOR_SEQ = "\033[1;%dm"
+BOLD_SEQ = "\033[1m"
+TIME_SEQ = COLOR_SEQ % (30 + MAGENTA)
+NAME_SEQ = COLOR_SEQ % (30 + CYAN)
+FORMAT = "[$TIME_SEQ%(asctime)-3s$RESET]" \
+         "[$NAME_SEQ$BOLD%(name)-2s$RESET]" \
+         "[%(levelname)-1s]" \
+         "[%(message)s]" \
+         "[($BOLD%(filename)s$RESET:%(lineno)d)]"
+
+
+def formatter_message(message: str, colored: bool = True):
+    if colored:
+        message = message.replace("$RESET", RESET_SEQ)
+        message = message.replace("$BOLD", BOLD_SEQ)
+        message = message.replace("$TIME_SEQ", TIME_SEQ)
+        message = message.replace("$NAME_SEQ", NAME_SEQ)
+        return message
+    else:
+        message = message.replace("$RESET", "")
+        message = message.replace("$BOLD", "")
+        return message
+
+
+class ColoredFormatter(logging.Formatter):
+    def __init__(self, msg, use_color=True):
+        logging.Formatter.__init__(self, msg)
+        self.use_color = use_color
+
+    def format(self, record):
+        level_name = record.levelname
+        if self.use_color and level_name in COLORS:
+            level_name_color = COLOR_SEQ % (30 + COLORS[level_name]) + level_name + RESET_SEQ
+            record.levelname = level_name_color
+        message = record.msg
+        if self.use_color and level_name in COLORS:
+            message_color = COLOR_SEQ % (30 + BLUE) + message + RESET_SEQ
+            record.msg = message_color
+        return logging.Formatter.format(self, record)
+
+
+class ColoredLogger(logging.Logger):
+    def __init__(self, name):
+        logging.Logger.__init__(self, name, logging.INFO)
+        return
+
+
+COLORS = {
+    'WARNING': YELLOW,
+    'INFO': BLUE,
+    'DEBUG': WHITE,
+    'CRITICAL': YELLOW,
+    'ERROR': RED
+}
+
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-logFormat = logging.Formatter("[%(asctime)s] [%(levelname)s] %(name)s: %(message)s")
-file = logging.FileHandler(filename=f'logs/{datetime.datetime.utcnow()}.log', encoding='utf-8', mode='w')
-file.setFormatter(logFormat)
+color_format = formatter_message(FORMAT, True)
+logging.setLoggerClass(ColoredLogger)
+color_formatter = ColoredFormatter(color_format)
 console = logging.StreamHandler()
-console.setFormatter(logFormat)
+file = logging.FileHandler(filename=f'logs/{datetime.datetime.utcnow()}.log', encoding='utf-8', mode='w')
+console.setFormatter(color_formatter)
+file.setFormatter(color_formatter)
 logger.addHandler(console)
 logger.addHandler(file)
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
 
 def _prefix_callable(bot, msg):
     prefixes = ['n!', 'N!']
@@ -106,8 +95,8 @@ class NekoBot(commands.AutoShardedBot):
         super().__init__(command_prefix=_prefix_callable,  # commands.when_mentioned_or('n!')
                          description="NekoBot",
                          pm_help=None,
-                         shard_id=1,
-                         shard_count=15,
+                         shard_ids=[15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+                         shard_count=30,
                          status=discord.Status.dnd,
                          activity=discord.Game(name="Restarting..."),
                          fetch_offline_members=False,
@@ -115,6 +104,7 @@ class NekoBot(commands.AutoShardedBot):
                          help_attrs={'hidden': True})
         self.counter = Counter()
         self.command_usage = Counter()
+        self.instance = 1
 
         async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
@@ -133,7 +123,7 @@ class NekoBot(commands.AutoShardedBot):
                 try:
                     self.load_extension(f"modules.{name}")
                 except:
-                    logger.warning(bcolors.FAIL + "Failed to load {}.".format(name) + bcolors.ENDC, file=sys.stderr)
+                    logger.warning("Failed to load {}.".format(name), file=sys.stderr)
                     traceback.print_exc()
 
     async def on_command_error(self, context, exception):
@@ -153,10 +143,6 @@ class NekoBot(commands.AutoShardedBot):
             for page in pages:
                 await ctx.send(page)
 
-    # async def on_error(self, event_method, *args, **kwargs):
-    #     print(bcolors.FAIL + "[ERROR]" + bcolors.ENDC)
-    #     sys.exc_info()
-
     async def on_message(self, message):
         self.counter["messages_read"] += 1
         if message.author.bot:
@@ -173,14 +159,14 @@ class NekoBot(commands.AutoShardedBot):
     async def on_ready(self):
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
-        print(bcolors.HEADER + "             _         _           _   \n"
+        print("             _         _           _   \n"
                                "            | |       | |         | |  \n"
                                "  _ __   ___| | _____ | |__   ___ | |_ \n"
                                " | '_ \ / _ \ |/ / _ \| '_ \ / _ \| __|\n"
                                " | | | |  __/   < (_) | |_) | (_) | |_ \n"
                                " |_| |_|\___|_|\_\___/|_.__/ \___/ \__|\n"
                                "                                       \n"
-                               "                                       " + bcolors.ENDC)
+                               "                                       ")
         logger.info("Ready OwO")
         logger.info(f"Shards: {self.shard_count}")
         logger.info(f"Servers {len(self.guilds)}")
