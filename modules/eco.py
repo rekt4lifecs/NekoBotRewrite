@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord, aiohttp, asyncio, time, datetime, config, random, math, logging
 import aiomysql
-import json
+import ujson
 import string
 from prettytable import PrettyTable
 
