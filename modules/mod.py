@@ -40,14 +40,14 @@ async def run_cmd(cmd: str) -> str:
 
 # Languages
 languages = ["english", "weeb", "tsundere"]
-l = {}
+lang = {}
 
 for l in languages:
     with open("lang/%s.json" % l) as f:
         lang[l] = ujson.load(f)
 
 def getlang(lang:str):
-return lang.get(lang, None)
+    return lang.get(lang, None)
 
 def getlang(lang:str):
     if lang == "english":
