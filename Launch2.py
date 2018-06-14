@@ -74,6 +74,7 @@ COLORS = {
 }
 
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 color_format = formatter_message(FORMAT, True)
 logging.setLoggerClass(ColoredLogger)
 color_formatter = ColoredFormatter(color_format)
