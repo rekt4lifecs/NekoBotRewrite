@@ -87,12 +87,10 @@ class IMGWelcome:
         """Set the image text, typing user will give the user as server will give the server name,
 
         Welcome user to server!"""
-        if self.forbiddencheck(text) >= 1:
-            return await ctx.send("Forbidden characters...")
         newtext = text.replace("user", "{0}").replace("server", "{1}")
         async with self.bot.sql_conn.acquire() as conn:
             async with conn.cursor() as db:
-                await db.execute(f"UPDATE newimgwelcome SET content = \"{newtext}\" WHERE server = {ctx.message.guild.id}")
+                await db.execute(f"UPDATE newimgwelcome SET content = %s WHERE server = %s", (newtext, ctx.message.guild.id,))
         await ctx.send("Updated!")
 
     @commands.command(hidden=True)
