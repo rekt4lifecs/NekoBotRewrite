@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord, asyncio
-import json
+import ujson
 
 # Languages
 languages = ["english", "weeb", "tsundere"]
