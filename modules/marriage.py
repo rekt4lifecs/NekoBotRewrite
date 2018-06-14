@@ -4,9 +4,14 @@ import json
 
 # Languages
 languages = ["english", "weeb", "tsundere"]
-english = json.load(open("lang/english.json"))
-weeb = json.load(open("lang/weeb.json"))
-tsundere = json.load(open("lang/tsundere.json"))
+l = {}
+
+for l in languages:
+    with open("lang/%s.json" % l) as f:
+        lang[l] = ujson.load(f)
+
+def getlang(lang:str):
+    return lang.get(lang, None)
 
 def getlang(lang:str):
     if lang == "english":
