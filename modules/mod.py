@@ -49,16 +49,6 @@ for l in languages:
 def getlang(lang:str):
     return lang.get(lang, None)
 
-def getlang(lang:str):
-    if lang == "english":
-        return english
-    elif lang == "weeb":
-        return weeb
-    elif lang == "tsundere":
-        return tsundere
-    else:
-        return None
-
 class Moderation:
     """Moderation Tools"""
 
