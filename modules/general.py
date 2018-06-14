@@ -4,7 +4,7 @@ import datetime, random, config, math, aiohttp, psutil
 from collections import Counter
 from .utils.chat_formatting import pagify
 from urllib.parse import quote_plus
-import string, json
+import string, json, ujson
 from .utils.paginator import EmbedPages, Pages
 from scipy import stats
 import numpy
@@ -49,19 +49,14 @@ def millify(n):
 
 # Languages
 languages = ["english", "weeb", "tsundere"]
-english = json.load(open("lang/english.json"))
-weeb = json.load(open("lang/weeb.json"))
-tsundere = json.load(open("lang/tsundere.json"))
+lang = {}
 
-def getlang(lang:str):
-    if lang == "english":
-        return english
-    elif lang == "weeb":
-        return weeb
-    elif lang == "tsundere":
-        return tsundere
-    else:
-        return None
+for l in languages:
+    with open("lang/%s.json" % l) as f:
+        lang[l] = ujson.load(f)
+
+def getlang(la:str):
+    return lang.get(la, None)
 
 class General:
     """General Commands"""
