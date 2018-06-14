@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup as bs
 from time import time
 from .utils import checks
 import config, aiofiles
-import json
+import ujson as json
 
 class NSFW:
     """NSFW Commands OwO"""
