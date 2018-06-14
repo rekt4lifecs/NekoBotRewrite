@@ -116,9 +116,9 @@ class General:
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
-            await ctx.send(getlang(lang)["general"]["cookie"].format(ctx.message.author.name, user.mention))
         else:
-            await ctx.send(english["general"]["cookie"].format(ctx.message.author.name, user.mention))
+            lang = "english"
+        await ctx.send(getlang(lang)["general"]["cookie"].format(ctx.message.author.name, user.mention))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
