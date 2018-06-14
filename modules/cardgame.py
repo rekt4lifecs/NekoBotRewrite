@@ -2,23 +2,18 @@ import discord, aiomysql, random, time, datetime, asyncio
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
-import aiohttp, config, json
+import aiohttp, config, json, ujson
 
 # Languages
 languages = ["english", "weeb", "tsundere"]
-english = json.load(open("lang/english.json"))
-weeb = json.load(open("lang/weeb.json"))
-tsundere = json.load(open("lang/tsundere.json"))
+lang = {}
 
-def getlang(lang:str):
-    if lang == "english":
-        return english
-    elif lang == "weeb":
-        return weeb
-    elif lang == "tsundere":
-        return tsundere
-    else:
-        return None
+for l in languages:
+    with open("lang/%s.json" % l) as f:
+        lang[l] = ujson.load(f)
+
+def getlang(la:str):
+    return lang.get(la, None)
 
 list_ = [
     "Shiro",

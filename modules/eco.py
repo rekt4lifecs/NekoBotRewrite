@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord, aiohttp, asyncio, time, datetime, config, random, math, logging
 import aiomysql
-import json
+import json, ujson
 import string
 from prettytable import PrettyTable
 
@@ -9,19 +9,14 @@ log = logging.getLogger("NekoBot")
 
 # Languages
 languages = ["english", "weeb", "tsundere"]
-english = json.load(open("lang/english.json"))
-weeb = json.load(open("lang/weeb.json"))
-tsundere = json.load(open("lang/tsundere.json"))
+lang = {}
 
-def getlang(lang:str):
-    if lang == "english":
-        return english
-    elif lang == "weeb":
-        return weeb
-    elif lang == "tsundere":
-        return tsundere
-    else:
-        return None
+for l in languages:
+    with open("lang/%s.json" % l) as f:
+        lang[l] = ujson.load(f)
+
+def getlang(la:str):
+    return lang.get(la, None)
 
 class economy:
     """Economy"""
