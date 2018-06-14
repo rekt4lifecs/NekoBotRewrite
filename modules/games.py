@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord, config, aiohttp
-import base64, json
+import base64
+import ujson as json #lazy
 import os
 
 class Games:
