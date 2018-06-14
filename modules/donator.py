@@ -8,19 +8,14 @@ import os, json
 
 # Languages
 languages = ["english", "weeb", "tsundere"]
-english = json.load(open("lang/english.json"))
-weeb = json.load(open("lang/weeb.json"))
-tsundere = json.load(open("lang/tsundere.json"))
+l = {}
+
+for l in languages:
+    with open("lang/%s.json" % l) as f:
+        lang[l] = ujson.load(f)
 
 def getlang(lang:str):
-    if lang == "english":
-        return english
-    elif lang == "weeb":
-        return weeb
-    elif lang == "tsundere":
-        return tsundere
-    else:
-        return None
+    return lang.get(lang, None)
 
 class Donator:
 
