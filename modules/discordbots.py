@@ -31,8 +31,6 @@ class DiscordBotsOrgAPI:
                 return values
 
     async def startdbl(self):
-        if self.bot.instance != 0:
-            return
         while True:
             log.info("Getting all servers.")
             log.info("Attempting to update server count.")
@@ -41,7 +39,7 @@ class DiscordBotsOrgAPI:
                 url = "https://discordbots.org/api/bots/310039170792030211/stats"
                 payload = {
                     "server_count": int(servers),
-                    "shard_count": len(self.bot.shards)
+                    "shard_count": self.bot.shard_count
                 }
                 async with aiohttp.ClientSession() as cs:
                     await cs.post(url, json=payload, headers={"Authorization": config.dbots_key})
@@ -63,6 +61,8 @@ class DiscordBotsOrgAPI:
 
 
     async def on_ready(self):
+        if self.bot.instance != 0:
+            return
         await self.startdbl()
 
 def setup(bot):
