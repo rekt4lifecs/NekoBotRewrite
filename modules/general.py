@@ -4,7 +4,7 @@ import datetime, random, config, math, aiohttp, psutil
 from collections import Counter
 from .utils.chat_formatting import pagify
 from urllib.parse import quote_plus
-import string, json, ujson
+import string, ujson
 from .utils.paginator import EmbedPages, Pages
 from scipy import stats
 import numpy
