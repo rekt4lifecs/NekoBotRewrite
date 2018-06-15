@@ -1,6 +1,8 @@
 from discord.ext import commands
 import discord, traceback, sys
-import config, aiohttp
+import config, aiohttp, logging
+
+log = logging.getLogger()
 
 class error_handler:
 
@@ -49,9 +51,9 @@ class error_handler:
                 async with cs.post(webhook_url, json=payload) as r:
                     await r.read()
             await ctx.send(embed=em)
-            print('In {}:'.format(ctx.command.qualified_name), file=sys.stderr)
+            log.warning('In {}:'.format(ctx.command.qualified_name), file=sys.stderr)
             traceback.print_tb(exception.original.__traceback__)
-            print('{}: {}'.format(exception.original.__class__.__name__, exception.original), file=sys.stderr)
+            log.warning('{}: {}'.format(exception.original.__class__.__name__, exception.original), file=sys.stderr)
         elif isinstance(exception, commands.BadArgument):
             await self.send_cmd_help(ctx)
         elif isinstance(exception, commands.MissingRequiredArgument):
