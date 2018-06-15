@@ -138,7 +138,7 @@ class Games:
             em.add_field(name="Damage Dealt", value=damageDealt)
             em.add_field(name="Win Place", value=winPlace)
             em.add_field(name="Walk Distance", value=walkDistance)
-            em.add_field(name="Heals", value=heals)
+            em.add_field(name="Heals",   value=heals)
             await ctx.send(embed=em)
         except Exception as e:
             await ctx.send("Failed to get data, error: `{e}`")
