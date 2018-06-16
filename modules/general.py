@@ -214,7 +214,9 @@ class General:
                                                                                           len(self.bot.lavalink.players._players),
                                                                                           self.get_bot_uptime(),
                                                                                           millify(self.bot.counter[
-                                                                                                      'messages_read'])))
+                                                                                                      'messages_read']),
+                                                                                          str(self.bot.command_usage.most_common(1)[0][0])+" ("+
+                                                                                          str(self.bot.command_usage.most_common(1)[0][1])+")"))
         info.add_field(name=getlang(lang)["general"]["info"]["links"]["name"],
                        value=getlang(lang)["general"]["info"]["links"]["links"])
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
