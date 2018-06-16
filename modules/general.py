@@ -919,6 +919,9 @@ class General:
             await ctx.send(f"Failed to get system info,\nError: {e}")
 
     async def on_message(self, message):
+        if message.guild.id == 221989003400970241:
+            if message.content == ".":
+                await message.delete()
         try:
             if message.channel.id == 445635075543924756:
                 descrip = message.embeds[0].description
