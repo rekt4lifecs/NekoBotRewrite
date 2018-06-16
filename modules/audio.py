@@ -6,6 +6,9 @@ import re
 import lavalink
 import config
 import ujson
+import logging
+
+log = logging.getLogger()
 
 time_rx = re.compile('[0-9]+')
 
@@ -99,7 +102,6 @@ class Audio:
 
         if audio_data['isPlaylist']:
             tracks = audio_data['tracks']
-
             toplay = []
             removedtracks = 0
 
