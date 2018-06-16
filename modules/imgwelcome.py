@@ -214,7 +214,8 @@ class IMGWelcome:
             drawtwo.text((152, 73), uname, 1, name_font_smallest, (0, 0, 0, 255))
             drawtwo.text((152, 73), uname, font=name_font_smallest, fill=(255, 255, 255, 230))
 
-        members = sorted(server.members, key=lambda m: m.joined_at).index(member) + 1
+        # members = sorted(server.members, key=lambda m: m.joined_at).index(member) + 1
+        members = len(server.members)
 
         member_number = str(members) + self._get_suffix(members)
         sname = str(member.guild.name) + '!' if len(str(member.guild.name)) <= 28 else str(member.guild.name)[
