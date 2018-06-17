@@ -41,7 +41,7 @@ class error_handler:
             payload = {
                 "embeds": [
                     {
-                        "title": f"Command: {ctx.command.qualified_name}",
+                        "title": f"Command: {ctx.command.qualified_name}, Instance: {self.bot.instance}",
                         "description": f"```py\n{exception}\n```",
                         "color": 16740159
                     }
