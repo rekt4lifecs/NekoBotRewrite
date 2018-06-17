@@ -181,6 +181,7 @@ class NekoBot(commands.AutoShardedBot):
                         topbalquery = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
                         await db.execute("UPDATE instances SET guilds = %s WHERE instance = %s", (len(self.guilds),
                                                                                                   self.instance,))
+
                         await db.execute(topbalquery)
                         allusers = await db.fetchall()
                 logger.info(f"Updated Instance {self.instance}'s Guild Count with {len(self.guilds)}")
@@ -242,7 +243,7 @@ class NekoBot(commands.AutoShardedBot):
                         if user10:
                             await db.execute("UPDATE ecotop SET user10 = %s", (user10,))
 
-                await asyncio.sleep(120)
+                await asyncio.sleep(300)
 
     def run(self):
         super().run(config.token)
