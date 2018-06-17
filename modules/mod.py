@@ -337,6 +337,9 @@ class Moderation:
 
     @commands.command(aliases=["ping"])
     async def latency(self, ctx):
+        """If on instance 1 will return latencies otherwise will return Pong"""
+        if self.bot.instance != 0:
+            return await ctx.send("Pong!")
         xd = '\n'.join(f'Shard {shard}: '+str(round(self.bot.latencies[shard][1]*1000)) + 'ms' for shard in self.bot.shards)
         em = discord.Embed(color=0xDEADBF, title="Latency",
                            description=f"```\n{xd}\n```")
