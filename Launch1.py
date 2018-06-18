@@ -147,6 +147,9 @@ class NekoBot(commands.AutoShardedBot):
         self.counter["messages_read"] += 1
         if message.author.bot:
             return
+        blacklisted = await self.redis.get(f"{message.author.id}-blacklist")
+        if blacklisted:
+            return
         await self.process_commands(message)
 
     async def close(self):

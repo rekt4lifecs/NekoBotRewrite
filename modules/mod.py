@@ -335,6 +335,20 @@ class Moderation:
         else:
             await ctx.send('Reloaded <a:forsenPls:444882132343717898>')
 
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def blacklist(self, ctx, uid:int):
+        """Blacklist a user"""
+        await self.bot.redis.set(f"{uid}-blacklist", 1)
+        await ctx.message.add_reaction("✅")
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def remblacklist(self, ctx, uid:int):
+        """Removes from blacklist"""
+        await self.bot.redis.delete(f"{uid}-blacklist")
+        await ctx.message.add_reaction("✅")
+
     @commands.command(aliases=["ping"])
     async def latency(self, ctx):
         """If on instance 1 will return latencies otherwise will return Pong"""
