@@ -936,6 +936,33 @@ class General:
             pass
 
     @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def prefix(self, ctx):
+        """Get the bots current prefix."""
+        currprefix = await self.bot.redis.get(f"{ctx.author.id}-prefix")
+        if currprefix:
+            currprefix = currprefix.decode("utf8")
+            await ctx.send(f"Your custom prefix is set to `{currprefix}`")
+        else:
+            await ctx.send("My prefix is `n!` or `N!`")
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def setprefix(self, ctx, prefix:str):
+        """Set your custom prefix, use quotation marks like "baka " for spaces."""
+        if len(prefix) >= 12:
+            return await ctx.send("Your prefix is over 12 characters.")
+        await self.bot.redis.set(f"{ctx.author.id}-prefix", prefix)
+        await ctx.send(f"Set your custom prefix to `{prefix}`")
+
+    @commands.command(aliases=["deleteprefix", "resetprefix"])
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def delprefix(self, ctx):
+        """Delete or reset your prefix"""
+        await self.bot.redis.delete(f"{ctx.author.id}-prefix")
+        await ctx.send("Deleted your prefix and reset it back to the default `n!`")
+
+    @commands.command()
     @commands.cooldown(1, 6, commands.BucketType.user)
     async def help(self, ctx, command:str=None):
         """Help!"""

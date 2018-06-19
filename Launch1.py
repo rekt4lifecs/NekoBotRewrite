@@ -85,10 +85,13 @@ file.setFormatter(color_formatter)
 logger.addHandler(console)
 logger.addHandler(file)
 
-def _prefix_callable(bot, msg):
-    prefixes = ['n!', 'N!']
-    return commands.when_mentioned_or(*prefixes)(bot, msg)
-
+async def _prefix_callable(bot, msg):
+    prefix = await bot.redis.get(f"{msg.author.id}-prefix")
+    if not prefix:
+        prefix = ['n!', 'N!']
+    else:
+        prefix = [prefix.decode("utf8")]
+    return commands.when_mentioned_or(*prefix)(bot, msg)
 
 class NekoBot(commands.AutoShardedBot):
 
@@ -131,6 +134,7 @@ class NekoBot(commands.AutoShardedBot):
             return
 
     async def on_command(self, ctx):
+        self.counter["commands_used"] += 1
         self.command_usage[str(ctx.command)] += 1
 
     async def send_cmd_help(self, ctx):
