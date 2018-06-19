@@ -998,6 +998,10 @@ class General:
             embed.add_field(name="Games",
                             value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Games" and not i.hidden]),
                             inline=False)
+            embed.add_field(name="General",
+                            value=", ".join(
+                                [f"`{i.name}`" for i in self.bot.commands if i.cog_name == "General" and not i.hidden]),
+                            inline=False)
             embed.add_field(name="IMGWelcome",
                             value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "IMGWelcome" and not i.hidden]),
                             inline=False)
