@@ -34,7 +34,7 @@ class error_handler:
             em = discord.Embed(color=0xDEADBF,
                                title="Error",
                                description=f"Error in command {ctx.command.qualified_name}, "
-                                           f"[Support Server](https://discord.gg/q98qeYN)")
+                                           f"[Support Server](https://discord.gg/q98qeYN).\n`{exception}`")
             webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
             if str(exception) == "Command raised an exception: Forbidden: FORBIDDEN (status code: 403): Missing Permissions":
                 return
