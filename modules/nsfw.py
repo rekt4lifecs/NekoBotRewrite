@@ -466,15 +466,5 @@ class NSFW:
             except:
                 pass
 
-    async def on_message(self, message):
-        if message.channel.id == 445987532648349701 or message.channel.id == 440900958936104970:
-            if len(message.attachments) >= 1:
-                for attachment in message.attachments:
-                    async with aiohttp.ClientSession() as cs:
-                        async with cs.get(attachment.url) as r:
-                            res = await r.read()
-                    async with aiofiles.open(f"data/other/{int(time())}-{str(attachment.url).rpartition('/')[2]}", mode="wb") as f:
-                        await f.write(res)
-
 def setup(bot):
     bot.add_cog(NSFW(bot))
