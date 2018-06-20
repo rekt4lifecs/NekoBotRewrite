@@ -67,7 +67,8 @@ list_ = [
     "Kirima Sharo",
     "Noumi Kudryavka",
     "Kanna",
-    "chifuyu_himeki"
+    "chifuyu_himeki",
+    "holo"
 ]
 
 class CardGame:
@@ -344,6 +345,8 @@ class CardGame:
             description = "Arrogant and overconfident. She considers her job as a duty and also can get bored while not fighting monsters."
         elif character == 'victorique_de_blois':
             description = "Bored by a normal life so she wants cases or other things to entertain her. She dislikes most strangers. She is also very intelligent."
+        elif character == "holo":
+            description = ""
         else:
             description = ""
 
