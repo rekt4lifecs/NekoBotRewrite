@@ -160,9 +160,6 @@ class NekoBot(commands.AutoShardedBot):
         await super().close()
         await self.close()
 
-    async def on_shard_ready(self, shard_id):
-        logger.info(f"Shard {shard_id} connected.")
-
     async def on_ready(self):
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
