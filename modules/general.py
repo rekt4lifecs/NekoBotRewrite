@@ -217,7 +217,8 @@ class General:
                                                                                           millify(self.bot.counter[
                                                                                                       'messages_read']),
                                                                                           str(self.bot.command_usage.most_common(1)[0][0])+" ("+
-                                                                                          str(self.bot.command_usage.most_common(1)[0][1])+")"))
+                                                                                          str(self.bot.command_usage.most_common(1)[0][1])+")",
+                                                                                          self.bot.counter["commands_used"]))
         info.add_field(name=getlang(lang)["general"]["info"]["links"]["name"],
                        value=getlang(lang)["general"]["info"]["links"]["links"])
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
@@ -921,9 +922,9 @@ class General:
                     await message.delete()
             if message.channel.id == 445635075543924756:
                 descrip = message.embeds[0].description
-                clean = int(str(descrip).replace("<@", "").replace(">", "").replace("has voted and recieved 5000 credits!", ""))
+                clean = int(str(descrip).replace("<@", "").replace(">", "").replace("has voted and received 5000 credits!", ""))
                 user = self.bot.get_user(clean)
-                await user.send(embed=discord.Embed(color=0xDEADBF, description="You have recieved 5000 credits for voting!"))
+                await user.send(embed=discord.Embed(color=0xDEADBF, description="You have received 5000 credits for voting!"))
                 log.info(f"{user} | Voted")
         except:
             pass
