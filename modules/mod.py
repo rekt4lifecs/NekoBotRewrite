@@ -127,6 +127,16 @@ class Moderation:
                 raise commands.BadArgument(f'reason is too long ({len(argument)}/{reason_max})')
             return ret
 
+    @commands.command(hidden=True)
+    @commands.cooldown(1, 15, commands.BucketType.user)
+    async def speedtest(self, ctx):
+        """Return the servers speedtest results"""
+        await ctx.trigger_typing()
+        data = await run_cmd("speedtest --share --simple | grep Share")
+        data = str(data).replace("Share results: ", "")
+        em = discord.Embed(color=0xDEADBF).set_image(url=data)
+        await ctx.send(embed=em)
+
     @commands.command()
     @commands.cooldown(1, 60, commands.BucketType.user)
     @commands.guild_only()
