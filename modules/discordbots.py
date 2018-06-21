@@ -16,25 +16,13 @@ class DiscordBotsOrgAPI:
         self.bot = bot
         self.token = config.dbots_key
 
-    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        async with self.bot.sql_conn.acquire() as conn:
-            async with conn.cursor() as db:
-                await db.execute(query)
-                if isSelect:
-                    if fetchAll:
-                        values = await db.fetchall()
-                    else:
-                        values = await db.fetchone()
-                if commit:
-                    await conn.commit()
-            if isSelect:
-                return values
-
     async def startdbl(self):
         while True:
             log.info("Getting all servers.")
             log.info("Attempting to update server count.")
-            servers = (await self.execute("SELECT sum(guilds) FROM instances", isSelect=True))[0]
+            instance1 = (await self.bot.redis.get("instance1-guilds")).decode("utf8")
+            instance2 = (await self.bot.redis.get("instance2-guilds")).decode("utf8")
+            servers = int(instance1+instance2)
             game = discord.Streaming(name=random.choice(stats2), url="https://www.twitch.tv/rektdevlol")
             await self.bot.change_presence(activity=game)
             if self.bot.instance == 0:
@@ -59,7 +47,6 @@ class DiscordBotsOrgAPI:
                 except Exception as e:
                     log.warning(f"Failed to post to pw, {e}")
             await asyncio.sleep(1800)
-
 
     async def on_ready(self):
         await self.startdbl()

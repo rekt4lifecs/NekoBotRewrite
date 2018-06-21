@@ -151,12 +151,11 @@ class NekoBot(commands.AutoShardedBot):
         self.counter["messages_read"] += 1
         if message.author.bot:
             return
-        blacklisted = await self.redis.get(f"{message.author.id}-blacklist")
-        if blacklisted:
-            return
         await self.process_commands(message)
 
     async def close(self):
+        await self.redis.close()
+        await self.sql_conn.close()
         await super().close()
         await self.close()
 
@@ -180,12 +179,10 @@ class NekoBot(commands.AutoShardedBot):
         if not hasattr(self, "instancePoster"):
             self.instancePoster = True
             while self.instancePoster:
+                await self.redis.set("instance%s-guilds" % self.instance, len(self.guilds))
                 async with self.sql_conn.acquire() as conn:
                     async with conn.cursor() as db:
-                        topbalquery = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
-                        await db.execute("UPDATE instances SET guilds = %s WHERE instance = %s", (len(self.guilds),
-                                                                                                  self.instance,))
-
+                        topbalquery = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10)"
                         await db.execute(topbalquery)
                         allusers = await db.fetchall()
                 logger.info(f"Updated Instance {self.instance}'s Guild Count with {len(self.guilds)}")
@@ -224,28 +221,26 @@ class NekoBot(commands.AutoShardedBot):
                         elif member.id == int(allusers[9][0]):
                             user10 = member.name
 
-                async with self.sql_conn.acquire() as conn:
-                    async with conn.cursor() as db:
-                        if user1:
-                            await db.execute("UPDATE ecotop SET user1 = %s", (user1,))
-                        if user2:
-                            await db.execute("UPDATE ecotop SET user2 = %s", (user2,))
-                        if user3:
-                            await db.execute("UPDATE ecotop SET user3 = %s", (user3,))
-                        if user4:
-                            await db.execute("UPDATE ecotop SET user4 = %s", (user4,))
-                        if user5:
-                            await db.execute("UPDATE ecotop SET user5 = %s", (user5,))
-                        if user6:
-                            await db.execute("UPDATE ecotop SET user6 = %s", (user6,))
-                        if user7:
-                            await db.execute("UPDATE ecotop SET user7 = %s", (user7,))
-                        if user8:
-                            await db.execute("UPDATE ecotop SET user8 = %s", (user8,))
-                        if user9:
-                            await db.execute("UPDATE ecotop SET user9 = %s", (user9,))
-                        if user10:
-                            await db.execute("UPDATE ecotop SET user10 = %s", (user10,))
+                if user1:
+                    await self.redis.set("ecotop1", user1)
+                if user2:
+                    await self.redis.set("ecotop2", user2)
+                if user3:
+                    await self.redis.set("ecotop3", user3)
+                if user4:
+                    await self.redis.set("ecotop4", user4)
+                if user5:
+                    await self.redis.set("ecotop5", user5)
+                if user6:
+                    await self.redis.set("ecotop6", user6)
+                if user7:
+                    await self.redis.set("ecotop7", user7)
+                if user8:
+                    await self.redis.set("ecotop8", user8)
+                if user9:
+                    await self.redis.set("ecotop9", user9)
+                if user10:
+                    await self.redis.set("ecotop10", user10)
 
                 await asyncio.sleep(300)
 
