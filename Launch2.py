@@ -99,8 +99,8 @@ class NekoBot(commands.AutoShardedBot):
         super().__init__(command_prefix=_prefix_callable,  # commands.when_mentioned_or('n!')
                          description="NekoBot",
                          pm_help=None,
-                         shard_ids=[15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
-                         shard_count=30,
+                         shard_ids=[16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+                         shard_count=32,
                          status=discord.Status.dnd,
                          activity=discord.Game(name="Restarting..."),
                          max_messages=2500,
