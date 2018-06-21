@@ -22,73 +22,19 @@ class Games:
             if isSelect:
                 return values
 
-    @commands.group()
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def osu(self, ctx):
-        """OSU Stats"""
-        if not ctx.invoked_subcommand or None:
-            embed = discord.Embed(color=0xDEADBF,
-                                  title="OSU",
-                                  description="n!osu add - **Add player profile**\n"
-                                              "n!osu stats - **Show player stats**")
-            await ctx.send(embed=embed)
-
-    @osu.command()
-    async def add(self, ctx, username : str):
-        """Add OSU Account"""
-        if '"' in username:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif "'" in username:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        elif ";" in username:
-            print(f"{ctx.message.author.id} {ctx.message.author.name} forbidden char")
-            return
-        try:
-            if await self.execute('SELECT 1 FROM osu WHERE userid = {}'.format(ctx.message.author.id), isSelect=True):
-                await self.execute(f"UPDATE osu SET osu = \"{username}\" WHERE userid = {ctx.message.author.id}",
-                                   commit=True)
-                await ctx.send("Updated!")
-            else:
-                await self.execute(f"INSERT IGNORE INTO osu VALUES ({ctx.message.author.id}, \"{username}\")",
-                           commit=True)
-                await ctx.send("Added user!")
-        except:
-            await ctx.send("Failed to add user.")
-
-    @osu.command()
-    async def stats(self, ctx, user : discord.Member = None):
-        """Show player stats"""
-        if user == None:
-            user = ctx.message.author
-        if not await self.execute('SELECT 1 FROM osu WHERE userid = {}'.format(user.id), isSelect=True):
-            await ctx.send("That user doesn't have a OSU user attached to your account. Use `n!osu add` to add a user.")
-        else:
-            x = await self.execute(f"SELECT osu FROM osu WHERE userid = {ctx.message.author.id}", isSelect=True)
-            username = x[0]
-            await ctx.send(f"Getting results for \"{username}\"")
-            try:
-                async with aiohttp.ClientSession() as cs:
-                    async with cs.get(f"http://osu.ppy.sh/api/get_user?k={config.osu_key}&u={username}") as r:
-                        osu = await r.json()
-                        if osu == []:
-                            await ctx.send("Incorrect Username.")
-                            return
-                embed = discord.Embed(color=0xDEADBF,
-                                      title=f"{username}")
-                embed.add_field(name="Play Count", value=osu[0]['playcount'])
-                embed.add_field(name="Ranked Score", value=osu[0]['ranked_score'])
-                embed.add_field(name="Total Score", value=osu[0]['total_score'])
-                embed.add_field(name="Level", value="%.2f" % float(osu[0]['level']))
-                embed.add_field(name="Accuracy", value="%.2f" % float(osu[0]['accuracy']))
-                embed.add_field(name="Country Ranking", value=osu[0]['pp_country_rank'])
-                await ctx.send(embed=embed)
-            except Exception as e:
-                embed = discord.Embed(color=0xDEADBF,
-                                      title="Error Contacting OSU API",
-                                      description=f"```{e}```")
-                await ctx.send(embed=embed)
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def osu(self, ctx, username:str):
+        """Get osu stats"""
+        await ctx.trigger_typing()
+        url = "https://nekobot.xyz/api/imagegen?type=osu&key=%s&username=%s" % (config.osu_key, username,)
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as r:
+                res = await r.json()
+        if res.get("message") == "userNotFound":
+            return await ctx.send("**Unable to find a user with that username.**")
+        em = discord.Embed(color=0xDEADBF).set_image(url=res.get("message"))
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.cooldown(1, 30, commands.BucketType.user)
