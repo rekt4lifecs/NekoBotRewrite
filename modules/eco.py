@@ -1,7 +1,6 @@
 from discord.ext import commands
 import discord, aiohttp, asyncio, time, datetime, config, random, math, logging
-import aiomysql
-import json, ujson
+import ujson
 import string
 from prettytable import PrettyTable
 
@@ -315,12 +314,6 @@ class economy:
             except:
                 await ctx.send(getlang(lang)["eco"]["set_desc"]["failed"])
 
-    @commands.command(aliases=['del'], hidden=True)
-    @commands.is_owner()
-    async def poof(self, ctx, _id : int):
-        await self.execute(f"DELETE FROM levels WHERE userid = {_id}", commit=True)
-        ctx.send(f"Deleted {_id}")
-
     @commands.command()
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def coinflip(self, ctx, amount : int):
@@ -385,21 +378,12 @@ class economy:
         msg = await ctx.send(embed=em)
         query = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
         allusers = await self.execute(query=query, isSelect=True, fetchAll=True)
-        users = await self.execute("SELECT * FROM ecotop", isSelect=True)
 
         table = PrettyTable()
         table.field_names = ["Username", "Balance"]
 
-        table.add_row([users[0], int(allusers[0][1])])
-        table.add_row([users[1], int(allusers[1][1])])
-        table.add_row([users[2], int(allusers[2][1])])
-        table.add_row([users[3], int(allusers[3][1])])
-        table.add_row([users[4], int(allusers[4][1])])
-        table.add_row([users[5], int(allusers[5][1])])
-        table.add_row([users[6], int(allusers[6][1])])
-        table.add_row([users[7], int(allusers[7][1])])
-        table.add_row([users[8], int(allusers[8][1])])
-        table.add_row([users[9], int(allusers[9][1])])
+        for x in range(9):
+            table.add_row([(await self.bot.redis.get("ecotop%s" % x + 1)).decode("utf8"), int(allusers[x][1])])
 
         await msg.edit(content=f"```\n{table}\n```", embed=None)
 

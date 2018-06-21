@@ -1,8 +1,8 @@
-import discord, aiomysql, random, time, datetime, asyncio
+import discord, random, time, datetime, asyncio
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
-import aiohttp, config, json, ujson
+import aiohttp, config, ujson
 
 # Languages
 languages = ["english", "weeb", "tsundere"]

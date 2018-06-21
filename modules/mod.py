@@ -8,7 +8,7 @@ import math
 import string
 import time
 import config
-import aiomysql, aiohttp
+import aiohttp
 import re, ujson, inspect, datetime, collections
 import logging
 
@@ -306,7 +306,7 @@ class Moderation:
     async def shutdown(self, ctx):
         """Shutdown Bot"""
         await ctx.send("Bai bai")
-        await self.bot.logout()
+        await self.bot.close()
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -472,25 +472,16 @@ class Moderation:
                 await ctx.send(f'```py\n{value}{ret}\n```')
 
     async def on_message_delete(self, message):
-        connection = await aiomysql.connect(host='localhost', port=3306,
-                                            user='root', password=config.dbpass,
-                                            db='nekobot')
         finishedmsg = invite_rx.sub("[INVITE]", message.content)
-        async with connection.cursor() as db:
-            try:
-                optin = await self.bot.redis.get(f"{message.author.id}-snipe")
-                if optin is not None:
-                    if optin.decode('utf-8') == "false":
-                        return
-                if not await db.execute("SELECT 1 FROM snipe WHERE channel = %s", (message.channel.id,)):
-                    await db.execute("INSERT INTO snipe VALUES (%s, %s, %s)", (message.channel.id, message.content, message.author.id,))
-                else:
-                    await db.execute("UPDATE snipe SET message = %s WHERE channel = %s", (finishedmsg, message.channel.id,))
-                    await connection.commit()
-                    await db.execute("UPDATE snipe SET author = %s WHERE channel = %s", (message.author.id, message.channel.id,))
-                await connection.commit()
-            except:
-                pass
+        try:
+            optin = await self.bot.redis.get(f"{message.author.id}-snipe")
+            if optin is not None:
+                if optin.decode('utf-8') == "false":
+                    return
+            await self.bot.redis.set(f"snipe:{message.channel.id}:author", message.author.name)
+            await self.bot.redis.set(f"snipe:{message.channel.id}:content", finishedmsg)
+        except:
+            pass
 
     @commands.command()
     @commands.guild_only()
@@ -498,36 +489,31 @@ class Moderation:
     async def snipe(self, ctx, optin:bool = None):
         """Snipe the last message."""
         await ctx.trigger_typing()
-        connection = await aiomysql.connect(host='localhost', port=3306,
-                                            user='root', password=config.dbpass,
-                                            db='nekobot')
-        channel = ctx.message.channel
-        async with connection.cursor() as db:
-            if optin is not None:
-                if optin:
-                    boolValue = "true"
-                else:
-                    boolValue = "false"
-                await self.bot.redis.set(f"{ctx.message.author.id}-snipe", boolValue)
-                return await ctx.send(f"**Snipe opt status updated to** `{boolValue}`")
-            if not await db.execute(f"SELECT 1 FROM snipe WHERE channel = {channel.id}"):
-                return await ctx.send("**No message found to snipe.**")
+        if optin is not None:
+            if optin:
+                boolValue = "true"
             else:
-                try:
-                    await db.execute(f"SELECT message, author FROM snipe WHERE channel = {channel.id}")
-                    message = await db.fetchall()
-                    em = discord.Embed(color=0xDEADBF, title=f"Sniped message by {ctx.message.author}",
-                                       description=f"{message[0][0]}")
-                    em.set_footer(text=f"Message from {self.bot.get_user(int(message[0][1]))}")
-                    return await ctx.send(embed=em)
-                except:
-                    return await ctx.send(f"**Failed to get message.**")
+                boolValue = "false"
+            await self.bot.redis.set(f"{ctx.message.author.id}-snipe", boolValue)
+            return await ctx.send(f"**Snipe opt status updated to** `{boolValue}`")
+        if not await self.bot.redis.get(f"snipe:{ctx.message.channel.id}:content"):
+            return await ctx.send("**No message found to snipe.**")
+        else:
+            try:
+                msg = await self.bot.redis.get(f"snipe:{ctx.message.channel.id}:content")
+                author = await self.bot.redis.get(f"snipe:{ctx.message.channel.id}:author")
+                em = discord.Embed(color=0xDEADBF, title="From %s" % author.decode("utf8"))
+                em.description = "```\n%s\n```" % msg.decode("utf8")
+                em.set_footer(text="Sniped by %s" % ctx.author.name)
+                return await ctx.send(embed=em)
+            except:
+                return await ctx.send(f"**Failed to get message.**")
 
     @commands.group(aliases=['remove'])
     @commands.guild_only()
     @checks.has_permissions(manage_messages=True)
     async def purge(self, ctx):
-        """Removes messages that meet a criteria.""" # RoboDanny <3
+        """Removes messages that meet a criteria."""
         
         if ctx.message.author.id == 137487801498337280:
             await ctx.send("😠")
