@@ -20,8 +20,8 @@ class DiscordBotsOrgAPI:
         while True:
             log.info("Getting all servers.")
             log.info("Attempting to update server count.")
-            instance1 = (await self.bot.redis.get("instance1-guilds")).decode("utf8")
-            instance2 = (await self.bot.redis.get("instance2-guilds")).decode("utf8")
+            instance1 = (await self.bot.redis.get("instance0-guilds")).decode("utf8")
+            instance2 = (await self.bot.redis.get("instance1-guilds")).decode("utf8")
             servers = int(instance1+instance2)
             game = discord.Streaming(name=random.choice(stats2), url="https://www.twitch.tv/rektdevlol")
             await self.bot.change_presence(activity=game)
