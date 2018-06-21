@@ -904,13 +904,12 @@ class General:
             cores = psutil.cpu_count()
             memory = psutil.virtual_memory().total >> 20
             mem_usage = psutil.virtual_memory().used >> 20
-            storage = psutil.disk_usage('/').total >> 30
             storage_free = psutil.disk_usage('/').free >> 30
             em = discord.Embed(color=0xDEADBF, title="System Stats",
                                description=f"Cores: **{cores}**\n"
                                            f"CPU%: **{cpu_per}**\n"
                                            f"RAM Usage: **{mem_usage}/{memory} MB** ({int(memory - mem_usage)}MB free)\n"
-                                           f"Storage: **{storage_free}/{storage} GB**")
+                                           f"Storage: **{storage_free} Free GB**")
             await ctx.send(embed=em)
         except Exception as e:
             await ctx.send(f"Failed to get system info,\nError: {e}")
