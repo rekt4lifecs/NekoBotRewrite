@@ -71,11 +71,7 @@ class NSFW:
     @commands.cooldown(200, 20, commands.BucketType.user)
     async def pgif(self, ctx):
         """Posts a Random PrOn GIF"""
-        votes = await self.execute("SELECT user FROM dbl", isSelect=True, fetchAll=True)
-        voters = []
-        for vote in votes:
-            voters.append(vote[0])
-        if str(ctx.message.author.id) in voters:
+        if await self.execute(f"SELECT 1 FROM dbl WHERE user = %s" % ctx.author.id, isSelect=True):
             if not ctx.message.channel.is_nsfw():
                 await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
                 return
