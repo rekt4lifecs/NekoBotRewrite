@@ -224,6 +224,10 @@ class Fun:
             file = discord.File(BytesIO(bytes(res["data"])), filename="image.png")
             em = discord.Embed(color=0xDEADBF)
             await ctx.send(file=file, embed=em.set_image(url="attachment://image.png"))
+            try:
+                await ctx.message.delete()
+            except:
+                pass
         except:
             await ctx.send(f"Failed to get data, `{res['errors'][0]['message']}`")
 
