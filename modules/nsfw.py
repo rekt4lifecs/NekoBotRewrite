@@ -1,9 +1,8 @@
 from discord.ext import commands
 import discord, random, aiohttp, requests
 from bs4 import BeautifulSoup as bs
-from time import time
-from .utils import checks
-import config, aiofiles
+from .utils import checks, chat_formatting, hastebin
+import config
 import json
 
 class NSFW:
@@ -11,6 +10,7 @@ class NSFW:
 
     def __init__(self, bot):
         self.bot = bot
+        self.session = aiohttp.ClientSession(loop=self.bot.loop)
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
         async with self.bot.sql_conn.acquire() as conn:
@@ -26,6 +26,46 @@ class NSFW:
             if isSelect:
                 return values
 
+    async def log_error(self, error:str):
+        webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
+        webhook = discord.Webhook.from_url(webhook_url, adapter=discord.AsyncWebhookAdapter(self.session))
+
+        em = discord.Embed(color=0xff6f3f)
+        em.title = "Error"
+        em.description = chat_formatting.box(error, "python")
+        em.set_footer(text="Instance %s" % self.bot.instance)
+
+        await webhook.send(embed=em)
+
+    async def boobbot(self, imgtype:str):
+        url = config.boobbot["base"] + imgtype
+        auth = {"key": config.boobbot["key"]}
+        data = await self.session.get(url, headers=auth)
+
+        try:
+            x = await data.json()
+        except aiohttp.ContentTypeError:
+            content = await data.text()
+            status = data.status
+            content = await hastebin.post(str(content))
+            await self.log_error(f"Content Type Error:\n({status}) {content}")
+            return "https://nekobot.xyz/placeholder.png"
+        return x.get("url")
+
+    async def nekobot(self, imgtype:str):
+        url = "https://nekobot.xyz/api/image?type=" + imgtype
+        data = await self.session.get(url)
+
+        try:
+            x = await data.json()
+            return x.get("message")
+        except aiohttp.ContentTypeError:
+            content = await data.text()
+            status = data.status
+            content = await hastebin.post(str(content))
+            await self.log_error(f"Content Type Error:\n({status}) {content}")
+            return "https://nekobot.xyz/placeholder.png"
+
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(200, 20, commands.BucketType.user)
@@ -39,13 +79,10 @@ class NSFW:
             if not ctx.message.channel.is_nsfw():
                 await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
                 return
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get("https://nekobot.xyz/api/image?type=pgif") as r:
-                    res = await r.json()
             em = discord.Embed(color=0xDEADBF)
-            em.set_image(url=res['message'])
+            em.set_image(url=await self.nekobot("pgif"))
 
-            await ctx.send(embed=em.set_footer(text=f"Used by {ctx.message.author.name}"))
+            await ctx.send(embed=em)
         else:
             embed = discord.Embed(color=0xDEADBF,
                                   title="WOAH",
@@ -62,13 +99,9 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://nekobot.xyz/api/image?type=anal") as r:
-                res = await r.json()
-        data = res['message']
         embed = discord.Embed(color=0xDEADBF)
-        embed.set_image(url=data)
-        await ctx.send(embed=embed.set_footer(text=f"Used by {ctx.message.author.name}"))
+        embed.set_image(url=await self.nekobot("anal"))
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=["DVA", "d.va"])
     @commands.guild_only()
@@ -93,13 +126,9 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://nekobot.xyz/api/image?type=4k") as r:
-                res = await r.json()
-        data = res['message']
         embed = discord.Embed(color=0xDEADBF)
-        embed.set_image(url=data)
-        await ctx.send(embed=embed.set_footer(text=f"Used by {ctx.message.author.name}"))
+        embed.set_image(url=await self.nekobot("4k"))
+        await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
@@ -155,11 +184,8 @@ class NSFW:
         """Get Random Boobs OwO"""
         if not ctx.message.channel.is_nsfw():
             return await ctx.send("This is not an NSFW channel...", delete_after=5)
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(config.boobbot["base"] + "boobs", headers={"key": config.boobbot["key"]}) as r:
-                res = await r.json()
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=res["url"])
+        em.set_image(url=await self.boobbot("boobs"))
         await ctx.send(embed=em)
 
     @commands.command()
@@ -209,12 +235,8 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        url = "https://nekobot.xyz/api/image?type=ass"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=res['message'])
+        em.set_image(url=await self.nekobot("ass"))
 
         await ctx.send(embed=em)
 
@@ -225,11 +247,8 @@ class NSFW:
         """CumSluts"""
         if not ctx.message.channel.is_nsfw():
             return await ctx.send("This is not an NSFW channel...", delete_after=5)
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(config.boobbot["base"] + "cumsluts", headers={"key": config.boobbot["key"]}) as r:
-                res = await r.json()
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=res.get("url"))
+        em.set_image(url=await self.boobbot("cumsluts"))
         await ctx.send(embed=em)
 
     @commands.command(aliases=["thigh"])
@@ -240,14 +259,8 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        url = 'https://nekobot.xyz/api/image?type=thigh'
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
-        x = res['message']
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=x)
-
+        em.set_image(url=await self.nekobot("thigh"))
         await ctx.send(embed=em)
 
     @commands.command()
@@ -258,13 +271,8 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        url = 'https://nekobot.xyz/api/image?type=pussy'
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
-        x = res['message']
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=x)
+        em.set_image(url=await self.nekobot("pussy"))
 
         await ctx.send(embed=em)
 
@@ -275,12 +283,8 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        url = "https://nekobot.xyz/api/image?type=gonewild"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=res['message'])
+        em.set_image(url=await self.nekobot("gonewild"))
 
         await ctx.send(embed=em)
 
@@ -302,32 +306,21 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://nekobot.xyz/api/image?type=lewdkitsune") as r:
-                    res = await r.json()
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=res['message'])
+        em.set_image(url=await self.nekobot("lewdkitsune"))
         await ctx.send(embed=em)
 
     @commands.command()
     @commands.guild_only()
     async def hentai(self, ctx):
+        """Lood 2d girls"""
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>\nhttps://nekobot.xyz/hentai.png")
             return
-        # amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"', isSelect=True)
-        # if amount:
-        votes = await self.execute("SELECT user FROM dbl", isSelect=True, fetchAll=True)
-        voters = []
-        for vote in votes:
-            voters.append(vote[0])
-        if str(ctx.message.author.id) in voters:
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://nekobot.xyz/api/image?type=hentai") as r:
-                    res = await r.json()
-                    em = discord.Embed(color=0xDEADBF)
-                    em.set_image(url=res['message'])
-                    await ctx.send(embed=em)
+        if await self.execute("SELECT 1 FROM dbl WHERE user = %s" % ctx.author.id, isSelect=True):
+            em = discord.Embed(color=0xDEADBF)
+            em.set_image(url=await self.nekobot("hentai"))
+            await ctx.send(embed=em)
         else:
             embed = discord.Embed(color=0xDEADBF,
                                   title="oof",
@@ -419,11 +412,8 @@ class NSFW:
         """Grils with peepee's"""
         if not ctx.message.channel.is_nsfw():
             return await ctx.send("This is not an NSFW channel...", delete_after=5)
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(config.boobbot["base"] + "futa", headers={"key": config.boobbot["key"]}) as r:
-                res = await r.json()
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=res["url"])
+        em.set_image(url=await self.boobbot("futa"))
         await ctx.send(embed=em)
 
     @commands.command(aliases=["collar"])
@@ -432,11 +422,8 @@ class NSFW:
     async def collared(self, ctx):
         if not ctx.message.channel.is_nsfw():
             return await ctx.send("This is not an NSFW channel...", delete_after=5)
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(config.boobbot["base"] + "collared", headers={"key": config.boobbot["key"]}) as r:
-                res = await r.json()
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=res["url"])
+        em.set_image(url=await self.boobbot("collared"))
         await ctx.send(embed=em)
 
     @commands.command()
