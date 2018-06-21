@@ -224,19 +224,13 @@ class NSFW:
     async def cumsluts(self, ctx):
         """CumSluts"""
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-            return
-        headers = {"Authorization": f"Client-ID {config.imgur}"}
-        url = f'https://api.imgur.com/3/gallery/r/cumsluts/hot/{random.randint(1, 5)}'
+            return await ctx.send("This is not an NSFW channel...", delete_after=5)
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(url, headers=headers) as r:
+            async with cs.get(config.boobbot["base"] + "cumsluts", headers={"key": config.boobbot["key"]}) as r:
                 res = await r.json()
-        x = random.choice(res['data'])
-        embed = discord.Embed(color=0xDEADBF,
-                              title=f"**{x['title']}**")
-        embed.set_image(url=x['link'])
-
-        await ctx.send(embed=embed)
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=res.get("url"))
+        await ctx.send(embed=em)
 
     @commands.command(aliases=["thigh"])
     @commands.guild_only()
