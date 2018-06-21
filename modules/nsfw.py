@@ -297,7 +297,11 @@ class NSFW:
             return
         else:
             url = "http://nhentai.net/random/"
-            await ctx.send(embed=discord.Embed(color=0xDEADBF, description=f"{url}"))
+            res = await self.session.get(url)
+            url = res.url
+            await ctx.send(embed=discord.Embed(color=0xDEADBF,
+                                               title="Random Doujin",
+                                               description=str(url)))
 
     @commands.command()
     @commands.guild_only()
