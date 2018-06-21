@@ -182,7 +182,7 @@ class NekoBot(commands.AutoShardedBot):
                 await self.redis.set("instance%s-guilds" % self.instance, len(self.guilds))
                 async with self.sql_conn.acquire() as conn:
                     async with conn.cursor() as db:
-                        topbalquery = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10)"
+                        topbalquery = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
                         await db.execute(topbalquery)
                         allusers = await db.fetchall()
                 logger.info(f"Updated Instance {self.instance}'s Guild Count with {len(self.guilds)}")

@@ -383,7 +383,10 @@ class economy:
         table.field_names = ["Username", "Balance"]
 
         for x in range(9):
-            table.add_row([(await self.bot.redis.get("ecotop%s" % x + 1)).decode("utf8"), int(allusers[x][1])])
+            user = await self.bot.redis.get("ecotop%s" % int(x + 1))
+            if not user:
+                user = b"User not found."
+            table.add_row([user.decode("utf8"), int(allusers[x][1])])
 
         await msg.edit(content=f"```\n{table}\n```", embed=None)
 
