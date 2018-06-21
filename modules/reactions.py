@@ -502,7 +502,7 @@ class Reactions:
                     await ctx.send(embed=em)
         else:
             async with aiohttp.ClientSession() as cs:
-                x = random.choice(['https://nekos.life/api/v2/img/nsfw_neko_gif', 'http://nekos.life/api/lewd/neko'])
+                x = random.choice(['https://nekos.life/api/v2/img/nsfw_neko_gif', 'https://nekos.life/api/v2/img/lewd'])
                 async with cs.get(x) as r:
                     res = await r.json()
                     em = discord.Embed(color=0xDEADBF)
