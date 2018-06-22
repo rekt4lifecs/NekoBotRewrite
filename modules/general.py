@@ -974,6 +974,7 @@ class General:
             other = ""
             other += "`pet`, "
             other += "`card`, "
+            other += "`imgwelcome`, "
             other += ", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Marriage"])
             embed = discord.Embed(color=0xDEADBF, title="NekoBot Help")
             # embed.add_field(name="Audio",
@@ -994,9 +995,6 @@ class General:
             embed.add_field(name="General",
                             value=", ".join(
                                 [f"`{i.name}`" for i in self.bot.commands if i.cog_name == "General" and not i.hidden]),
-                            inline=False)
-            embed.add_field(name="IMGWelcome",
-                            value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "IMGWelcome" and not i.hidden]),
                             inline=False)
             embed.add_field(name="Moderation",
                             value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Moderation" and not i.hidden]),
