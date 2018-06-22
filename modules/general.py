@@ -195,7 +195,9 @@ class General:
     async def info(self, ctx):
         """Get Bot's Info"""
         await ctx.trigger_typing()
-        servers = (await self.execute("SELECT sum(guilds) FROM instances", isSelect=True))[0]
+        instance1 = (await self.bot.redis.get("instance0-guilds")).decode("utf8")
+        instance2 = (await self.bot.redis.get("instance1-guilds")).decode("utf8")
+        servers = int(instance1) + int(instance2)
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
