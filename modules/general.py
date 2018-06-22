@@ -976,9 +976,9 @@ class General:
             other += "`card`, "
             other += ", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Marriage"])
             embed = discord.Embed(color=0xDEADBF, title="NekoBot Help")
-            embed.add_field(name="Audio",
-                            value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Audio" and not i.hidden]),
-                            inline=False)
+            # embed.add_field(name="Audio",
+            #                 value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Audio" and not i.hidden]),
+            #                 inline=False)
             embed.add_field(name="Donator",
                             value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Donator" and not i.hidden]),
                             inline=False)
