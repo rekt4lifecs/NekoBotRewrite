@@ -401,10 +401,12 @@ class CardGame:
         await ctx.send(f"{author.mention}, type `yes` to sell **{cardname_en}** for {cardprice}")
 
         def check(m):
-            return m.content == 'yes' and m.channel == ctx.message.channel and m.author == author
+            return m.channel == ctx.message.channel and m.author == author
 
         try:
-            await self.bot.wait_for('message', check=check, timeout=15.0)
+            x = await self.bot.wait_for('message', check=check, timeout=15.0)
+            if not str(x.content).lower() == "yes":
+                return await ctx.send("**Cancelled Transaction.**")
         except asyncio.TimeoutError:
             await ctx.send(embed=discord.Embed(color=0xff5630, description="Cancelled Transaction."))
             return
