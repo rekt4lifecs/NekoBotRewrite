@@ -75,16 +75,16 @@ class Fun:
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def catgirlmeme(self, ctx):
         """Everything is a dollar not spent on genetically engendering catgirls for domestic ownership"""
-        while True:
+        if await ctx.channel.is_nsfw():
             async with aiohttp.ClientSession() as cs:
                 async with cs.get("https://nekos.life/api/v2/img/gecg") as r:
                     res = await r.json()
-                    if not res["url"] == "https://cdn.nekos.life/gecg/15_00000.jpg":
-                        break
-        em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=res["url"])
-        em.set_footer(text="nekos.life owo")
-        await ctx.send(embed=em)
+            em = discord.Embed(color=0xDEADBF)
+            em.set_image(url=res["url"])
+            em.set_footer(text="nekos.life owo")
+            await ctx.send(embed=em)
+        else:
+            return await ctx.send("Use this in an nsfw channel just to make sure")
 
     async def get_image(self, effect:str, ctx:commands.Context, user:discord.Member):
         await ctx.trigger_typing()
