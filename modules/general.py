@@ -383,8 +383,12 @@ class General:
         await ctx.send(embed=embed)
 
     @commands.command()
+    @commands.guild_only()
     async def urban(self, ctx, *, search_terms: str, definition_number: int = 1):
         """Search Urban Dictionary"""
+
+        if not ctx.channel.is_nsfw():
+            return await ctx.send("Please use this in an NSFW channel.", delete_after=5)
 
         def encode(s):
             return quote_plus(s, encoding='utf-8', errors='replace')
