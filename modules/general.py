@@ -384,7 +384,7 @@ class General:
 
     @commands.command()
     @commands.guild_only()
-    async def urban(self, ctx, *, search_terms: str, definition_number: int = 1):
+    async def urban(self, ctx, *, search_terms: str):
         """Search Urban Dictionary"""
 
         if not ctx.channel.is_nsfw():
@@ -400,8 +400,8 @@ class General:
                 search_terms = search_terms[:-1]
             else:
                 pos = 0
-            if pos not in range(0, 11):  # API only provides the
-                pos = 0                  # top 10 definitions
+            if pos not in range(0, 11):
+                pos = 0
         except ValueError:
             pos = 0
 
