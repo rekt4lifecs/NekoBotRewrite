@@ -195,9 +195,26 @@ class General:
     async def info(self, ctx):
         """Get Bot's Info"""
         await ctx.trigger_typing()
-        instance1 = (await self.bot.redis.get("instance0-guilds")).decode("utf8")
-        instance2 = (await self.bot.redis.get("instance1-guilds")).decode("utf8")
-        servers = int(instance1) + int(instance2)
+        instance1g = (await self.bot.redis.get("instance0-guilds")).decode("utf8")
+        instance2g = (await self.bot.redis.get("instance1-guilds")).decode("utf8")
+        servers = int(instance1g) + int(instance2g)
+
+        instance1m = (await self.bot.redis.get("instance0-members")).decode("utf8")
+        instance2m = (await self.bot.redis.get("instance1-members")).decode("utf8")
+        members = int(instance1m) + int(instance2m)
+
+        instance1mes = (await self.bot.redis.get("instance0-messages")).decode("utf8")
+        instance2mes = (await self.bot.redis.get("instance1-messages")).decode("utf8")
+        messages = int(instance1mes) + int(instance2mes)
+
+        instance1c = (await self.bot.redis.get("instance0-commands")).decode("utf8")
+        instance2c = (await self.bot.redis.get("instance1-commands")).decode("utf8")
+        commands = int(instance1c) + int(instance2c)
+
+        instance1chan = (await self.bot.redis.get("instance0-channels")).decode("utf8")
+        instance2chan = (await self.bot.redis.get("instance1-channels")).decode("utf8")
+        channels = int(instance1chan) + int(instance2chan)
+
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
@@ -207,21 +224,17 @@ class General:
                              title=getlang(lang)["general"]["info"]["info"],
                              description=getlang(lang)["general"]["info"]["stats"].format(millify(servers),
                                                                                           servers,
-                                                                                          millify(len(set(
-                                                                                            self.bot.get_all_members()))),
+                                                                                          millify(members),
                                                                                           str(len(self.bot.commands)),
-                                                                                          millify(len(set(
-                                                                                              self.bot.get_all_channels()))),
+                                                                                          millify(channels),
                                                                                           self.bot.shard_count,
                                                                                           # len(self.bot.lavalink.players.find_all(lambda
                                                                                           #   p: p.is_playing))
                                                                                           0,
                                                                                           self.get_bot_uptime(),
-                                                                                          millify(self.bot.counter[
-                                                                                                      'messages_read']),
-                                                                                          str(self.bot.command_usage.most_common(1)[0][0])+" ("+
-                                                                                          str(self.bot.command_usage.most_common(1)[0][1])+")",
-                                                                                          self.bot.counter["commands_used"]))
+                                                                                          millify(messages),
+                                                                                          str(self.bot.command_usage.most_common(1)[0][0]),
+                                                                                          commands))
         info.add_field(name=getlang(lang)["general"]["info"]["links"]["name"],
                        value=getlang(lang)["general"]["info"]["links"]["links"])
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
@@ -384,7 +397,7 @@ class General:
 
     @commands.command()
     @commands.guild_only()
-    async def urban(self, ctx, *, search_terms: str):
+    async def urban(self, ctx, *, search_terms: str, definition_number: int = 1):
         """Search Urban Dictionary"""
 
         if not ctx.channel.is_nsfw():
