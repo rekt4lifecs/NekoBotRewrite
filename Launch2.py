@@ -99,8 +99,8 @@ class NekoBot(commands.AutoShardedBot):
         super().__init__(command_prefix=_prefix_callable,  # commands.when_mentioned_or('n!')
                          description="NekoBot",
                          pm_help=None,
-                         shard_ids=[16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
-                         shard_count=32,
+                         shard_ids=[18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35],
+                         shard_count=36,
                          status=discord.Status.dnd,
                          activity=discord.Game(name="Restarting..."),
                          max_messages=2500,
@@ -180,6 +180,10 @@ class NekoBot(commands.AutoShardedBot):
             self.instancePoster = True
             while self.instancePoster:
                 await self.redis.set("instance%s-guilds" % self.instance, len(self.guilds))
+                await self.redis.set("instance%s-users" % self.instance, len(set(self.get_all_members())))
+                await self.redis.set("instance%s-messages" % self.instance, self.counter["messages_read"])
+                await self.redis.set("instance%s-commands" % self.instance, self.counter["commands_used"])
+                await self.redis.set("instance%s-channels" % self.instance, len(set(self.get_all_channels())))
                 async with self.sql_conn.acquire() as conn:
                     async with conn.cursor() as db:
                         topbalquery = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
