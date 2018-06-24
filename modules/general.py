@@ -199,8 +199,8 @@ class General:
         instance2g = (await self.bot.redis.get("instance1-guilds")).decode("utf8")
         servers = int(instance1g) + int(instance2g)
 
-        instance1m = (await self.bot.redis.get("instance0-members")).decode("utf8")
-        instance2m = (await self.bot.redis.get("instance1-members")).decode("utf8")
+        instance1m = (await self.bot.redis.get("instance0-users")).decode("utf8")
+        instance2m = (await self.bot.redis.get("instance1-users")).decode("utf8")
         members = int(instance1m) + int(instance2m)
 
         instance1mes = (await self.bot.redis.get("instance0-messages")).decode("utf8")
