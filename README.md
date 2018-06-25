@@ -1,4 +1,4 @@
-# NekoBotRewrite
+# NekoBot
 OwO Whats This
 
 NekoBot is an amazing Discord Bot with plenty of Fun and NSFW Commands all rewritten just a few weeks ago! There maybe are still a bit of stuff to cleanup but right now its down good!
