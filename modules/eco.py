@@ -362,8 +362,6 @@ class economy:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
-        em = discord.Embed(color=0xDEADBF, title="Top Users | Economy", description="Loading...")
-        msg = await ctx.send(embed=em)
         query = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
         allusers = await self.execute(query=query, isSelect=True, fetchAll=True)
 
@@ -376,7 +374,7 @@ class economy:
                 user = b"User not found."
             table.add_row([user.decode("utf8"), int(allusers[x][1])])
 
-        await msg.edit(content=f"```\n{table}\n```", embed=None)
+        await ctx.send(content=f"```\n{table}\n```", embed=None)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
