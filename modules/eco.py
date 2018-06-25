@@ -65,12 +65,10 @@ class economy:
                 await db.execute("INSERT INTO levels VALUES (%s, 0, 0, 0, 0, 0, 0)", (user,))
 
     async def edit_balance(self, user:discord.Member, amount:int):
-        balance = await self.get_balance(user)
         user = user.id
-        new_balance = balance + amount
         async with self.bot.sql_conn.acquire() as conn:
             async with conn.cursor() as db:
-                await db.execute("UPDATE economy SET balance = %s WHERE userid = %s", (new_balance, user,))
+                await db.execute("UPDATE economy SET balance = %s WHERE userid = %s", (amount, user,))
 
     async def _economy_create_account(self, user:discord.Member):
         user = user.id
