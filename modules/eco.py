@@ -1,7 +1,7 @@
 from discord.ext import commands
-import discord, aiohttp, asyncio, time, datetime, config, random, math, logging
+import discord, aiohttp, asyncio, datetime, config, random, math, logging
+import time
 import ujson
-import string
 from prettytable import PrettyTable
 
 log = logging.getLogger("NekoBot")
@@ -23,26 +23,66 @@ class economy:
     def __init__(self, bot):
         self.bot = bot
 
-    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+    async def has_account(self, user:discord.Member):
+        user = user.id
         async with self.bot.sql_conn.acquire() as conn:
             async with conn.cursor() as db:
-                await db.execute(query)
-                if isSelect:
-                    if fetchAll:
-                        values = await db.fetchall()
-                    else:
-                        values = await db.fetchone()
-                if commit:
-                    await conn.commit()
-            if isSelect:
-                return values
+                if not await db.execute("SELECT 1 FROM economy WHERE userid = %s", (user,)):
+                    return False
+                else:
+                    return True
 
-    async def usercheck(self, datab : str, user : discord.Member):
+    async def has_level_account(self, user:discord.Member):
         user = user.id
-        if not await self.execute(query=f'SELECT 1 FROM {datab} WHERE userid = {user}', isSelect=True):
-            return False
-        else:
-            return True
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                if not await db.execute("SELECT 1 FROM levels WHERE userid = %s", (user,)):
+                    return False
+                else:
+                    return True
+
+    async def get_balance(self, user:discord.Member):
+        user = user.id
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("SELECT balance FROM economy WHERE userid = %s", (user,))
+                bal = int((await db.fetchone())[0])
+                return bal
+
+    async def has_voted(self, user:discord.Member):
+        user = user.id
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                if await db.execute("SELECT 1 FROM dbl WHERE user = %s", (user,)):
+                    return True
+                else:
+                    return False
+
+    async def _levels_create_account(self, user:discord.Member):
+        user = user.id
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("INSERT INTO levels VALUES (%s, 0, 0, 0, 0, 0, 0)", (user,))
+
+    async def edit_balance(self, user:discord.Member, amount:int):
+        balance = await self.get_balance(user)
+        user = user.id
+        new_balance = balance + amount
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("UPDATE economy SET balance = %s WHERE userid = %s", (new_balance, user,))
+
+    async def _economy_create_account(self, user:discord.Member):
+        user = user.id
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("INSERT INTO economy VALUES (%s, 0, 0)", (user,))
+
+    async def update_payday_time(self, user:discord.Member):
+        user = user.id
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("UPDATE economy SET payday = %s WHERE userid = %s", (int(time.time()), user,))
 
     def _required_exp(self, level: int):
         if level < 0:
@@ -55,12 +95,6 @@ class economy:
     def _find_level(self, total_exp):
         return int((1 / 278) * (9 + math.sqrt(81 + 1112 * (total_exp))))
 
-    async def _create_user(self, user_id):
-        try:
-            await self.execute(f"INSERT INTO levels VALUES ({user_id}, 0, 0, 0, 0, 0, 0)", commit=True)
-        except:
-            pass
-
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def bank(self, ctx):
@@ -70,26 +104,25 @@ class economy:
             lang = lang.decode('utf8')
         else:
             lang = "english"
+
+        if not await self.has_level_account(ctx.author):
+            await self._levels_create_account(ctx.author)
+
         try:
-            if await self.usercheck('levels', ctx.message.author) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
-        try:
-            x = await self.execute(f"SELECT balance FROM economy WHERE userid = {ctx.message.author.id}", isSelect=True)
-            balance = int(x[0])
+            balance = await self.get_balance(ctx.author)
         except:
             balance = 0
-        total = 0
-        all_eco = await self.execute("SELECT balance FROM economy", isSelect=True, fetchAll=True)
-        for x in all_eco:
-            total = total + int(x[0])
+
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("SELECT SUM(balance) FROM economy")
+                total = int((await db.fetchone())[0])
 
         em = discord.Embed(color=0xDEADBF,
                            title=getlang(lang)["eco"]["welcome"])
         em.set_thumbnail(url=self.bot.user.avatar_url)
-        em.add_field(name=getlang(lang)["eco"]["total_amount"], value=f"{total}")
-        em.add_field(name=getlang(lang)["eco"]["user_amount"], value=balance)
+        em.add_field(name=getlang(lang)["eco"]["total_amount"], value=str(total))
+        em.add_field(name=getlang(lang)["eco"]["user_amount"], value=str(balance))
         em.add_field(name="owo", value=getlang(lang)["eco"]["footer"])
 
         await ctx.send(embed=em)
@@ -98,25 +131,20 @@ class economy:
     @commands.cooldown(1, 120, commands.BucketType.user)
     async def register(self, ctx):
         """Register a bank account"""
-        user = ctx.message.author
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
             lang = lang.decode('utf8')
         else:
             lang = "english"
 
-        try:
-            if await self.usercheck('levels', ctx.message.author) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
+        if not await self.has_level_account(ctx.author):
+            await self._levels_create_account(ctx.author)
 
-        if await self.usercheck('economy', user) is False:
+        if not await self.has_account(ctx.author):
             await ctx.send(getlang(lang)["eco"]["registered"])
-            await self.execute(f"INSERT INTO economy VALUES ({user.id}, 0, 0)", commit=True)
+            await self._economy_create_account(ctx.author)
         else:
             await ctx.send(getlang(lang)["eco"]["already_registered"])
-
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -129,32 +157,32 @@ class economy:
         else:
             lang = "english"
 
-        if user == None:
-            user = ctx.message.author
-        try:
-            if await self.usercheck('levels', ctx.message.author) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
-        username = str(user.name)
-        if await self.usercheck('levels', user) is False:
+        if user is None:
+            user = ctx.author
+
+        if not await self.has_level_account(user):
+            await self._levels_create_account(user)
+
+        if not await self.has_level_account(user):
             description = ""
         else:
-            fetchlvl = await self.execute(f"SELECT rep, level, info FROM levels WHERE userid = {user.id}", isSelect=True, fetchAll=True)
-            xp = fetchlvl[0][1]
-            description = fetchlvl[0][2]
-            level = self._find_level(xp)
-        if await self.usercheck('marriage', user) is False:
-            married = "Nobody"
-        else:
-            x = await self.execute(f"SELECT marryid FROM marriage WHERE userid = {user.id}", isSelect=True)
-            marryid = int(x[0])
-            married = await self.bot.get_user_info(marryid)
-        if await self.usercheck('economy', user):
-            x = await self.execute(f"SELECT balance FROM economy WHERE userid = {user.id}", isSelect=True)
-            balance = int(x[0])
-        else:
+            async with self.bot.sql_conn.acquire() as conn:
+                async with conn.cursor() as db:
+                    await db.execute("SELECT info FROM levels WHERE userid = %s", (user.id,))
+                    description = (await db.fetchone())[0]
+
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                if not await db.execute("SELECT marryid FROM marriage WHERE userid = %s", (user.id)):
+                    married = "Nobody"
+                else:
+                    married = await self.bot.get_user_info(int((await db.fetchone())[0]))
+
+        if not await self.has_account(user):
             balance = 0
+        else:
+            balance = await self.get_balance(user)
+
         xp = await self.bot.redis.get(f"{ctx.message.author.id}-xp")
         if xp:
             xp = int(xp)
@@ -169,7 +197,7 @@ class economy:
             async with cs.get(f"https://api.weeb.sh/reputation/{self.bot.user.id}/{user.id}",
                                headers={"Authorization": "Wolke " + config.weeb}) as r:
                 data = await r.json()
-        embed = discord.Embed(color=0xDEABDF, title=getlang(lang)["eco"]["profile"]["title"].format(username),
+        embed = discord.Embed(color=0xDEABDF, title=getlang(lang)["eco"]["profile"]["title"].format(user.name),
                               description=getlang(lang)["eco"]["profile"]["description"].format(balance,
                                                                                           data['user']['reputation'],
                                                                                           level, xp, required,
@@ -188,20 +216,22 @@ class economy:
         else:
             lang = "english"
 
-        user = ctx.message.author
-        try:
-            if await self.usercheck('levels', ctx.message.author) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
-        if await self.usercheck('economy', user) is False:
+        user = ctx.author
+
+        if not await self.has_level_account(user):
+            await self._levels_create_account(user)
+
+        if not await self.has_account(user):
             await ctx.send(getlang(lang)["eco"]["no_account"])
             return
         else:
-            x = await self.execute(f"SELECT payday FROM economy WHERE userid = {user.id}", isSelect=True)
-            paydaytime = x[0]
+            async with self.bot.sql_conn.acquire() as conn:
+                async with conn.cursor() as db:
+                    await db.execute("SELECT payday FROM economy WHERE userid = %s", (user.id,))
+                    paydaytime = int((await db.fetchone())[0])
+
             timenow = datetime.datetime.utcfromtimestamp(time.time()).strftime("%d")
-            timecheck = datetime.datetime.utcfromtimestamp(int(paydaytime)).strftime("%d")
+            timecheck = datetime.datetime.utcfromtimestamp(paydaytime).strftime("%d")
             if timecheck == timenow:
                 tomorrow = datetime.datetime.replace(datetime.datetime.now() + datetime.timedelta(days=1),
                                                      hour=0, minute=0, second=0)
@@ -210,21 +240,18 @@ class economy:
                 await ctx.send(getlang(lang)["eco"]["daily_timer"].format(int(timeleft)))
                 return
             else:
-                x = await self.execute(f"SELECT balance FROM economy WHERE userid = {user.id}", isSelect=True)
-                balance = int(x[0])
+                balance = await self.get_balance(user)
 
-                # Voter Bonus
-                amount = await self.execute(f'SELECT 1 FROM dbl WHERE user = {ctx.message.author.id} AND type = \"upvote\"', isSelect=True)
-                if amount != 0:
-                    await self.execute(f"UPDATE economy SET balance = {balance + 7500} WHERE userid = {user.id}", commit=True)
-                    await self.execute(f"UPDATE economy SET payday = {int(time.time())} WHERE userid = {user.id}", commit=True)
+                if await self.has_voted(user):
+                    await self.edit_balance(user, balance + 7500)
+                    await self.update_payday_time(user)
                     embed = discord.Embed(color=0xDEADBF,
                                           title=getlang(lang)["eco"]["daily_credits"],
                                           description=getlang(lang)["eco"]["daily_voter"])
                     await ctx.send(embed=embed)
                 else:
-                    await self.execute(f"UPDATE economy SET balance = {balance + 2500} WHERE userid = {user.id}", commit=True)
-                    await self.execute(f"UPDATE economy SET payday = {int(time.time())} WHERE userid = {user.id}", commit=True)
+                    await self.edit_balance(user, 2500)
+                    await self.update_payday_time(user)
                     embed = discord.Embed(color=0xDEADBF,
                                           title=getlang(lang)["eco"]["daily_credits"],
                                           description=getlang(lang)["eco"]["daily_normal"])
@@ -241,7 +268,8 @@ class economy:
             lang = lang.decode('utf8')
         else:
             lang = "english"
-        author = ctx.message.author
+
+        author = ctx.author
         if user == author:
             await ctx.send(getlang(lang)["eco"]["cant_rep_self"])
             return
@@ -256,7 +284,7 @@ class economy:
             async with cs.get(f"https://api.weeb.sh/reputation/310039170792030211/{author.id}",
                                headers={"Authorization": "Wolke " + config.weeb}) as r:
                 repdata = await r.json()
-        # await ctx.send(f"```\n{json.dumps(data, indent=4)}\n```")
+
         availablerep = repdata['user']['availableReputations']
         if availablerep > 1:
             points = getlang(lang)["eco"]["points"]
@@ -282,14 +310,12 @@ class economy:
             lang = lang.decode('utf8')
         else:
             lang = "english"
-        try:
-            if await self.usercheck('levels', ctx.message.author) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
-        if await self.usercheck("levels", ctx.message.author) is False:
-            await ctx.send("Error finding your profile.")
-            return
+
+        user = ctx.author
+
+        if not await self.has_level_account(user):
+            await self._levels_create_account(user)
+
         if len(desc) > 500:
             await ctx.send(getlang(lang)["eco"]["set_desc"]["over_limit"])
             return
@@ -303,7 +329,7 @@ class economy:
                 await ctx.send(getlang(lang)["eco"]["set_desc"]["failed"])
 
     @commands.command()
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def coinflip(self, ctx, amount : int):
         """Coinflip OwO"""
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
@@ -311,43 +337,42 @@ class economy:
             lang = lang.decode('utf8')
         else:
             lang = "english"
-        user = ctx.message.author
-        try:
-            if await self.usercheck('levels', ctx.message.author) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
+        user = ctx.author
+
+        if not await self.has_level_account(user):
+            await self._levels_create_account(user)
+
         if amount <= 0:
             await ctx.send(getlang(lang)["eco"]["coinflip"]["too_low"])
             return
         elif amount > 10000:
             await ctx.send(getlang(lang)["eco"]["coinflip"]["too_high"])
             return
-        if await self.usercheck('economy', user) is False:
+        if not await self.has_account(user):
             await ctx.send(getlang(lang)["eco"]["no_account"])
             return
         else:
-            x = await self.execute(f"SELECT balance FROM economy WHERE userid = {user.id}", isSelect=True)
-            balance = int(x[0])
+            balance = await self.get_balance(user)
             if (balance - amount) < 0:
                 await ctx.send(getlang(lang)["eco"]["coinflip"]["cant_spend"])
                 return
             else:
                 msg = await ctx.send(getlang(lang)["eco"]["coinflip"]["flipping"])
-                await asyncio.sleep(random.randint(2, 5))
-                await self.execute(f"UPDATE economy SET balance = {balance - amount} WHERE userid = {user.id}", commit=True)
+                await asyncio.sleep(random.randint(1, 5))
+                await self.edit_balance(user, balance - amount)
                 choice = random.randint(0, 1)
                 if choice == 1:
                     try:
                         await ctx.message.add_reaction('🎉')
                     except:
                         pass
-                    em = discord.Embed(color=0x42FF73, description=getlang(lang)["eco"]["coinflip"]["won"].format(user, amount * 1.5))
-                    await msg.edit(embed=em)
-                    await self.execute(f"UPDATE economy SET balance = {balance + int(amount * 1.5)} WHERE userid = {user.id}", commit=True)
+                    em = discord.Embed(color=0x42FF73)
+                    em.description = getlang(lang)["eco"]["coinflip"]["won"].format(user, amount * 1.5)
+                    await msg.edit(embed=em, content=None)
+                    await self.edit_balance(user, balance + int(amount * 1.5))
                 else:
                     em = discord.Embed(color=0xFF5637, description=getlang(lang)["eco"]["coinflip"]["lost"])
-                    await msg.edit(embed=em)
+                    await msg.edit(embed=em, content=None)
                     try:
                         await ctx.message.add_reaction('😦')
                     except:
@@ -357,13 +382,16 @@ class economy:
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def top(self, ctx):
         """Get Top Users OwO"""
-        try:
-            if await self.usercheck('levels', ctx.message.author) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
+        user = ctx.author
+        if not await self.has_level_account(user):
+            await self._levels_create_account(user)
+
         query = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
-        allusers = await self.execute(query=query, isSelect=True, fetchAll=True)
+
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute(query)
+                allusers = await db.fetchall()
 
         table = PrettyTable()
         table.field_names = ["Username", "Balance"]
@@ -385,11 +413,10 @@ class economy:
             lang = lang.decode('utf8')
         else:
             lang = "english"
-        try:
-            if await self.usercheck('levels', ctx.message.author) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
+
+        if not await self.has_level_account(ctx.author):
+            await self._levels_create_account(ctx.author)
+
         if amount < 10:
             await ctx.send(getlang(lang)["eco"]["transfer"]["min"])
             return
@@ -400,37 +427,32 @@ class economy:
             await ctx.send(getlang(lang)["eco"]["transfer"]["self"])
             return
         else:
-            if await self.usercheck('economy', ctx.message.author) is False:
+            if not await self.has_account(ctx.author):
                 await ctx.send(getlang(lang)["eco"]["no_account"])
                 return
-            elif await self.usercheck('economy', user) is False:
+            elif not await self.has_account(user):
                 await ctx.send(getlang(lang)["eco"]["transfer"]["user_no_account"].format(user))
                 return
             else:
-                x = await self.execute(f"SELECT balance FROM economy WHERE userid = {ctx.message.author.id}", isSelect=True)
-                author_balance = int(x[0])
-                x = await self.execute(f"SELECT balance FROM economy WHERE userid = {user.id}", isSelect=True)
-                user_balance = int(x[0])
+                author_balance = await self.get_balance(ctx.author)
+                user_balance = await self.get_balance(user)
                 if (author_balance - amount) < 0:
                     await ctx.send(getlang(lang)["eco"]["coinflip"]["cant_spend"])
                     return
                 else:
-                    await self.execute(f"UPDATE economy SET balance = {amount + user_balance} WHERE userid = {user.id}", commit=True)
-                    await self.execute(f"UPDATE economy SET balance = {author_balance - amount} WHERE userid = {ctx.message.author.id}", commit=True)
+                    await self.edit_balance(user, user_balance + amount)
+                    await self.edit_balance(ctx.author, author_balance - amount)
                     await ctx.send(getlang(lang)["eco"]["transfer"]["sent"].format(amount, user))
                     try:
-                        await user.send(f"{ctx.message.author.name} has sent you ${amount}.")
+                        await user.send(f"{ctx.author.name} has sent you ${amount}.")
                     except:
                         pass
 
     @commands.command(aliases=['bj'])
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def blackjack(self, ctx, betting_amount: int):
-        try:
-            if await self.usercheck('levels', ctx.message.author) is False:
-                await self._create_user(ctx.message.author.id)
-        except:
-            pass
+        if not await self.has_level_account(ctx.author):
+            await self._levels_create_account(ctx.author)
         cards = {
             "2C": "<:2C:424587135463456778>",
             "2D": "<:2D:424587135383764993>",
@@ -491,12 +513,11 @@ class economy:
 
         author = ctx.message.author
 
-        if await self.usercheck('economy', author) is False:
+        if not await self.has_account(ctx.author):
             await ctx.send("You don't have a bank account...")
             return
 
-        author_balance = await self.execute(f"SELECT balance FROM economy WHERE userid = {author.id}", isSelect=True)
-        author_balance = int(author_balance[0])
+        author_balance = await self.get_balance(ctx.author)
 
         if betting_amount <= 0:
             await ctx.send("You can't bet that low...")
@@ -509,12 +530,10 @@ class economy:
             return
 
         # Take users moneylol
-        await self.execute(f"UPDATE economy SET balance = {author_balance - betting_amount} WHERE userid = {author.id}",
-                           commit=True)
+        await self.edit_balance(ctx.author, author_balance - betting_amount)
 
         # Get New Author Balance
-        author_balance = await self.execute(f"SELECT balance FROM economy WHERE userid = {author.id}", isSelect=True)
-        author_balance = int(author_balance[0])
+        author_balance = await self.get_balance(ctx.author)
 
         card_choice1 = cards[random.choice(lst)]
         card_choice2 = cards[random.choice(lst)]
@@ -560,7 +579,7 @@ class economy:
             if (int(amount1) + int(amount2)) > (int(amount3) + int(amount4)):
                 winner = author.name
                 color = 0xDEADBF
-                await self.execute(f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}", commit=True)
+                await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
             else:
                 winner = self.bot.user.name
                 color = 0xff5630
@@ -597,8 +616,7 @@ class economy:
             await msg.edit(embed=e)
             return
         elif (int(amount3) + int(amount4) + int(amount6)) > 21:
-            query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
-            await self.execute(query=query, commit=True)
+            await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
             e = discord.Embed(color=0xff5630, title="Blackjack",
                               description=f"{self.bot.user.name} went over 21 and {author.name} won!")
             e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
@@ -626,8 +644,7 @@ class economy:
             if (int(amount1) + int(amount2) + int(amount5)) > (int(amount3) + int(amount4) + int(amount6)):
                 winner = author.name
                 color = 0xDEADBF
-                query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
-                await self.execute(query=query, commit=True)
+                await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
             else:
                 winner = self.bot.user.name
                 color = 0xff5630
@@ -666,8 +683,7 @@ class economy:
             await msg.edit(embed=e)
             return
         elif (int(amount3) + int(amount4) + int(amount6) + int(amount8)) > 21:
-            query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
-            await self.execute(query=query, commit=True)
+            await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
             e = discord.Embed(color=0xff5630, title="Blackjack",
                               description=f"{self.bot.user.name} went over 21 and {author.name} won!")
             e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
@@ -685,7 +701,6 @@ class economy:
         e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ? | ? | ?", inline=True)
 
         msg = await ctx.send(embed=e)
-        msg
 
         def check(m):
             return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
@@ -696,8 +711,7 @@ class economy:
             if (int(amount1) + int(amount2) + int(amount5) + int(amount7)) > (int(amount3) + int(amount4) + int(amount6) + int(amount8)):
                 winner = author.name
                 color = 0xDEADBF
-                query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
-                await self.execute(query=query, commit=True)
+                await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
             else:
                 winner = self.bot.user.name
                 color = 0xff5630
@@ -736,8 +750,7 @@ class economy:
             await msg.edit(embed=e)
             return
         elif (int(amount3) + int(amount4) + int(amount6) + int(amount10) + int(amount8)) > 21:
-            query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
-            await self.execute(query=query, commit=True)
+            await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
             e = discord.Embed(color=0xff5630, title="Blackjack",
                               description=f"{self.bot.user.name} went over 21 and {author.name} won!")
             e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)}",
@@ -765,8 +778,7 @@ class economy:
             if (int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)) > (int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)):
                 winner = author.name
                 color = 0xDEADBF
-                query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
-                await self.execute(query=query, commit=True)
+                await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
             else:
                 winner = self.bot.user.name
                 color = 0xff5630
@@ -778,8 +790,7 @@ class economy:
                 int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)):
             winner = author.name
             color = 0xDEADBF
-            query = f"UPDATE economy SET balance = {int(author_balance + (betting_amount * 1.5))} WHERE userid = {author.id}"
-            await self.execute(query=query, commit=True)
+            await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
         else:
             winner = self.bot.user.name
             color = 0xff5630
