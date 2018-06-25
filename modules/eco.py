@@ -17,11 +17,19 @@ for l in languages:
 def getlang(la:str):
     return lang.get(la, None)
 
+with open("transactions.json") as f:
+    transaction_webhook = (ujson.load(f))["webhook"]
+
 class economy:
     """Economy"""
 
     def __init__(self, bot):
         self.bot = bot
+
+    async def post_to_transactions(self, embed:discord.Embed):
+        async with aiohttp.ClientSession() as cs:
+            webhook = discord.Webhook.from_url(transaction_webhook, adapter=discord.AsyncWebhookAdapter(cs))
+            await webhook.send(embed=embed)
 
     async def has_account(self, user:discord.Member):
         user = user.id
@@ -141,6 +149,9 @@ class economy:
         if not await self.has_account(ctx.author):
             await ctx.send(getlang(lang)["eco"]["registered"])
             await self._economy_create_account(ctx.author)
+            await self.post_to_transactions(discord.Embed(color=0xDEADBF, title="Account Made",
+                                                          description="**%s** (%s) has made an account." % (ctx.author.name,
+                                                                                                       ctx.author.id,)))
         else:
             await ctx.send(getlang(lang)["eco"]["already_registered"])
 
@@ -247,13 +258,22 @@ class economy:
                                           title=getlang(lang)["eco"]["daily_credits"],
                                           description=getlang(lang)["eco"]["daily_voter"])
                     await ctx.send(embed=embed)
+                    await self.post_to_transactions(discord.Embed(color=0xDEADBF, title="Daily Received",
+                                                                  description="**%s** (%s) has received %s credits" % (user.name,
+                                                                                                                       user.id,
+                                                                                                                       7500,)))
                 else:
-                    await self.edit_balance(user, 2500)
+                    await self.edit_balance(user, balance + 2500)
                     await self.update_payday_time(user)
                     embed = discord.Embed(color=0xDEADBF,
                                           title=getlang(lang)["eco"]["daily_credits"],
                                           description=getlang(lang)["eco"]["daily_normal"])
                     embed.set_footer(text=getlang(lang)["eco"]["vote_footer"])
+                    await self.post_to_transactions(discord.Embed(color=0xDEADBF, title="Daily Received",
+                                                                  description="**%s** (%s) has received %s credits" % (
+                                                                  user.name,
+                                                                  user.id,
+                                                                  2500,)))
                     await ctx.send(embed=embed)
 
     @commands.command()
@@ -368,9 +388,17 @@ class economy:
                     em.description = getlang(lang)["eco"]["coinflip"]["won"].format(user, amount * 1.5)
                     await msg.edit(embed=em, content=None)
                     await self.edit_balance(user, balance + int(amount * 1.5))
+                    await self.post_to_transactions(discord.Embed(color=0xDEADBF, title="Coinflip Win",
+                                                                  description="**%s** (%s) has recieved %s from coinflip" % (user.name,
+                                                                                                                             user.id,
+                                                                                                                             int(amount*1.5))))
                 else:
                     em = discord.Embed(color=0xFF5637, description=getlang(lang)["eco"]["coinflip"]["lost"])
                     await msg.edit(embed=em, content=None)
+                    await self.post_to_transactions(discord.Embed(color=0xDEADBF, title="Coinflip Loss",
+                                                                  description="**%s** (%s) has lost %s from coinflip" % (user.name,
+                                                                                                                         user.id,
+                                                                                                                         int(amount))))
                     try:
                         await ctx.message.add_reaction('😦')
                     except:
@@ -445,6 +473,12 @@ class economy:
                         await user.send(f"{ctx.author.name} has sent you ${amount}.")
                     except:
                         pass
+                    await self.post_to_transactions(discord.Embed(color=0xDEADBF, title="Money Transfer",
+                                                                  description="**%s** (%s) sent **%s** (%s), $%s" % (ctx.author.name,
+                                                                                                                     ctx.author.id,
+                                                                                                                     user.name,
+                                                                                                                     user.id,
+                                                                                                                     amount,)))
 
     @commands.command(aliases=['bj'])
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -527,6 +561,14 @@ class economy:
             await ctx.send("You can't bet past 50k")
             return
 
+        win_embed = discord.Embed(color=0xDEADBF)
+        win_embed.title = "Blackjack Win"
+        win_embed.description = "**%s** (%s) has won %s" % (ctx.author.name, ctx.author.id, int(betting_amount * 1.5))
+
+        lose_embed = discord.Embed(color=0xDEADBF)
+        lose_embed.title = "Blackjack Lose"
+        lose_embed.description = "**%s** (%s) has lost %s" % (ctx.author.name, ctx.author.id, int(betting_amount * 1.5))
+
         # Take users moneylol
         await self.edit_balance(ctx.author, author_balance - betting_amount)
 
@@ -577,11 +619,14 @@ class economy:
             if (int(amount1) + int(amount2)) > (int(amount3) + int(amount4)):
                 winner = author.name
                 color = 0xDEADBF
+                await self.post_to_transactions(win_embed)
                 await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
             else:
                 winner = self.bot.user.name
+                await self.post_to_transactions(lose_embed)
                 color = 0xff5630
             await msg.edit(embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
+            await self.post_to_transactions(win_embed)
             return
 
         # 2nd screen #
@@ -611,6 +656,7 @@ class economy:
             e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
                         value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount5}{bot_choice3}",
                         inline=True)
+            await self.post_to_transactions(lose_embed)
             await msg.edit(embed=e)
             return
         elif (int(amount3) + int(amount4) + int(amount6)) > 21:
@@ -623,6 +669,7 @@ class economy:
             e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
                         value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount6}{bot_choice3}",
                         inline=True)
+            await self.post_to_transactions(win_embed)
             await msg.edit(embed=e)
             return
 
@@ -642,9 +689,11 @@ class economy:
             if (int(amount1) + int(amount2) + int(amount5)) > (int(amount3) + int(amount4) + int(amount6)):
                 winner = author.name
                 color = 0xDEADBF
+                await self.post_to_transactions(win_embed)
                 await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
             else:
                 winner = self.bot.user.name
+                await self.post_to_transactions(lose_embed)
                 color = 0xff5630
             await msg.edit(
                 embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
@@ -678,6 +727,7 @@ class economy:
             e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
                         value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount5}{bot_choice3}",
                         inline=True)
+            await self.post_to_transactions(lose_embed)
             await msg.edit(embed=e)
             return
         elif (int(amount3) + int(amount4) + int(amount6) + int(amount8)) > 21:
@@ -690,6 +740,7 @@ class economy:
             e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
                         value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount6}{bot_choice3}| {amount8}{bot_choice4}",
                         inline=True)
+            await self.post_to_transactions(win_embed)
             await msg.edit(embed=e)
             return
 
@@ -709,9 +760,11 @@ class economy:
             if (int(amount1) + int(amount2) + int(amount5) + int(amount7)) > (int(amount3) + int(amount4) + int(amount6) + int(amount8)):
                 winner = author.name
                 color = 0xDEADBF
+                await self.post_to_transactions(win_embed)
                 await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
             else:
                 winner = self.bot.user.name
+                await self.post_to_transactions(lose_embed)
                 color = 0xff5630
             await msg.edit(
                 embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
@@ -745,6 +798,7 @@ class economy:
             e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)}",
                         value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount5}{bot_choice3}| {amount10}{bot_choice3}",
                         inline=True)
+            await self.post_to_transactions(lose_embed)
             await msg.edit(embed=e)
             return
         elif (int(amount3) + int(amount4) + int(amount6) + int(amount10) + int(amount8)) > 21:
@@ -757,6 +811,7 @@ class economy:
             e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
                         value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount6}{bot_choice3}| {amount10}{bot_choice5}| {amount8}{bot_choice4}",
                         inline=True)
+            await self.post_to_transactions(win_embed)
             await msg.edit(embed=e)
             return
 
@@ -775,10 +830,12 @@ class economy:
         except:
             if (int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)) > (int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)):
                 winner = author.name
+                await self.post_to_transactions(win_embed)
                 color = 0xDEADBF
                 await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
             else:
                 winner = self.bot.user.name
+                await self.post_to_transactions(lose_embed)
                 color = 0xff5630
             await msg.edit(
                 embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
@@ -787,10 +844,12 @@ class economy:
         if (int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)) > (
                 int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)):
             winner = author.name
+            await self.post_to_transactions(win_embed)
             color = 0xDEADBF
             await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
         else:
             winner = self.bot.user.name
+            await self.post_to_transactions(lose_embed)
             color = 0xff5630
         await msg.edit(
             embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
