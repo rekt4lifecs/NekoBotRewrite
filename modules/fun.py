@@ -108,6 +108,29 @@ class Fun:
         return img
 
     @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def caption(self, ctx, user:discord.Member=None):
+        """Caption an image"""
+        img = await self.get_image("caption", ctx, user)
+        if not isinstance(img, str):
+            return img
+        headers = {
+            "Content-Type": "application/json; charset=utf-8"
+        }
+        payload = {
+            "Content": img,
+            "Type": "CaptionRequest"
+        }
+        url = "https://captionbot.azurewebsites.net/api/messages"
+        try:
+            data = await (await self.session.post(url, headers=headers, json=payload)).text()
+            em = discord.Embed(color=0xDEADBF, title=str(data))
+            em.set_image(url=img)
+            await ctx.send(embed=em)
+        except:
+            await ctx.send("Failed to get data.")
+
+    @commands.command()
     @commands.cooldown(1, 7, commands.BucketType.user)
     async def blurpify(self, ctx, user:discord.Member=None):
         """Either blurpify a user or attach an image."""
