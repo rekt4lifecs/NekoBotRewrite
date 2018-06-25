@@ -37,14 +37,6 @@ class economy:
             if isSelect:
                 return values
 
-    def forbiddencheck(self, text:str):
-        characters = string.ascii_letters + string.digits + " "
-        forbidden_char = 0
-        for letter in text:
-            if letter not in characters:
-                forbidden_char += 1
-        return forbidden_char
-
     async def usercheck(self, datab : str, user : discord.Member):
         user = user.id
         if not await self.execute(query=f'SELECT 1 FROM {datab} WHERE userid = {user}', isSelect=True):
@@ -146,16 +138,12 @@ class economy:
             pass
         username = str(user.name)
         if await self.usercheck('levels', user) is False:
-            level = 0
-            xp = 0
-            required = 0
             description = ""
         else:
             fetchlvl = await self.execute(f"SELECT rep, level, info FROM levels WHERE userid = {user.id}", isSelect=True, fetchAll=True)
             xp = fetchlvl[0][1]
             description = fetchlvl[0][2]
             level = self._find_level(xp)
-            required = self._level_exp(level + 1)
         if await self.usercheck('marriage', user) is False:
             married = "Nobody"
         else:
@@ -302,14 +290,14 @@ class economy:
         if await self.usercheck("levels", ctx.message.author) is False:
             await ctx.send("Error finding your profile.")
             return
-        if self.forbiddencheck(str(desc)) >= 1:
-            return await ctx.send("**Text has forbidden characters.**")
         if len(desc) > 500:
             await ctx.send(getlang(lang)["eco"]["set_desc"]["over_limit"])
             return
         else:
             try:
-                await self.execute(f"UPDATE levels SET info = \"{desc}\" WHERE userid = {ctx.message.author.id}", commit=True)
+                async with self.bot.sql_conn.acquire() as conn:
+                    async with conn.cursor() as db:
+                        await db.execute("UPDATE levels SET info = %s WHERE userid = %s", (desc, ctx.author.id,))
                 await ctx.send(getlang(lang)["eco"]["set_desc"]["updated"])
             except:
                 await ctx.send(getlang(lang)["eco"]["set_desc"]["failed"])
