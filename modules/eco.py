@@ -363,7 +363,7 @@ class economy:
         if amount <= 0:
             await ctx.send(getlang(lang)["eco"]["coinflip"]["too_low"])
             return
-        elif amount > 10000:
+        elif amount > 100000:
             await ctx.send(getlang(lang)["eco"]["coinflip"]["too_high"])
             return
         if not await self.has_account(user):
