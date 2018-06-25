@@ -7,6 +7,7 @@ venv/
 config.py
 /config.py
 
+transactions.json
 .idea/
 .vscode
 *.sql
