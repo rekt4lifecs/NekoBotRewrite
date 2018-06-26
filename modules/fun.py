@@ -72,10 +72,11 @@ class Fun:
                 return values
 
     @commands.command()
+    @commands.guild_only()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def catgirlmeme(self, ctx):
         """Everything is a dollar not spent on genetically engendering catgirls for domestic ownership"""
-        if await ctx.channel.is_nsfw():
+        if ctx.channel.is_nsfw():
             async with aiohttp.ClientSession() as cs:
                 async with cs.get("https://nekos.life/api/v2/img/gecg") as r:
                     res = await r.json()
