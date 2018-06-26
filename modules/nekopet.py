@@ -249,7 +249,7 @@ class NekoPet:
     async def on_message(self, message):
         if message.author.bot:
             return
-        if random.randint(1, 60) == 1:
+        if random.randint(1, 125) == 1:
             if await self.check(message.author.id):
                 data = await self.execute(f"SELECT food, play FROM nekopet WHERE userid = {message.author.id}",
                                           isSelect=True)

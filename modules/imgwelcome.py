@@ -139,8 +139,6 @@ class IMGWelcome:
             async with cs.get(member.avatar_url_as(format="png")) as r:
                 imgdata = await r.read()
 
-        global welcome_picture
-        welcome_picture = Image.new("RGBA", (500, 150))
         welcome_picture = ImageOps.fit(background, (500, 150), centering=(0.5, 0.5))
         welcome_picture.paste(background)
         welcome_picture = welcome_picture.resize((500, 150), Image.NEAREST)

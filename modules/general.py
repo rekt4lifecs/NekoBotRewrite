@@ -123,6 +123,8 @@ class General:
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def keygen(self, ctx, length:int=64):
+        if length >= 1500:
+            length = 1500
         await ctx.send(''.join(random.choice(string.digits + string.ascii_letters) for _ in range(length)))
 
     @commands.command()
@@ -165,33 +167,8 @@ class General:
 
         return fmt.format(d=days, h=hours, m=minutes, s=seconds)
 
-    async def on_member_update(self, before, after):
-        if before.bot:
-            return
-        if before.activity == after.activity:
-            return
-        if after.activity:
-            self.bot.games[str(after.activity.name)] += 1
-        if before.activity:
-            self.bot.games[str(before.activity.name)] -= 1
-
-    @commands.command()
-    @commands.cooldown(1, 3, commands.BucketType.user)
-    async def topgames(self, ctx):
-        """Get top games played."""
-        em = discord.Embed(color=0xDEADBF)
-        games = self.bot.games.most_common(10)
-
-        table = PrettyTable()
-        table.field_names = ["Game Name", "Players"]
-
-        for game in games:
-            table.add_row([game[0], game[1]])
-        em.title = "Top Games Played"
-        em.description = f"```\n{table}```"
-        await ctx.send(embed=em)
-
     @commands.command(aliases=['version'])
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def info(self, ctx):
         """Get Bot's Info"""
         await ctx.trigger_typing()
@@ -242,6 +219,7 @@ class General:
         await ctx.send(embed=info)
 
     @commands.command(hidden=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def socketstats(self, ctx):
         delta = datetime.datetime.utcnow() - self.bot.uptime
         minutes = delta.total_seconds() / 60
@@ -250,25 +228,6 @@ class General:
         em = discord.Embed(color=0xDEADBF, title="Websocket Stats",
                            description=f'{total} socket events observed ({cpm:.2f}/minute):\n{self.bot.socket_stats}')
         await ctx.send(embed=em)
-
-    @commands.command()
-    @commands.cooldown(1, 15, commands.BucketType.user)
-    async def whois(self, ctx, userid:int):
-        """Lookup a user with a userid"""
-        user = self.bot.get_user(userid)
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
-        if user is None:
-            return await ctx.send(f"```css\n[ {getlang(lang)['general']['whois_notfound'].format(userid)}```")
-        text = f"```css\n" \
-               f"{getlang(lang)['general']['whois'].format(userid, user.name, user.id, user.discriminator, user.bot, user.created_at)}" \
-               f"```"
-        embed = discord.Embed(color=0xDEADBF, description=text)
-        embed.set_thumbnail(url=user.avatar_url)
-        await ctx.send(embed=embed)
 
     @commands.command(aliases=["emojiinfo", "emote", "emoji"])
     @commands.cooldown(1, 3, commands.BucketType.user)
@@ -966,7 +925,7 @@ class General:
         if len(prefix) >= 12:
             return await ctx.send("Your prefix is over 12 characters.")
         await self.bot.redis.set(f"{ctx.author.id}-prefix", prefix)
-        await ctx.send(f"Set your custom prefix to `{prefix}`")
+        await ctx.send(f"Set your custom prefix to `{prefix}`, you can remove it by pinging me and using delprefix.")
 
     @commands.command(aliases=["deleteprefix", "resetprefix"])
     @commands.cooldown(1, 3, commands.BucketType.user)
@@ -997,34 +956,47 @@ class General:
             other += "`imgwelcome`, "
             other += ", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Marriage"])
             embed = discord.Embed(color=0xDEADBF, title="NekoBot Help")
-            # embed.add_field(name="Audio",
-            #                 value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Audio" and not i.hidden]),
-            #                 inline=False)
-            embed.add_field(name="Donator",
-                            value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Donator" and not i.hidden]),
-                            inline=False)
-            embed.add_field(name="Economy",
-                            value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "economy" and not i.hidden]),
-                            inline=False)
-            embed.add_field(name="Fun",
-                            value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Fun" and not i.hidden]),
-                            inline=False)
-            embed.add_field(name="Games",
-                            value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Games" and not i.hidden]),
-                            inline=False)
-            embed.add_field(name="General",
-                            value=", ".join(
-                                [f"`{i.name}`" for i in self.bot.commands if i.cog_name == "General" and not i.hidden]),
-                            inline=False)
-            embed.add_field(name="Moderation",
-                            value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Moderation" and not i.hidden]),
-                            inline=False)
-            embed.add_field(name="NSFW",
-                            value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "NSFW" and not i.hidden]),
-                            inline=False)
-            embed.add_field(name="Reactions",
-                            value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Reactions" and not i.hidden]),
-                            inline=False)
+            try:
+                embed.add_field(name="Donator",
+                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Donator" and not i.hidden]),
+                                inline=False)
+            except: pass
+            try:
+                embed.add_field(name="Economy",
+                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "economy" and not i.hidden]),
+                                inline=False)
+            except: pass
+            try:
+                embed.add_field(name="Fun",
+                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Fun" and not i.hidden]),
+                                inline=False)
+            except: pass
+            try:
+                embed.add_field(name="Games",
+                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Games" and not i.hidden]),
+                                inline=False)
+            except: pass
+            try:
+                embed.add_field(name="General",
+                                value=", ".join(
+                                    [f"`{i.name}`" for i in self.bot.commands if i.cog_name == "General" and not i.hidden]),
+                                inline=False)
+            except: pass
+            try:
+                embed.add_field(name="Moderation",
+                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Moderation" and not i.hidden]),
+                                inline=False)
+            except: pass
+            try:
+                embed.add_field(name="NSFW",
+                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "NSFW" and not i.hidden]),
+                                inline=False)
+            except: pass
+            try:
+                embed.add_field(name="Reactions",
+                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Reactions" and not i.hidden]),
+                                inline=False)
+            except: pass
             embed.add_field(name="Other", value=other, inline=False)
             await ctx.send(embed=embed)
         except discord.HTTPException:
