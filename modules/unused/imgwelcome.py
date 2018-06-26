@@ -14,27 +14,28 @@ class IMGWelcome:
     def __init__(self, bot):
         self.bot = bot
 
-    def forbiddencheck(self, text:str):
-        characters = string.ascii_letters + string.digits + " "
-        forbidden_char = 0
-        for letter in text:
-            if letter not in characters:
-                forbidden_char += 1
-        return forbidden_char
+    # async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+    #     async with self.bot.sql_conn.acquire() as conn:
+    #         async with conn.cursor() as db:
+    #             await db.execute(query)
+    #             if isSelect:
+    #                 if fetchAll:
+    #                     values = await db.fetchall()
+    #                 else:
+    #                     values = await db.fetchone()
+    #             if commit:
+    #                 await conn.commit()
+    #         if isSelect:
+    #             return values
 
-    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
+    async def imgwelcome_exists(self, guild:discord.Guild):
+        guild = guild.id
         async with self.bot.sql_conn.acquire() as conn:
             async with conn.cursor() as db:
-                await db.execute(query)
-                if isSelect:
-                    if fetchAll:
-                        values = await db.fetchall()
-                    else:
-                        values = await db.fetchone()
-                if commit:
-                    await conn.commit()
-            if isSelect:
-                return values
+                if await db.execute("SELECT 1 FROM imgwelcome WHERE server = %s", (guild,)):
+                    return True
+                else:
+                    return False
 
     @commands.command()
     @checks.is_admin()
@@ -47,24 +48,27 @@ class IMGWelcome:
                                                    "Step 4: Profit?!\n\n"
                                                    "To remove the welcomer use `n!imgdelete`.")
         await ctx.send(embed=embed)
-        if not await self.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id),
-                                  isSelect=True):
-            username = "0 1"
-            username.find("0")
-            await self.execute(f"INSERT IGNORE INTO imgwelcome VALUES ({ctx.message.guild.id}, \"Welcome user to server!!!\", \"NONE\", \"arial.ttf\", \"NONE\")", commit=True)
-            log.info(f"Added {ctx.message.guild.name} ({ctx.message.guild.id})")
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                if not await db.execute("SELECT 1 FROM imgwelcome WHERE server = %s", (ctx.guild.id,)):
+                    username = "0 1"
+                    username.find("0")
+                    await db.execute("INSERT IGNORE INTO imgwelcome VALUES (%s, %s, %s, %s, %s)", (ctx.guild.id,
+                                                                                                    "Welcome user to server!!!",
+                                                                                                    "NONE", "arial.ttf", "NONE",))
+                    log.info(f"Added {ctx.message.guild.name} ({ctx.message.guild.id})")
 
     @commands.command()
     @checks.is_admin()
     async def imgchannel(self, ctx, channel : discord.TextChannel):
         """Select a IMG Welcoming text channel"""
-        if not await self.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id),
-                                  isSelect=True):
+        if not await self.imgwelcome_exists(ctx.guild):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
         else:
-            await self.execute(f"UPDATE imgwelcome SET channel = \"{channel.id}\" WHERE server = {ctx.message.guild.id}",
-                               commit=True)
+            async with self.bot.sql_conn.acquire() as conn:
+                async with conn.cursor() as db:
+                    await db.execute("UPDATE imgwelcome SET channel = %s WHERE server = %s", (channel.id, ctx.guild.id,))
             await ctx.send(f"Updated imgwelcome to {channel.name}")
             log.info(f"UPDATED {ctx.message.guild.name} ({ctx.message.guild.id}) - Channel to {channel.name} ({channel.id})")
 
@@ -72,12 +76,13 @@ class IMGWelcome:
     @checks.is_admin()
     async def imgdelete(self, ctx):
         """Remove imgwelcomer from the server."""
-        if not await self.execute('SELECT 1 FROM imgwelcome WHERE server = {}'.format(ctx.message.guild.id),
-                                  isSelect=True):
+        if not await self.imgwelcome_exists(ctx.guild):
             await ctx.send("Use `imgwelcome` to initialize.")
             return
         else:
-            await self.execute(f"DELETE FROM imgwelcome WHERE server = {ctx.message.guild.id}", commit=True)
+            async with self.bot.sql_conn.acquire() as conn:
+                async with conn.cursor() as db:
+                    await db.execute("DELETE FROM imgwelcome WHERE server = %s", (ctx.guild.id,))
             await ctx.send(f"Removed imgwelcome!")
 
     @commands.command()

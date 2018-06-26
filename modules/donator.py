@@ -22,20 +22,6 @@ class Donator:
     def __init__(self, bot):
         self.bot = bot
 
-    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        async with self.bot.sql_conn.acquire() as conn:
-            async with conn.cursor() as db:
-                await db.execute(query)
-                if isSelect:
-                    if fetchAll:
-                        values = await db.fetchall()
-                    else:
-                        values = await db.fetchone()
-                if commit:
-                    await conn.commit()
-            if isSelect:
-                return values
-
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
 
@@ -60,7 +46,10 @@ class Donator:
 
         author = ctx.message.author
 
-        alltokens = await self.execute(isSelect=True, fetchAll=True, query="SELECT userid FROM donator")
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("SELECT userid FROM donator")
+                alltokens = await db.fetchall()
         tokenlist = []
         for x in range(len(alltokens)):
             tokenlist.append(int(alltokens[x][0]))
@@ -91,58 +80,66 @@ class Donator:
         await ctx.send(embed=discord.Embed(color=0x8bff87, title="Token Generated", description=f"```css\n"
                                                                                                 f"[ {token} ]```"))
         timenow = int(time.time())
-        await self.execute(query=f"INSERT INTO donator VALUES (0, \"{token}\", {timenow})", commit=True)
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("INSERT INTO donator VALUES (0, %s, %s)", (token, timenow,))
 
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def redeem(self, ctx, *, key: str):
-        """Redeem your donation key"""
-        await ctx.trigger_typing()
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
-        x = await self.execute(query=f"SELECT 1 FROM donator WHERE token = \"{key}\"", isSelect=True)
-        if not x:
-            return await ctx.send(getlang(lang)["donator"]["error"]["invalid"])
-        alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
-        tokenlist = []
-        for x in range(len(alltokens)):
-            tokenlist.append(int(alltokens[x][0]))
-        if ctx.message.author.id in tokenlist:
-            return await ctx.send(getlang(lang)["donator"]["error"]["already_active"])
-        user = await self.execute(query=f"SELECT userid FROM donator WHERE token = \"{key}\"",
-                                      isSelect=True)
-        if int(user[0]) == 0:
-            await self.execute(query=f"UPDATE donator SET userid = {ctx.message.author.id} WHERE token = \"{key}\"",
-                                   commit=True)
-            async with aiohttp.ClientSession() as cs:
-                webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
-                                                   adapter=discord.AsyncWebhookAdapter(cs))
-                await webhook.send(embed=discord.Embed(color=0x8bff87,
-                                                   title="Token Accepted",
-                                                   description=f"```css\n"
-                                                               f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
-                                                               f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
-            return await ctx.send("**Token Accepted!**")
-        else:
-            async with aiohttp.ClientSession() as cs:
-                webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
-                                                   adapter=discord.AsyncWebhookAdapter(cs))
-                await webhook.send(embed=discord.Embed(color=0xff6f3f,
-                                                   title="Token Denied",
-                                                   description=f"```css\n"
-                                                               f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
-                                                               f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
-            return await ctx.send(getlang(lang)["donator"]["error"]["in_use"])
+    # Todo, rewrite this when i wakeup
+    # @commands.command()
+    # @commands.cooldown(1, 5, commands.BucketType.user)
+    # async def redeem(self, ctx, *, key: str):
+    #     """Redeem your donation key"""
+    #     await ctx.trigger_typing()
+    #
+    #     async with self.bot.sql_conn.acquire() as conn:
+    #         async with conn.cursor() as db:
+    #             if not db.execute("SELECT 1 FROM donator WHERE token = %s", (key,)):
+    #                 return await ctx.send("**Invalid Key**")
+    #             await db.execute("SELECT userid FROM donator")
+    #             alltokens = await db.fetchall()
+    #
+    #     tokenlist = []
+    #     for x in range(len(alltokens)):
+    #         tokenlist.append(int(alltokens[x][0]))
+    #     if ctx.message.author.id in tokenlist:
+    #         return await ctx.send("**That key is already active.**")
+    #     async with self.bot.sql_conn.acquire() as conn:
+    #         async with conn.cursor() as db:
+    #             await db.execute("SELECT userid FROM donator WHERE token = %s", (key,))
+    #             user = int((await db.fetchone())[0])
+    #     if user == 0:
+    #         async with self.bot.sql_conn.acquire() as conn:
+    #             async with conn.cursor() as db:
+    #                 await db.execute("UPDATE donator SET userid = %s WHERE token = %s", (ctx.author.id, key,))
+    #         async with aiohttp.ClientSession() as cs:
+    #             webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
+    #                                                adapter=discord.AsyncWebhookAdapter(cs))
+    #             await webhook.send(embed=discord.Embed(color=0x8bff87,
+    #                                                title="Token Accepted",
+    #                                                description=f"```css\n"
+    #                                                            f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
+    #                                                            f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
+    #         return await ctx.send("**Token Accepted!**")
+    #     else:
+    #         async with aiohttp.ClientSession() as cs:
+    #             webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
+    #                                                adapter=discord.AsyncWebhookAdapter(cs))
+    #             await webhook.send(embed=discord.Embed(color=0xff6f3f,
+    #                                                title="Token Denied",
+    #                                                description=f"```css\n"
+    #                                                            f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
+    #                                                            f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
+    #         return await ctx.send("That key is already in use.")
 
     @commands.command(hidden=True)
     @commands.is_owner()
     async def keys(self, ctx):
         """View all keys + expiry"""
         await ctx.trigger_typing()
-        allkeys = await self.execute("SELECT userid, token, usetime FROM donator", isSelect=True, fetchAll=True)
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("SELECT userid, token, usetime FROM donator")
+                allkeys = await db.fetchall()
         text = f"```css\n" \
                f"[      USER      ] | [    KEY     ] | [ EXPIRY DATE ]\n"
         for key in allkeys:
@@ -155,11 +152,12 @@ class Donator:
     async def delkey(self, ctx, *, key:str):
         """Delete a key"""
         await ctx.trigger_typing()
-        x = await self.execute(query=f"SELECT 1 FROM donator WHERE token = \"{key}\"", isSelect=True)
-        if not x:
-            return await ctx.send("**Invalid key**")
-        else:
-            await self.execute(query=f"DELETE FROM donator WHERE token = \"{key}\"", commit=True)
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                if not await db.execute("SELECT 1 FROM donator WHERE token = %s", (key,)):
+                    return await ctx.send("**Invalid key**")
+                else:
+                    await db.execute("DELETE FROM donator WHERE token = %s", (key,))
             await ctx.send(f"**Key `{key}` has been deleted.**")
             embed = discord.Embed(color=0xff6f3f, title="Token Deleted",
                                   description=f"```css\n"
@@ -180,13 +178,18 @@ class Donator:
             lang = lang.decode('utf8')
         else:
             lang = "english"
-        alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("SELECT userid FROM donator")
+                alltokens = await db.fetchall()
         tokenlist = []
         for x in range(len(alltokens)):
             tokenlist.append(int(alltokens[x][0]))
         if ctx.message.author.id in tokenlist:
-            user_token = await self.execute(query=f"SELECT token, usetime FROM donator WHERE userid = {ctx.message.author.id}",
-                                                isSelect=True)
+            async with self.bot.sql_conn.acquire() as conn:
+                async with conn.cursor() as db:
+                    await db.execute("SELECT token, usetime FROM donator WHERE userid = %s", (ctx.author.id,))
+                    user_token = int((await db.fetchone()[0]))
             timeconvert = datetime.datetime.fromtimestamp(int(user_token[1])).strftime('%Y-%m-%d')
             embed = discord.Embed(color=0xDEADBF, title="Key Info", description=f"Key: `XXXX-XXXX-{user_token[0][-4:]}`\n"
                                                                                 f"Expiry Date: `{timeconvert}`")
@@ -206,7 +209,10 @@ class Donator:
         else:
             lang = "english"
 
-        alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("SELECT userid FROM donator")
+                alltokens = await db.fetchall()
         tokenlist = []
         for x in range(len(alltokens)):
             tokenlist.append(int(alltokens[x][0]))
@@ -229,7 +235,10 @@ class Donator:
         else:
             lang = "english"
 
-        alltokens = await self.execute(query="SELECT userid FROM donator", isSelect=True, fetchAll=True)
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("SELECT userid FROM donator")
+                alltokens = await db.fetchall()
         tokenlist = []
         for x in range(len(alltokens)):
             tokenlist.append(int(alltokens[x][0]))
