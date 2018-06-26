@@ -653,16 +653,6 @@ class Fun:
         res = await (await self.session.get("https://nekobot.xyz/api/imagegen?type=jpeg&url=%s" % img)).json()
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
 
-    @commands.command()
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def isnowillegal(self, ctx, legal : str):
-        """Make Stuff Illegal!"""
-        legal = legal.upper()
-        url = "https://storage.googleapis.com/is-now-illegal.appspot.com/gifs/" + legal +".gif"
-        em = discord.Embed(title="{} is now Illegal!".format(legal))
-        em.set_image(url=url)
-        await ctx.send(embed=em)
-
     @commands.command(pass_context=True, no_pm=True)
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def gif(self, ctx, *keywords):
@@ -701,46 +691,11 @@ class Fun:
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def bitconnect(self, ctx):
-        videos = ["https://www.youtube.com/watch?v=d1oZ6P8ZBoM", "https://www.youtube.com/watch?v=CJe0rWOP4fE",
-                  "https://www.youtube.com/watch?v=A8M70M7tzTI", "https://www.youtube.com/watch?v=lc2-ImMRMC8",
-                  "https://www.youtube.com/watch?v=GLQAXo0xonI", "https://www.youtube.com/watch?v=9wlDhciUDD0",
-                  "https://www.youtube.com/watch?v=vhyAREaWfyU", "https://www.youtube.com/watch?v=Ii_D-Fcks_A",
-                  "https://www.youtube.com/watch?v=lsgvcCnztJ4", "https://www.youtube.com/watch?v=PDiSLXcAU3U",
-                  "https://www.youtube.com/watch?v=d4a88-IhAVw", "https://www.youtube.com/watch?v=8tOFoEP-2f4",
-                  "https://www.youtube.com/watch?v=e5nyQmaq4k4", "https://www.youtube.com/watch?v=upejO2mFqX0",
-                  "https://www.youtube.com/watch?v=aPD9Mj1OWo4", "https://www.youtube.com/watch?v=Dy7RnUOmNcQ",
-                  "https://www.youtube.com/watch?v=d4a88-IhAVw", "https://www.youtube.com/watch?v=vabXXkZjKiw",
-                  "https://www.youtube.com/watch?v=W2GKSZdPgrY", "https://www.youtube.com/watch?v=axKTFLkFzDM",
-                  "https://www.youtube.com/watch?v=FRA9FZSZKlg"]
-        await ctx.send(random.choice(videos))
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
     async def feed(self, ctx, user : discord.Member):
         if user == ctx.message.author:
             await ctx.send(f"-- {ctx.message.author.mention} eats {random.choice(food)} --")
         else:
             await ctx.send(f"-- Forces {random.choice(food)} down {user.name}'s throat --")
-
-    @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def lovecalculator(self, ctx, user1 : discord.Member, user2 : discord.Member = None):
-        """Love Calculator"""
-        if user2 == None:
-            user2 = ctx.message.author
-        rnd = random.randint(1, 20)
-        l1 = (len(user1.name))
-        l2 = (len(user2.name))
-        score = 100 - (l1 * l2) - rnd
-        if score > 40:
-            heart = "❤"
-        else:
-            heart = "💔"
-        embed = discord.Embed(color=0xDEADBF,
-                              title="Love Calculator",
-                              description=f"{user1.name} {heart} {user2.name} = {score}%")
-        await ctx.send(embed=embed)
 
     @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
@@ -781,13 +736,6 @@ class Fun:
         em.add_field(name=f"Round | {user1.name} vs {user2.name}",
                      value=f"***pew pew*** {random.choice([user1.name, user2.name])} got the first hit and won OwO")
         await ctx.send(embed=em)
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def clap(self, ctx, *, text:str):
-        """Clap meme"""
-        text = text.replace(" ", "👏")
-        await ctx.send(embed=discord.Embed(color=0xDEADBF, description=text))
 
 def setup(bot):
     bot.add_cog(Fun(bot))

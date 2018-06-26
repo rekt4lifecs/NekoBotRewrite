@@ -17,19 +17,11 @@ for l in languages:
 def getlang(la:str):
     return lang.get(la, None)
 
-with open("transactions.json") as f:
-    transaction_webhook = (ujson.load(f))["webhook"]
-
 class economy:
     """Economy"""
 
     def __init__(self, bot):
         self.bot = bot
-
-    async def post_to_transactions(self, embed:discord.Embed):
-        async with aiohttp.ClientSession() as cs:
-            webhook = discord.Webhook.from_url(transaction_webhook, adapter=discord.AsyncWebhookAdapter(cs))
-            await webhook.send(embed=embed)
 
     async def has_account(self, user:discord.Member):
         user = user.id
@@ -149,9 +141,6 @@ class economy:
         if not await self.has_account(ctx.author):
             await ctx.send(getlang(lang)["eco"]["registered"])
             await self._economy_create_account(ctx.author)
-            await self.post_to_transactions(discord.Embed(color=0xDEADBF, title="Account Made",
-                                                          description="**%s** (%s) has made an account." % (ctx.author.name,
-                                                                                                       ctx.author.id,)))
         else:
             await ctx.send(getlang(lang)["eco"]["already_registered"])
 
@@ -258,10 +247,6 @@ class economy:
                                           title=getlang(lang)["eco"]["daily_credits"],
                                           description=getlang(lang)["eco"]["daily_voter"])
                     await ctx.send(embed=embed)
-                    await self.post_to_transactions(discord.Embed(color=0xDEADBF, title="Daily Received",
-                                                                  description="**%s** (%s) has received %s credits" % (user.name,
-                                                                                                                       user.id,
-                                                                                                                       7500,)))
                 else:
                     await self.edit_balance(user, balance + 2500)
                     await self.update_payday_time(user)
@@ -269,11 +254,6 @@ class economy:
                                           title=getlang(lang)["eco"]["daily_credits"],
                                           description=getlang(lang)["eco"]["daily_normal"])
                     embed.set_footer(text=getlang(lang)["eco"]["vote_footer"])
-                    await self.post_to_transactions(discord.Embed(color=0xDEADBF, title="Daily Received",
-                                                                  description="**%s** (%s) has received %s credits" % (
-                                                                  user.name,
-                                                                  user.id,
-                                                                  2500,)))
                     await ctx.send(embed=embed)
 
     @commands.command()
@@ -388,17 +368,9 @@ class economy:
                     em.description = getlang(lang)["eco"]["coinflip"]["won"].format(user, amount * 1.5)
                     await msg.edit(embed=em, content=None)
                     await self.edit_balance(user, balance + int(amount * 1.5))
-                    await self.post_to_transactions(discord.Embed(color=0xDEADBF, title="Coinflip Win",
-                                                                  description="**%s** (%s) has recieved %s from coinflip" % (user.name,
-                                                                                                                             user.id,
-                                                                                                                             int(amount*1.5))))
                 else:
                     em = discord.Embed(color=0xFF5637, description=getlang(lang)["eco"]["coinflip"]["lost"])
                     await msg.edit(embed=em, content=None)
-                    await self.post_to_transactions(discord.Embed(color=0xDEADBF, title="Coinflip Loss",
-                                                                  description="**%s** (%s) has lost %s from coinflip" % (user.name,
-                                                                                                                         user.id,
-                                                                                                                         int(amount))))
                     try:
                         await ctx.message.add_reaction('😦')
                     except:
@@ -473,12 +445,6 @@ class economy:
                         await user.send(f"{ctx.author.name} has sent you ${amount}.")
                     except:
                         pass
-                    await self.post_to_transactions(discord.Embed(color=0xDEADBF, title="Money Transfer",
-                                                                  description="**%s** (%s) sent **%s** (%s), $%s" % (ctx.author.name,
-                                                                                                                     ctx.author.id,
-                                                                                                                     user.name,
-                                                                                                                     user.id,
-                                                                                                                     amount,)))
 
     # @commands.command(aliases=['bj'])
     # @commands.cooldown(1, 5, commands.BucketType.user)
@@ -981,13 +947,11 @@ class economy:
                 em.description = "You beat me!"
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
-                await self.post_to_transactions(win_embed)
                 await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
             else:
                 em.description = "I beat you >:3"
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
-                await self.post_to_transactions(lose_embed)
             return await msg.edit(embed=em)
 
         author_total = int(author_deck_n[0]) + int(author_deck_n[1]) + int(author_deck_n[2])
@@ -1004,10 +968,8 @@ class economy:
 
             if author_total > 21:
                 em.description = "You went over 21 and I won >:3"
-                await self.post_to_transactions(lose_embed)
             else:
                 em.description = "I went over 21 and you won ;w;"
-                await self.post_to_transactions(win_embed)
                 await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
 
             bot_value = f"%s %s | %s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
@@ -1047,13 +1009,11 @@ class economy:
                 em.description = "You beat me!"
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
-                await self.post_to_transactions(win_embed)
                 await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
             else:
                 em.description = "I beat you >:3"
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
-                await self.post_to_transactions(lose_embed)
             return await msg.edit(embed=em)
 
         author_total = int(author_deck_n[0]) + int(author_deck_n[1]) + int(author_deck_n[2]) + int(author_deck_n[3])
@@ -1071,10 +1031,8 @@ class economy:
 
             if author_total > 21:
                 em.description = "You went over 21 and I won >:3"
-                await self.post_to_transactions(lose_embed)
             else:
                 em.description = "I went over 21 and you won ;w;"
-                await self.post_to_transactions(win_embed)
                 await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
 
             bot_value = f"%s %s | %s %s | %s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
@@ -1115,13 +1073,11 @@ class economy:
                 em.description = "You beat me!"
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
-                await self.post_to_transactions(win_embed)
                 await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
             else:
                 em.description = "I beat you >:3"
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
-                await self.post_to_transactions(lose_embed)
             return await msg.edit(embed=em)
 
         author_total = int(author_deck_n[0]) + int(author_deck_n[1]) + int(author_deck_n[2]) + int(author_deck_n[3]) + \
@@ -1141,10 +1097,8 @@ class economy:
 
             if author_total > 21:
                 em.description = "You went over 21 and I won >:3"
-                await self.post_to_transactions(lose_embed)
             else:
                 em.description = "I went over 21 and you won ;w;"
-                await self.post_to_transactions(win_embed)
                 await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
 
             bot_value = f"%s %s | %s %s | %s %s | %s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
@@ -1163,11 +1117,9 @@ class economy:
 
         if author_total > bot_total:
             em.description = "You beat me ;w;"
-            await self.post_to_transactions(win_embed)
             await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
         else:
             em.description = "I beat you >:3"
-            await self.post_to_transactions(lose_embed)
 
         em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
         em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)

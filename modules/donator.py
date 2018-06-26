@@ -84,52 +84,51 @@ class Donator:
             async with conn.cursor() as db:
                 await db.execute("INSERT INTO donator VALUES (0, %s, %s)", (token, timenow,))
 
-    # Todo, rewrite this when i wakeup
-    # @commands.command()
-    # @commands.cooldown(1, 5, commands.BucketType.user)
-    # async def redeem(self, ctx, *, key: str):
-    #     """Redeem your donation key"""
-    #     await ctx.trigger_typing()
-    #
-    #     async with self.bot.sql_conn.acquire() as conn:
-    #         async with conn.cursor() as db:
-    #             if not db.execute("SELECT 1 FROM donator WHERE token = %s", (key,)):
-    #                 return await ctx.send("**Invalid Key**")
-    #             await db.execute("SELECT userid FROM donator")
-    #             alltokens = await db.fetchall()
-    #
-    #     tokenlist = []
-    #     for x in range(len(alltokens)):
-    #         tokenlist.append(int(alltokens[x][0]))
-    #     if ctx.message.author.id in tokenlist:
-    #         return await ctx.send("**That key is already active.**")
-    #     async with self.bot.sql_conn.acquire() as conn:
-    #         async with conn.cursor() as db:
-    #             await db.execute("SELECT userid FROM donator WHERE token = %s", (key,))
-    #             user = int((await db.fetchone())[0])
-    #     if user == 0:
-    #         async with self.bot.sql_conn.acquire() as conn:
-    #             async with conn.cursor() as db:
-    #                 await db.execute("UPDATE donator SET userid = %s WHERE token = %s", (ctx.author.id, key,))
-    #         async with aiohttp.ClientSession() as cs:
-    #             webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
-    #                                                adapter=discord.AsyncWebhookAdapter(cs))
-    #             await webhook.send(embed=discord.Embed(color=0x8bff87,
-    #                                                title="Token Accepted",
-    #                                                description=f"```css\n"
-    #                                                            f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
-    #                                                            f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
-    #         return await ctx.send("**Token Accepted!**")
-    #     else:
-    #         async with aiohttp.ClientSession() as cs:
-    #             webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
-    #                                                adapter=discord.AsyncWebhookAdapter(cs))
-    #             await webhook.send(embed=discord.Embed(color=0xff6f3f,
-    #                                                title="Token Denied",
-    #                                                description=f"```css\n"
-    #                                                            f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
-    #                                                            f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
-    #         return await ctx.send("That key is already in use.")
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def redeem(self, ctx, *, key: str):
+        """Redeem your donation key"""
+        await ctx.trigger_typing()
+
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                if not await db.execute("SELECT 1 FROM donator WHERE token = %s", (key,)):
+                    return await ctx.send("**Invalid Key**")
+                await db.execute("SELECT userid FROM donator")
+                alltokens = await db.fetchall()
+
+        tokenlist = []
+        for x in range(len(alltokens)):
+            tokenlist.append(int(alltokens[x][0]))
+        if ctx.message.author.id in tokenlist:
+            return await ctx.send("**That key is already active.**")
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("SELECT userid FROM donator WHERE token = %s", (key,))
+                user = int((await db.fetchone())[0])
+        if user == 0:
+            async with self.bot.sql_conn.acquire() as conn:
+                async with conn.cursor() as db:
+                    await db.execute("UPDATE donator SET userid = %s WHERE token = %s", (ctx.author.id, key,))
+            async with aiohttp.ClientSession() as cs:
+                webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
+                                                   adapter=discord.AsyncWebhookAdapter(cs))
+                await webhook.send(embed=discord.Embed(color=0x8bff87,
+                                                   title="Token Accepted",
+                                                   description=f"```css\n"
+                                                               f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
+                                                               f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
+            return await ctx.send("**Token Accepted!**")
+        else:
+            async with aiohttp.ClientSession() as cs:
+                webhook = discord.Webhook.from_url(f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
+                                                   adapter=discord.AsyncWebhookAdapter(cs))
+                await webhook.send(embed=discord.Embed(color=0xff6f3f,
+                                                   title="Token Denied",
+                                                   description=f"```css\n"
+                                                               f"User: {ctx.message.author.name} ({ctx.message.author.id})\n"
+                                                               f"Key: [ {key} ]```").set_thumbnail(url=ctx.message.author.avatar_url))
+            return await ctx.send("That key is already in use.")
 
     @commands.command(hidden=True)
     @commands.is_owner()
