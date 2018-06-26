@@ -480,70 +480,394 @@ class economy:
                                                                                                                      user.id,
                                                                                                                      amount,)))
 
-    @commands.command(aliases=['bj'])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def blackjack(self, ctx, betting_amount: int):
-        if not await self.has_level_account(ctx.author):
-            await self._levels_create_account(ctx.author)
-        cards = {
-            "2C": "<:2C:424587135463456778>",
-            "2D": "<:2D:424587135383764993>",
-            "2H": "<:2H:424587135346147329>",
-            "2S": "<:2S:424587135341821954>",
-            "3C": "<:3C:424587163737522176>",
-            "3D": "<:3D:424587162437156874>",
-            "3H": "<:3H:424587162579763202>",
-            "3S": "<:3S:424587163745779712>",
-            "4C": "<:4C:424587171232743425>",
-            "4D": "<:4D:424587163737391104>",
-            "4H": "<:4H:424587169865138176>",
-            "4S": "<:4S:424587170028978186>",
-            "5C": "<:5C:424587178933223425>",
-            "5D": "<:5D:424587173111529482>",
-            "5H": "<:5H:424587174348980225>",
-            "5S": "<:5S:424587172994088970>",
-            "6C": "<:6C:424587180938231808>",
-            "6D": "<:6D:424587177717137419>",
-            "6H": "<:6H:424587178392158208>",
-            "6S": "<:6S:424587177360621586>",
-            "7C": "<:7C:424587184650059779>",
-            "7D": "<:7D:424587179134681090>",
-            "7H": "<:7H:424587179109515266>",
-            "7S": "<:7S:424587177565880331>",
-            "8C": "<:8C:424587186160271400>",
-            "8D": "<:8D:424587181970161667>",
-            "8H": "<:8H:424587182377009152>",
-            "8S": "<:8S:424587182330871808>",
-            "9C": "<:9C:424587184717168640>",
-            "9D": "<:9D:424587183035252757>",
-            "9H": "<:9H:424587181978419221>",
-            "9S": "<:9S:424587182146191362>",
-            "10C": "<:10C:424587186055151617>",
-            "10D": "<:10D:424587182234140672>",
-            "10H": "<:10H:424587182360100874>",
-            "10S": "<:10S:424587182070693889>",
-            "AC": "<:AC:424587167864717313>",
-            "AD": "<:AD:424587167965118465>",
-            "AH": "<:AH:424587168183222272>",
-            "AS": "<:AS:424587182297317376>",
-            "KC": "<:KC:424587233182351362>",
-            "KD": "<:KD:424587236651171840>",
-            "KH": "<:KH:424587237968314370>",
-            "KS": "<:KS:424587238068715541>",
-            "QC": "<:QC:424587235715973130>",
-            "QD": "<:QD:424587237943148555>",
-            "QH": "<:QH:424587080824389653>",
-            "QS": "<:QS:424587085538787348>",
-            "JC": "<:JC:424587235673767966>",
-            "JD": "<:JD:424587237590827018>",
-            "JH": "<:JH:424587239419281431>",
-            "JS": "<:JS:424587238308052992>",
-        }
-        lst = []
-        for card in cards:
-            lst.append(card)
+    # @commands.command(aliases=['bj'])
+    # @commands.cooldown(1, 5, commands.BucketType.user)
+    # async def blackjack(self, ctx, betting_amount: int):
+    #     if not await self.has_level_account(ctx.author):
+    #         await self._levels_create_account(ctx.author)
+    #     cards = {
+    #         "2C": "<:2C:424587135463456778>",
+    #         "2D": "<:2D:424587135383764993>",
+    #         "2H": "<:2H:424587135346147329>",
+    #         "2S": "<:2S:424587135341821954>",
+    #         "3C": "<:3C:424587163737522176>",
+    #         "3D": "<:3D:424587162437156874>",
+    #         "3H": "<:3H:424587162579763202>",
+    #         "3S": "<:3S:424587163745779712>",
+    #         "4C": "<:4C:424587171232743425>",
+    #         "4D": "<:4D:424587163737391104>",
+    #         "4H": "<:4H:424587169865138176>",
+    #         "4S": "<:4S:424587170028978186>",
+    #         "5C": "<:5C:424587178933223425>",
+    #         "5D": "<:5D:424587173111529482>",
+    #         "5H": "<:5H:424587174348980225>",
+    #         "5S": "<:5S:424587172994088970>",
+    #         "6C": "<:6C:424587180938231808>",
+    #         "6D": "<:6D:424587177717137419>",
+    #         "6H": "<:6H:424587178392158208>",
+    #         "6S": "<:6S:424587177360621586>",
+    #         "7C": "<:7C:424587184650059779>",
+    #         "7D": "<:7D:424587179134681090>",
+    #         "7H": "<:7H:424587179109515266>",
+    #         "7S": "<:7S:424587177565880331>",
+    #         "8C": "<:8C:424587186160271400>",
+    #         "8D": "<:8D:424587181970161667>",
+    #         "8H": "<:8H:424587182377009152>",
+    #         "8S": "<:8S:424587182330871808>",
+    #         "9C": "<:9C:424587184717168640>",
+    #         "9D": "<:9D:424587183035252757>",
+    #         "9H": "<:9H:424587181978419221>",
+    #         "9S": "<:9S:424587182146191362>",
+    #         "10C": "<:10C:424587186055151617>",
+    #         "10D": "<:10D:424587182234140672>",
+    #         "10H": "<:10H:424587182360100874>",
+    #         "10S": "<:10S:424587182070693889>",
+    #         "AC": "<:AC:424587167864717313>",
+    #         "AD": "<:AD:424587167965118465>",
+    #         "AH": "<:AH:424587168183222272>",
+    #         "AS": "<:AS:424587182297317376>",
+    #         "KC": "<:KC:424587233182351362>",
+    #         "KD": "<:KD:424587236651171840>",
+    #         "KH": "<:KH:424587237968314370>",
+    #         "KS": "<:KS:424587238068715541>",
+    #         "QC": "<:QC:424587235715973130>",
+    #         "QD": "<:QD:424587237943148555>",
+    #         "QH": "<:QH:424587080824389653>",
+    #         "QS": "<:QS:424587085538787348>",
+    #         "JC": "<:JC:424587235673767966>",
+    #         "JD": "<:JD:424587237590827018>",
+    #         "JH": "<:JH:424587239419281431>",
+    #         "JS": "<:JS:424587238308052992>",
+    #     }
+    #     lst = []
+    #     for card in cards:
+    #         lst.append(card)
+    #
+    #     author = ctx.message.author
+    #
+    #     if not await self.has_account(ctx.author):
+    #         await ctx.send("You don't have a bank account...")
+    #         return
+    #
+    #     author_balance = await self.get_balance(ctx.author)
+    #
+    #     if betting_amount <= 0:
+    #         await ctx.send("You can't bet that low...")
+    #         return
+    #     if (author_balance - betting_amount) < 0:
+    #         await ctx.send("You don't have that much to bet...")
+    #         return
+    #     if betting_amount > 50000:
+    #         await ctx.send("You can't bet past 50k")
+    #         return
+    #
+    #     win_embed = discord.Embed(color=0xDEADBF)
+    #     win_embed.title = "Blackjack Win"
+    #     win_embed.description = "**%s** (%s) has won %s" % (ctx.author.name, ctx.author.id, int(betting_amount * 1.5))
+    #
+    #     lose_embed = discord.Embed(color=0xDEADBF)
+    #     lose_embed.title = "Blackjack Lose"
+    #     lose_embed.description = "**%s** (%s) has lost %s" % (ctx.author.name, ctx.author.id, int(betting_amount))
+    #
+    #     # Take users moneylol
+    #     await self.edit_balance(ctx.author, author_balance - betting_amount)
+    #
+    #     # Get New Author Balance
+    #     author_balance = await self.get_balance(ctx.author)
+    #
+    #     card_choice1 = cards[random.choice(lst)]
+    #     card_choice2 = cards[random.choice(lst)]
+    #
+    #     bot_choice1 = cards[random.choice(lst)]
+    #     bot_choice2 = cards[random.choice(lst)]
+    #
+    #     amount1 = card_choice1[2]
+    #     amount2 = card_choice2[2]
+    #     amount3 = bot_choice1[2]
+    #     amount4 = bot_choice2[2]
+    #
+    #     if amount1 is "Q" or amount1 is "K" or amount1 is "J":
+    #         amount1 = 10
+    #     if amount2 is "Q" or amount2 is "K" or amount2 is "J":
+    #         amount2 = 10
+    #     if amount3 is "Q" or amount3 is "K" or amount3 is "J":
+    #         amount3 = 10
+    #     if amount4 is "Q" or amount4 is "K" or amount4 is "J":
+    #         amount4 = 10
+    #
+    #     if amount1 is "A":
+    #         amount1 = 11
+    #     if amount2 is "A":
+    #         amount2 = 11
+    #     if amount3 is "A":
+    #         amount3 = 11
+    #     if amount4 is "A":
+    #         amount4 = 11
+    #
+    #     e = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` to hit or wait 7s to end")
+    #     e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2)}", value=f"{amount1}{card_choice1}| {amount2}{card_choice2}", inline=True)
+    #     e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ?", inline=True)
+    #
+    #     msg = await ctx.send(embed=e)
+    #
+    #     def check(m):
+    #         return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
+    #
+    #     try:
+    #         await self.bot.wait_for('message', check=check, timeout=7.5)
+    #     except:
+    #         if (int(amount1) + int(amount2)) > (int(amount3) + int(amount4)):
+    #             winner = author.name
+    #             color = 0xDEADBF
+    #             await self.post_to_transactions(win_embed)
+    #             await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+    #         else:
+    #             winner = self.bot.user.name
+    #             await self.post_to_transactions(lose_embed)
+    #             color = 0xff5630
+    #         await msg.edit(embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
+    #         await self.post_to_transactions(win_embed)
+    #         return
+    #
+    #     # 2nd screen #
+    #
+    #     card_choice3 = cards[random.choice(lst)]
+    #
+    #     bot_choice3 = cards[random.choice(lst)]
+    #
+    #     amount5 = card_choice3[2]
+    #     amount6 = bot_choice3[2]
+    #
+    #     if amount5 is "Q" or amount5 is "K" or amount5 is "J":
+    #         amount5 = 10
+    #     if amount6 is "Q" or amount6 is "K" or amount6 is "J":
+    #         amount6 = 10
+    #
+    #     if amount5 is "A":
+    #         amount5 = 11
+    #     if amount6 is "A":
+    #         amount6 = 11
+    #
+    #     if (int(amount1) + int(amount2) + int(amount5)) > 21:
+    #         e = discord.Embed(color=0xff5630, title="Blackjack", description=f"{author.name} went over 21 and {self.bot.user.name} won!")
+    #         e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
+    #                     value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}",
+    #                     inline=True)
+    #         e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
+    #                     value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount5}{bot_choice3}",
+    #                     inline=True)
+    #         await self.post_to_transactions(lose_embed)
+    #         await msg.edit(embed=e)
+    #         return
+    #     elif (int(amount3) + int(amount4) + int(amount6)) > 21:
+    #         await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+    #         e = discord.Embed(color=0xff5630, title="Blackjack",
+    #                           description=f"{self.bot.user.name} went over 21 and {author.name} won!")
+    #         e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
+    #                     value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}",
+    #                     inline=True)
+    #         e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
+    #                     value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount6}{bot_choice3}",
+    #                     inline=True)
+    #         await self.post_to_transactions(win_embed)
+    #         await msg.edit(embed=e)
+    #         return
+    #
+    #     e = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` to hit or wait 7s to end")
+    #     e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
+    #                 value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}|{card_choice3}", inline=True)
+    #     e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ? | ?", inline=True)
+    #
+    #     msg = await ctx.send(embed=e)
+    #
+    #     def check(m):
+    #         return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
+    #
+    #     try:
+    #         await self.bot.wait_for('message', check=check, timeout=7.5)
+    #     except:
+    #         if (int(amount1) + int(amount2) + int(amount5)) > (int(amount3) + int(amount4) + int(amount6)):
+    #             winner = author.name
+    #             color = 0xDEADBF
+    #             await self.post_to_transactions(win_embed)
+    #             await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+    #         else:
+    #             winner = self.bot.user.name
+    #             await self.post_to_transactions(lose_embed)
+    #             color = 0xff5630
+    #         await msg.edit(
+    #             embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
+    #         return
+    #
+    #     # 3rd screen #
+    #
+    #     card_choice4 = cards[random.choice(lst)]
+    #
+    #     bot_choice4 = cards[random.choice(lst)]
+    #
+    #     amount7 = card_choice3[2]
+    #     amount8 = bot_choice3[2]
+    #
+    #     if amount7 is "Q" or amount7 is "K" or amount7 is "J":
+    #         amount7 = 10
+    #     if amount8 is "Q" or amount8 is "K" or amount8 is "J":
+    #         amount8 = 10
+    #
+    #     if amount7 is "A":
+    #         amount7 = 11
+    #     if amount8 is "A":
+    #         amount8 = 11
+    #
+    #     if (int(amount1) + int(amount2) + int(amount5) + int(amount7)) > 21:
+    #         e = discord.Embed(color=0xff5630, title="Blackjack",
+    #                           description=f"{author.name} went over 21 and {self.bot.user.name} won!")
+    #         e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
+    #                     value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}",
+    #                     inline=True)
+    #         e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
+    #                     value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount5}{bot_choice3}",
+    #                     inline=True)
+    #         await self.post_to_transactions(lose_embed)
+    #         await msg.edit(embed=e)
+    #         return
+    #     elif (int(amount3) + int(amount4) + int(amount6) + int(amount8)) > 21:
+    #         await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+    #         e = discord.Embed(color=0xff5630, title="Blackjack",
+    #                           description=f"{self.bot.user.name} went over 21 and {author.name} won!")
+    #         e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
+    #                     value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}| {amount7}{card_choice4}",
+    #                     inline=True)
+    #         e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
+    #                     value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount6}{bot_choice3}| {amount8}{bot_choice4}",
+    #                     inline=True)
+    #         await self.post_to_transactions(win_embed)
+    #         await msg.edit(embed=e)
+    #         return
+    #
+    #     e = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` to hit or wait 7s to end")
+    #     e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount7)}",
+    #                 value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}|{card_choice3}| {amount7}{card_choice4}", inline=True)
+    #     e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ? | ? | ?", inline=True)
+    #
+    #     msg = await ctx.send(embed=e)
+    #
+    #     def check(m):
+    #         return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
+    #
+    #     try:
+    #         await self.bot.wait_for('message', check=check, timeout=7.5)
+    #     except:
+    #         if (int(amount1) + int(amount2) + int(amount5) + int(amount7)) > (int(amount3) + int(amount4) + int(amount6) + int(amount8)):
+    #             winner = author.name
+    #             color = 0xDEADBF
+    #             await self.post_to_transactions(win_embed)
+    #             await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+    #         else:
+    #             winner = self.bot.user.name
+    #             await self.post_to_transactions(lose_embed)
+    #             color = 0xff5630
+    #         await msg.edit(
+    #             embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
+    #         return
+    #
+    #     # 3rd screen #
+    #
+    #     card_choice5 = cards[random.choice(lst)]
+    #
+    #     bot_choice5 = cards[random.choice(lst)]
+    #
+    #     amount9 = card_choice3[2]
+    #     amount10 = bot_choice3[2]
+    #
+    #     if amount9 is "Q" or amount9 is "K" or amount9 is "J":
+    #         amount9 = 10
+    #     if amount10 is "Q" or amount10 is "K" or amount10 is "J":
+    #         amount10 = 10
+    #
+    #     if amount9 is "A":
+    #         amount9 = 11
+    #     if amount10 is "A":
+    #         amount10 = 11
+    #
+    #     if (int(amount1) + int(amount2) + int(amount5) + int(amount9) + int(amount7)) > 21:
+    #         e = discord.Embed(color=0xff5630, title="Blackjack",
+    #                           description=f"{author.name} went over 21 and {self.bot.user.name} won!")
+    #         e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount7)}",
+    #                     value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}| {amount7}{card_choice5}",
+    #                     inline=True)
+    #         e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)}",
+    #                     value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount5}{bot_choice3}| {amount10}{bot_choice3}",
+    #                     inline=True)
+    #         await self.post_to_transactions(lose_embed)
+    #         await msg.edit(embed=e)
+    #         return
+    #     elif (int(amount3) + int(amount4) + int(amount6) + int(amount10) + int(amount8)) > 21:
+    #         await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+    #         e = discord.Embed(color=0xff5630, title="Blackjack",
+    #                           description=f"{self.bot.user.name} went over 21 and {author.name} won!")
+    #         e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)}",
+    #                     value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}| {amount9}{card_choice5}| {amount7}|{card_choice4}",
+    #                     inline=True)
+    #         e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
+    #                     value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount6}{bot_choice3}| {amount10}{bot_choice5}| {amount8}{bot_choice4}",
+    #                     inline=True)
+    #         await self.post_to_transactions(win_embed)
+    #         await msg.edit(embed=e)
+    #         return
+    #
+    #     e = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` to hit or wait 7s to end")
+    #     e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount9) + int(amount7)}",
+    #                 value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}|{card_choice3}| {amount7}{card_choice4}| {amount9}{card_choice5}", inline=True)
+    #     e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ? | ? | ? | ?", inline=True)
+    #
+    #     msg = await ctx.send(embed=e)
+    #
+    #     def check(m):
+    #         return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
+    #
+    #     try:
+    #         await self.bot.wait_for('message', check=check, timeout=7.5)
+    #     except:
+    #         if (int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)) > (int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)):
+    #             winner = author.name
+    #             await self.post_to_transactions(win_embed)
+    #             color = 0xDEADBF
+    #             await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+    #         else:
+    #             winner = self.bot.user.name
+    #             await self.post_to_transactions(lose_embed)
+    #             color = 0xff5630
+    #         await msg.edit(
+    #             embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
+    #         return
+    #
+    #     if (int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)) > (
+    #             int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)):
+    #         winner = author.name
+    #         await self.post_to_transactions(win_embed)
+    #         color = 0xDEADBF
+    #         await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+    #     else:
+    #         winner = self.bot.user.name
+    #         await self.post_to_transactions(lose_embed)
+    #         color = 0xff5630
+    #     await msg.edit(
+    #         embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
 
-        author = ctx.message.author
+    async def delmsg(self, msg:discord.Message):
+        try:
+            await msg.delete()
+        except:
+            pass
+
+    @commands.command(aliases=['bj'])
+    @commands.guild_only()
+    async def blackjack(self, ctx, amount:int):
+        """Blackjack"""
+        author = ctx.author
+
+        if not await self.has_level_account(author):
+            await self._levels_create_account(author)
 
         if not await self.has_account(ctx.author):
             await ctx.send("You don't have a bank account...")
@@ -551,308 +875,303 @@ class economy:
 
         author_balance = await self.get_balance(ctx.author)
 
-        if betting_amount <= 0:
+        if amount <= 0:
             await ctx.send("You can't bet that low...")
             return
-        if (author_balance - betting_amount) < 0:
+        if (author_balance - amount) < 0:
             await ctx.send("You don't have that much to bet...")
             return
-        if betting_amount > 50000:
+        if amount > 50000:
             await ctx.send("You can't bet past 50k")
             return
 
+        await self.edit_balance(ctx.author, author_balance - amount)
+
+        card_list = {
+            "2": "<:2C:424587135463456778>",
+            "3": "<:3C:424587163737522176>",
+            "4": "<:4C:424587171232743425>",
+            "5": "<:5C:424587178933223425>",
+            "6": "<:6C:424587180938231808>",
+            "7": "<:7C:424587184650059779>",
+            "8": "<:8C:424587186160271400>",
+            "9": "<:9C:424587184717168640>",
+            "10": "<:10C:424587186055151617>",
+            "11": "<:AC:424587167864717313>",
+            "K": "<:KC:424587233182351362>",
+            "Q": "<:QC:424587235715973130>",
+            "J": "<:JC:424587235673767966>"
+        }
+        special = ["K", "Q", "J"]
+
+        cards = [card for card in card_list]
+
+        author_deck = []
+        bot_deck = []
+        author_deck_n = []
+        bot_deck_n = []
+
+        while True:
+            card = random.choice(cards)
+            if card not in author_deck:
+                author_deck.append(card)
+                if card in special:
+                    card = 10
+                author_deck_n.append(card)
+            if len(author_deck) == 5:
+                break
+
+        while True:
+            card = random.choice(cards)
+            if card not in bot_deck:
+                bot_deck.append(card)
+                if card in special:
+                    card = 10
+                bot_deck_n.append(card)
+            if len(bot_deck) == 5:
+                break
+
         win_embed = discord.Embed(color=0xDEADBF)
         win_embed.title = "Blackjack Win"
-        win_embed.description = "**%s** (%s) has won %s" % (ctx.author.name, ctx.author.id, int(betting_amount * 1.5))
+        win_embed.description = "**%s** (%s) has won %s" % (ctx.author.name, ctx.author.id, int(amount * 1.5))
 
         lose_embed = discord.Embed(color=0xDEADBF)
         lose_embed.title = "Blackjack Lose"
-        lose_embed.description = "**%s** (%s) has lost %s" % (ctx.author.name, ctx.author.id, int(betting_amount * 1.5))
+        lose_embed.description = "**%s** (%s) has lost %s" % (ctx.author.name, ctx.author.id, int(amount))
 
-        # Take users moneylol
-        await self.edit_balance(ctx.author, author_balance - betting_amount)
+        em = discord.Embed(color=0xDEADBF)
+        em.title = "Blackjack"
+        em.description = "Type `hit` or `stay`."
+        author_value = f"%s %s | %s %s" % (card_list[author_deck[0]], author_deck_n[0],
+                                           card_list[author_deck[1]], author_deck_n[1],)
+        bot_value = f"%s %s | ? ?" % (card_list[bot_deck[0]], bot_deck_n[0])
+        author_total = int(author_deck_n[0]) + int(author_deck_n[1])
+        bot_total = int(bot_deck_n[0]) + int(bot_deck_n[1])
+        em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+        em.add_field(name="My Cards (?)", value=bot_value, inline=True)
 
-        # Get New Author Balance
-        author_balance = await self.get_balance(ctx.author)
-
-        card_choice1 = cards[random.choice(lst)]
-        card_choice2 = cards[random.choice(lst)]
-
-        bot_choice1 = cards[random.choice(lst)]
-        bot_choice2 = cards[random.choice(lst)]
-
-        amount1 = card_choice1[2]
-        amount2 = card_choice2[2]
-        amount3 = bot_choice1[2]
-        amount4 = bot_choice2[2]
-
-        if amount1 is "Q" or amount1 is "K" or amount1 is "J":
-            amount1 = 10
-        if amount2 is "Q" or amount2 is "K" or amount2 is "J":
-            amount2 = 10
-        if amount3 is "Q" or amount3 is "K" or amount3 is "J":
-            amount3 = 10
-        if amount4 is "Q" or amount4 is "K" or amount4 is "J":
-            amount4 = 10
-
-        if amount1 is "A":
-            amount1 = 11
-        if amount2 is "A":
-            amount2 = 11
-        if amount3 is "A":
-            amount3 = 11
-        if amount4 is "A":
-            amount4 = 11
-
-        e = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` to hit or wait 7s to end")
-        e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2)}", value=f"{amount1}{card_choice1}| {amount2}{card_choice2}", inline=True)
-        e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ?", inline=True)
-
-        msg = await ctx.send(embed=e)
+        msg = await ctx.send(embed=em)
 
         def check(m):
-            return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
+            return m.channel == ctx.message.channel and m.author == author
 
-        try:
-            await self.bot.wait_for('message', check=check, timeout=7.5)
-        except:
-            if (int(amount1) + int(amount2)) > (int(amount3) + int(amount4)):
-                winner = author.name
-                color = 0xDEADBF
-                await self.post_to_transactions(win_embed)
-                await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+        while True:
+            x = await self.bot.wait_for('message', check=check)
+
+            if str(x.content).lower() == "hit":
+                move = 0
+                break
+            elif str(x.content).lower() == "stay":
+                move = 1
+                break
             else:
-                winner = self.bot.user.name
-                await self.post_to_transactions(lose_embed)
-                color = 0xff5630
-            await msg.edit(embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
-            await self.post_to_transactions(win_embed)
-            return
+                pass
+        await self.delmsg(x)
 
-        # 2nd screen #
+        if move == 1:
+            em = discord.Embed(color=0xDEADBF)
+            em.title = "Blackjack"
 
-        card_choice3 = cards[random.choice(lst)]
+            author_value = f"%s %s | %s %s" % (card_list[author_deck[0]], author_deck_n[0],
+                                               card_list[author_deck[1]], author_deck_n[1],)
+            bot_value = f"%s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
+                                            card_list[bot_deck[1]], bot_deck_n[1])
 
-        bot_choice3 = cards[random.choice(lst)]
-
-        amount5 = card_choice3[2]
-        amount6 = bot_choice3[2]
-
-        if amount5 is "Q" or amount5 is "K" or amount5 is "J":
-            amount5 = 10
-        if amount6 is "Q" or amount6 is "K" or amount6 is "J":
-            amount6 = 10
-
-        if amount5 is "A":
-            amount5 = 11
-        if amount6 is "A":
-            amount6 = 11
-
-        if (int(amount1) + int(amount2) + int(amount5)) > 21:
-            e = discord.Embed(color=0xff5630, title="Blackjack", description=f"{author.name} went over 21 and {self.bot.user.name} won!")
-            e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
-                        value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}",
-                        inline=True)
-            e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
-                        value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount5}{bot_choice3}",
-                        inline=True)
-            await self.post_to_transactions(lose_embed)
-            await msg.edit(embed=e)
-            return
-        elif (int(amount3) + int(amount4) + int(amount6)) > 21:
-            await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
-            e = discord.Embed(color=0xff5630, title="Blackjack",
-                              description=f"{self.bot.user.name} went over 21 and {author.name} won!")
-            e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
-                        value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}",
-                        inline=True)
-            e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
-                        value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount6}{bot_choice3}",
-                        inline=True)
-            await self.post_to_transactions(win_embed)
-            await msg.edit(embed=e)
-            return
-
-        e = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` to hit or wait 7s to end")
-        e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
-                    value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}|{card_choice3}", inline=True)
-        e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ? | ?", inline=True)
-
-        msg = await ctx.send(embed=e)
-
-        def check(m):
-            return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
-
-        try:
-            await self.bot.wait_for('message', check=check, timeout=7.5)
-        except:
-            if (int(amount1) + int(amount2) + int(amount5)) > (int(amount3) + int(amount4) + int(amount6)):
-                winner = author.name
-                color = 0xDEADBF
+            if author_total > bot_total:
+                em.description = "You beat me!"
+                em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+                em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
                 await self.post_to_transactions(win_embed)
-                await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+                await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
             else:
-                winner = self.bot.user.name
+                em.description = "I beat you >:3"
+                em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+                em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
                 await self.post_to_transactions(lose_embed)
-                color = 0xff5630
-            await msg.edit(
-                embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
-            return
+            return await msg.edit(embed=em)
 
-        # 3rd screen #
+        author_total = int(author_deck_n[0]) + int(author_deck_n[1]) + int(author_deck_n[2])
+        bot_total = int(bot_deck_n[0]) + int(bot_deck_n[1]) + int(bot_deck_n[2])
 
-        card_choice4 = cards[random.choice(lst)]
+        author_value = f"%s %s | %s %s | %s %s" % (card_list[author_deck[0]], author_deck_n[0],
+                                                   card_list[author_deck[1]], author_deck_n[1],
+                                                   card_list[author_deck[2]], author_deck_n[2],)
+        bot_value = f"%s %s | ? ? | ? ?" % (card_list[bot_deck[0]], bot_deck_n[0])
 
-        bot_choice4 = cards[random.choice(lst)]
+        if author_total > 21 or bot_total > 21:
+            em = discord.Embed(color=0xDEADBF)
+            em.title = "Blackjack"
 
-        amount7 = card_choice3[2]
-        amount8 = bot_choice3[2]
-
-        if amount7 is "Q" or amount7 is "K" or amount7 is "J":
-            amount7 = 10
-        if amount8 is "Q" or amount8 is "K" or amount8 is "J":
-            amount8 = 10
-
-        if amount7 is "A":
-            amount7 = 11
-        if amount8 is "A":
-            amount8 = 11
-
-        if (int(amount1) + int(amount2) + int(amount5) + int(amount7)) > 21:
-            e = discord.Embed(color=0xff5630, title="Blackjack",
-                              description=f"{author.name} went over 21 and {self.bot.user.name} won!")
-            e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
-                        value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}",
-                        inline=True)
-            e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
-                        value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount5}{bot_choice3}",
-                        inline=True)
-            await self.post_to_transactions(lose_embed)
-            await msg.edit(embed=e)
-            return
-        elif (int(amount3) + int(amount4) + int(amount6) + int(amount8)) > 21:
-            await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
-            e = discord.Embed(color=0xff5630, title="Blackjack",
-                              description=f"{self.bot.user.name} went over 21 and {author.name} won!")
-            e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5)}",
-                        value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}| {amount7}{card_choice4}",
-                        inline=True)
-            e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
-                        value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount6}{bot_choice3}| {amount8}{bot_choice4}",
-                        inline=True)
-            await self.post_to_transactions(win_embed)
-            await msg.edit(embed=e)
-            return
-
-        e = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` to hit or wait 7s to end")
-        e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount7)}",
-                    value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}|{card_choice3}| {amount7}{card_choice4}", inline=True)
-        e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ? | ? | ?", inline=True)
-
-        msg = await ctx.send(embed=e)
-
-        def check(m):
-            return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
-
-        try:
-            await self.bot.wait_for('message', check=check, timeout=7.5)
-        except:
-            if (int(amount1) + int(amount2) + int(amount5) + int(amount7)) > (int(amount3) + int(amount4) + int(amount6) + int(amount8)):
-                winner = author.name
-                color = 0xDEADBF
+            if author_total > 21:
+                em.description = "You went over 21 and I won >:3"
+                await self.post_to_transactions(lose_embed)
+            else:
+                em.description = "I went over 21 and you won ;w;"
                 await self.post_to_transactions(win_embed)
-                await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+                await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
+
+            bot_value = f"%s %s | %s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
+                                                card_list[bot_deck[1]], bot_deck_n[1],
+                                                card_list[bot_deck[2]], bot_deck_n[2],)
+
+            em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+            em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+
+            return await msg.edit(embed=em)
+
+        em = discord.Embed(color=0xDEADBF)
+        em.title = "Blackjack"
+        em.description = "Type `hit` or `stay`."
+        em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+        em.add_field(name="My Cards (?)", value=bot_value, inline=True)
+        await msg.edit(embed=em)
+
+        while True:
+            x = await self.bot.wait_for('message', check=check)
+
+            if str(x.content).lower() == "hit":
+                move = 0
+                break
+            elif str(x.content).lower() == "stay":
+                move = 1
+                break
             else:
-                winner = self.bot.user.name
-                await self.post_to_transactions(lose_embed)
-                color = 0xff5630
-            await msg.edit(
-                embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
-            return
+                pass
+        await self.delmsg(x)
 
-        # 3rd screen #
+        if move == 1:
+            em = discord.Embed(color=0xDEADBF)
+            em.title = "Blackjack"
 
-        card_choice5 = cards[random.choice(lst)]
-
-        bot_choice5 = cards[random.choice(lst)]
-
-        amount9 = card_choice3[2]
-        amount10 = bot_choice3[2]
-
-        if amount9 is "Q" or amount9 is "K" or amount9 is "J":
-            amount9 = 10
-        if amount10 is "Q" or amount10 is "K" or amount10 is "J":
-            amount10 = 10
-
-        if amount9 is "A":
-            amount9 = 11
-        if amount10 is "A":
-            amount10 = 11
-
-        if (int(amount1) + int(amount2) + int(amount5) + int(amount9) + int(amount7)) > 21:
-            e = discord.Embed(color=0xff5630, title="Blackjack",
-                              description=f"{author.name} went over 21 and {self.bot.user.name} won!")
-            e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount7)}",
-                        value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}| {amount7}{card_choice5}",
-                        inline=True)
-            e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)}",
-                        value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount5}{bot_choice3}| {amount10}{bot_choice3}",
-                        inline=True)
-            await self.post_to_transactions(lose_embed)
-            await msg.edit(embed=e)
-            return
-        elif (int(amount3) + int(amount4) + int(amount6) + int(amount10) + int(amount8)) > 21:
-            await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
-            e = discord.Embed(color=0xff5630, title="Blackjack",
-                              description=f"{self.bot.user.name} went over 21 and {author.name} won!")
-            e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)}",
-                        value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}{card_choice3}| {amount9}{card_choice5}| {amount7}|{card_choice4}",
-                        inline=True)
-            e.add_field(name=f"{self.bot.user.name}'s Cards | {int(amount3) + int(amount4) + int(amount6)}",
-                        value=f"{amount3}{bot_choice1}| {amount4}{bot_choice2}| {amount6}{bot_choice3}| {amount10}{bot_choice5}| {amount8}{bot_choice4}",
-                        inline=True)
-            await self.post_to_transactions(win_embed)
-            await msg.edit(embed=e)
-            return
-
-        e = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` to hit or wait 7s to end")
-        e.add_field(name=f"{author.name}'s Cards | {int(amount1) + int(amount2) + int(amount5) + int(amount9) + int(amount7)}",
-                    value=f"{amount1}{card_choice1}| {amount2}{card_choice2}| {amount5}|{card_choice3}| {amount7}{card_choice4}| {amount9}{card_choice5}", inline=True)
-        e.add_field(name=f"{self.bot.user.name}'s Cards | ?", value=f"{amount3}{bot_choice1}| ? | ? | ? | ?", inline=True)
-
-        msg = await ctx.send(embed=e)
-
-        def check(m):
-            return m.content == 'hit' and m.channel == ctx.message.channel and m.author == author
-
-        try:
-            await self.bot.wait_for('message', check=check, timeout=7.5)
-        except:
-            if (int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)) > (int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)):
-                winner = author.name
+            if author_total > bot_total:
+                em.description = "You beat me!"
+                em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+                em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
                 await self.post_to_transactions(win_embed)
-                color = 0xDEADBF
-                await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+                await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
             else:
-                winner = self.bot.user.name
+                em.description = "I beat you >:3"
+                em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+                em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
                 await self.post_to_transactions(lose_embed)
-                color = 0xff5630
-            await msg.edit(
-                embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
-            return
+            return await msg.edit(embed=em)
 
-        if (int(amount1) + int(amount2) + int(amount5) + int(amount7) + int(amount9)) > (
-                int(amount3) + int(amount4) + int(amount6) + int(amount8) + int(amount10)):
-            winner = author.name
+        author_total = int(author_deck_n[0]) + int(author_deck_n[1]) + int(author_deck_n[2]) + int(author_deck_n[3])
+        bot_total = int(bot_deck_n[0]) + int(bot_deck_n[1]) + int(bot_deck_n[2]) + int(bot_deck_n[3])
+
+        author_value = f"%s %s | %s %s | %s %s | %s %s" % (card_list[author_deck[0]], author_deck_n[0],
+                                                           card_list[author_deck[1]], author_deck_n[1],
+                                                           card_list[author_deck[2]], author_deck_n[2],
+                                                           card_list[author_deck[3]], author_deck_n[3],)
+        bot_value = f"%s %s | ? ? | ? ? | ? ?" % (card_list[bot_deck[0]], bot_deck_n[0])
+
+        if author_total > 21 or bot_total > 21:
+            em = discord.Embed(color=0xDEADBF)
+            em.title = "Blackjack"
+
+            if author_total > 21:
+                em.description = "You went over 21 and I won >:3"
+                await self.post_to_transactions(lose_embed)
+            else:
+                em.description = "I went over 21 and you won ;w;"
+                await self.post_to_transactions(win_embed)
+                await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
+
+            bot_value = f"%s %s | %s %s | %s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
+                                                            card_list[bot_deck[1]], bot_deck_n[1],
+                                                            card_list[bot_deck[2]], bot_deck_n[2],
+                                                            card_list[bot_deck[3]], bot_deck_n[3],)
+
+            em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+            em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+
+            return await msg.edit(embed=em)
+
+        em = discord.Embed(color=0xDEADBF)
+        em.title = "Blackjack"
+        em.description = "Type `hit` or `stay`."
+        em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+        em.add_field(name="My Cards (?)", value=bot_value, inline=True)
+        await msg.edit(embed=em)
+
+        while True:
+            x = await self.bot.wait_for('message', check=check)
+
+            if str(x.content).lower() == "hit":
+                move = 0
+                break
+            elif str(x.content).lower() == "stay":
+                move = 1
+                break
+            else:
+                pass
+        await self.delmsg(x)
+
+        if move == 1:
+            em = discord.Embed(color=0xDEADBF)
+            em.title = "Blackjack"
+
+            if author_total > bot_total:
+                em.description = "You beat me!"
+                em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+                em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+                await self.post_to_transactions(win_embed)
+                await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
+            else:
+                em.description = "I beat you >:3"
+                em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+                em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+                await self.post_to_transactions(lose_embed)
+            return await msg.edit(embed=em)
+
+        author_total = int(author_deck_n[0]) + int(author_deck_n[1]) + int(author_deck_n[2]) + int(author_deck_n[3]) + \
+                       int(author_deck_n[4])
+        bot_total = int(bot_deck_n[0]) + int(bot_deck_n[1]) + int(bot_deck_n[2]) + int(bot_deck_n[3]) + \
+                    int(bot_deck_n[4])
+
+        author_value = f"%s %s | %s %s | %s %s | %s %s | %s %s" % (card_list[author_deck[0]], author_deck_n[0],
+                                                                   card_list[author_deck[1]], author_deck_n[1],
+                                                                   card_list[author_deck[2]], author_deck_n[2],
+                                                                   card_list[author_deck[3]], author_deck_n[3],
+                                                                   card_list[author_deck[4]], author_deck_n[4],)
+
+        if author_total > 21 or bot_total > 21:
+            em = discord.Embed(color=0xDEADBF)
+            em.title = "Blackjack"
+
+            if author_total > 21:
+                em.description = "You went over 21 and I won >:3"
+                await self.post_to_transactions(lose_embed)
+            else:
+                em.description = "I went over 21 and you won ;w;"
+                await self.post_to_transactions(win_embed)
+                await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
+
+            bot_value = f"%s %s | %s %s | %s %s | %s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
+                                                                    card_list[bot_deck[1]], bot_deck_n[1],
+                                                                    card_list[bot_deck[2]], bot_deck_n[2],
+                                                                    card_list[bot_deck[3]], bot_deck_n[3],
+                                                                    card_list[bot_deck[4]], bot_deck_n[4],)
+
+            em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+            em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+
+            return await msg.edit(embed=em)
+
+        em = discord.Embed(color=0xDEADBF)
+        em.title = "Blackjack"
+
+        if author_total > bot_total:
+            em.description = "You beat me ;w;"
             await self.post_to_transactions(win_embed)
-            color = 0xDEADBF
-            await self.edit_balance(ctx.author, author_balance + int(betting_amount * 1.5))
+            await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
         else:
-            winner = self.bot.user.name
+            em.description = "I beat you >:3"
             await self.post_to_transactions(lose_embed)
-            color = 0xff5630
-        await msg.edit(
-            embed=discord.Embed(color=color, title="Blackjack", description=f"Game ended with {winner} winning!"))
+
+        em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
+        em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+        return await msg.edit(embed=em)
 
     async def on_message(self, message):
         if random.randint(1, 30) == 1:
