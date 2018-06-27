@@ -65,10 +65,12 @@ class Marriage:
             await ctx.send(getlang(lang)["marriage"]["marry_msg"].format(author, user))
 
             def check(m):
-                return m.content == 'yes' and m.channel == ctx.message.channel and m.author == user
+                return m.channel == ctx.message.channel and m.author == user
 
             try:
-                await self.bot.wait_for('message', check=check, timeout=15.0)
+                msg = await self.bot.wait_for('message', check=check, timeout=15.0)
+                if msg.content.lower() != "yes":
+                    return await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["cancelled"]))
             except asyncio.TimeoutError:
                 await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["cancelled"]))
                 return
@@ -79,7 +81,7 @@ class Marriage:
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def divorce(self, ctx, user : discord.Member):
+    async def divorce(self, ctx):
         """Divorce ;-;"""
         author = ctx.message.author
 
@@ -89,25 +91,34 @@ class Marriage:
         else:
             lang = "english"
 
-        if user == author:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["self_divorce"]))
-            return
-
         if await self.userexists('marriage', author) is False:
             await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["not_married"]))
             return
-        elif await self.userexists('marriage', user) is False:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["user_not_married"]))
-            return
         x = await self.execute(f"SELECT marryid FROM marriage WHERE userid = {author.id}", isSelect=True)
         user_married_to = int(x[0])
-        if user_married_to != user.id:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["author_not_married_to_user"]))
-            return
+        married_to_name = self.bot.get_user(user_married_to)
+        if married_to_name:
+            married_to_name = married_to_name.name
         else:
-            await ctx.send(f"{author.name} divorced {user.name} 😦😢")
-            await self.execute(f"DELETE FROM marriage WHERE userid = {author.id}", commit=True)
-            await self.execute(f"DELETE FROM marriage WHERE userid = {user.id}", commit=True)
+            married_to_name = "Unknown user"
+
+        def check(m):
+            return m.channel == ctx.message.channel and m.author == author
+
+        await ctx.send("Are you sure you want to divorce %s?" % (married_to_name,))
+
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=15.0)
+            if msg.content.lower() != "yes":
+                return await ctx.send(
+                    embed=discord.Embed(color=0xff5630, description="Cancelled"))
+        except asyncio.TimeoutError:
+            await ctx.send(embed=discord.Embed(color=0xff5630, description="Cancelled"))
+            return
+
+        await ctx.send(f"{author.name} divorced {married_to_name} 😦😢")
+        await self.execute(f"DELETE FROM marriage WHERE userid = {author.id}", commit=True)
+        await self.execute(f"DELETE FROM marriage WHERE userid = {user_married_to}", commit=True)
 
 def setup(bot):
     bot.add_cog(Marriage(bot))
