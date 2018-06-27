@@ -91,7 +91,7 @@ class NekoPet:
                                   "**n!pet show** - Show your pet\n"
                                   "**n!pet shop** - Shop for a neko or buy items for it\n"
                                   "**n!pet feed** - Feed your neko\n"
-                                  "**n!ped train** - Train your neko to learn new tricks.")
+                                  "**n!pet train** - Train your neko to learn new tricks.")
 
     @pet.command(name="play")
     async def neko_play(self, ctx):
