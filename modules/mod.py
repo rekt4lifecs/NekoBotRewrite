@@ -167,6 +167,27 @@ class Moderation:
                                                                      hastepaste))
 
     @commands.command()
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.guild_only()
+    @checks.is_admin()
+    async def undehoist(self, ctx):
+        """Undehoist"""
+        users_undehoisted = []
+        users_failed = []
+        starttime = int(time.time())
+        await ctx.send("Starting undehoist...")
+        for user in ctx.guild.members:
+            try:
+                if not user.display_name == "Hoister":
+                    await user.edit(nick=None)
+                    users_undehoisted.append(f"{user.name}-{user.id}")
+            except:
+                users_failed.append(user.id)
+                pass
+        hastepaste = await hastebin("\n".join(users_undehoisted))
+        await ctx.send(f"{len(users_undehoisted)} users undehoisted in {int(time.time() - starttime)}s, {len(users_failed)} failed. {hastepaste}")
+
+    @commands.command()
     @commands.guild_only()
     @checks.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: ActionReason = None):
@@ -1015,15 +1036,15 @@ class Moderation:
             log.warning(e)
             pass
 
-    async def on_member_update(self, before, after):
-        try:
-            if not before.guild.id == 221989003400970241:
-                return
-            if not before.display_name == after.display_name:
-                if not after.display_name[0] in list(str(string.ascii_letters)):
-                    await after.edit(nick="Hoister", reason="Hoisting")
-        except:
-            pass
+    # async def on_member_update(self, before, after):
+    #     try:
+    #         if not before.guild.id == 221989003400970241:
+    #             return
+    #         if not before.display_name == after.display_name:
+    #             if not after.display_name[0] in list(str(string.ascii_letters)):
+    #                 await after.edit(nick="Hoister", reason="Hoisting")
+    #     except:
+    #         pass
 
     async def on_guild_remove(self, guild):
         if not guild.large:
