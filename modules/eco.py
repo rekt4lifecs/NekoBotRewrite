@@ -408,7 +408,7 @@ class economy:
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def transfer(self, ctx, amount : int, user : discord.Member):
+    async def transfer(self, ctx, user:discord.Member, amount:int,):
         """Transfer Credits to Users"""
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
@@ -442,9 +442,15 @@ class economy:
                     await ctx.send(getlang(lang)["eco"]["coinflip"]["cant_spend"])
                     return
                 else:
-                    await self.edit_balance(user, user_balance + amount)
+                    await self.edit_balance(user, user_balance + int(amount - (amount * .03)))
                     await self.edit_balance(ctx.author, author_balance - amount)
-                    await ctx.send(getlang(lang)["eco"]["transfer"]["sent"].format(amount, user))
+                    await ctx.send(getlang(lang)["eco"]["transfer"]["sent"].format(int(amount - (amount * .03)), user))
+                    async with self.bot.sql_conn.acquire() as conn:
+                        async with conn.cursor() as db:
+                            await db.execute("SELECT balance FROM economy WHERE userid = 270133511325876224")
+                            rektbal = int((await db.fetchone())[0])
+                            await db.execute("UPDATE economy SET balance = %s WHERE userid = 270133511325876224",
+                                             (rektbal + int(amount * .03),))
                     log.info("%s (%s) sent %s (%s) $%s" % (ctx.author.name, ctx.author.id,
                                                               user.name, user.id, amount,))
                     try:
