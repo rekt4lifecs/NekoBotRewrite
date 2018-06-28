@@ -104,6 +104,7 @@ class NekoBot(commands.AutoShardedBot):
                          status=discord.Status.dnd,
                          activity=discord.Game(name="Restarting..."),
                          max_messages=2500,
+                         fetch_offline_members=False,
                          help_attrs={'hidden': True})
         self.counter = Counter()
         self.command_usage = Counter()
