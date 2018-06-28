@@ -7,6 +7,7 @@ class IMGWelcome:
 
     def __init__(self, bot):
         self.bot = bot
+        self.cached_guilds = []
 
     @commands.group()
     @commands.cooldown(1, 3, commands.BucketType.user)
@@ -192,7 +193,7 @@ class IMGWelcome:
         name_font_medium = ImageFont.truetype("data/fonts/UniSansHeavy.otf", 22)
         name_font_small = ImageFont.truetype("data/fonts/UniSansHeavy.otf", 18)
         name_font_smallest = ImageFont.truetype("data/fonts/UniSansHeavy.otf", 12)
-        server_font = ImageFont.truetype("data/fonts/UniSansHeavy.otf", 20)
+        server_font = ImageFont.truetype("data/fonts/UniSansHeavy.otf", 22)
 
         if len(uname) <= 17:
             _outline((152, 63), uname, 1, name_font, (0, 0, 0, 255))
@@ -212,19 +213,22 @@ class IMGWelcome:
             drawtwo.text((152, 73), uname, 1, name_font_smallest, (0, 0, 0, 255))
             drawtwo.text((152, 73), uname, font=name_font_smallest, fill=(255, 255, 255, 230))
 
-        try:
-            members = sorted(server.members, key=lambda m: m.joined_at).index(member) + 1
-        except:
-            members = len(server.members)
+        # try:
+        #     members = sorted(server.members, key=lambda m: m.joined_at).index(member) + 1
+        # except:
+        #     members = len(server.members)
 
-        member_number = str(members) + self._get_suffix(members)
-        sname = str(member.guild.name) + '!' if len(str(member.guild.name)) <= 28 else str(member.guild.name)[
-                                                                                         :23] + '...'
+        # member_number = str(members) + self._get_suffix(members)
+        # sname = str(member.guild.name) + '!' if len(str(member.guild.name)) <= 28 else str(member.guild.name)[
+        #                                                                                  :23] + '...'
 
-        _outline((152, 96), "You are the " + str(member_number) + " member", 1, server_font, (0, 0, 0, 255))
-        drawtwo.text((152, 96), "You are the " + str(member_number) + " member", font=server_font, fill=(255, 255, 255, 230))
-        _outline((152, 116), 'of ' + sname, 1, server_font, (0, 0, 0, 255))
-        drawtwo.text((152, 116), 'of ' + sname, font=server_font, fill=(255, 255, 255, 230))
+        # _outline((152, 96), "You are the " + str(member_number) + " member", 1, server_font, (0, 0, 0, 255))
+        # drawtwo.text((152, 96), "You are the " + str(member_number) + " member", font=server_font, fill=(255, 255, 255, 230))
+        # _outline((152, 116), 'of ' + sname, 1, server_font, (0, 0, 0, 255))
+        # drawtwo.text((152, 116), 'of ' + sname, font=server_font, fill=(255, 255, 255, 230))
+
+        _outline((152, 100), "Welcome to " + str(server.name) + "!", 1, server_font, (0, 0, 0, 255))
+        drawtwo.text((152, 100), "Welcome to " + str(server.name) + "!", font=server_font, fill=(255, 255, 255, 230))
 
         welcome_picture.save("data/welcome.png")
 
