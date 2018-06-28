@@ -178,7 +178,7 @@ class Moderation:
         await ctx.send("Starting undehoist...")
         for user in ctx.guild.members:
             try:
-                if not user.display_name == "Hoister":
+                if user.display_name == "Hoister":
                     await user.edit(nick=None)
                     users_undehoisted.append(f"{user.name}-{user.id}")
             except:
