@@ -368,9 +368,13 @@ class economy:
                     em.description = getlang(lang)["eco"]["coinflip"]["won"].format(user, amount * 1.5)
                     await msg.edit(embed=em, content=None)
                     await self.edit_balance(user, balance + int(amount * 1.5))
+                    log.info("%s (%s) bet %s on coinflip and won %s" % (ctx.author.name,
+                                                                           ctx.author.id,
+                                                                           amount, int(amount * 1.5),))
                 else:
                     em = discord.Embed(color=0xFF5637, description=getlang(lang)["eco"]["coinflip"]["lost"])
                     await msg.edit(embed=em, content=None)
+                    log.info("%s (%s) bet %s on coinflip and lost" % (ctx.author.name, ctx.author.id, amount,))
                     try:
                         await ctx.message.add_reaction('😦')
                     except:
@@ -441,6 +445,8 @@ class economy:
                     await self.edit_balance(user, user_balance + amount)
                     await self.edit_balance(ctx.author, author_balance - amount)
                     await ctx.send(getlang(lang)["eco"]["transfer"]["sent"].format(amount, user))
+                    log.info("%s (%s) sent %s (%s) $%s" % (ctx.author.name, ctx.author.id,
+                                                              user.name, user.id, amount,))
                     try:
                         await user.send(f"{ctx.author.name} has sent you ${amount}.")
                     except:
