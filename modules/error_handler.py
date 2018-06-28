@@ -52,7 +52,6 @@ class error_handler:
                     await r.read()
             await ctx.send(embed=em)
             log.warning('In {}:'.format(ctx.command.qualified_name))
-            traceback.print_tb(exception.original.__traceback__)
             log.warning('{}: {}'.format(exception.original.__class__.__name__, exception.original))
         elif isinstance(exception, commands.BadArgument):
             await self.send_cmd_help(ctx)
