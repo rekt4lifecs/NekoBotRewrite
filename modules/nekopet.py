@@ -82,7 +82,7 @@ class NekoPet:
 
     @commands.group()
     @commands.guild_only()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 7, commands.BucketType.user)
     async def pet(self, ctx):
         """Neko pet owo"""
         if ctx.invoked_subcommand is None:
@@ -177,7 +177,7 @@ class NekoPet:
         def check(m):
             return m.channel == ctx.message.channel and m.author == ctx.message.author
         em = discord.Embed(color=0xDEADBF, title="Neko Shop",
-                           description="1 = Buy a Neko ($50,000)").set_footer(text="More coming soon...")
+                           description="1 = Buy a Neko ($75,000)").set_footer(text="More coming soon...")
         em.set_footer(text="Type a number.")
         strt = await ctx.send(embed=em)
         try:
@@ -202,9 +202,9 @@ class NekoPet:
             except:
                 return await strt.edit(content="**Timed out...**", embed=None)
             if msg.content.lower() == "yes":
-                if not await self.bal_check(ctx.message.author.id, 50000):
+                if not await self.bal_check(ctx.message.author.id, 75000):
                     return await strt.edit(content="**You don't have enough $ ;c**")
-                await self.remove_balance(ctx.message.author.id, 50000)
+                await self.remove_balance(ctx.message.author.id, 75000)
                 await self.create(ctx.message.author.id, name=f"{ctx.message.author.name}'s Neko", update=owned)
                 return await strt.edit(content="Successfully bought a neko!")
             else:
@@ -221,7 +221,7 @@ class NekoPet:
         food = int(food[0])
         if food >= 90:
             return await ctx.send("**Your neko already has enough food!**")
-        payamount = random.randint(250, 3000)
+        payamount = random.randint(250, 10000)
         if not await self.bal_check(ctx.message.author.id, payamount):
             return await ctx.send("**You don't have enough food to give your pet ;c*")
         try:
