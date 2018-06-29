@@ -389,7 +389,7 @@ class economy:
         if not await self.has_level_account(user):
             await self._levels_create_account(user)
 
-        query = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 15"
+        query = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
 
         async with self.bot.sql_conn.acquire() as conn:
             async with conn.cursor() as db:
@@ -399,7 +399,7 @@ class economy:
         table = PrettyTable()
         table.field_names = ["Username", "Balance"]
 
-        for x in range(14):
+        for x in range(9):
             user = await self.bot.redis.get("ecotop%s" % int(x + 1))
             if not user:
                 user = b"User not found."
