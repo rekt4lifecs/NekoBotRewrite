@@ -492,8 +492,6 @@ class economy:
             await ctx.send("You can't bet past 50k")
             return
 
-        await self.edit_balance(ctx.author, author_balance - amount)
-
         card_list = {
             "2": "<:2C:424587135463456778>",
             "3": "<:3C:424587163737522176>",
@@ -540,7 +538,7 @@ class economy:
 
         win_embed = discord.Embed(color=0xDEADBF)
         win_embed.title = "Blackjack Win"
-        win_embed.description = "**%s** (%s) has won %s" % (ctx.author.name, ctx.author.id, int(amount * 1.5))
+        win_embed.description = "**%s** (%s) has won %s" % (ctx.author.name, ctx.author.id, int(amount * .5))
 
         lose_embed = discord.Embed(color=0xDEADBF)
         lose_embed.title = "Blackjack Lose"
@@ -588,11 +586,12 @@ class economy:
                 em.description = "You beat me!"
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
-                await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
+                await self.edit_balance(ctx.author, author_balance + int(amount * .5))
             else:
                 em.description = "I beat you >:3"
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+                await self.edit_balance(ctx.author, author_balance - amount)
             return await msg.edit(embed=em)
 
         author_total = int(author_deck_n[0]) + int(author_deck_n[1]) + int(author_deck_n[2])
@@ -609,9 +608,10 @@ class economy:
 
             if author_total > 21:
                 em.description = "You went over 21 and I won >:3"
+                await self.edit_balance(ctx.author, author_balance - amount)
             else:
                 em.description = "I went over 21 and you won ;w;"
-                await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
+                await self.edit_balance(ctx.author, author_balance + int(amount * .5))
 
             bot_value = f"%s %s | %s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
                                                 card_list[bot_deck[1]], bot_deck_n[1],
@@ -650,11 +650,12 @@ class economy:
                 em.description = "You beat me!"
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
-                await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
+                await self.edit_balance(ctx.author, author_balance + int(amount * .5))
             else:
                 em.description = "I beat you >:3"
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+                await self.edit_balance(ctx.author, author_balance - amount)
             return await msg.edit(embed=em)
 
         author_total = int(author_deck_n[0]) + int(author_deck_n[1]) + int(author_deck_n[2]) + int(author_deck_n[3])
@@ -672,9 +673,10 @@ class economy:
 
             if author_total > 21:
                 em.description = "You went over 21 and I won >:3"
+                await self.edit_balance(ctx.author, author_balance - amount)
             else:
                 em.description = "I went over 21 and you won ;w;"
-                await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
+                await self.edit_balance(ctx.author, author_balance + int(amount * .5))
 
             bot_value = f"%s %s | %s %s | %s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
                                                             card_list[bot_deck[1]], bot_deck_n[1],
@@ -714,11 +716,12 @@ class economy:
                 em.description = "You beat me!"
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
-                await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
+                await self.edit_balance(ctx.author, author_balance + int(amount * .5))
             else:
                 em.description = "I beat you >:3"
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+                await self.edit_balance(ctx.author, author_balance - amount)
             return await msg.edit(embed=em)
 
         author_total = int(author_deck_n[0]) + int(author_deck_n[1]) + int(author_deck_n[2]) + int(author_deck_n[3]) + \
@@ -738,9 +741,10 @@ class economy:
 
             if author_total > 21:
                 em.description = "You went over 21 and I won >:3"
+                await self.edit_balance(ctx.author, author_balance - amount)
             else:
                 em.description = "I went over 21 and you won ;w;"
-                await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
+                await self.edit_balance(ctx.author, author_balance + int(amount * .5))
 
             bot_value = f"%s %s | %s %s | %s %s | %s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
                                                                     card_list[bot_deck[1]], bot_deck_n[1],
@@ -758,9 +762,10 @@ class economy:
 
         if author_total > bot_total:
             em.description = "You beat me ;w;"
-            await self.edit_balance(ctx.author, author_balance + int(amount * 1.5))
+            await self.edit_balance(ctx.author, author_balance + int(amount * .5))
         else:
             em.description = "I beat you >:3"
+            await self.edit_balance(ctx.author, author_balance - amount)
 
         em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
         em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
