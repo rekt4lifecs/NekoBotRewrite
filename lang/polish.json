@@ -1,0 +1,165 @@
+{
+  "general": {
+    "cookie": "<:NekoCookie:408672929379909632> - **{0} gave {1} a cookie OwO** - <:NekoCookie:408672929379909632>",
+    "flip": {
+      "heads": "Heads",
+      "tails": "Tails"
+    },
+    "info": {
+      "info": "**Info**",
+      "stats": "Serwery: **{0} ({1})**\nCzłonkowie: **{2}**\nKomendy Bota: **{3}**\nKanały: **{4}**\nOdłamki: **{5}**\nBot na kanałach głosowych: **{6}**\nCzas działania: **{7}**\nWiadomoci przeczytane (od restartu): **{8}**\nNajczęciej używane polecenie od restartu: **{9}**\nKomendy użyte: **{10}**",
+      "links": {
+        "name": "Linki",
+        "links": "<:GH:416593854368841729> - [GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) | [Support Server](https://discord.gg/q98qeYN) | [Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | <:nkotreon:430733839003025409> [Patreon](https://www.patreon.com/NekoBot)"
+      },
+      "footer": "Bot stworzony przez ReKT#0001 & poprawiony przez Kot#1337 :^)"
+    },
+    "whois_notfound": "Whois Wypatruje {0} ]\n\nUżytkownik nie znaleziony!",
+    "whois": "[ Whois Wypatruje {0} ]\n\n\nNazwa:      {1}\nID:        {2}\nDiscrim:   {3}\nBot:       {4}\nStworzony:   {5}\n",
+    "userinfo": {
+      "id": "ID",
+      "discrim": "Dyskryminator",
+      "bot": "Bot",
+      "created": "Stworzono",
+      "joined": "Dołšczono",
+      "animated_avatar": "Animowany Avatar",
+      "playing": "Gra",
+      "status": "Status",
+      "color": "Kolor"
+    },
+    "serverinfo": {
+      "name": "Nazwa",
+      "online": "Online",
+      "owner": "Właciciel",
+      "created_at": "Stworzony przez",
+      "channels": "Kanały",
+      "roles": "Role",
+      "emojis": "Emoji",
+      "region": "Region",
+      "security": "Ochrona"
+    },
+    "channelinfo": {
+      "name": "Nazwa",
+      "guild": "Gilidia",
+      "id": "ID",
+      "category_id": "Kategoria ID",
+      "position": "Pozycja",
+      "nsfw": "NSFW",
+      "members": "Członkowie",
+      "category": "Kategoria",
+      "created_at": "Stworzony przez"
+    },
+    "coffee": "*pije kawe*",
+    "voting_link": "Link do głosowania"
+  },
+  "donator": {
+    "error": {
+      "error": "Błšd",
+      "message": "Musisz być [donator](https://www.patreon.com/NekoBot) aby użyć tej komendy.",
+      "invalid": "**Błędny Klucz**",
+      "already_active": "**Twój token już jest aktywny!**",
+      "in_use": "**Token już w użyciu.**"
+    },
+    "whats_this": "OwO Co to jest",
+    "donate": "Zostań naszym patronem na [Patreon](https://www.patreon.com/NekoBot) żeby uzyskać specjalne cechy OwO"
+  },
+  "marriage": {
+    "marry_self": "Nie możesz sam siebie polubić.",
+    "author_married": "Już jeste po lubie",
+    "user_married": "Ta osoba już jest po lubie.",
+    "marry_msg": "{0.name} chce wyjć za {1.name}!\n{1.mention} napisz: yes, aby się zgodzić!",
+    "cancelled": "lub odwołany.",
+    "self_divorce": "Jak możesz się rozwieć?",
+    "not_married": "Nie jeste jeszcze po lubie",
+    "user_not_married": "Ta osoba nie jest po lubie",
+    "author_not_married_to_user": "Nie jeste po lubie z tym użytkownikiem"
+  },
+  "audio": {
+    "join_voice": "Musisz dołšczyć do kanału głosowego.",
+    "bot_missing_perms": "Brakujšce uprawnienia `POŁĽCZ` i/lub `MÓW`.",
+    "join_bot": "Dołšcz do mojego kanału głosowego.",
+    "nothing_found": "Nic nie znaleziono...",
+    "playlist_enqueued": "Lista odtwarzania została zapisana!",
+    "imported_tracks": "Importowano {0} utworów z listy odtwarzania :)",
+    "track_enqueued": "Track Enqueued",
+    "not_playing": "Nie puszczam niczego...",
+    "now_playing": "Teraz Grane",
+    "not_in_my_vc": "Nie jeste na moim kanale głosowym!",
+    "no_queue": "Niczego nie ma w kolejce odtwarzania."
+  },
+  "eco": {
+    "welcome": "Witamy w NekoBanku!",
+    "total_amount": "Całkowite $",
+    "user_amount": "Twoja iloć",
+    "footer": "[Donate](https://www.patreon.com/NekoBot) lub [Vote](https://discordbots.org/bot/nekobot) aby zyskać większy przychód OwO",
+    "registered": "Zarejestrowano konto bankowe!",
+    "already_registered": "Już masz konto bankowe <:nkoDed:422666465238319107>",
+    "profile": {
+      "title": "{0}'s Profil",
+      "description": "`Balans:` **{0}**\n`Rep:` **{1}**\n`Poziom:` **{2}** | **{3}/{4}**\n\n```\n{5}```\nW zwišzku małżeńskim z: **{6}**"
+    },
+    "no_account": "Nie masz konta bankowego...",
+    "daily_timer": "Poczekaj kolejne {0} godzin przed użyciem dziennego przychodu ponownie...",
+    "daily_credits": "Dzienny Przychód",
+    "daily_voter": "Pobrano 2500 + 5000 Dziennego przychodu - Bonus dla głosujšcych!",
+    "daily_normal": "Pobrano 2500 Dziennego przychodu!",
+    "vote_footer": "Pssst głosowanie da ci trzykrotnie większy dzienny przychód OwO, głosuj poprzez komendę n!vote",
+    "cant_rep_self": "Nie możesz dać sam sobie rep <:nkoDed:422666465238319107>",
+    "cant_rep_bots": "Nie możesz dać rep botom <:nkoDed:422666465238319107>",
+    "point": "punkt",
+    "points": "punkty",
+    "given_rep": "Dany rep!",
+    "failed_rep": "Błšd przy dawaniu rep!",
+    "no_rep_points": "{0.mention}, narazie nie masz żadnych rep punktów ;c",
+    "rep_msg": "{0.mention} dał {1.mention} 1 rep!\n**{1.name}** Teraz ma {2} rep\nTeraz masz {3} rep {4} na dzisiaj!",
+    "set_desc": {
+      "updated": "Zaktualizowano opis!",
+      "failed": "Błšd przy aktualizacji opisu.",
+      "over_limit": "Ponad limit znaków."
+    },
+    "coinflip": {
+      "too_low": "Twoja suma jest za mała <:nkoDed:422666465238319107>",
+      "too_high": "Nie możesz przekroczyć 100,000",
+      "cant_spend": "Nie masz tak wiele do wydania...",
+      "flipping": "Rzucanie",
+      "won": "{0.mention} Wygrał {1}!!!",
+      "lost": "Przegrałe đŚ"
+    },
+    "transfer": {
+      "min": "Minimalna kwota do wysyłki to $10",
+      "bot": "Nie możesz wysyłać pieniędzy do botów.",
+      "self": "Nie możesz wysłać pieniędzy do siebie.",
+      "user_no_account": "{0.name} nie ma konta bankowego...",
+      "sent": "Wysłano `{0}` do {1.mention}!"
+    }
+  },
+  "cardgame": {
+    "card_help": "Loli gra karciana ofc!\n\n**Komendy**\n**n!card daily** - Odbierz swoje dzienne karty\n**n!card display** - Wywietl swoje karty\n**n!card list** - Lista twoich kart\n**n!card sell** - Sprzedaj karty\n**n!card fight** - Walcz z użytkownikiem OwO\n**n!card transfer** - Dokonaj transferu karty",
+    "coming_soon": "**Wkrótce**",
+    "battle": {
+      "confirm": "{0.mention}, chcesz walczyć z {1.mention}? Walka zostanie anulowana po 15 sekundach.",
+      "cancelled": "Walka anulowana.",
+      "author_select": "{0.mention}, prosze wybrać kartę.",
+      "invalid": "Zła karta. Powtarzanie...",
+      "invalid_slot": "{0.mention}, nie masz karty w tym slocie."
+    },
+    "daily": {
+      "no_vote": "Nie głosowałe dzisiaj ;c",
+      "wait_time": "Poczekaj {0}h {1}m przed dziennym użyciem...",
+      "slots_full": "**Wszystkie twoje sloty sš pełne.**",
+      "given_char": "Wydano charakter **{0}!**"
+    }
+  },
+  "mod": {
+    "dehoist": {
+      "start": "Dehoist wystartował...",
+      "end": "{0} użytkownik dehoistowany, skończono w {1}s.\n{2} wystšpił błšd przy dehoistowaniu użytkownika. Użytkownik dehoistowany: {3}"
+    },
+    "permission_error": "I couldn't do that action, either I dont have permissions or my role is too low.",
+    "kicked": "{0.name} został wyrzucony.",
+    "banned": "{0.name} został zbanowany.",
+    "renamed": "{0.name} zmienił nazwę.",
+    "unbanned_reason": "Odbanowano {0.user} (ID: {0.user.id}), poprzednio zbanowany za {0.reason}.",
+    "unbanned": "Odbanowano {0.user} (ID: {0.user.id})."
+  }
+}
