@@ -47,7 +47,7 @@ def millify(n):
     return '{:.0f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
 
 # Languages
-languages = ["english", "weeb", "tsundere", "polish"]
+languages = ["english", "weeb", "tsundere", "polish", "spanish"]
 lang = {}
 
 for l in languages:
@@ -95,8 +95,9 @@ class General:
                                            "List of current languages:\n"
                                            "`english`,\n"
                                            "`weeb`,\n"
-                                           "`tsundere` - Translated by computerfreaker#4054\n"
-                                           "`polish` - Translated by YebakazLLE#7118")
+                                           "`tsundere` - computerfreaker#4054\n"
+                                           "`polish` - YebakazLLE#7118\n"
+                                           "`spanish` - ΛTLΛS Dinoseto & Luketten")
             return await ctx.send(embed=em)
         if lang.lower() in languages:
             await self.bot.redis.set(f"{ctx.message.author.id}-lang", lang.lower())

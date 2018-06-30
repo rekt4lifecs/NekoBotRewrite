@@ -7,7 +7,7 @@ import config
 import os, ujson
 
 # Languages
-languages = ["english", "weeb", "tsundere", "polish"]
+languages = ["english", "weeb", "tsundere", "polish", "spanish"]
 lang = {}
 
 for l in languages:
