@@ -9,7 +9,6 @@ from .utils.paginator import EmbedPages, Pages
 from scipy import stats
 import numpy
 from .utils.paginator import HelpPaginator
-from prettytable import PrettyTable
 from colorthief import ColorThief
 from io import BytesIO
 from .utils import checks
@@ -48,11 +47,11 @@ def millify(n):
     return '{:.0f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
 
 # Languages
-languages = ["english", "weeb", "tsundere"]
+languages = ["english", "weeb", "tsundere", "polish"]
 lang = {}
 
 for l in languages:
-    with open("lang/%s.json" % l) as f:
+    with open("lang/%s.json" % l, encoding="utf-8") as f:
         lang[l] = ujson.load(f)
 
 def getlang(la:str):
@@ -96,7 +95,8 @@ class General:
                                            "List of current languages:\n"
                                            "`english`,\n"
                                            "`weeb`,\n"
-                                           "`tsundere` - Translated by computerfreaker#4054")
+                                           "`tsundere` - Translated by computerfreaker#4054\n"
+                                           "`polish` - Translated by YebakazLLE#7118")
             return await ctx.send(embed=em)
         if lang.lower() in languages:
             await self.bot.redis.set(f"{ctx.message.author.id}-lang", lang.lower())

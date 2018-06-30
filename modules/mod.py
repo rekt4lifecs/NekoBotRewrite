@@ -39,11 +39,11 @@ async def run_cmd(cmd: str) -> str:
     return "".join(x.decode("utf-8") for x in results)
 
 # Languages
-languages = ["english", "weeb", "tsundere"]
+languages = ["english", "weeb", "tsundere", "polish"]
 lang = {}
 
 for l in languages:
-    with open("lang/%s.json" % l) as f:
+    with open("lang/%s.json" % l, encoding="utf-8") as f:
         lang[l] = ujson.load(f)
 
 def getlang(la:str):
