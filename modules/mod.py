@@ -208,6 +208,21 @@ class Moderation:
     @commands.command()
     @commands.guild_only()
     @checks.has_permissions(ban_members=True)
+    async def hackban(self, ctx, member_id:int):
+        """Bans a user from their ID"""
+
+        try:
+            await self.bot.http.ban(member_id, ctx.guild.id)
+        except discord.NotFound:
+            return await ctx.send("That user was not found.")
+        except discord.Forbidden:
+            return await ctx.send("I couldn't ban that user.")
+
+        await ctx.send('\N{OK HAND SIGN}')
+
+    @commands.command()
+    @commands.guild_only()
+    @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: MemberID, *, reason: ActionReason = None):
         """Bans a member from the server."""
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
