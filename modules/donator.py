@@ -2,9 +2,11 @@ from discord.ext import commands
 import discord, aiohttp
 import random, string, time
 import datetime
+import asyncio
 from .utils.hastebin import post as hastepost
 import config
 import os, ujson
+import logging
 
 # Languages
 languages = ["english", "weeb", "tsundere", "polish", "spanish"]
@@ -17,13 +19,66 @@ for l in languages:
 def getlang(la:str):
     return lang.get(la, None)
 
+log = logging.getLogger()
+
 class Donator:
 
     def __init__(self, bot):
         self.bot = bot
+        self.looder_enabled = False
+        self.lood_session = aiohttp.ClientSession()
+        self.bot.loop.create_task(self.autoloodme())
 
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
+
+    async def has_donated(self, userid:int):
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                if not await db.execute("SELECT 1 FROM donator WHERE userid = %s", (userid,)):
+                    return False
+                else:
+                    return True
+
+    async def get_lood_channel(self):
+        channels = []
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                await db.execute("SELECT * FROM autolooder")
+                all_channels = await db.fetchall()
+
+        for channel in all_channels:
+            channels.append(int(channel[0]))
+
+        return channels
+
+    async def get_random_lood(self):
+        try:
+            base = "https://nekobot.xyz/api/image?type="
+            imgtype = random.choice(["lewdneko", "lewdkitsune", "hentai", "neko", "hentai_anal"])
+            r = await (await self.lood_session.get(base + imgtype)).json()
+            return r["message"]
+        except Exception as e:
+            log.error("Failed to post, %s" % e)
+            return "https://nekobot.xyz/placeholder.png"
+
+    async def autoloodme(self):
+        if not self.looder_enabled:
+            self.looder_enabled = True
+        while self.looder_enabled:
+
+            for channel in await self.get_lood_channel():
+                log.info("Sending loods to %s" % channel)
+                try:
+                    channel = self.bot.get_channel(channel)
+                    if channel.is_nsfw():
+                        em = discord.Embed(color=0xDEADBF)
+                        em.set_image(url=await self.get_random_lood())
+                        await channel.send(embed=em)
+                except:
+                    pass
+
+            await asyncio.sleep(3600)
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -280,6 +335,28 @@ class Donator:
             os.remove(file)
         except Exception as e:
             return await ctx.send(f"**Error uploading file**\n\n{e}")
+
+    @commands.command(aliases=["autolood"])
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.has_permissions(manage_guild=True)
+    @commands.guild_only()
+    async def autolooder(self, ctx, channel:discord.TextChannel):
+        """Enable/Disable the autolooder for your server, mention an already added channel to disable."""
+
+        if not await self.has_donated(ctx.author.id):
+            return await ctx.send("You have not donated <a:rainbowNekoDance:462373594555613214>")
+
+        async with self.bot.sql_conn.acquire() as conn:
+            async with conn.cursor() as db:
+                if await db.execute("SELECT 1 FROM autolooder WHERE channel = %s", (channel.id,)):
+                    await db.execute("DELETE FROM autolooder WHERE channel = %s", (channel.id))
+                    return await ctx.send("Disabled autolooder from `%s`" % channel.name)
+
+                if channel.is_nsfw():
+                    await db.execute("INSERT INTO autolooder VALUES (%s)", (channel.id,))
+                    await ctx.send("Enabled autolooder for `%s`" % (channel.name,))
+                else:
+                    return await ctx.send("That channel is not an NSFW channel.")
 
 def setup(bot):
     bot.add_cog(Donator(bot))
