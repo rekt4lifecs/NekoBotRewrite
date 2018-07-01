@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, argparse, re, shlex, traceback, io, textwrap, asyncio
+import discord, argparse, os, shlex, traceback, io, textwrap, asyncio, re
 from .utils import checks
 from contextlib import redirect_stdout
 from collections import Counter
@@ -372,6 +372,19 @@ class Moderation:
     @commands.is_owner()
     async def _reload(self, ctx, *, module):
         """Reloads a module."""
+        if module == "all":
+            for file in os.listdir("modules"):
+                if file.endswith(".py"):
+                    name = file[:-3]
+                    try:
+                        self.bot.unload_extension(f"modules.{name}")
+                        self.bot.load_extension(f"modules.{name}")
+                    except:
+                        log.warning("Failed to load {}.".format(name))
+                        traceback.print_exc()
+
+            return await ctx.send("Reloaded all.")
+
         module = "modules." + module
         try:
             self.bot.unload_extension(module)

@@ -188,9 +188,12 @@ class Donator:
             async with self.bot.sql_conn.acquire() as conn:
                 async with conn.cursor() as db:
                     await db.execute("SELECT token, usetime FROM donator WHERE userid = %s", (ctx.author.id,))
-                    user_token = int((await db.fetchone()[0]))
-            timeconvert = datetime.datetime.fromtimestamp(int(user_token[1])).strftime('%Y-%m-%d')
-            embed = discord.Embed(color=0xDEADBF, title="Key Info", description=f"Key: `XXXX-XXXX-{user_token[0][-4:]}`\n"
+                    data = await db.fetchone()
+                    user_key = data[0]
+                    user_time = data[1]
+
+            timeconvert = datetime.datetime.fromtimestamp(int(user_time)).strftime('%Y-%m-%d')
+            embed = discord.Embed(color=0xDEADBF, title="Key Info", description=f"Key: `XXXX-XXXX-{user_key[-4:]}`\n"
                                                                                 f"Expiry Date: `{timeconvert}`")
             return await ctx.send(embed=embed)
         else:
