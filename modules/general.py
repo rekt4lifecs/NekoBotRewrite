@@ -841,15 +841,14 @@ class General:
 
     @commands.command(hidden=True)
     @commands.is_owner()
-    async def addvote(self, ctx, user_id:int):
+    async def addvote(self, ctx, *user_ids:int):
         """Add user id to votes"""
         try:
-            await self.execute(f"INSERT INTO dbl VALUES (0, {user_id}, 0, 0)", commit=True)
-            try:
-                emoji = self.bot.get_emoji(408672929379909632)
-                await ctx.message.add_reaction(emoji)
-            except:
-                pass
+            users_added = []
+            for userid in user_ids:
+                await self.execute(f"INSERT INTO dbl VALUES (0, {userid}, 0, 0)", commit=True)
+                users_added.append(userid)
+            await ctx.send("Added %s users to the db" % (len(users_added),))
         except Exception as e:
             await ctx.send(f"`{e}`")
 
