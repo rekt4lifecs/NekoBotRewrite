@@ -151,21 +151,23 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
-    async def yandere(self, ctx, *tags: str):
+    async def yandere(self, ctx, tag: str):
         """Search Yande.re OwO"""
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         else:
             try:
-                tags = ("+").join(tags)
-                query = ("https://yande.re/post.json?limit=42&tags=" + tags)
+                query = ("https://yande.re/post.json?limit=100&tags=" + tag)
                 async with aiohttp.ClientSession() as cs:
                     async with cs.get(query) as r:
                         res = await r.json()
                 if res != []:
+                    img = random.choice(res)
+                    if "loli" in img["tags"] or "shota" in img["tags"]:
+                        return await ctx.send("Loli or shota was found in this post.")
                     em = discord.Embed(color=0xDEADBF)
-                    em.set_image(url=random.choice(res)['jpeg_url'])
+                    em.set_image(url=img['jpeg_url'])
                     await ctx.send(embed=em)
                 else:
                     e = discord.Embed(color=0xDEADBF, title="⚠ Error",
