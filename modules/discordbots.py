@@ -58,6 +58,12 @@ class DiscordBotsOrgAPI:
                             await cs.post(url, json=payload, headers={"Authorization": config.ds_key})
                     except Exception as e:
                         log.error(f"Failed to post to ds, {e}")
+                try:
+                    url = f"https://listcord.com/api/bot/{self.bot.user.id}/guilds"
+                    async with aiohttp.ClientSession() as cs:
+                        await cs.post(url, headers={"Authorization": config.listcord}, json={"guilds": int(servers)})
+                except Exception as e:
+                    log.error(f"Failed to post to listcord, {e}")
                 await asyncio.sleep(1800)
 
     async def on_ready(self):
