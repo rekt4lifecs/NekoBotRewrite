@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup as bs
 from .utils import checks, chat_formatting, hastebin
 import config
 import json
+import listcord
 
 class NSFW:
     """NSFW Commands OwO"""
@@ -11,6 +12,7 @@ class NSFW:
     def __init__(self, bot):
         self.bot = bot
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
+        self.listcord = listcord.Client(bot_id=self.bot.user.id)
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
         async with self.bot.sql_conn.acquire() as conn:
@@ -348,6 +350,9 @@ class NSFW:
             response = non_loli[random.randint(0, len(non_loli) - 1)]
             img = f"https://img.rule34.xxx/images/{response['directory']}/{response['image']}"
             em = discord.Embed(color=0xDEADBF)
+            if not await self.listcord.has_voted(ctx.author.id):
+                em.url = "https://listcord.com/bot/310039170792030211"
+                em.title = "Upvote here? :^)"
             em.set_image(url=img)
             await ctx.send(embed=em)
         except json.JSONDecodeError:
