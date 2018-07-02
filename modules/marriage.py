@@ -3,7 +3,7 @@ import discord, asyncio
 import ujson
 
 # Languages
-languages = ["english", "weeb", "tsundere", "polish", "spanish"]
+languages = ["english", "weeb", "tsundere", "polish", "spanish", "french"]
 lang = {}
 
 for l in languages:

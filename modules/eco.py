@@ -7,7 +7,7 @@ from prettytable import PrettyTable
 log = logging.getLogger("NekoBot")
 
 # Languages
-languages = ["english", "weeb", "tsundere", "polish", "spanish"]
+languages = ["english", "weeb", "tsundere", "polish", "spanish", "french"]
 lang = {}
 
 for l in languages:
