@@ -39,7 +39,7 @@ async def run_cmd(cmd: str) -> str:
     return "".join(x.decode("utf-8") for x in results)
 
 # Languages
-languages = ["english", "weeb", "tsundere", "polish", "spanish"]
+languages = ["english", "weeb", "tsundere", "polish", "spanish", "french"]
 lang = {}
 
 for l in languages:
