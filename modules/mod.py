@@ -242,6 +242,25 @@ class Moderation:
     @commands.command()
     @commands.guild_only()
     @checks.has_permissions(ban_members=True)
+    async def softban(self, ctx, user:discord.Member):
+        """Softban a user, bans a user to delete all their messages and unbans after."""
+
+        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        if lang:
+            lang = lang.decode('utf8')
+        else:
+            lang = "english"
+
+        try:
+            await ctx.guild.ban(user, reason=f"Softbanned by {ctx.author.name}", delete_message_days=7)
+            await ctx.guild.unban(user)
+            await ctx.send("I have successfully softbanned that user.")
+        except:
+            await ctx.send(getlang(lang)["mod"]["permission_error"])
+
+    @commands.command()
+    @commands.guild_only()
+    @checks.has_permissions(ban_members=True)
     async def massban(self, ctx, reason: ActionReason, *members: MemberID):
         """Mass bans multiple members from the server."""
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
