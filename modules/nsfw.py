@@ -350,9 +350,12 @@ class NSFW:
             response = non_loli[random.randint(0, len(non_loli) - 1)]
             img = f"https://img.rule34.xxx/images/{response['directory']}/{response['image']}"
             em = discord.Embed(color=0xDEADBF)
-            if not await self.listcord.has_voted(ctx.author.id):
-                em.url = "https://listcord.com/bot/310039170792030211"
-                em.title = "Upvote here? :^)"
+            try:
+                if not await self.listcord.has_voted(ctx.author.id):
+                    em.url = "https://listcord.com/bot/310039170792030211"
+                    em.title = "Upvote here? :^)"
+            except:
+                pass
             em.set_image(url=img)
             await ctx.send(embed=em)
         except json.JSONDecodeError:
