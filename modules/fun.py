@@ -2,7 +2,6 @@ from discord.ext import commands
 import discord, aiohttp, random, config, datetime, base64, hashlib
 from io import BytesIO
 import os
-from googleapiclient import discovery
 
 key = config.weeb
 auth = {"Authorization": "Wolke " + key}
@@ -189,7 +188,7 @@ class Fun:
         """Get text toxicity levels"""
         try:
             API_KEY = "AIzaSyAc49LROgPF9IEiLDavWqwb2z8UndUUbcM"
-            service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=API_KEY)
+            url = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=" + API_KEY
             analyze_request = {
                 'comment': {'text': f'{text}'},
                 'requestedAttributes': {'TOXICITY': {},
@@ -200,7 +199,7 @@ class Fun:
                                         'INFLAMMATORY': {},
                                         'INCOHERENT': {}}
             }
-            response = service.comments().analyze(body=analyze_request).execute()
+            response = await (await self.session.post(url, json=analyze_request)).json()
             em = discord.Embed(color=0xDEADBF, title="Toxicity Levels")
             em.add_field(name="Toxicity",
                          value=f"{round(float(response['attributeScores']['TOXICITY']['summaryScore']['value'])*100)}%")
