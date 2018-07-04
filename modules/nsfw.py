@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup as bs
 from .utils import checks, chat_formatting, hastebin
 import config
 import json
+import nekobot
 
 class NSFW:
     """NSFW Commands OwO"""
@@ -11,6 +12,7 @@ class NSFW:
     def __init__(self, bot):
         self.bot = bot
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
+        self.nekobot = nekobot.Client(loop=self.bot.loop)
 
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
         async with self.bot.sql_conn.acquire() as conn:
@@ -52,31 +54,17 @@ class NSFW:
             return "https://nekobot.xyz/placeholder.png"
         return x.get("url")
 
-    async def nekobot(self, imgtype:str):
-        url = "https://nekobot.xyz/api/image?type=" + imgtype
-        data = await self.session.get(url)
-
-        try:
-            x = await data.json()
-            return x.get("message")
-        except aiohttp.ContentTypeError:
-            content = await data.text()
-            status = data.status
-            content = await hastebin.post(str(content))
-            await self.log_error(f"Content Type Error:\n({status}) {content}")
-            return "https://nekobot.xyz/placeholder.png"
-
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(200, 20, commands.BucketType.user)
     async def pgif(self, ctx):
         """Posts a Random PrOn GIF"""
+        if not ctx.message.channel.is_nsfw():
+            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            return
         if await self.execute(f"SELECT 1 FROM dbl WHERE user = %s" % ctx.author.id, isSelect=True):
-            if not ctx.message.channel.is_nsfw():
-                await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-                return
             em = discord.Embed(color=0xDEADBF)
-            em.set_image(url=await self.nekobot("pgif"))
+            em.set_image(url=await self.nekobot.image("pgif"))
 
             await ctx.send(embed=em)
         else:
@@ -96,7 +84,7 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         embed = discord.Embed(color=0xDEADBF)
-        embed.set_image(url=await self.nekobot("anal"))
+        embed.set_image(url=await self.nekobot.image("anal"))
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["DVA", "d.va"])
@@ -123,7 +111,7 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         embed = discord.Embed(color=0xDEADBF)
-        embed.set_image(url=await self.nekobot("4k"))
+        embed.set_image(url=await self.nekobot.image("4k"))
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -234,7 +222,7 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=await self.nekobot("ass"))
+        em.set_image(url=await self.nekobot.image("ass"))
 
         await ctx.send(embed=em)
 
@@ -258,7 +246,7 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=await self.nekobot("thigh"))
+        em.set_image(url=await self.nekobot.image("thigh"))
         await ctx.send(embed=em)
 
     @commands.command()
@@ -270,7 +258,7 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=await self.nekobot("pussy"))
+        em.set_image(url=await self.nekobot.image("pussy"))
 
         await ctx.send(embed=em)
 
@@ -282,7 +270,7 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=await self.nekobot("gonewild"))
+        em.set_image(url=await self.nekobot.image("gonewild"))
 
         await ctx.send(embed=em)
 
@@ -309,7 +297,7 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=await self.nekobot("lewdkitsune"))
+        em.set_image(url=await self.nekobot.image("lewdkitsune"))
         await ctx.send(embed=em)
 
     @commands.command()
@@ -321,7 +309,7 @@ class NSFW:
             return
         if await self.execute("SELECT 1 FROM dbl WHERE user = %s" % ctx.author.id, isSelect=True):
             em = discord.Embed(color=0xDEADBF)
-            em.set_image(url=await self.nekobot("hentai"))
+            em.set_image(url=await self.nekobot.image("hentai"))
             await ctx.send(embed=em)
         else:
             embed = discord.Embed(color=0xDEADBF,
