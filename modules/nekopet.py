@@ -255,8 +255,9 @@ class NekoPet:
                                           isSelect=True)
                 if data[1] <= 0:
                     await self.execute(f"UPDATE nekopet SET play = 0 WHERE userid = {message.author.id}")
+                else:
+                    await self.execute(f"UPDATE nekopet SET play = {int(data[1]) - random.randint(1, 20)} WHERE userid = {message.author.id}")
                 await self.execute(f"UPDATE nekopet SET food = {int(data[0]) - random.randint(1, 20)} WHERE userid = {message.author.id}")
-                await self.execute(f"UPDATE nekopet SET play = {int(data[1]) - random.randint(1, 20)} WHERE userid = {message.author.id}")
                 if data[0] <= 0:
                     await self.execute(f"DELETE FROM nekopet WHERE userid = {message.author.id}")
                     log.info(f"{message.author.name} Neko Died.")
