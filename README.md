@@ -1,14 +1,12 @@
 # NekoBot
 OwO Whats This
 
-NekoBot is an amazing Discord Bot with plenty of Fun and NSFW Commands all rewritten just a few weeks ago! There maybe are still a bit of stuff to cleanup but right now its down good!
-
-We have a bunch of fun commands for example you can ship too people in an image OwO and can fight people in a 1v1 rust match. We have an economy system where you can get your daily credits, give users reputation and gable all your money ofcourse. Are you good at OSU, Overwatch or Fortnite? You can flex on them haters with your 100k scores! ~~if your not good at any of them maybe suggest another game your are good at ;)~~
+General fun commands, NSFW commands, Simple Moderation commands and more! 
 
 [![Discord Bots](https://discordbots.org/api/widget/310039170792030211.svg)](https://discordbots.org/bot/310039170792030211)
 [![Server](https://img.shields.io/discord/221989003400970241.svg?logo=discord&style=for-the-badge)](https://discord.gg/q98qeYN)
 
-### Commands
+### Commands (Outdated, use the help command to view the full list)
 | Command       | Category      |Info                          |
 |:-------------:|:-------------:|:-----------------------------|
 | 8ball | General | Ask 8ball a question owo |
