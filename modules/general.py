@@ -98,7 +98,7 @@ class General:
                                            "`tsundere` - computerfreaker#4054\n"
                                            "`polish` - YebakazLLE#7118\n"
                                            "`spanish` - ΛTLΛS Dinoseto & Luketten\n"
-                                           "`french` - ShiroNeko#7379")
+                                           "`french` - ShiroNeko#7379 & Anderson")
             return await ctx.send(embed=em)
         if lang.lower() in languages:
             await self.bot.redis.set(f"{ctx.message.author.id}-lang", lang.lower())
@@ -926,7 +926,7 @@ class General:
         if len(prefix) >= 12:
             return await ctx.send("Your prefix is over 12 characters.")
         await self.bot.redis.set(f"{ctx.author.id}-prefix", prefix)
-        await ctx.send(f"Set your custom prefix to `{prefix}`, you can remove it by pinging me and using delprefix.")
+        await ctx.send(f"Set **your** custom prefix to `{prefix}`, you can remove it by pinging me and using delprefix.")
 
     @commands.command(aliases=["deleteprefix", "resetprefix"])
     @commands.cooldown(1, 3, commands.BucketType.user)
