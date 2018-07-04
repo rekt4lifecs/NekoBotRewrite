@@ -1,29 +1,29 @@
 {
   "general": {
-    "cookie": "<:NekoCookie:408672929379909632> - **{0} gave {1} a cookie OwO** - <:NekoCookie:408672929379909632>",
+    "cookie": "<:NekoCookie:408672929379909632> - **{0} a donné un cookie à {1} OwO** - <:NekoCookie:408672929379909632>",
     "flip": {
       "heads": "Tête",
       "tails": "Queue"
     },
     "info": {
       "info": "**Info**",
-      "stats": "Serveurs: **{0} ({1})**\nMembres: **{2}**\nBot Commandes: **{3}**\nChannels: **{4}**\nShards: **{5}**\nBot dans un salon vocal(s): **{6}**\nUptime: **{7}**\nMessages Read (Since Restart): **{8}**\nMost common command since restart: **{9}**\nCommands Used: **{10}**",
+      "stats": "Serveurs: **{0} ({1})**\nMembres: **{2}**\nCommandes disponibles: **{3}**\nCanaux: **{4}**\nInstances: **{5}**\nBot dans un salon vocal(s): **{6}**\nTemps depuis le dernier lancement: **{7}**\nMessages lus depuis le dernier lancement: **{8}**\nCommande la plus utilisée depuis le dernier lancement: **{9}**\nCommandes utilisées: **{10}**",
       "links": {
         "name": "Links",
         "links": "<:GH:416593854368841729> - [GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) | [Support Server](https://discord.gg/q98qeYN) | [Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | <:nkotreon:430733839003025409> [Patreon](https://www.patreon.com/NekoBot)"
       },
-      "footer": "Bot par ReKT#0001 & cleaned by Kot#1337 :^)"
+      "footer": "Bot par ReKT#0001 & aidé par Kot#1337 :^)"
     },
-    "whois_notfound": "Whois regarde pour {0} ]\n\nutilisateur non trouvé!",
-    "whois": "[ Whois regarde pour {0} ]\n\n\nNom:      {1}\nID:        {2}\nDiscrimation:   {3}\nBot:       {4}\nCréé :   {5}\n",
+    "whois_notfound": "Echec du whois : {0} ]\n\nutilisateur non trouvé!",
+    "whois": "[ Whois effectué : {0} ]\n\n\nNom:      {1}\nID:        {2}\nDiscriminant:   {3}\nBot:       {4}\nCréé le :   {5}\n",
     "userinfo": {
       "id": "ID",
-      "discrim": "Discriminateur",
+      "discrim": "Discriminant",
       "bot": "Bot",
-      "created": "Créé",
-      "joined": "Rejoins",
+      "created": "Crée",
+      "joined": "Date d'inscription",
       "animated_avatar": "Avatar animé",
-      "playing": "Joue",
+      "playing": "En train de jouer à",
       "status": "Statut",
       "color": "Couleur"
     },
@@ -31,25 +31,25 @@
       "name": "Nom",
       "online": "En ligne",
       "owner": "Créateur",
-      "created_at": "Créé",
-      "channels": "Salon",
-      "roles": "Roles",
+      "created_at": "Crée le",
+      "channels": "Salons",
+      "roles": "Rôles",
       "emojis": "Emojis",
-      "region": "Region",
+      "region": "Région",
       "security": "Securité"
     },
     "channelinfo": {
       "name": "Nom",
-      "guild": "Guilde",
+      "guild": "Serveur",
       "id": "ID",
-      "category_id": "Categorie ID",
+      "category_id": "ID de catégorie",
       "position": "Position",
       "nsfw": "NSFW",
       "members": "Membres",
-      "category": "Categorie",
+      "category": "Catégorie",
       "created_at": "Créé le"
     },
-    "coffee": "*bois du café*",
+    "coffee": "*Bois du café*",
     "voting_link": "Lien de vote"
   },
   "donator": {
@@ -60,7 +60,7 @@
       "already_active": "**Tu as déja un token d'activé!**",
       "in_use": "**Token actuellement utilisé.**"
     },
-    "whats_this": "OwO C'est quoi",
+    "whats_this": "Qu'est ce que c'est ? OwO",
     "donate": "Viens donner [Patreon](https://www.patreon.com/NekoBot) pour avoir accès a de nouvelles fonctionnalités  OwO"
   },
   "marriage": {
@@ -69,7 +69,7 @@
     "user_married": "Cette utilisateur est déjà marrié, dommage.",
     "marry_msg": "{0.name} veut marrier {1.name}!\n{1.mention} écris yes si tu veux te marrier",
     "cancelled": "Marriage annulé.",
-    "self_divorce": "Comment tu veux te divorcer ?",
+    "self_divorce": "Comment veux tu divorcer de toi même ?",
     "not_married": "Vous n'êtes pas marrié",
     "user_not_married": "Cette utilisateur est déjà marrié",
     "author_not_married_to_user": "Tu n'est pas marrié avec utilisateur"
@@ -99,9 +99,9 @@
       "description": "`Balance:` **{0}**\n`Réputation:` **{1}**\n`Niveau:` **{2}** | **{3}/{4}**\n\n```\n{5}```\nMarrié to: **{6}**"
     },
     "no_account": "Tu n'a pas de compte bancaire...",
-    "daily_timer": "Attend {0} heures avant d'utiliser tes crédits journalier...",
-    "daily_credits": "Crédits journalier",
-    "daily_voter": "Reçu 2500 + 5000 crédits journalier - Vote Bonus!",
+    "daily_timer": "Attend {0} heures avant d'utiliser tes crédits journaliers...",
+    "daily_credits": "Crédits journaliers",
+    "daily_voter": "Reçu 2500 + 5000 crédits journaliers - Bonus de vote !",
     "daily_normal": "Reçu 2500 crédits journaliers!",
     "vote_footer": "Pssst voter te donnera 3 fois le bonus journalier OwO, vote avec n!vote",
     "cant_rep_self": "Tu ne peux pas te donner de la réputation <:nkoDed:422666465238319107>",
@@ -119,14 +119,14 @@
     },
     "coinflip": {
       "too_low": "Votre montant est trop bas <:nkoDed:422666465238319107>",
-      "too_high": "Tu ne peux pas dépasser les 100,000",
-      "cant_spend": "Tu n'a pas assez a dépasser...",
-      "flipping": "Flipping",
+      "too_high": "Tu ne peux pas dépasser 100,000$",
+      "cant_spend": "Tu n'a pas assez d'argent...;c",
+      "flipping": "Lance la pièce...",
       "won": "{0.mention} Gagne {1}!!!",
       "lost": "Tu as perdu 😦"
     },
     "transfer": {
-      "min": "L'envoi minimum est de $10",
+      "min": "L'envoi minimum est de 10$",
       "bot": "Tu ne peux pas envoyer de crédits au bot.",
       "self": "Tu ne peux pas t'envoyer de l'argent à toi-même.",
       "user_no_account": "{0.name} n'a pas de compte bancaire...",
@@ -134,7 +134,7 @@
     }
   },
   "cardgame": {
-    "card_help": "Un jeu de carte roleplay de loli ofc!\n\n**Commandes**\n**n!card daily** - Ais tes cartes journalières\n**n!card display** - Voit les cartes qui t'appartiennent\n**n!card list** - Listes de tes cartes\n**n!card sell** - Vendre une carte\n**n!card fight** - Se battre contre un joueur OwO\n**n!card transfer** - Transférer une carte",
+    "card_help": "Un jeu de carte roleplay de loli ofc!\n\n**Commandes**\n**n!card daily** - Obtiens tes cartes journalières\n**n!card display** - Consulte une de tes cartes !\n**n!card list** - Liste de tes cartes\n**n!card sell** - Vendre une carte\n**n!card fight** - Se battre contre un joueur OwO\n**n!card transfer** - Transférer une carte",
     "coming_soon": "**Arrivera bientôt**",
     "battle": {
       "confirm": "{0.mention}, veux tu te battre contre {1.mention}? Ce sera annulé dans 15 secondes.",
@@ -152,12 +152,12 @@
   },
   "mod": {
     "dehoist": {
-      "start": "Dehoist started...",
-      "end": "{0} users dehoisted, finished in {1}s.\n{2} users failed to dehoist. Users dehoisted: {3}"
+      "start": "Régularisation des pseudonymes en cours...",
+      "end": "{0} users régularisés, terminé en {1}s.\n{2} utilisateurs non régularisé. Utilisateurs régularisés : {3}"
     },
-    "permission_error": "I couldn't do that action, either I dont have permissions or my role is too low.",
-    "kicked": "{0.name} a été kick.",
-    "banned": "{0.name} a été ban.",
+    "permission_error": "Je n'ai pas pu effectuer cette action, je n'ai pas les permissions requises ou mon rôle est trop bas dans la hiérarchie du serveur.",
+    "kicked": "{0.name} a été expulsé.",
+    "banned": "{0.name} a été bannis.",
     "renamed": "{0.name} a été renommé.",
     "unbanned_reason": "{0.user} débanni (ID: {0.user.id}), banni pour {0.reason}.",
     "unbanned": "Débannir {0.user} (ID: {0.user.id})."
