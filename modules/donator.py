@@ -63,9 +63,7 @@ class Donator:
             return "https://nekobot.xyz/placeholder.png"
 
     async def autoloodme(self):
-        if not self.looder_enabled:
-            self.looder_enabled = True
-        while self.looder_enabled:
+        while True:
 
             for channel in await self.get_lood_channel():
                 log.info("Sending loods to %s" % channel)
