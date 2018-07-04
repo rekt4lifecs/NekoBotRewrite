@@ -21,3 +21,4 @@ prettytable
 qrcode
 ujson
 listcord
+nekobot
