@@ -99,7 +99,7 @@ class NekoBot(commands.AutoShardedBot):
         super().__init__(command_prefix=_prefix_callable,  # commands.when_mentioned_or('n!')
                          description="NekoBot",
                          pm_help=None,
-                         shard_ids=[17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33],
+                         shard_ids=[34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50],
                          shard_count=51,
                          status=discord.Status.dnd,
                          activity=discord.Game(name="Restarting..."),
@@ -108,7 +108,7 @@ class NekoBot(commands.AutoShardedBot):
                          help_attrs={'hidden': True})
         self.counter = Counter()
         self.command_usage = Counter()
-        self.instance = 1
+        self.instance = 2
 
         async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)

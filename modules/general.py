@@ -176,23 +176,28 @@ class General:
         await ctx.trigger_typing()
         instance1g = (await self.bot.redis.get("instance0-guilds")).decode("utf8")
         instance2g = (await self.bot.redis.get("instance1-guilds")).decode("utf8")
-        servers = int(instance1g) + int(instance2g)
+        instance3g = (await self.bot.redis.get("instance2-guilds")).decode("utf8")
+        servers = int(instance1g) + int(instance2g) + int(instance3g)
 
         instance1m = (await self.bot.redis.get("instance0-users")).decode("utf8")
         instance2m = (await self.bot.redis.get("instance1-users")).decode("utf8")
-        members = int(instance1m) + int(instance2m)
+        instance3m = (await self.bot.redis.get("instance2-users")).decode("utf8")
+        members = int(instance1m) + int(instance2m) + int(instance3m)
 
         instance1mes = (await self.bot.redis.get("instance0-messages")).decode("utf8")
         instance2mes = (await self.bot.redis.get("instance1-messages")).decode("utf8")
-        messages = int(instance1mes) + int(instance2mes)
+        instance3mes = (await self.bot.redis.get("instance2-messages")).decode("utf8")
+        messages = int(instance1mes) + int(instance2mes) + int(instance3mes)
 
         instance1c = (await self.bot.redis.get("instance0-commands")).decode("utf8")
         instance2c = (await self.bot.redis.get("instance1-commands")).decode("utf8")
-        commands = int(instance1c) + int(instance2c)
+        instance3c = (await self.bot.redis.get("instance2-commands")).decode("utf8")
+        commands = int(instance1c) + int(instance2c) + int(instance3c)
 
         instance1chan = (await self.bot.redis.get("instance0-channels")).decode("utf8")
         instance2chan = (await self.bot.redis.get("instance1-channels")).decode("utf8")
-        channels = int(instance1chan) + int(instance2chan)
+        instance3chan = (await self.bot.redis.get("instance2-channels")).decode("utf8")
+        channels = int(instance1chan) + int(instance2chan) + int(instance3chan)
 
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
