@@ -110,7 +110,7 @@
     "points": "points",
     "given_rep": "Given Rep!",
     "failed_rep": "Failed to give rep!",
-    "no_rep_points": "{0.mention}, you dont have any rep points available ;c",
+    "no_rep_points": "{0.mention}, you dont have any rep points available ;c.\nYou can give more rep in **{1}**",
     "rep_msg": "{0.mention} has given {1.mention} 1 rep!\n**{1.name}** Now has {2} rep\nYou now have {3} rep {4} left for today!",
     "set_desc": {
       "updated": "Updated description!",

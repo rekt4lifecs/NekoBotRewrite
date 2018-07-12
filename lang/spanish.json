@@ -110,7 +110,7 @@
     "points": "puntos",
     "given_rep": "reputación recibida!",
     "failed_rep": "Error al recibir reputación!",
-    "no_rep_points": "{0.mention}, No te quedan mas puntos de reputación ;c",
+    "no_rep_points": "{0.mention}, No te quedan mas puntos de reputación ;c.\nYou can give more rep in **{1}**",
     "rep_msg": "{0.mention} ha dado a {1.mention} 1 punto de reputación!\n**{1.name}** ahora tiene {2} rep\nTe quedan {3} puntos de reputación {4} por hoy!",
     "set_desc": {
       "updated": "Descripción actualizada!",

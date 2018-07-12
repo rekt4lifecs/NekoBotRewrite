@@ -295,8 +295,10 @@ class economy:
                                                                                   availablerep, points))
             return await ctx.send(embed=em)
         else:
+            nextrep = repdata["user"]["nextAvailableReputations"][0]
+            timeleft = str(datetime.timedelta(milliseconds=nextrep)).rpartition(".")[0]
             em = discord.Embed(color=0xDEADBF, title=getlang(lang)["eco"]["failed_rep"],
-                               description=getlang(lang)["eco"]["no_rep_points"].format(author))
+                               description=getlang(lang)["eco"]["no_rep_points"].format(author, timeleft))
             return await ctx.send(embed=em)
 
     @commands.command()

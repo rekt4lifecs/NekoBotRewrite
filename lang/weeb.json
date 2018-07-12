@@ -110,7 +110,7 @@
     "points": "poinyts",
     "given_rep": "giveny wep! uwu",
     "failed_rep": "f-faiwed to give wep! uwu",
-    "no_rep_points": "{0.mention}, you donyt have a-anyy wep p-poinyts avaiwabwe ;-;c :3",
+    "no_rep_points": "{0.mention}, you donyt have a-anyy wep p-poinyts avaiwabwe ;-;c :3.\nyou can g-give mowe w-wep in **{1}**",
     "rep_msg": "{0.mention} has g-giveny {1.mention} 1 w-wep!\n**{1.name}** nyow h-has {2} wep\nyou nyow have {3} w-wep {4} weft fow today!",
     "set_desc": {
       "updated": "updated descwiptiony! OwO",
