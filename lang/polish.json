@@ -110,7 +110,7 @@
     "points": "punkty",
     "given_rep": "Dany rep!",
     "failed_rep": "Błšd przy dawaniu rep!",
-    "no_rep_points": "{0.mention}, narazie nie masz żadnych rep punktów ;c",
+    "no_rep_points": "{0.mention}, narazie nie masz żadnych rep punktów ;c.\nYou can give more rep in **{1}**",
     "rep_msg": "{0.mention} dał {1.mention} 1 rep!\n**{1.name}** Teraz ma {2} rep\nTeraz masz {3} rep {4} na dzisiaj!",
     "set_desc": {
       "updated": "Zaktualizowano opis!",
