@@ -25,9 +25,11 @@ class DiscordBotsOrgAPI:
                 log.info("Attempting to update server count.")
                 instance1 = (await self.bot.redis.get("instance0-guilds")).decode("utf8")
                 instance2 = (await self.bot.redis.get("instance1-guilds")).decode("utf8")
-                servers = int(instance1) + int(instance2)
+                instance3 = (await self.bot.redis.get("instance2-guilds")).decode("utf8")
+                servers = int(instance1) + int(instance2) + int(instance3)
                 game = discord.Streaming(name=random.choice(stats2), url="https://www.twitch.tv/rektdevlol")
                 await self.bot.change_presence(activity=game)
+                log.info("Servers: %s" % servers)
                 if self.bot.instance == 0:
                     try:
                         url = "https://discordbots.org/api/bots/310039170792030211/stats"
