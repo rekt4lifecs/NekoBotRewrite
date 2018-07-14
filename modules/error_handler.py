@@ -42,7 +42,7 @@ class error_handler:
                 "embeds": [
                     {
                         "title": f"Command: {ctx.command.qualified_name}, Instance: {self.bot.instance}",
-                        "description": f"```py\n{exception}\n```",
+                        "description": f"```py\n{exception}\n```\n By `{ctx.author}` (`{ctx.author.id}`)",
                         "color": 16740159
                     }
                 ]
