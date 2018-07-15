@@ -26,11 +26,13 @@ class Donator:
     def __init__(self, bot):
         self.bot = bot
         self.looder_enabled = False
-        self.lood_session = aiohttp.ClientSession()
-        self.bot.loop.create_task(self.autoloodme())
+        self.lood_session = aiohttp.ClientSession(loop=self.bot.loop)
 
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
+
+    async def on_ready(self):
+        self.bot.loop.create_task(self.autoloodme())
 
     async def has_donated(self, userid:int):
         async with self.bot.sql_conn.acquire() as conn:
