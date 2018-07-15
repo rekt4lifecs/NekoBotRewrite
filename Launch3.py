@@ -127,7 +127,7 @@ class NekoBot(commands.AutoShardedBot):
                 try:
                     self.load_extension(f"modules.{name}")
                 except:
-                    logger.warning("Failed to load {}.".format(name), file=sys.stderr)
+                    logger.warning("Failed to load {}.".format(name))
                     traceback.print_exc()
 
     async def on_command_error(self, context, exception):
