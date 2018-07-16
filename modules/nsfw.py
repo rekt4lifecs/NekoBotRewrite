@@ -14,6 +14,10 @@ class NSFW:
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
         self.nekobot = nekobot.Client(loop=self.bot.loop)
 
+    def unload(self):
+        self.nekobot.close()
+        self.session.close()
+
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
         async with self.bot.sql_conn.acquire() as conn:
             async with conn.cursor() as db:
@@ -341,34 +345,36 @@ class NSFW:
         except json.JSONDecodeError:
             await ctx.send(":x: No image found. Sorry :/")
 
-    @commands.command(name="rule34magik", aliases=["r34magik", "r34m"])
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.guild_only()
-    async def rule34m(self, ctx, tag:str):
-        """Magikify Rule34 Searches"""
-        if not ctx.message.channel.is_nsfw():
-            return await ctx.send("This is not an NSFW channel...", delete_after=5)
-        try:
-            async with ctx.typing():
-                async with aiohttp.ClientSession() as cs:
-                    async with cs.get(f"https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags={tag}") as r:
-                        data = json.loads(await r.text())
-                non_loli = list(filter(lambda x: 'loli' not in x['tags'] and 'shota' not in x['tags'], data))
-                if len(non_loli) == 0:
-                    em = discord.Embed(color=0xff6f3f, title="Warning", description="Loli/Shota in search.")
-                    return await ctx.send(embed=em)
-                response = non_loli[random.randint(0, len(non_loli) - 1)]
-                img = f"https://img.rule34.xxx/images/{response['directory']}/{response['image']}"
-                async with aiohttp.ClientSession() as cs:
-                    async with cs.get("https://nekobot.xyz/api/imagegen?type=magik&image="+img) as r:
-                        res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                if not res["success"]:
-                    return await ctx.send(f"**Failed to magikify a rule34 search**, `{res['message']}`")
-                em.set_image(url=res["message"])
-                await ctx.send(embed=em)
-        except json.JSONDecodeError:
-            await ctx.send(":x: No image found. Sorry :/")
+    # IP Banned from r34 on api dedi?
+    # @commands.command(name="rule34magik", aliases=["r34magik", "r34m", "rule34magick"])
+    # @commands.cooldown(1, 5, commands.BucketType.user)
+    # @commands.guild_only()
+    # async def rule34m(self, ctx, tag:str):
+    #     """Magikify Rule34 Searches"""
+    #     if not ctx.message.channel.is_nsfw():
+    #         return await ctx.send("This is not an NSFW channel...", delete_after=5)
+    #     try:
+    #         async with ctx.typing():
+    #             async with aiohttp.ClientSession() as cs:
+    #                 async with cs.get(f"https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags={tag}") as r:
+    #                     data = json.loads(await r.text())
+    #             non_loli = list(filter(lambda x: 'loli' not in x['tags'] and 'shota' not in x['tags'], data))
+    #             if len(non_loli) == 0:
+    #                 em = discord.Embed(color=0xff6f3f, title="Warning", description="Loli/Shota in search.")
+    #                 return await ctx.send(embed=em)
+    #             response = non_loli[random.randint(0, len(non_loli) - 1)]
+    #             img = f"https://img.rule34.xxx/images/{response['directory']}/{response['image']}"
+    #
+    #             try:
+    #                 img = await self.nekobot.magik(img)
+    #             except:
+    #                 return await ctx.send("Failed to get data.")
+    #
+    #             em = discord.Embed(color=0xDEADBF)
+    #             em.set_image(url=img)
+    #             await ctx.send(embed=em)
+    #     except json.JSONDecodeError:
+    #         await ctx.send(":x: No image found. Sorry :/")
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
