@@ -320,6 +320,7 @@ class Donator:
             attachment = str(url).rpartition('.')[2]
             if attachment not in ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'tiff', 'webp']:
                 return await ctx.send("**File type is forbiddon.**")
+            await ctx.trigger_typing()
             async with aiohttp.ClientSession() as session:
                 async with session.get(url) as response:
                     t = await response.read()
@@ -327,9 +328,11 @@ class Donator:
                     file = f"/var/www/html/" + attach
                     with open(file, "wb") as f:
                         f.write(t)
+                async with session.get("http://ip.42.pl/raw") as ip:
+                    myip = (await ip.read()).decode("utf-8")
                 async with session.get(f"https://nekobot.xyz/api/postimage?auth={config.dbpass}"
                                        f"&type=x"
-                                       f"&url=http://45.76.114.202/{attach}") as response:
+                                       f"&url=http://{myip}/{attach}") as response:
                     t = await response.json()
             await ctx.send(t["message"])
             os.remove(file)
