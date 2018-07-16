@@ -56,6 +56,9 @@ class Fun:
         self.bot = bot
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
 
+    def unload(self):
+        self.session.close()
+
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
         async with self.bot.sql_conn.acquire() as conn:
             async with conn.cursor() as db:
