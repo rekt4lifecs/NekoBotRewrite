@@ -14,10 +14,6 @@ class NSFW:
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
         self.nekobot = nekobot.Client(loop=self.bot.loop)
 
-    def unload(self):
-        self.nekobot.close()
-        self.session.close()
-
     async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
         async with self.bot.sql_conn.acquire() as conn:
             async with conn.cursor() as db:
