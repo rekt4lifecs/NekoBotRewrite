@@ -389,7 +389,7 @@ class NSFW:
                 data = random.choice(res)
                 if data == []:
                     return await ctx.send("**No images found**")
-                if data["has_children"]:
+                if "loli" in data["tags"] or "shota" in data["tags"]:
                     return await ctx.send("**Children found in image.**")
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=data["file_url"])
