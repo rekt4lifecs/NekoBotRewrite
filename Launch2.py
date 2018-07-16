@@ -90,7 +90,7 @@ async def _prefix_callable(bot, msg):
     if not prefix:
         prefix = ['n!', 'N!']
     else:
-        prefix = [prefix.decode("utf8")]
+        prefix = [prefix.decode("utf8"), "n!", "N!"]
     return commands.when_mentioned_or(*prefix)(bot, msg)
 
 class NekoBot(commands.AutoShardedBot):
