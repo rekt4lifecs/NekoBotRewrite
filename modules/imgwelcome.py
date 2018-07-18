@@ -40,7 +40,7 @@ class IMGWelcome:
         """Set the img text channel"""
         async with self.bot.sql_conn.acquire() as conn:
             async with conn.cursor() as db:
-                await db.execute(f"UPDATE newimgwelcome SET channel = {channel.id} WHERE server = {ctx.message.guild.id}")
+                await db.execute("UPDATE newimgwelcome SET channel = %s WHERE server = %s", (channel.id, ctx.guild.id,))
         await ctx.send(f"Updated channel to {channel.name}")
 
     @imgwelcome.command(name="img")

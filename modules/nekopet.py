@@ -206,6 +206,7 @@ class NekoPet:
                     return await strt.edit(content="**You don't have enough $ ;c**")
                 await self.remove_balance(ctx.message.author.id, 75000)
                 await self.create(ctx.message.author.id, name=f"{ctx.message.author.name}'s Neko", update=owned)
+                log.info("%s (%s) bought a neko." % (ctx.author.name, ctx.author.id,))
                 return await strt.edit(content="Successfully bought a neko!")
             else:
                 return await strt.edit(content="Returned...")
@@ -221,9 +222,9 @@ class NekoPet:
         food = int(food[0])
         if food >= 90:
             return await ctx.send("**Your neko already has enough food!**")
-        payamount = random.randint(250, 10000)
+        payamount = random.randint(250, 5000)
         if not await self.bal_check(ctx.message.author.id, payamount):
-            return await ctx.send("**You don't have enough food to give your pet ;c*")
+            return await ctx.send("**You don't have enough money to give your pet ;c*")
         try:
             await self.remove_balance(ctx.message.author.id, payamount)
             await self.execute(f"UPDATE nekopet SET food = 100 WHERE userid = {ctx.message.author.id}", commit=True)
