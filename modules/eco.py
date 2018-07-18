@@ -424,14 +424,13 @@ class economy:
             await self._levels_create_account(ctx.author)
 
         if amount < 10:
-            await ctx.send(getlang(lang)["eco"]["transfer"]["min"])
-            return
+            return await ctx.send(getlang(lang)["eco"]["transfer"]["min"])
+        elif amount > 10000000:
+            return await ctx.send("You cant transfer more than 10 million at a time")
         if user.bot:
-            await ctx.send(getlang(lang)["eco"]["transfer"]["bot"])
-            return
+            return await ctx.send(getlang(lang)["eco"]["transfer"]["bot"])
         elif user == ctx.message.author:
-            await ctx.send(getlang(lang)["eco"]["transfer"]["self"])
-            return
+            return await ctx.send(getlang(lang)["eco"]["transfer"]["self"])
         else:
             if not await self.has_account(ctx.author):
                 await ctx.send(getlang(lang)["eco"]["no_account"])
@@ -443,18 +442,11 @@ class economy:
                 author_balance = await self.get_balance(ctx.author)
                 user_balance = await self.get_balance(user)
                 if (author_balance - amount) < 0:
-                    await ctx.send(getlang(lang)["eco"]["coinflip"]["cant_spend"])
-                    return
+                    return await ctx.send(getlang(lang)["eco"]["coinflip"]["cant_spend"])
                 else:
                     await self.edit_balance(user, user_balance + int(amount - (amount * .07)))
                     await self.edit_balance(ctx.author, author_balance - amount)
                     await ctx.send(getlang(lang)["eco"]["transfer"]["sent"].format(int(amount - (amount * .07)), user))
-                    async with self.bot.sql_conn.acquire() as conn:
-                        async with conn.cursor() as db:
-                            await db.execute("SELECT balance FROM economy WHERE userid = 270133511325876224")
-                            rektbal = int((await db.fetchone())[0])
-                            await db.execute("UPDATE economy SET balance = %s WHERE userid = 270133511325876224",
-                                             (rektbal + int(amount * .07),))
                     log.info("%s (%s) sent %s (%s) $%s" % (ctx.author.name, ctx.author.id,
                                                               user.name, user.id, amount,))
                     try:
