@@ -8,36 +8,48 @@ class Games:
     def __init__(self, bot):
         self.bot = bot
 
-    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        async with self.bot.sql_conn.acquire() as conn:
-            async with conn.cursor() as db:
-                await db.execute(query)
-                if isSelect:
-                    if fetchAll:
-                        values = await db.fetchall()
-                    else:
-                        values = await db.fetchone()
-                if commit:
-                    await conn.commit()
-            if isSelect:
-                return values
-
     @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 7, commands.BucketType.user)
     async def osu(self, ctx, username:str):
         """Get osu stats"""
         try:
             await ctx.trigger_typing()
-            url = "https://nekobot.xyz/api/imagegen?type=osu&key=%s&username=%s" % (config.osu_key, username,)
+            url = "https://osu.ppy.sh/api/get_user?k=%s&u=%s" % (config.osu_key, username,)
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(url) as r:
-                    res = await r.json()
-            if res.get("message") == "userNotFound":
-                return await ctx.send("**Unable to find a user with that username.**")
-            em = discord.Embed(color=0xDEADBF).set_image(url=res.get("message"))
-            await ctx.send(embed=em)
-        except:
-            return await ctx.send("Failed to fetch data.")
+                    data = await r.json()
+            if data == []:
+                return await ctx.send("User not found.")
+
+            data = data[0]
+            level = data["level"]
+            rank = data["pp_rank"]
+            crank = data["pp_country_rank"]
+            accuracy = int(float(data["accuracy"]))
+            pp = int(float(data["pp_raw"]))
+
+            ss = int(data["count_rank_ss"])
+            ssp = int(data["count_rank_ssh"])
+            s = int(data["count_rank_s"])
+            sp = int(data["count_rank_sh"])
+            a = int(data["count_rank_a"])
+
+            msg = "OSU! Profile for `%s`\n" % username
+            msg += "```\n"
+            msg += "Level %s\n" % level
+            msg += "Rank - %s\n" % rank
+            msg += "Country Rank - %s\n" % crank
+            msg += f"Accuracy - {accuracy}%\n"
+            msg += "PP - %s\n" % pp
+            msg += "SS - %s (SS+ %s)\n" % (ss, ssp,)
+            msg += "S  - %s (S+ %s)\n" % (s, sp,)
+            msg += "A  - %s\n" % a
+            msg += "```"
+
+            await ctx.send(msg)
+
+        except Exception as e:
+            return await ctx.send("Failed to fetch data, %s" % e)
 
     @commands.command()
     @commands.cooldown(1, 30, commands.BucketType.user)
