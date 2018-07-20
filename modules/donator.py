@@ -7,6 +7,7 @@ from .utils.hastebin import post as hastepost
 import config
 import os, ujson
 import logging
+from prettytable import PrettyTable
 
 # Languages
 languages = ["english", "weeb", "tsundere", "polish", "spanish", "french"]
@@ -194,12 +195,13 @@ class Donator:
             async with conn.cursor() as db:
                 await db.execute("SELECT userid, token, usetime FROM donator")
                 allkeys = await db.fetchall()
-        text = f"```css\n" \
-               f"[      USER      ] | [    KEY     ] | [ EXPIRY DATE ]\n"
+        table = PrettyTable()
+        table.field_names = ["User", "Key", "Expiry Date"]
         for key in allkeys:
-            text += f"{key[0]} | {key[1]} | {datetime.datetime.fromtimestamp(int(key[2])).strftime('%Y-%m-%d')}\n"
-        text += "```"
-        await ctx.send(text)
+            expiry = str(datetime.datetime.fromtimestamp(int(key[2])).strftime('%Y-%m-%d'))
+            table.add_row([str(key[0]), str(key[1]), expiry])
+        x = await hastepost(str(table))
+        await ctx.send(x)
 
     @commands.command(hidden=True)
     @commands.is_owner()
