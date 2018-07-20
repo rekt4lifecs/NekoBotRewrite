@@ -899,20 +899,6 @@ class General:
         except Exception as e:
             await ctx.send(f"Failed to get system info,\nError: {e}")
 
-    async def on_message(self, message):
-        try:
-            if message.guild.id == 221989003400970241:
-                if message.content == ".":
-                    await message.delete()
-            if message.channel.id == 445635075543924756:
-                descrip = message.embeds[0].description
-                clean = int(str(descrip).replace("<@", "").replace(">", "").replace("has voted and received 5000 credits!", ""))
-                user = self.bot.get_user(clean)
-                await user.send(embed=discord.Embed(color=0xDEADBF, description="You have received 5000 credits for voting!"))
-                log.info(f"{user} | Voted")
-        except:
-            pass
-
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def prefix(self, ctx):
