@@ -236,11 +236,11 @@ class CardGame:
                 await self._create_user(ctx.message.author.id)
         except:
             pass
-        async with aiohttp.ClientSession(headers={"Authorization": config.dbots_key}) as cs:
-            async with cs.get(f'https://discordbots.org/api/bots/310039170792030211/check?userId={ctx.message.author.id}') as r:
-                res = await r.json()
-        if not res['voted'] == 1:
-            return await ctx.send(getlang(lang)["cardgame"]["daily"]["no_vote"])
+        # async with aiohttp.ClientSession(headers={"Authorization": config.dbots_key}) as cs:
+        #     async with cs.get(f'https://discordbots.org/api/bots/310039170792030211/check?userId={ctx.message.author.id}') as r:
+        #         res = await r.json()
+        # if not res['voted'] == 1:
+        #     return await ctx.send(getlang(lang)["cardgame"]["daily"]["no_vote"])
         i = await self.execute(f"SELECT 1 FROM roleplay WHERE userid = {ctx.message.author.id}", isSelect=True)
         if i == 0:
             await self.execute(f"INSERT INTO roleplay VALUES ({ctx.message.author.id}, 0, 0, 0, 0, 0, 0, 0)",
