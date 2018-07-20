@@ -228,14 +228,6 @@ class economy:
                     await db.execute("SELECT payday FROM economy WHERE userid = %s", (user.id,))
                     paydaytime = int((await db.fetchone())[0])
 
-            try:
-                url = f"https://discordbots.org/api/bots/310039170792030211/check?userId={ctx.message.author.id}"
-                async with aiohttp.ClientSession(headers={"Authorization": config.dbots_key}) as cs:
-                    async with cs.get(url) as r:
-                        res = await r.json()
-            except:
-                return await ctx.send("Failed to get data please try again later.")
-
             timenow = datetime.datetime.utcfromtimestamp(time.time()).strftime("%d")
             timecheck = datetime.datetime.utcfromtimestamp(paydaytime).strftime("%d")
             if timecheck == timenow:
@@ -248,7 +240,28 @@ class economy:
             else:
                 balance = await self.get_balance(user)
 
-                if res["voted"]:
+                try:
+                    url = f"https://discordbots.org/api/bots/310039170792030211/check?userId={ctx.message.author.id}"
+                    async with aiohttp.ClientSession(headers={"Authorization": config.dbots_key}) as cs:
+                        async with cs.get(url) as r:
+                            res = await r.json()
+                    voted = res["voted"]
+                except:
+                    webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
+                    payload = {
+                        "embeds": [
+                            {
+                                "title": f"Command: {ctx.command.qualified_name}, Instance: {self.bot.instance}, error.",
+                                "description": f"```json\n{res}\n```\n By `{ctx.author}` (`{ctx.author.id}`)",
+                                "color": 16740159
+                            }
+                        ]
+                    }
+                    async with aiohttp.ClientSession() as cs:
+                        await cs.post(webhook_url, json=payload)
+                    return await ctx.send("Failed to get data please try again later.")
+
+                if voted:
                     embed = discord.Embed(color=0xDEADBF,
                                           title=getlang(lang)["eco"]["daily_credits"])
                     weekday = datetime.datetime.today().weekday()
