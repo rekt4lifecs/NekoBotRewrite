@@ -205,7 +205,7 @@ class economy:
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['payday'])
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def daily(self, ctx):
         """Receive your daily bonus"""
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
