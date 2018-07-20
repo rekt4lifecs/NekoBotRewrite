@@ -3,6 +3,7 @@ from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
 import aiohttp, config, ujson
+import os
 
 # Languages
 languages = ["english", "weeb", "tsundere", "polish", "spanish", "french"]
@@ -58,7 +59,6 @@ list_ = [
     "Flandre Scarlet",
     "Hiiragi Kagami",
     "Tatsumaki",
-    "Louise Fran\u00e7oise Le Blanc De La Valli\u00e8re",
     "Kaname Madoka",
     "Sakura Kyouko",
     "Hoshimiya Kate",
@@ -70,7 +70,7 @@ list_ = [
     "chifuyu_himeki",
     "holo",
     "dva"
-]
+] #"Louise Francoise Le Blanc De La Valliere",
 
 class CardGame:
     """Loli Card Gamelol"""
@@ -560,6 +560,7 @@ class CardGame:
         embed.add_field(name="Defense", value=str(defense))
 
         await ctx.send(file=discord.File(f'data/cards/{num}.png'), embed=embed.set_image(url=f'attachment://{num}.png'))
+        os.remove("data/cards/%s.png" % num)
 
     @card.command(name='generate', hidden=True)
     @commands.is_owner()
