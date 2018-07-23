@@ -606,10 +606,10 @@ class Fun:
             async with cs.get(url, headers=headers) as r:
                 res = await r.json()
         js = random.choice(res['data'])
-        if js['nsfw'] or js['is_ad'] == True:
+        if js['nsfw'] or js['is_ad']:
             while True:
                 js = random.choice(res['data'])
-                if js['nsfw'] or js['is_ad'] == False:
+                if not js['nsfw'] or not js['is_ad']:
                     break
         embed = discord.Embed(color=0xDEADBF,
                               description=f"**{js['title']}**")
