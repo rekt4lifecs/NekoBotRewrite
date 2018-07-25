@@ -22,7 +22,7 @@ class Games:
                 return await ctx.send("User not found.")
 
             data = data[0]
-            level = data["level"]
+            level = float(data["level"])
             rank = data["pp_rank"]
             crank = data["pp_country_rank"]
             accuracy = int(float(data["accuracy"]))
@@ -34,9 +34,16 @@ class Games:
             sp = int(data["count_rank_sh"])
             a = int(data["count_rank_a"])
 
+            int_level = int(level)
+            next_level = int_level + 1
+
+            score = int((1 - (next_level - level)) * 100)
+            filled_progbar = round(score / 100 * 10)
+            level_graphx = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
+
             msg = "OSU! Profile for `%s`\n" % username
             msg += "```\n"
-            msg += "Level %s\n" % level
+            msg += "Level - %s [ %s ] %s\n" % (int_level, level_graphx, next_level,)
             msg += "Rank - %s\n" % rank
             msg += "Country Rank - %s\n" % crank
             msg += f"Accuracy - {accuracy}%\n"
