@@ -438,7 +438,7 @@ class economy:
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 30, commands.BucketType.user)
-    async def transfer(self, ctx, user:discord.Member, amount:int,):
+    async def transfer(self, ctx, user:discord.Member, amount:int):
         """Transfer Credits to Users"""
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
@@ -470,15 +470,59 @@ class economy:
                 if (author_balance - amount) < 0:
                     return await ctx.send(getlang(lang)["eco"]["coinflip"]["cant_spend"])
                 else:
-                    await self.edit_balance(user, user_balance + int(amount - (amount * .07)))
+                    await self.edit_balance(user, user_balance + amount)
                     await self.edit_balance(ctx.author, author_balance - amount)
-                    await ctx.send(getlang(lang)["eco"]["transfer"]["sent"].format(int(amount - (amount * .07)), user))
+                    await ctx.send(getlang(lang)["eco"]["transfer"]["sent"].format(amount, user))
                     log.info("%s (%s) sent %s (%s) $%s" % (ctx.author.name, ctx.author.id,
                                                               user.name, user.id, amount,))
                     try:
                         await user.send(f"{ctx.author.name} has sent you ${amount}.")
                     except:
                         pass
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(1, 7, commands.BucketType.user)
+    async def roulette(self, ctx, amount:int, color:str):
+
+        if not await self.has_level_account(ctx.author):
+            await self._levels_create_account(ctx.author)
+
+        if not await self.has_account(ctx.author):
+            return await ctx.send("You don't have a bank account...")
+
+        author_balance = await self.get_balance(ctx.author)
+
+        if amount <= 0:
+            return await ctx.send("You can't bet that low...")
+        if (author_balance - amount) < 0:
+            return await ctx.send("You don't have that much to bet...")
+        if amount > 75000:
+            return await ctx.send("You can't bet past 75k")
+
+        color = color.lower()
+        if color not in ["red", "green", "black"]:
+            return await ctx.send("Invalid color, available colors: `red`, `black`, `green`")
+        log.info("%s (%s) started a roulette game" % (ctx.author, ctx.author.id))
+        await self.edit_balance(ctx.author, author_balance - amount)
+
+        choice = random.randint(0, 36)
+
+        if choice in [32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10]:
+            chosen_color = "red"
+        elif choice in [5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26]:
+            chosen_color = "black"
+        else:
+            chosen_color = "green"
+
+        if chosen_color != color:
+            log.info("%s (%s) lost roulette" % (ctx.author, ctx.author.id))
+            return await ctx.send(f"It landed on `{chosen_color}`, you lost :c")
+        else:
+            log.info("%s (%s) won roulette" % (ctx.author, ctx.author.id))
+            await self.edit_balance(ctx.author, author_balance + int(amount * .65))
+            return await ctx.send(f"It landed on `{chosen_color}` and you won!")
+
 
     async def delmsg(self, msg:discord.Message):
         try:
@@ -513,6 +557,7 @@ class economy:
             return
 
         await self.edit_balance(ctx.author, author_balance - amount)
+        log.info("%s (%s) started a blackjack game" % (ctx.author, ctx.author.id))
 
         card_list = {
             "2": "<:2C:424587135463456778>",
@@ -560,7 +605,7 @@ class economy:
 
         win_embed = discord.Embed(color=0xDEADBF)
         win_embed.title = "Blackjack Win"
-        win_embed.description = "**%s** (%s) has won %s" % (ctx.author.name, ctx.author.id, int(amount * .5))
+        win_embed.description = "**%s** (%s) has won %s" % (ctx.author.name, ctx.author.id, int(amount * .75))
 
         lose_embed = discord.Embed(color=0xDEADBF)
         lose_embed.title = "Blackjack Lose"
