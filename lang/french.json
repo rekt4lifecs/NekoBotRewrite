@@ -10,7 +10,7 @@
       "stats": "Serveurs: **{0} ({1})**\nMembres: **{2}**\nCommandes disponibles: **{3}**\nCanaux: **{4}**\nInstances: **{5}**\nBot dans un salon vocal(s): **{6}**\nTemps depuis le dernier lancement: **{7}**\nMessages lus depuis le dernier lancement: **{8}**\nCommande la plus utilisée depuis le dernier lancement: **{9}**\nCommandes utilisées: **{10}**",
       "links": {
         "name": "Links",
-        "links": "<:GH:416593854368841729> - [GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) | [Support Server](https://discord.gg/q98qeYN) | [Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | <:nkotreon:430733839003025409> [Patreon](https://www.patreon.com/NekoBot)"
+        "links": "[GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) | [Support Server](https://discord.gg/q98qeYN) | [Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | [Patreon](https://www.patreon.com/NekoBot)"
       },
       "footer": "Bot par ReKT#0001 & aidé par Kot#1337 :^)"
     },

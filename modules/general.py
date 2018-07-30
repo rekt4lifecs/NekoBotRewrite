@@ -174,30 +174,24 @@ class General:
     async def info(self, ctx):
         """Get Bot's Info"""
         await ctx.trigger_typing()
-        instance1g = (await self.bot.redis.get("instance0-guilds")).decode("utf8")
-        instance2g = (await self.bot.redis.get("instance1-guilds")).decode("utf8")
-        instance3g = (await self.bot.redis.get("instance2-guilds")).decode("utf8")
-        servers = int(instance1g) + int(instance2g) + int(instance3g)
 
-        instance1m = (await self.bot.redis.get("instance0-users")).decode("utf8")
-        instance2m = (await self.bot.redis.get("instance1-users")).decode("utf8")
-        instance3m = (await self.bot.redis.get("instance2-users")).decode("utf8")
-        members = int(instance1m) + int(instance2m) + int(instance3m)
+        servers = 0
+        members = 0
+        messages = 0
+        commands = 0
+        channels = 0
 
-        instance1mes = (await self.bot.redis.get("instance0-messages")).decode("utf8")
-        instance2mes = (await self.bot.redis.get("instance1-messages")).decode("utf8")
-        instance3mes = (await self.bot.redis.get("instance2-messages")).decode("utf8")
-        messages = int(instance1mes) + int(instance2mes) + int(instance3mes)
-
-        instance1c = (await self.bot.redis.get("instance0-commands")).decode("utf8")
-        instance2c = (await self.bot.redis.get("instance1-commands")).decode("utf8")
-        instance3c = (await self.bot.redis.get("instance2-commands")).decode("utf8")
-        commands = int(instance1c) + int(instance2c) + int(instance3c)
-
-        instance1chan = (await self.bot.redis.get("instance0-channels")).decode("utf8")
-        instance2chan = (await self.bot.redis.get("instance1-channels")).decode("utf8")
-        instance3chan = (await self.bot.redis.get("instance2-channels")).decode("utf8")
-        channels = int(instance1chan) + int(instance2chan) + int(instance3chan)
+        for x in range(0, 3):
+            y = (await self.bot.redis.get("instance%s-guilds" % x)).decode("utf8")
+            servers += int(y)
+            y = (await self.bot.redis.get("instance%s-users" % x)).decode("utf8")
+            members += int(y)
+            y = (await self.bot.redis.get("instance%s-messages" % x)).decode("utf8")
+            messages += int(y)
+            y = (await self.bot.redis.get("instance%s-commands" % x)).decode("utf8")
+            commands += int(y)
+            y = (await self.bot.redis.get("instance%s-channels" % x)).decode("utf8")
+            channels += int(y)
 
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
@@ -222,7 +216,6 @@ class General:
         info.add_field(name=getlang(lang)["general"]["info"]["links"]["name"],
                        value=getlang(lang)["general"]["info"]["links"]["links"])
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
-        info.set_footer(text=getlang(lang)["general"]["info"]["footer"])
         await ctx.send(embed=info)
 
     @commands.command(hidden=True)
