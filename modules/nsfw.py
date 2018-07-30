@@ -246,7 +246,10 @@ class NSFW:
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=await self.nekobot.image("thigh"))
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/v2/image/thighs") as r:
+                res = await r.json()
+        em.set_image(url=res["message"])
         await ctx.send(embed=em)
 
     @commands.command()
