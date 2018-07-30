@@ -99,12 +99,12 @@ class NekoBot(commands.AutoShardedBot):
         super().__init__(command_prefix=_prefix_callable,  # commands.when_mentioned_or('n!')
                          description="NekoBot",
                          pm_help=None,
-                         shard_ids=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
-                         shard_count=57,
+                         shard_ids=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                         shard_count=60,
                          status=discord.Status.dnd,
                          activity=discord.Game(name="Restarting..."),
                          fetch_offline_members=False,
-                         max_messages=2500,
+                         max_messages=105,
                          help_attrs={'hidden': True})
         self.counter = Counter()
         self.command_usage = Counter()
@@ -155,10 +155,9 @@ class NekoBot(commands.AutoShardedBot):
         await self.process_commands(message)
 
     async def close(self):
-        await self.redis.close()
-        await self.sql_conn.close()
+        self.redis.close()
+        self.sql_conn.close()
         await super().close()
-        await self.close()
 
     async def on_ready(self):
         if not hasattr(self, 'uptime'):
