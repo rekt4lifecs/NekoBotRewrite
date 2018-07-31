@@ -2,6 +2,7 @@ from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 import discord, os, aiohttp, string
 from io import BytesIO
+import textwrap
 
 class IMGWelcome:
 
@@ -227,8 +228,10 @@ class IMGWelcome:
         # _outline((152, 116), 'of ' + sname, 1, server_font, (0, 0, 0, 255))
         # drawtwo.text((152, 116), 'of ' + sname, font=server_font, fill=(255, 255, 255, 230))
 
-        _outline((152, 100), "Welcome to " + str(server.name) + "!", 1, server_font, (0, 0, 0, 255))
-        drawtwo.text((152, 100), "Welcome to " + str(server.name) + "!", font=server_font, fill=(255, 255, 255, 230))
+        server_text = f"Welcome to {server.name}!"
+        server_text = textwrap.wrap(server_text, 25)
+        _outline((152, 100), server_text, 1, server_font, (0, 0, 0, 255))
+        drawtwo.text((152, 100), server_text, font=server_font, fill=(255, 255, 255, 230))
 
         welcome_picture.save("data/welcome.png")
 
