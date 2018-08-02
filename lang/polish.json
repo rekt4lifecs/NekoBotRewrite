@@ -54,7 +54,7 @@
   },
   "donator": {
     "error": {
-      "error": "Błšd",
+      "error": "Błąd",
       "message": "Musisz być [donator](https://www.patreon.com/NekoBot) aby użyć tej komendy.",
       "invalid": "**Błędny Klucz**",
       "already_active": "**Twój token już jest aktywny!**",
@@ -64,15 +64,15 @@
     "donate": "Zostań naszym patronem na [Patreon](https://www.patreon.com/NekoBot) żeby uzyskać specjalne cechy OwO"
   },
   "marriage": {
-    "marry_self": "Nie możesz sam siebie polubić.",
-    "author_married": "Już jeste po lubie",
-    "user_married": "Ta osoba już jest po lubie.",
-    "marry_msg": "{0.name} chce wyjć za {1.name}!\n{1.mention} napisz: yes, aby się zgodzić!",
-    "cancelled": "lub odwołany.",
-    "self_divorce": "Jak możesz się rozwieć?",
-    "not_married": "Nie jeste jeszcze po lubie",
-    "user_not_married": "Ta osoba nie jest po lubie",
-    "author_not_married_to_user": "Nie jeste po lubie z tym użytkownikiem"
+    "marry_self": "Nie możesz sam siebie poślubić.",
+    "author_married": "Już jesteś po ślubie",
+    "user_married": "Ta osoba już jest po ślubie.",
+    "marry_msg": "{0.name} chce wyjść za {1.name}!\n{1.mention} napisz: yes, aby się zgodzić!",
+    "cancelled": "lub odwołany.",
+    "self_divorce": "Jak możesz się rozwieść?",
+    "not_married": "Nie jesteś jeszcze po ślubie",
+    "user_not_married": "Ta osoba nie jest po ślubie",
+    "author_not_married_to_user": "Nie jesteś po ślubie z tym użytkownikiem"
   },
   "audio": {
     "join_voice": "Musisz dołšczyć do kanału głosowego.",
@@ -84,13 +84,13 @@
     "track_enqueued": "Track Enqueued",
     "not_playing": "Nie puszczam niczego...",
     "now_playing": "Teraz Grane",
-    "not_in_my_vc": "Nie jeste na moim kanale głosowym!",
+    "not_in_my_vc": "Nie jesteś na moim kanale głosowym!",
     "no_queue": "Niczego nie ma w kolejce odtwarzania."
   },
   "eco": {
     "welcome": "Witamy w NekoBanku!",
     "total_amount": "Całkowite $",
-    "user_amount": "Twoja iloć",
+    "user_amount": "Twoja ilość",
     "footer": "[Donate](https://www.patreon.com/NekoBot) lub [Vote](https://discordbots.org/bot/nekobot) aby zyskać większy przychód OwO",
     "registered": "Zarejestrowano konto bankowe!",
     "already_registered": "Już masz konto bankowe <:nkoDed:422666465238319107>",
@@ -123,7 +123,7 @@
       "cant_spend": "Nie masz tak wiele do wydania...",
       "flipping": "Rzucanie",
       "won": "{0.mention} Wygrał {1}!!!",
-      "lost": "Przegrałe đŚ"
+      "lost": "Przegrałeś đŚ"
     },
     "transfer": {
       "min": "Minimalna kwota do wysyłki to $10",
