@@ -134,7 +134,7 @@
     }
   },
   "cardgame": {
-    "card_help": "A loli roleplaying card game ofc!\n\n**Commands**\n**n!card daily** - Get your daily cards\n**n!card display** - Display a card of yours\n**n!card list** - Lists your cards\n**n!card sell** - Sell a card\n**n!card fight** - Fight a user OwO\n**n!card transfer** - Transfer a card",
+    "card_help": "A loli roleplaying card game ofc!\n\n**Commands**\n**n!card daily** - Get your daily cards\n**n!card display** - Display a card of yours\n**n!card list** - Lists your cards\n**n!card sell** - Sell a card\n**n!card fight** - Fight a user OwO",
     "coming_soon": "**Coming Soon**",
     "battle": {
       "confirm": "{0.mention} battle {1.mention} i want to see someone cry! Will time-out in 15 seconds.",

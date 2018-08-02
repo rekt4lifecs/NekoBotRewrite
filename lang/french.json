@@ -134,7 +134,7 @@
     }
   },
   "cardgame": {
-    "card_help": "Un jeu de carte roleplay de loli ofc!\n\n**Commandes**\n**n!card daily** - Obtiens tes cartes journalières\n**n!card display** - Consulte une de tes cartes !\n**n!card list** - Liste de tes cartes\n**n!card sell** - Vendre une carte\n**n!card fight** - Se battre contre un joueur OwO\n**n!card transfer** - Transférer une carte",
+    "card_help": "Un jeu de carte roleplay de loli ofc!\n\n**Commandes**\n**n!card daily** - Obtiens tes cartes journalières\n**n!card display** - Consulte une de tes cartes !\n**n!card list** - Liste de tes cartes\n**n!card sell** - Vendre une carte\n**n!card fight** - Se battre contre un joueur OwO",
     "coming_soon": "**Arrivera bientôt**",
     "battle": {
       "confirm": "{0.mention}, veux tu te battre contre {1.mention}? Ce sera annulé dans 15 secondes.",

@@ -72,7 +72,7 @@
     "self_divorce": "Como te puedes divorciar de tí mismo?",
     "not_married": "No estás casado.",
     "user_not_married": "Ese usuario no está casado.",
-    "author_not_married_to_user": "No estás casado con ese usuario.",
+    "author_not_married_to_user": "No estás casado con ese usuario."
   },
   "audio": {
     "join_voice": "Necesitas unirte al canal de voz.",
@@ -134,7 +134,7 @@
     }
   },
   "cardgame": {
-    "card_help": "Un juego de cartas de lolis obviamente!\n\n**Comandos**\n**n!card daily** - Te da tu carta diaria\n**n!card display** - Muestra una de tus cartas\n**n!card list** - Muestra las cartas que posees\n**n!card sell** - Vende una carta\n**n!card fight** - Pelea contra otra persona OwO\n**n!card transfer** - Envía una carta a otro jugador.",
+    "card_help": "Un juego de cartas de lolis obviamente!\n\n**Comandos**\n**n!card daily** - Te da tu carta diaria\n**n!card display** - Muestra una de tus cartas\n**n!card list** - Muestra las cartas que posees\n**n!card sell** - Vende una carta\n**n!card fight** - Pelea contra otra persona OwO",
     "coming_soon": "**Próximamente**",
     "battle": {
       "confirm": "{0.mention}, {1.mention} te ha retado, te gustaría pelear? Escribe yes para aceptar. Expira en 15 segundos.",
