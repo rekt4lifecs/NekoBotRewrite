@@ -5,6 +5,7 @@ import datetime
 import aioredis, aiomysql
 import os, asyncio
 import config
+import rethinkdb as r
 
 # logger = logging.getLogger()
 # logger.setLevel(logging.INFO)
@@ -99,8 +100,8 @@ class NekoBot(commands.AutoShardedBot):
         super().__init__(command_prefix=_prefix_callable,  # commands.when_mentioned_or('n!')
                          description="NekoBot",
                          pm_help=None,
-                         shard_ids=[40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59],
-                         shard_count=60,
+                         shard_ids=[44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65],
+                         shard_count=66,
                          status=discord.Status.dnd,
                          activity=discord.Game(name="Restarting..."),
                          max_messages=105,
@@ -117,6 +118,13 @@ class NekoBot(commands.AutoShardedBot):
             self.sql_conn = await aiomysql.create_pool(host='localhost', port=3306,
                                                        user='root', password=config.dbpass,
                                                        db='nekobot', loop=self.loop, autocommit=True)
+
+        async def _init_rethink():
+            r.set_loop_type("asyncio")
+            self.r_conn = await r.connect(host="localhost",
+                                          db="nekobot")
+
+        self.loop.create_task(_init_rethink())
 
         self.loop.create_task(_init_sql())
         self.loop.create_task(_init_redis())
@@ -155,6 +163,7 @@ class NekoBot(commands.AutoShardedBot):
         await self.process_commands(message)
 
     async def close(self):
+        self.r_conn.close()
         self.redis.close()
         self.sql_conn.close()
         await super().close()
@@ -184,67 +193,67 @@ class NekoBot(commands.AutoShardedBot):
                 await self.redis.set("instance%s-messages" % self.instance, self.counter["messages_read"])
                 await self.redis.set("instance%s-commands" % self.instance, self.counter["commands_used"])
                 await self.redis.set("instance%s-channels" % self.instance, len(set(self.get_all_channels())))
-                async with self.sql_conn.acquire() as conn:
-                    async with conn.cursor() as db:
-                        topbalquery = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
-                        await db.execute(topbalquery)
-                        allusers = await db.fetchall()
+                # async with self.sql_conn.acquire() as conn:
+                #     async with conn.cursor() as db:
+                #         topbalquery = "SELECT userid, balance FROM economy ORDER BY balance+0 DESC LIMIT 10"
+                #         await db.execute(topbalquery)
+                #         allusers = await db.fetchall()
                 logger.info(f"Updated Instance {self.instance}'s Guild Count with {len(self.guilds)}")
-
-                user1 = None
-                user2 = None
-                user3 = None
-                user4 = None
-                user5 = None
-                user6 = None
-                user7 = None
-                user8 = None
-                user9 = None
-                user10 = None
-
-                for guild in self.guilds:
-                    for member in guild.members:
-                        if member.id == int(allusers[0][0]):
-                            user1 = member.name
-                        elif member.id == int(allusers[1][0]):
-                            user2 = member.name
-                        elif member.id == int(allusers[2][0]):
-                            user3 = member.name
-                        elif member.id == int(allusers[3][0]):
-                            user4 = member.name
-                        elif member.id == int(allusers[4][0]):
-                            user5 = member.name
-                        elif member.id == int(allusers[5][0]):
-                            user6 = member.name
-                        elif member.id == int(allusers[6][0]):
-                            user7 = member.name
-                        elif member.id == int(allusers[7][0]):
-                            user8 = member.name
-                        elif member.id == int(allusers[8][0]):
-                            user9 = member.name
-                        elif member.id == int(allusers[9][0]):
-                            user10 = member.name
-
-                if user1:
-                    await self.redis.set("ecotop1", user1)
-                if user2:
-                    await self.redis.set("ecotop2", user2)
-                if user3:
-                    await self.redis.set("ecotop3", user3)
-                if user4:
-                    await self.redis.set("ecotop4", user4)
-                if user5:
-                    await self.redis.set("ecotop5", user5)
-                if user6:
-                    await self.redis.set("ecotop6", user6)
-                if user7:
-                    await self.redis.set("ecotop7", user7)
-                if user8:
-                    await self.redis.set("ecotop8", user8)
-                if user9:
-                    await self.redis.set("ecotop9", user9)
-                if user10:
-                    await self.redis.set("ecotop10", user10)
+                #
+                # user1 = None
+                # user2 = None
+                # user3 = None
+                # user4 = None
+                # user5 = None
+                # user6 = None
+                # user7 = None
+                # user8 = None
+                # user9 = None
+                # user10 = None
+                #
+                # for guild in self.guilds:
+                #     for member in guild.members:
+                #         if member.id == int(allusers[0][0]):
+                #             user1 = member.name
+                #         elif member.id == int(allusers[1][0]):
+                #             user2 = member.name
+                #         elif member.id == int(allusers[2][0]):
+                #             user3 = member.name
+                #         elif member.id == int(allusers[3][0]):
+                #             user4 = member.name
+                #         elif member.id == int(allusers[4][0]):
+                #             user5 = member.name
+                #         elif member.id == int(allusers[5][0]):
+                #             user6 = member.name
+                #         elif member.id == int(allusers[6][0]):
+                #             user7 = member.name
+                #         elif member.id == int(allusers[7][0]):
+                #             user8 = member.name
+                #         elif member.id == int(allusers[8][0]):
+                #             user9 = member.name
+                #         elif member.id == int(allusers[9][0]):
+                #             user10 = member.name
+                #
+                # if user1:
+                #     await self.redis.set("ecotop1", user1)
+                # if user2:
+                #     await self.redis.set("ecotop2", user2)
+                # if user3:
+                #     await self.redis.set("ecotop3", user3)
+                # if user4:
+                #     await self.redis.set("ecotop4", user4)
+                # if user5:
+                #     await self.redis.set("ecotop5", user5)
+                # if user6:
+                #     await self.redis.set("ecotop6", user6)
+                # if user7:
+                #     await self.redis.set("ecotop7", user7)
+                # if user8:
+                #     await self.redis.set("ecotop8", user8)
+                # if user9:
+                #     await self.redis.set("ecotop9", user9)
+                # if user10:
+                #     await self.redis.set("ecotop10", user10)
 
                 await asyncio.sleep(300)
 
