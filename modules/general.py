@@ -14,6 +14,10 @@ from io import BytesIO
 from .utils import checks
 import qrcode, os, uuid
 import logging
+import base64
+from PIL import Image
+import urllib
+from .utils.hastebin import post as haste
 
 log = logging.getLogger()
 
@@ -82,6 +86,87 @@ class General:
 
     async def on_socket_response(self, msg):
         self.bot.socket_stats[msg.get('t')] += 1
+
+    @commands.command()
+    @commands.cooldown(2, 45, commands.BucketType.user)
+    @commands.guild_only()
+    async def whatanime(self, ctx):
+        """Check what the anime is from an image."""
+
+        if not len(ctx.message.attachments) == 0:
+            img = ctx.message.attachments[0].url
+        else:
+            def check(m):
+                return m.channel == ctx.message.channel and m.author == ctx.message.author
+
+            try:
+                await ctx.send("Send me an image of an anime to search for.")
+                x = await self.bot.wait_for('message', check=check, timeout=15)
+            except:
+                return await ctx.send("Timed out.")
+
+            if not len(x.attachments) >= 1:
+                return await ctx.send("You didn't give me a image.")
+
+            img = x.attachments[0].url
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(img) as r:
+                res = await r.read()
+
+        with Image.open(BytesIO(res)) as img:
+            img.convert("RGB")
+            img.seek(0)
+            img.resize((512, 288))
+            i = BytesIO()
+            img.save(i, format="PNG")
+            i.seek(0)
+
+        try:
+            await ctx.trigger_typing()
+            async with aiohttp.ClientSession() as cs:
+                async with cs.post("https://whatanime.ga/api/search?token=%s" % config.whatanime,
+                                   data={"image": str(base64.b64encode(i.read()).decode("utf8"))},
+                                   headers={"Content-Type": "application/x-www-form-urlencoded"}) as r:
+                    try:
+                        res = await r.json()
+                    except:
+                        return await ctx.send("File too large.")
+
+            if res["docs"] == []:
+                return await ctx.send("Nothing found.")
+
+            doc = res["docs"][0]
+
+            if doc["is_adult"] and not ctx.channel.is_nsfw:
+                return await ctx.send("Can't send NSFW in a non NSFW channel.")
+
+            em = discord.Embed(color=0xDEADBF)
+            em.title = doc["title_romaji"]
+            em.url = "https://myanimelist.net/anime/%s" % doc["mal_id"]
+            em.add_field(name="Episode", value=str(doc["episode"]))
+            em.add_field(name="At", value=str(doc["at"]))
+            em.add_field(name="Matching %", value=str(round(doc["similarity"] * 100, 2)))
+            em.add_field(name="Native Title", value=doc["title_native"])
+            em.set_footer(text="Powered by whatanime.ga")
+
+            try:
+                preview = f"https://whatanime.ga/preview.php?anilist_id={doc['anilist_id']}" \
+                          f"&file={urllib.parse.quote_plus(doc['filename'])}" \
+                          f"&t={doc['at']}" \
+                          f"&token={doc['tokenthumb']}"
+                async with aiohttp.ClientSession() as cs:
+                    async with cs.get(preview) as r:
+                        res = await r.read()
+
+                file = discord.File(res, filename="file.gif")
+                em.set_image(url="attachment://file.gif")
+            except:
+                return await ctx.send(embed=em)
+
+            await ctx.send(embed=em, file=file)
+        except Exception as e:
+            return await ctx.send("Failed to get data, %s" % e)
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
