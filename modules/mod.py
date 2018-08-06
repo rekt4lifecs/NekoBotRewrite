@@ -11,6 +11,7 @@ import config
 import aiohttp
 import re, ujson, inspect, datetime, collections
 import logging
+import rethinkdb as r
 
 log = logging.getLogger()
 
@@ -1053,32 +1054,24 @@ class Moderation:
         """Sets the autorole."""
         guild = ctx.message.guild
         if role is None:
-            async with self.bot.sql_conn.acquire() as conn:
-                async with conn.cursor() as db:
-                    await db.execute(f"DELETE FROM autorole WHERE guild = {guild.id}")
+            await r.table("autorole").get(str(guild.id)).delete().run(self.bot.r_conn)
             return await ctx.send("Reset Autorole.")
         else:
-            async with self.bot.sql_conn.acquire() as conn:
-                async with conn.cursor() as db:
-                    if not await db.execute(f"SELECT 1 FROM autorole WHERE guild = {guild.id}"):
-                        await db.execute(f"INSERT INTO autorole VALUES ({guild.id}, {role.id})")
-                    else:
-                        await db.execute(f"UPDATE autorole SET role = {role.id} WHERE guild = {guild.id}")
+            data = {
+                "id": str(guild.id),
+                "role": str(role.id)
+            }
+            await r.table("autorole").get(str(guild.id)).delete().run(self.bot.r_conn)
+            await r.table("autorole").insert(data).run(self.bot.r_conn)
             return await ctx.send(f"Updated Autorole to {role.name}")
 
     async def on_member_join(self, member):
         server = member.guild
         try:
-            async with self.bot.sql_conn.acquire() as conn:
-                async with conn.cursor() as db:
-                    if not await db.execute(f"SELECT 1 FROM autorole WHERE guild = {server.id}"):
-                        return
-                    else:
-                        await db.execute(f"SELECT role FROM autorole WHERE guild = {server.id}")
-                        role = await db.fetchone()
-                        role = role[0]
-            role = discord.utils.get(server.roles, id=int(role))
-            await member.add_roles(role, reason="Autorole")
+            if await r.table("autorole").get(str(server.id)).run(self.bot.r_conn):
+                data = await r.table("autorole").get(str(server.id)).run(self.bot.r_conn)
+                role = discord.utils.get(server.roles, id=int(data["role"]))
+                await member.add_roles(role, reason="Autorole")
         except Exception as e:
             log.warning(e)
             pass
