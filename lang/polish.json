@@ -134,7 +134,7 @@
     }
   },
   "cardgame": {
-    "card_help": "Loli gra karciana ofc!\n\n**Komendy**\n**n!card daily** - Odbierz swoje dzienne karty\n**n!card display** - Wywietl swoje karty\n**n!card list** - Lista twoich kart\n**n!card sell** - Sprzedaj karty\n**n!card fight** - Walcz z użytkownikiem OwO",
+    "card_help": "Loli gra karciana ofc!\n\n**Komendy**\n**n!card daily** - Odbierz swoje dzienne karty\n**n!card display** - Wywietl swoje karty\n**n!card list** - Lista twoich kart\n**n!card sell** - Sprzedaj karty\n**n!card transfer** - Transfer Cards",
     "coming_soon": "**Wkrótce**",
     "battle": {
       "confirm": "{0.mention}, chcesz walczyć z {1.mention}? Walka zostanie anulowana po 15 sekundach.",

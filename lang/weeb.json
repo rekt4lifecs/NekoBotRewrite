@@ -134,7 +134,7 @@
     }
   },
   "cardgame": {
-    "card_help": "a w-wowi wowepwayinyg cawd game ofc! UWU\n\n**commanyds**\n**n!cawd d-daiwy** - get youw daiwy cawds uwu\n**n!cawd d-dispway** - dispway a cawd of y-youws x3\n**n!cawd w-wist** - w-wists youw cawds owo\n**n!c-cawd seww** - seww a cawd UwU\n**n!cawd fight** - f-fight a-a usew owo X3",
+    "card_help": "a w-wowi wowepwayinyg cawd game ofc! UWU\n\n**commanyds**\n**n!cawd d-daiwy** - get youw daiwy cawds uwu\n**n!cawd d-dispway** - dispway a cawd of y-youws x3\n**n!cawd w-wist** - w-wists youw cawds owo\n**n!c-cawd seww** - seww a cawd UwU\n**n!card transfer** - Transfer Cards",
     "coming_soon": "**c-cominyg soony UwU**",
     "battle": {
       "confirm": "{0.mention}, wouwd you w-wike t-to battwe {1.mention}? wiww timout i-iny 15 seconyds. OWO",
