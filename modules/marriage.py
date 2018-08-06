@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord, asyncio
 import ujson
+import rethinkdb as r
 
 # Languages
 languages = ["english", "weeb", "tsundere", "polish", "spanish", "french"]
@@ -18,33 +19,11 @@ class Marriage:
     def __init__(self, bot):
         self.bot = bot
 
-    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        async with self.bot.sql_conn.acquire() as conn:
-            async with conn.cursor() as db:
-                await db.execute(query)
-                if isSelect:
-                    if fetchAll:
-                        values = await db.fetchall()
-                    else:
-                        values = await db.fetchone()
-                if commit:
-                    await conn.commit()
-            if isSelect:
-                return values
-
-    async def userexists(self, datab : str, user : discord.Member):
-        user = user.id
-        x = await self.execute(f"SELECT 1 FROM {datab} WHERE userid = {user}", isSelect=True)
-        if not x:
-            return False
-        else:
-            return True
-
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def marry(self, ctx, user : discord.Member):
         """Marry someone OwO"""
-        author = ctx.message.author
+        author = ctx.author
 
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
@@ -55,10 +34,10 @@ class Marriage:
         if user == author:
             await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["marry_self"]))
             return
-        if await self.userexists('marriage', author):
+        if await r.table("marriage").get(str(author.id)).run(self.bot.r_conn):
             await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["author_married"]))
             return
-        elif await self.userexists('marriage', user):
+        elif await r.table("marriage").get(str(user.id)).run(self.bot.r_conn):
             await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["user_married"]))
             return
         else:
@@ -76,8 +55,8 @@ class Marriage:
                 return
 
             await ctx.send(f"🎉 {author.mention} ❤ {user.mention} 🎉")
-            await self.execute(f"INSERT INTO marriage VALUES({author.id}, {user.id})", commit=True)
-            await self.execute(f"INSERT INTO marriage VALUES({user.id}, {author.id})", commit=True)
+            await r.table("marriage").insert({"id": str(author.id), "marriedTo": str(user.id)}).run(self.bot.r_conn)
+            await r.table("marriage").insert({"id": str(user.id), "marriedTo": str(author.id)}).run(self.bot.r_conn)
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -91,16 +70,12 @@ class Marriage:
         else:
             lang = "english"
 
-        if await self.userexists('marriage', author) is False:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["not_married"]))
-            return
-        x = await self.execute(f"SELECT marryid FROM marriage WHERE userid = {author.id}", isSelect=True)
-        user_married_to = int(x[0])
-        married_to_name = self.bot.get_user(user_married_to)
-        if married_to_name:
-            married_to_name = married_to_name.name
-        else:
-            married_to_name = "Unknown user"
+        if not await r.table("marriage").get(str(author.id)).run(self.bot.r_conn):
+            return await ctx.send(embed=discord.Embed(color=0xff5630,
+                                                      description=getlang(lang)["marriage"]["not_married"]))
+        x = await r.table("marriage").get(str(author.id)).run(self.bot.r_conn)
+        user_married_to = int(x["marriedTo"])
+        married_to_name = await self.bot.get_user_info(user_married_to)
 
         def check(m):
             return m.channel == ctx.message.channel and m.author == author
@@ -117,8 +92,8 @@ class Marriage:
             return
 
         await ctx.send(f"{author.name} divorced {married_to_name} 😦😢")
-        await self.execute(f"DELETE FROM marriage WHERE userid = {author.id}", commit=True)
-        await self.execute(f"DELETE FROM marriage WHERE userid = {user_married_to}", commit=True)
+        await r.table("marriage").get(str(author.id)).delete().run(self.bot.r_conn)
+        await r.table("marriage").get(str(user_married_to)).delete().run(self.bot.r_conn)
 
 def setup(bot):
     bot.add_cog(Marriage(bot))
