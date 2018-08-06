@@ -143,9 +143,9 @@ class economy:
         rep = (await self.__get_rep_data(user.id))["user"]["reputation"]
 
         # Get Users Level
-        xp = await self.bot.redis.get(f"{ctx.message.author.id}-xp")
+        xp = await r.table("levelSystem").get(str(ctx.author.id)).run(self.bot.r_conn)
         if xp:
-            xp = int(xp)
+            xp = xp["xp"]
             level = self._find_level(xp)
             required = self._level_exp(level + 1)
         else:
@@ -154,17 +154,16 @@ class economy:
             required = 0
 
         # Get user married to
-        async with self.bot.sql_conn.acquire() as conn:
-            async with conn.cursor() as db:
-                if not await db.execute("SELECT marryid FROM marriage WHERE userid = %s", (user.id,)):
-                    married = "Nobody"
-                else:
-                    married = await self.bot.get_user_info(int((await db.fetchone())[0]))
+        married = await r.table("marriage").get(str(ctx.author.id)).run(self.bot.r_conn)
+        if not married:
+            married = "Nobody"
+        else:
+            married = await self.bot.get_user_info(married["marriedTo"])
 
         em = discord.Embed(color=color)
         em.title = "%s's Profile" % user.name
-        wew = (f"${balance}", rep, level, info,)
-        em.description = "💵 | Balance: **%s**\n📈 | Rep: **%s**\n🎮 | Level: **%s**\n\n```\n%s\n```" % wew
+        wew = (f"${balance}", rep, level, xp, required, info,)
+        em.description = "💵 | Balance: **%s**\n📈 | Rep: **%s**\n🎮 | Level: **%s %s/%s**\n\n```\n%s\n```" % wew
         em.set_footer(text="Married to %s" % married)
         em.set_thumbnail(url=user.avatar_url)
 
@@ -713,13 +712,26 @@ class economy:
         return await msg.edit(embed=em)
 
     async def on_message(self, message):
-        if random.randint(1, 30) == 1:
-            if not await self.bot.redis.get(f"{message.author.id}-xp"):
-                await self.bot.redis.set(f"{message.author.id}-xp", 0)
-            currxp = await self.bot.redis.get(f"{message.author.id}-xp")
-            currxp = int(currxp)
-            newxp = random.randint(1, 10)
-            await self.bot.redis.set(f"{message.author.id}-xp", currxp + newxp)
+        if message.author.bot:
+            return
+        if random.randint(1, 7) == 1:
+            author = message.author
+            if not await r.table("levelSystem").get(str(author.id)).run(self.bot.r_conn):
+                data = {
+                    "id": str(author.id),
+                    "xp": 0,
+                    "lastxp": "0"
+                }
+                await r.table("levelSystem").insert(data).run(self.bot.r_conn)
+            user_data = await r.table("levelSystem").get(str(author.id)).run(self.bot.r_conn)
+            if (int(time.time()) - int(user_data["lastxp"])) >= 120:
+                newxp = random.randint(1, 25)
+                xp = user_data["xp"] + newxp
+                data = {
+                    "xp": xp,
+                    "lastxp": str(int(time.time()))
+                }
+                await r.table("levelSystem").get(str(author.id)).update(data).run(self.bot.r_conn)
 
 def setup(bot):
     bot.add_cog(economy(bot))
