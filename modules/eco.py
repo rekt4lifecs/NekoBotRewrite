@@ -715,21 +715,31 @@ class economy:
         if message.author.bot:
             return
         if random.randint(1, 7) == 1:
+            if not len(message.content) > 5:
+                return
             author = message.author
             if not await r.table("levelSystem").get(str(author.id)).run(self.bot.r_conn):
                 data = {
                     "id": str(author.id),
                     "xp": 0,
-                    "lastxp": "0"
+                    "lastxp": "0",
+                    "blacklisted": False,
+                    "lastxptimes": []
                 }
                 await r.table("levelSystem").insert(data).run(self.bot.r_conn)
             user_data = await r.table("levelSystem").get(str(author.id)).run(self.bot.r_conn)
+            if user_data["blacklisted"]:
+                return
             if (int(time.time()) - int(user_data["lastxp"])) >= 120:
+                lastxptimes = user_data["lastxptimes"]
+                lastxptimes.append(str(int(time.time())))
+
                 newxp = random.randint(1, 25)
                 xp = user_data["xp"] + newxp
                 data = {
                     "xp": xp,
-                    "lastxp": str(int(time.time()))
+                    "lastxp": str(int(time.time())),
+                    "lastxptimes": lastxptimes
                 }
                 await r.table("levelSystem").get(str(author.id)).update(data).run(self.bot.r_conn)
 
