@@ -399,6 +399,9 @@ class economy:
         if chosen_color != color:
             return await ctx.send(f"It landed on `{chosen_color}`, you lost :c")
         else:
+            if chosen_color == "green":
+                await self.__update_balance(ctx.author.id, author_balance + int(amount * 5))
+                return await ctx.send("You hit green!")
             await self.__update_balance(ctx.author.id, author_balance + int(amount * .65))
             return await ctx.send(f"It landed on `{chosen_color}` and you won!")
 
