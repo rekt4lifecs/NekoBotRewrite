@@ -143,7 +143,7 @@ class economy:
         rep = (await self.__get_rep_data(user.id))["user"]["reputation"]
 
         # Get Users Level
-        xp = await r.table("levelSystem").get(str(ctx.author.id)).run(self.bot.r_conn)
+        xp = await r.table("levelSystem").get(str(user.id)).run(self.bot.r_conn)
         if xp:
             xp = xp["xp"]
             level = self._find_level(xp)
@@ -154,7 +154,7 @@ class economy:
             required = 0
 
         # Get user married to
-        married = await r.table("marriage").get(str(ctx.author.id)).run(self.bot.r_conn)
+        married = await r.table("marriage").get(str(user.id)).run(self.bot.r_conn)
         if not married:
             married = "Nobody"
         else:
