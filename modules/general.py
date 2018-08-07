@@ -17,7 +17,7 @@ import logging
 import base64
 from PIL import Image
 import urllib
-from .utils.hastebin import post as haste
+import rethinkdb as r
 
 log = logging.getLogger()
 
@@ -69,20 +69,6 @@ class General:
         self.counter = Counter()
         if not hasattr(bot, "games"):
             self.bot.games = Counter()
-
-    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        async with self.bot.sql_conn.acquire() as conn:
-            async with conn.cursor() as db:
-                await db.execute(query)
-                if isSelect:
-                    if fetchAll:
-                        values = await db.fetchall()
-                    else:
-                        values = await db.fetchone()
-                if commit:
-                    await conn.commit()
-            if isSelect:
-                return values
 
     async def on_socket_response(self, msg):
         self.bot.socket_stats[msg.get('t')] += 1
@@ -930,7 +916,7 @@ class General:
         try:
             users_added = []
             for userid in user_ids:
-                await self.execute(f"INSERT INTO dbl VALUES (0, {userid}, 0, 0)", commit=True)
+                await r.table("votes").insert({"id": str(userid)}).run(self.bot.r_conn)
                 users_added.append(userid)
             await ctx.send("Added %s users to the db" % (len(users_added),))
         except Exception as e:
