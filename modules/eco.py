@@ -63,11 +63,7 @@ class economy:
         return res
 
     async def __has_voted(self, user:int):
-        url = f"https://discordbots.org/api/bots/310039170792030211/check?userId=%s" % user
-        async with aiohttp.ClientSession(headers={"Authorization": dbots_key}) as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
-        if res["voted"]:
+        if await r.table("votes").get(str(user)).run(self.bot.r_conn):
             return True
         else:
             return False

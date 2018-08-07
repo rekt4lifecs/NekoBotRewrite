@@ -5,6 +5,7 @@ from .utils import checks, chat_formatting, hastebin
 import config
 import json
 import nekobot
+import rethinkdb as r
 
 class NSFW:
     """NSFW Commands OwO"""
@@ -14,19 +15,11 @@ class NSFW:
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
         self.nekobot = nekobot.Client(loop=self.bot.loop)
 
-    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        async with self.bot.sql_conn.acquire() as conn:
-            async with conn.cursor() as db:
-                await db.execute(query)
-                if isSelect:
-                    if fetchAll:
-                        values = await db.fetchall()
-                    else:
-                        values = await db.fetchone()
-                if commit:
-                    await conn.commit()
-            if isSelect:
-                return values
+    async def __has_voted(self, user:int):
+        if await r.table("votes").get(str(user)).run(self.bot.r_conn):
+            return True
+        else:
+            return False
 
     async def log_error(self, error:str):
         webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
@@ -62,7 +55,7 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        if await self.execute(f"SELECT 1 FROM dbl WHERE user = %s" % ctx.author.id, isSelect=True):
+        if await self.__has_voted(ctx.author.id):
             em = discord.Embed(color=0xDEADBF)
             em.set_image(url=await self.nekobot.image("pgif"))
 
@@ -310,7 +303,7 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>\nhttps://nekobot.xyz/hentai.png")
             return
-        if await self.execute("SELECT 1 FROM dbl WHERE user = %s" % ctx.author.id, isSelect=True):
+        if await self.__has_voted(ctx.author.id):
             em = discord.Embed(color=0xDEADBF)
             em.set_image(url=await self.nekobot.image("hentai"))
             await ctx.send(embed=em)

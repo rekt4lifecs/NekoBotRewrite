@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord, aiohttp, random, config, datetime, base64, hashlib
 from io import BytesIO
 import os
+import rethinkdb as r
 
 key = config.weeb
 auth = {"Authorization": "Wolke " + key}
@@ -56,19 +57,11 @@ class Fun:
         self.bot = bot
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
 
-    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        async with self.bot.sql_conn.acquire() as conn:
-            async with conn.cursor() as db:
-                await db.execute(query)
-                if isSelect:
-                    if fetchAll:
-                        values = await db.fetchall()
-                    else:
-                        values = await db.fetchone()
-                if commit:
-                    await conn.commit()
-            if isSelect:
-                return values
+    async def __has_voted(self, user:int):
+        if await r.table("votes").get(str(user)).run(self.bot.r_conn):
+            return True
+        else:
+            return False
 
     @commands.command()
     @commands.guild_only()
@@ -516,11 +509,7 @@ class Fun:
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def changemymind(self, ctx, *, text:str):
-        votes = await self.execute("SELECT user FROM dbl", isSelect=True, fetchAll=True)
-        voters = []
-        for vote in votes:
-            voters.append(vote[0])
-        if str(ctx.message.author.id) in voters:
+        if await self.__has_voted(ctx.author.id):
             await ctx.trigger_typing()
             url = f"https://nekobot.xyz/api/imagegen?type=changemymind&text={text}"
             async with aiohttp.ClientSession() as cs:
