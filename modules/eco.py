@@ -396,9 +396,9 @@ class economy:
             return await ctx.send(f"It landed on `{chosen_color}`, you lost :c")
         else:
             if chosen_color == "green":
-                await self.__update_balance(ctx.author.id, author_balance + int(amount * 5))
+                await self.__update_balance(ctx.author.id, author_balance + int(amount * 36))
                 return await ctx.send("You hit green!")
-            await self.__update_balance(ctx.author.id, author_balance + int(amount * .65))
+            await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
             return await ctx.send(f"It landed on `{chosen_color}` and you won!")
 
     async def delmsg(self, msg: discord.Message):
@@ -456,6 +456,8 @@ class economy:
         bot_deck = []
         author_deck_n = []
         bot_deck_n = []
+        hasHit_author = False
+        hasHit_bot = False
 
         while True:
             card = random.choice(cards)
@@ -463,6 +465,12 @@ class economy:
                 author_deck.append(card)
                 if card in special:
                     card = 10
+                if card == "11":
+                    if not hasHit_author:
+                        card = 11
+                        hasHit_author = True
+                    else:
+                        card = 1
                 author_deck_n.append(card)
             if len(author_deck) == 5:
                 break
@@ -473,6 +481,12 @@ class economy:
                 bot_deck.append(card)
                 if card in special:
                     card = 10
+                if card == "11":
+                    if not hasHit_bot:
+                        card = 11
+                        hasHit_bot = True
+                    else:
+                        card = 1
                 bot_deck_n.append(card)
             if len(bot_deck) == 5:
                 break
