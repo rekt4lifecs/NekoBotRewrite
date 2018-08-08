@@ -882,7 +882,8 @@ class General:
             em = discord.Embed(color=0xDEADBF, title="Config",
                                description=" - avatar, **Owner Only**\n"
                                            "- username, **Owner Only**\n"
-                                           "- blacklist, **Owner Only**")
+                                           "- blacklist, **Owner Only**\n"
+                                           "- reset, **Owner Only**")
             await ctx.send(embed=em)
 
     @config.command(name="avatar", hidden=True)
@@ -913,7 +914,7 @@ class General:
     @config.command(hidden=True, name="blacklist")
     @commands.is_owner()
     async def conf_blacklist(self, ctx, userid):
-        """Blacklist userids from economy"""
+        """Blacklist user from levelling"""
         userdata = await r.table("levelSystem").get(str(userid)).run(self.bot.r_conn)
         if userdata["blacklisted"]:
             await r.table("levelSystem").get(str(userid)).update({"blacklisted": False}).run(self.bot.r_conn)
@@ -921,6 +922,13 @@ class General:
         else:
             await r.table("levelSystem").get(str(userid)).update({"blacklisted": True}).run(self.bot.r_conn)
             await ctx.send("Added to blacklist")
+
+    @config.command(hidden=True, name="reset")
+    @commands.is_owner()
+    async def conf_reset(self, ctx, userid:int):
+        """Reset user"""
+        await r.table("levelSystem").get(str(userid)).delete().run(self.bot.r_conn)
+        await ctx.send("Reset user.")
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -934,6 +942,32 @@ class General:
             await ctx.send("Added %s users to the db" % (len(users_added),))
         except Exception as e:
             await ctx.send(f"`{e}`")
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def getuser(self, ctx, userid:int):
+        """Get user from id"""
+        try:
+            user = await self.bot.get_user_info(userid)
+            created_at = user.created_at.strftime("%d %b %Y %H:%M")
+            bank = await r.table("economy").get(str(userid)).run(self.bot.r_conn)
+            level = await r.table("levelSystem").get(str(userid)).run(self.bot.r_conn)
+
+            em = discord.Embed(color=0xDEADBF)
+            em.set_author(name=str(user), icon_url=user.avatar_url)
+            em.add_field(name="Bot?", value=str(user.bot))
+            em.add_field(name="Created At", value=str(created_at))
+            if bank:
+                em.add_field(name="Balance", value=bank["balance"])
+                em.add_field(name="Last Payday", value=bank["lastpayday"])
+            if level:
+                em.add_field(name="XP", value=str(level["xp"]))
+                em.add_field(name="Level", value=str(int((1 / 278) * (9 + math.sqrt(81 + 1112 * (level["xp"]))))))
+                em.add_field(name="Blacklisted?", value=str(level["blacklisted"]))
+                em.add_field(name="Last XP", value=level["lastxp"])
+            await ctx.send(embed=em)
+        except:
+            await ctx.send("Failed to find user.")
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
