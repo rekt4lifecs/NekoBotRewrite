@@ -874,14 +874,15 @@ class General:
 
         await p.paginate()
 
-    @commands.group()
+    @commands.group(hidden=True)
     @checks.is_admin()
     async def config(self, ctx):
         """Configuration"""
         if ctx.invoked_subcommand is None:
             em = discord.Embed(color=0xDEADBF, title="Config",
                                description=" - avatar, **Owner Only**\n"
-                                           "- username, **Owner Only**")
+                                           "- username, **Owner Only**\n"
+                                           "- blacklist, **Owner Only**")
             await ctx.send(embed=em)
 
     @config.command(name="avatar", hidden=True)
@@ -908,6 +909,18 @@ class General:
             await ctx.message.add_reaction(emoji)
         except:
             pass
+
+    @config.command(hidden=True, name="blacklist")
+    @commands.is_owner()
+    async def conf_blacklist(self, ctx, userid):
+        """Blacklist userids from economy"""
+        userdata = await r.table("levelSystem").get(str(userid)).run(self.bot.r_conn)
+        if userdata["blacklisted"]:
+            await r.table("levelSystem").get(str(userid)).update({"blacklisted": False}).run(self.bot.r_conn)
+            await ctx.send("Removed from blacklist")
+        else:
+            await r.table("levelSystem").get(str(userid)).update({"blacklisted": True}).run(self.bot.r_conn)
+            await ctx.send("Added to blacklist")
 
     @commands.command(hidden=True)
     @commands.is_owner()
