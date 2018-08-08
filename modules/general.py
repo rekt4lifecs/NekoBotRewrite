@@ -927,7 +927,7 @@ class General:
     @commands.is_owner()
     async def conf_reset(self, ctx, userid:int):
         """Reset user"""
-        await r.table("levelSystem").get(str(userid)).delete().run(self.bot.r_conn)
+        await r.table("levelSystem").get(str(userid)).update({"xp": 0, "lastxptimes": [], "lastxp": "0"}).run(self.bot.r_conn)
         await ctx.send("Reset user.")
 
     @commands.command(hidden=True)
