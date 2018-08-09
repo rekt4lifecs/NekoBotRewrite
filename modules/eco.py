@@ -233,17 +233,16 @@ class economy:
                                headers={"Authorization": "Wolke " + weeb},
                                data={"source_user": str(ctx.author.id)}) as r:
                 data = await r.json()
-            async with cs.get("https://api.weeb.sh/reputation/310039170792030211/%s" % ctx.author.id,
-                               headers={"Authorization": "Wolke " + weeb}) as r:
-                repdata = await r.json()
 
-        availablerep = repdata['user']['availableReputations']
-        if data['status'] == 200:
-            await ctx.send("**🆙 | %s has given %s a reputation point!**" % (ctx.author.name, user.mention,))
-        else:
-            nextrep = repdata["user"]["nextAvailableReputations"][0]
-            timeleft = str(datetime.timedelta(milliseconds=nextrep)).rpartition(".")[0]
-            await ctx.send("**🆙 | %s, you can award more reputation in %s hours**" % (ctx.author.mention, timeleft,))
+            if data['status'] == 200:
+                await ctx.send("**%s has given %s 1 reputation point!**" % (ctx.author.name, user.mention,))
+            else:
+                async with cs.get("https://api.weeb.sh/reputation/310039170792030211/%s" % ctx.author.id,
+                                   headers={"Authorization": "Wolke " + weeb}) as r:
+                    repdata = await r.json()
+                nextrep = repdata["user"]["nextAvailableReputations"][0]
+                timeleft = str(datetime.timedelta(milliseconds=nextrep)).rpartition(".")[0]
+                await ctx.send("**%s, you can give more reputation in %s**" % (ctx.author.mention, timeleft,))
 
     @commands.command()
     @commands.cooldown(1, 7, commands.BucketType.user)
