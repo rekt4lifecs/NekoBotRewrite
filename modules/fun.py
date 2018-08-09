@@ -147,34 +147,6 @@ class Fun:
             return await ctx.send("**Failed to successfully get image.**")
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res["message"]))
 
-    @commands.command(aliases=['dragonify'])
-    @commands.cooldown(1, 3, commands.BucketType.user)
-    async def dragonic(self, ctx, *, text:str):
-        """Translate english to dragonic"""
-        await ctx.trigger_typing()
-        try:
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://nekobot.xyz/api/text?type=dragonic&text={text}") as r:
-                    res = await r.json()
-            em = discord.Embed(color=0xDEADBF, title="Dragonic Text", description=res['message'])
-            await ctx.send(embed=em)
-        except:
-            await ctx.send("Failed to get data.")
-
-    @commands.command(aliases=['dedragonify'])
-    @commands.cooldown(1, 3, commands.BucketType.user)
-    async def dedragonic(self, ctx, *, text:str):
-        """Translate dragonic to english"""
-        await ctx.trigger_typing()
-        try:
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://nekobot.xyz/api/text?type=dedragonic&text={text}") as r:
-                    res = await r.json()
-            em = discord.Embed(color=0xDEADBF, title="Dedragonic Text", description=res['message'])
-            await ctx.send(embed=em)
-        except:
-            await ctx.send("Failed to get data.")
-
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def toxicity(self, ctx, *, text:str):
@@ -311,32 +283,6 @@ class Fun:
             return img
         res = await (await self.session.get("https://nekobot.xyz/api/imagegen?type=deepfry&image=%s" % img)).json()
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
-
-    @commands.command(name="b64", aliases=['b64encode', 'base64encode'])
-    @commands.cooldown(1, 7, commands.BucketType.user)
-    async def base_encode(self, ctx, *, encode_to: str):
-        """Encode with Base64"""
-        try:
-            encoded = base64.b64encode(encode_to.encode())
-            await ctx.send(embed=discord.Embed(color=0xDEADBF, title=f"{encode_to}",
-                                               description=f"```\n{encoded}\n```"))
-        except discord.Forbidden:
-            pass
-        except Exception as e:
-            await ctx.send(f"Could not encode.\n`{e}`")
-
-    @commands.command(name="md5")
-    @commands.cooldown(1, 7, commands.BucketType.user)
-    async def md_five(self, ctx, *, encode_to: str):
-        """Encode with Base64"""
-        try:
-            encoded = hashlib.md5(encode_to.encode('utf-8')).hexdigest()
-            await ctx.send(embed=discord.Embed(color=0xDEADBF, title=f"{encode_to}",
-                                               description=f"```\n{encoded}\n```"))
-        except discord.Forbidden:
-            pass
-        except Exception as e:
-            await ctx.send(f"Could not encode.\n`{e}`")
 
     @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
@@ -587,26 +533,15 @@ class Fun:
         await ctx.send(embed=embed)
 
 
-    @commands.command()
+    @commands.command(aliases=["dick", "penis"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def penis(self, ctx, *, user : discord.Member):
-        """Detects user's penis length"""
+    async def dong(self, ctx, *, user : discord.Member):
+        """Detects user's dong length"""
         state = random.getstate()
         random.seed(user.id)
         dong = "8{}D".format("=" * random.randint(0, 30))
         random.setstate(state)
-        em = discord.Embed(title="{}'s Dick Size".format(user), description="Size: " + dong, colour=0xDEADBF)
-        await ctx.send(embed=em)
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def vagina(self, ctx, *, user: discord.Member):
-        """Detects user's vaginas depth"""
-        state = random.getstate()
-        random.seed(user.id)
-        dong = "{} Meters Deep".format(str(random.randint(0, 30)))
-        random.setstate(state)
-        em = discord.Embed(title="{}'s Puss Depth".format(user), description="Size: " + dong, colour=0xDEADBF)
+        em = discord.Embed(title="{}'s Dong Size".format(user), description="Size: " + dong, colour=0xDEADBF)
         await ctx.send(embed=em)
 
     @commands.command(pass_context=True)
