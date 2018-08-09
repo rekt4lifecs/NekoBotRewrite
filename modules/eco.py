@@ -239,17 +239,11 @@ class economy:
 
         availablerep = repdata['user']['availableReputations']
         if data['status'] == 200:
-            em = discord.Embed(color=0xDEADBF)
-            em.title = "Given Reputation!"
-            em.description = "You gave %s 1 rep, you now have `%s` rep available!" % (user.mention, availablerep,)
-            await ctx.send(embed=em)
+            await ctx.send("**🆙 | %s has given %s a reputation point!**" % (ctx.author.name, user.mention,))
         else:
             nextrep = repdata["user"]["nextAvailableReputations"][0]
             timeleft = str(datetime.timedelta(milliseconds=nextrep)).rpartition(".")[0]
-            em = discord.Embed(color=0xDEABF)
-            em.title = "No Rep Points Left"
-            em.description = "You don't have any rep points left, please wait %s hours" % (timeleft,)
-            await ctx.send(embed=em)
+            await ctx.send("**🆙 | %s, you can award more reputation in %s hours**" % (ctx.author.mention, timeleft,))
 
     @commands.command()
     @commands.cooldown(1, 7, commands.BucketType.user)
