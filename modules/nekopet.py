@@ -208,7 +208,7 @@ class NekoPet:
             return await ctx.send("You don't have a pet to play with ;c, buy one with `n!pet shop`")
         pet_data = await r.table("nekopet").get(str(ctx.author.id)).run(self.bot.r_conn)
         level = pet_data["level"]
-        if random.randint(1, 5) == 1:
+        if random.randint(1, 4) == 1:
             am = random.randint(10, 100)
             newlvl = level + am
             await r.table("nekopet").get(str(ctx.author.id)).update({"level": newlvl}).run(self.bot.r_conn)
