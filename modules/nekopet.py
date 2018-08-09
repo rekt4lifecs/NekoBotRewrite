@@ -209,7 +209,7 @@ class NekoPet:
         pet_data = await r.table("nekopet").get(str(ctx.author.id)).run(self.bot.r_conn)
         level = pet_data["level"]
         if random.randint(1, 5) == 1:
-            am = random.randint(10, 60)
+            am = random.randint(10, 100)
             newlvl = level + am
             await r.table("nekopet").get(str(ctx.author.id)).update({"level": newlvl}).run(self.bot.r_conn)
             await ctx.send(f"**Your neko learnt new tricks owo ({am} score)**")
