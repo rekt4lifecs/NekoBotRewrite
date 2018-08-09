@@ -194,11 +194,12 @@ class General:
         await ctx.send(getlang(lang)["general"]["cookie"].format(ctx.message.author.name, user.mention))
 
     @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def keygen(self, ctx, length:int=64):
-        if length >= 1500:
-            length = 1500
-        await ctx.send(''.join(random.choice(string.digits + string.ascii_letters) for _ in range(length)))
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def choose(self, ctx, *items):
+        """Choose between multiple options"""
+        em = discord.Embed(color=0xDEADBF)
+        em.title = random.choice(items)
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.cooldown(1, 2, commands.BucketType.user)
