@@ -402,7 +402,7 @@ class economy:
 
     @commands.command(aliases=['bj'])
     @commands.guild_only()
-    @commands.cooldown(1, 15, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def blackjack(self, ctx, amount: int):
         """Blackjack"""
         author = ctx.author
@@ -451,6 +451,8 @@ class economy:
         bot_deck_n = []
         hasHit_author = False
         hasHit_bot = False
+        author_card_amount = 0
+        bot_card_amount = 0
 
         while True:
             card = random.choice(cards)
@@ -459,11 +461,12 @@ class economy:
                 if card in special:
                     card = 10
                 if card == "11":
-                    if not hasHit_author:
+                    if not hasHit_author or not author_card_amount > 11:
                         card = 11
                         hasHit_author = True
                     else:
                         card = 1
+                author_card_amount += int(card)
                 author_deck_n.append(card)
             if len(author_deck) == 5:
                 break
@@ -475,11 +478,12 @@ class economy:
                 if card in special:
                     card = 10
                 if card == "11":
-                    if not hasHit_bot:
+                    if not hasHit_bot or not bot_card_amount > 11:
                         card = 11
                         hasHit_bot = True
                     else:
                         card = 1
+                bot_card_amount += int(card)
                 bot_deck_n.append(card)
             if len(bot_deck) == 5:
                 break
