@@ -7,7 +7,7 @@ r_conn = r.connect(db="nekobot")
 
 def get_single():
     userid = str(input("Userid: "))
-    data = r.table("levelSystem").get(userid).run(r_conn)
+    data = r.table("levelSystem").get(userid).run(r_conn, array_limit=200000)
 
     if not data:
         print("User not found")
@@ -35,7 +35,7 @@ def get_single():
 def get_top():
     top_amount = int(input("Top: "))
     top_seconds = int(input("Seconds: "))
-    top = r.table("levelSystem").order_by(r.desc("xp")).limit(top_amount).run(r_conn)
+    top = r.table("levelSystem").order_by(r.desc("xp")).limit(top_amount).run(r_conn, array_limit=200000)
     print("Retrieved Data")
 
     users = []
@@ -56,6 +56,6 @@ def get_top():
     print("\n".join(users))
 
 if __name__ == "__main__":
-    get_single()
-    # get_top()
+    # get_single()
+    get_top()
     r_conn.close()
