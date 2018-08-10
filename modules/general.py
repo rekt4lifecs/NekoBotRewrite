@@ -197,6 +197,8 @@ class General:
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def choose(self, ctx, *items):
         """Choose between multiple options"""
+        if not items:
+            return await self.bot.send_cmd_help(ctx)
         em = discord.Embed(color=0xDEADBF)
         em.title = random.choice(items)
         await ctx.send(embed=em)
