@@ -199,7 +199,7 @@ class General:
         """Choose between multiple options"""
         if not items:
             return await self.bot.send_cmd_help(ctx)
-        await ctx.send("I chose: **%s**!" % random.choice(items))
+        await ctx.send("I chose: **%s**!" % (random.choice(items)).replace("@", "@\u200B"))
 
     @commands.command()
     @commands.cooldown(1, 2, commands.BucketType.user)

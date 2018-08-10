@@ -235,7 +235,8 @@ class economy:
                 data = await r.json()
 
             if data['status'] == 200:
-                await ctx.send("**%s has given %s 1 reputation point!**" % (ctx.author.name, user.mention,))
+                await ctx.send("**%s has given %s 1 reputation point!**" % (ctx.author.name.replace("@", "@\u200B"),
+                                                                            user.mention,))
             else:
                 async with cs.get("https://api.weeb.sh/reputation/310039170792030211/%s" % ctx.author.id,
                                    headers={"Authorization": "Wolke " + weeb}) as r:
