@@ -6,6 +6,7 @@ import aiohttp, asyncio
 import base64, random
 import datetime, time, math
 from prettytable import PrettyTable
+import hooks
 
 auth = {"Authorization": "Wolke " + weeb,
         "User-Agent": "NekoBot/4.2.0"}
@@ -74,6 +75,20 @@ class economy:
     async def __update_payday_time(self, user:int):
         await r.table("economy").get(str(user)).update({"lastpayday": str(int(time.time()))}).run(self.bot.r_conn)
 
+    async def __post_to_hook(self, action:str, user:discord.Member, amount):
+        try:
+            async with aiohttp.ClientSession() as cs:
+                webhook = discord.Webhook.from_url(hooks.get_url(), adapter=discord.AsyncWebhookAdapter(cs))
+                await webhook.send("User: %s (%s)\nAction: %s\nAmount: %s\nTime: %s" % (str(user), user.id, action, amount, int(time.time())))
+        except:
+            pass
+
+    async def __add_bettime(self, user:int):
+        data = await r.table("economy").get(str(user)).run(self.bot.r_conn)
+        bettimes = data["bettimes"]
+        bettimes.append(str(int(time.time())))
+        await r.table("economy").get(str(user)).update({"bettimes": bettimes}).run(self.bot.r_conn)
+
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def register(self, ctx):
@@ -88,8 +103,10 @@ class economy:
             data = {
                 "id": str(user.id),
                 "balance": 0,
-                "lastpayday": "0"
+                "lastpayday": "0",
+                "bettimes": []
             }
+            await self.__post_to_hook("Register", ctx.author, 0)
             await r.table("economy").insert(data).run(self.bot.r_conn)
             await ctx.send("Made an account!")
 
@@ -198,10 +215,12 @@ class economy:
             weekday = datetime.datetime.today().weekday()
             if weekday <= 4: # If its a weekend, give weekend bonus.
                 em.description = "You have received **12500** weekend bonus credits!"
+                await self.__post_to_hook("Daily (Vote Weekend)", ctx.author, 12500)
                 await self.__update_payday_time(user.id)
                 await self.__update_balance(user.id, user_balance + 12500)
             else:
                 em.description = "You have received **7500** credits!"
+                await self.__post_to_hook("Daily (Vote)", ctx.author, 7500)
                 await self.__update_payday_time(user.id)
                 await self.__update_balance(user.id, user_balance + 7500)
             await ctx.send(embed=em)
@@ -210,6 +229,7 @@ class economy:
             em.title = "Daily Bonus"
             em.description = "You have received **2500** credits!"
             em.set_footer(text="Voting will give you 7500 👀")
+            await self.__post_to_hook("Daily (Non Vote)", ctx.author, 2500)
             await self.__update_payday_time(user.id)
             await self.__update_balance(user.id, user_balance + 2500)
             await ctx.send(embed=em)
@@ -284,14 +304,17 @@ class economy:
         choice = random.randint(0, 1)
 
         em = discord.Embed(color=0xDEADBF)
+        await self.__add_bettime(ctx.author.id)
 
         if choice == 1:
             em.title = "You Won!"
             em.description = "You won `%s`!" % int(amount * .5)
+            await self.__post_to_hook("Coinflip Win", ctx.author, int(amount * .5))
             await self.__update_balance(ctx.author.id, balance + int(amount * .5))
         else:
             em.title = "You Lost"
             em.description = "You lost `%s`" % amount
+            await self.__post_to_hook("Coinflip Loss", ctx.author, amount)
             await self.__update_balance(ctx.author.id, balance - amount)
 
         await msg.edit(content=None, embed=em)
@@ -349,6 +372,7 @@ class economy:
 
         await self.__update_balance(user.id, user_balance + amount)
         await self.__update_balance(ctx.author.id, author_balance - amount)
+        await self.__post_to_hook("Transfer", ctx.author, "%s to %s (%s)" % (amount, str(user), user.id))
 
         await ctx.send("Successfully sent %s $%s" % (user.name, amount,))
 
@@ -376,6 +400,7 @@ class economy:
             return await ctx.send("Invalid color, available colors: `red`, `black`, `green`")
 
         await self.__update_balance(ctx.author.id, author_balance - amount)
+        await self.__add_bettime(ctx.author.id)
 
         choice = random.randint(0, 36)
 
@@ -387,11 +412,14 @@ class economy:
             chosen_color = "green"
 
         if chosen_color != color:
+            await self.__post_to_hook("Roulette Loss", ctx.author, amount)
             return await ctx.send(f"It landed on `{chosen_color}`, you lost :c")
         else:
             if chosen_color == "green":
+                await self.__post_to_hook("Roulette Won (green)", ctx.author, int(amount*36))
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * 36))
                 return await ctx.send("You hit green!")
+            await self.__post_to_hook("Roulette Won (%s)" % color, ctx.author, int(amount*.75))
             await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
             return await ctx.send(f"It landed on `{chosen_color}` and you won!")
 
@@ -426,6 +454,7 @@ class economy:
             return
 
         await self.__update_balance(ctx.author.id, author_balance - amount)
+        await self.__add_bettime(ctx.author.id)
 
         card_list = {
             "2": "<:2C:424587135463456778>",
@@ -537,11 +566,13 @@ class economy:
 
             if author_total > bot_total:
                 em.description = "You beat me!"
+                await self.__post_to_hook("Blackjack Won", ctx.author, amount)
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * .5))
             else:
                 em.description = "I beat you >:3"
+                await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
 
@@ -561,9 +592,11 @@ class economy:
 
             if author_total > 21:
                 em.description = "You went over 21 and I won >:3"
+                await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
 
             else:
                 em.description = "I went over 21 and you won ;w;"
+                await self.__post_to_hook("Blackjack Won", ctx.author, amount)
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
 
             bot_value = f"%s %s | %s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
@@ -601,11 +634,13 @@ class economy:
 
             if author_total > bot_total:
                 em.description = "You beat me!"
+                await self.__post_to_hook("Blackjack Won", ctx.author, amount)
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
             else:
                 em.description = "I beat you >:3"
+                await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
             return await msg.edit(embed=em)
@@ -625,9 +660,11 @@ class economy:
 
             if author_total > 21:
                 em.description = "You went over 21 and I won >:3"
+                await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
 
             else:
                 em.description = "I went over 21 and you won ;w;"
+                await self.__post_to_hook("Blackjack Won", ctx.author, amount)
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
 
             bot_value = f"%s %s | %s %s | %s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
@@ -666,11 +703,13 @@ class economy:
 
             if author_total > bot_total:
                 em.description = "You beat me!"
+                await self.__post_to_hook("Blackjack Won", ctx.author, amount)
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
             else:
                 em.description = "I beat you >:3"
+                await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
                 em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
                 em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
 
@@ -693,9 +732,11 @@ class economy:
 
             if author_total > 21:
                 em.description = "You went over 21 and I won >:3"
+                await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
 
             else:
                 em.description = "I went over 21 and you won ;w;"
+                await self.__post_to_hook("Blackjack Won", ctx.author, amount)
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
 
             bot_value = f"%s %s | %s %s | %s %s | %s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
@@ -714,9 +755,11 @@ class economy:
 
         if author_total > bot_total:
             em.description = "You beat me ;w;"
+            await self.__post_to_hook("Blackjack Won", ctx.author, amount)
             await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
         else:
             em.description = "I beat you >:3"
+            await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
 
         em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
         em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
