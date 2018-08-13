@@ -40,6 +40,14 @@ class NSFW:
         try:
             x = await data.json()
         except aiohttp.ContentTypeError:
+            if imgtype == "boobs":
+                try:
+                    async with aiohttp.ClientSession() as cs:
+                        async with cs.get("http://api.oboobs.ru/boobs/" % random.randint(0, 12058)) as r:
+                            res = await r.json()
+                    return res["preview"]
+                except:
+                    pass
             content = await data.text()
             status = data.status
             content = await hastebin.post(str(content))
