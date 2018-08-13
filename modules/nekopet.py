@@ -194,7 +194,7 @@ class NekoPet:
             return await ctx.send("**Your neko already has enough food!**")
         payamount = random.randint(250, 5000)
         if not await self.__can_purchase(ctx.author.id, payamount):
-            return await ctx.send("**You don't have enough money to give your pet ;c*")
+            return await ctx.send("**You don't have enough money for food ;c*")
         try:
             await self.__remove_amount(ctx.author.id, payamount)
             await r.table("nekopet").get(str(ctx.author.id)).update({"food": 100}).run(self.bot.r_conn)
