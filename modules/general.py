@@ -5,10 +5,9 @@ from collections import Counter
 from .utils.chat_formatting import pagify
 from urllib.parse import quote_plus
 import string, ujson
-from .utils.paginator import EmbedPages, Pages
+from .utils.paginator import EmbedPages, Pages, HelpPaginator
 from scipy import stats
 import numpy
-from .utils.paginator import HelpPaginator
 from colorthief import ColorThief
 from io import BytesIO
 from .utils import checks
