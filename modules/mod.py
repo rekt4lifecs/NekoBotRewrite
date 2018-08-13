@@ -1051,7 +1051,15 @@ class Moderation:
     @commands.guild_only()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def autorole(self, ctx, role:discord.Role=None):
-        """Sets the autorole."""
+        """Sets the autorole.
+
+        (Case sensitive)
+
+        Example:
+            n!autorole Members
+            n!autorole @Members
+            n!autorole "All Cuties"
+        """
         guild = ctx.message.guild
         if role is None:
             await r.table("autorole").get(str(guild.id)).delete().run(self.bot.r_conn)
