@@ -214,7 +214,7 @@ class IMGWelcome:
             drawtwo.text((152, 73), uname, 1, name_font_smallest, (0, 0, 0, 255))
             drawtwo.text((152, 73), uname, font=name_font_smallest, fill=(255, 255, 255, 230))
 
-        server_text = textwrap.wrap(f"Welcome to {guild.name}!", 25)[0]
+        server_text = "\n".join(textwrap.wrap(f"Welcome to {guild.name}!", 25))
         _outline((152, 100), server_text, 1, server_font, (0, 0, 0, 255))
         drawtwo.text((152, 100), server_text, font=server_font, fill=(255, 255, 255, 230))
 
