@@ -388,6 +388,9 @@ class CardGame:
         data = await r.table("cardgame").get(str(author.id)).run(self.bot.r_conn)
         cards = data["cards"]
 
+        if not await r.table("economy").get(str(author.id)).run(self.bot.r_conn):
+            return await ctx.send("❌ | **You don't have a bank account to sell your cards, make one with `n!register`**")
+
         try:
             card = cards[num-1]
         except:
@@ -408,9 +411,9 @@ class CardGame:
         try:
             x = await self.bot.wait_for('message', check=check, timeout=15.0)
             if not str(x.content).lower() == "yes":
-                return await ctx.send("**Cancelled Transaction.**")
+                return await ctx.send("❌ | **Cancelled Transaction.**")
         except asyncio.TimeoutError:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description="Cancelled Transaction."))
+            await ctx.send("❌ | **Cancelled Transaction.**")
             return
 
         await r.table("cardgame").get(str(author.id)).update({"cards": r.row["cards"].delete_at(num-1)}).run(self.bot.r_conn)
