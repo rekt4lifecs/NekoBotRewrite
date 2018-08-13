@@ -6,6 +6,8 @@ venv/
 .config.py
 config.py
 /config.py
+hooks.py
+./hooks.py
 
 transactions.json
 .idea/
