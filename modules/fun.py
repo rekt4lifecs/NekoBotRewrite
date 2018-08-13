@@ -276,7 +276,7 @@ class Fun:
 
     @commands.command()
     @commands.cooldown(1, 20, commands.BucketType.user)
-    async def clyde(self, ctx, *, text : str = None):
+    async def clyde(self, ctx, *, text : str):
         await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.clyde(text)))
 
     @commands.command()
