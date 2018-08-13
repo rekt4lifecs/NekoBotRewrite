@@ -68,7 +68,7 @@ class NekoPet:
             if newplay >= 100:
                 newplay = 100
             await r.table("nekopet").get(str(ctx.author.id)).update({"play": newplay}).run(self.bot.r_conn)
-            await ctx.send(f"**Your neko is now happy :3 ({am} attention)**")
+            await ctx.send(f"<a:rainbowNekoDance:462373594555613214> | **Your neko is now happy :3 ({am} attention)**")
         else:
             await ctx.send("**Your neko doesn't feel like playing, maybe try again later.**")
 
@@ -88,7 +88,7 @@ class NekoPet:
         """Show your pet"""
         await ctx.trigger_typing()
         if not await self.__check_pet(ctx.author.id):
-            return await ctx.send("You don't have a pet to play with ;c, buy one with `n!pet shop`")
+            return await ctx.send("❌ | You don't have a pet to play with ;c, buy one with `n!pet shop`")
 
         pet_data = await r.table("nekopet").get(str(ctx.author.id)).run(self.bot.r_conn)
         userpath = f"data/nekopet/{ctx.author.id}.png"
@@ -133,7 +133,7 @@ class NekoPet:
     async def neko_shop(self, ctx):
         """Shop for a neko or buy items for it!"""
         if not await self.__has_bank(ctx.author.id):
-            return await ctx.send("**You dont have a bank account, how will you buy anything?!**")
+            return await ctx.send("❌ | **You dont have a bank account, how will you buy anything?!**")
 
         def check(m):
             return m.channel == ctx.message.channel and m.author == ctx.message.author
@@ -162,10 +162,10 @@ class NekoPet:
             try:
                 msg = await self.bot.wait_for('message', check=check, timeout=15.0)
             except:
-                return await strt.edit(content="**Timed out...**", embed=None)
+                return await strt.edit(content="❌ | **Timed out...**", embed=None)
             if msg.content.lower() == "yes":
                 if not await self.__can_purchase(ctx.author.id, 75000):
-                    return await strt.edit(content="**You don't have enough $ ;c**")
+                    return await strt.edit(content="❌ | **You don't have enough $ ;c**")
                 await self.__remove_amount(ctx.author.id, 75000)
                 data = {
                     "id": str(ctx.author.id),
@@ -177,30 +177,30 @@ class NekoPet:
                 await r.table("nekopet").get(str(ctx.author.id)).delete().run(self.bot.r_conn)
                 await r.table("nekopet").insert(data).run(self.bot.r_conn)
                 log.info("%s (%s) bought a neko." % (ctx.author.name, ctx.author.id,))
-                return await strt.edit(content="Successfully bought a neko!")
+                return await strt.edit(content="<a:rainbowNekoDance:462373594555613214> | Successfully bought a neko!")
             else:
-                return await strt.edit(content="Returned...")
+                return await strt.edit(content="❌ | Returned...")
         else:
-            return await ctx.send("Invalid option, returning...")
+            return await ctx.send("❌ | Invalid option, returning...")
 
     @pet.command(name="feed")
     async def neko_feed(self, ctx):
         """Feed your neko"""
         if not await self.__check_pet(ctx.author.id):
-            return await ctx.send("You don't have a pet to play with ;c, buy one with `n!pet shop`")
+            return await ctx.send("❌ | You don't have a pet to play with ;c, buy one with `n!pet shop`")
         pet_data = await r.table("nekopet").get(str(ctx.author.id)).run(self.bot.r_conn)
         food = pet_data["food"]
         if food >= 90:
-            return await ctx.send("**Your neko already has enough food!**")
+            return await ctx.send("❌ | **Your neko already has enough food!**")
         payamount = random.randint(250, 5000)
         if not await self.__can_purchase(ctx.author.id, payamount):
-            return await ctx.send("**You don't have enough money for food ;c*")
+            return await ctx.send("❌ | **You don't have enough money for food ;c*")
         try:
             await self.__remove_amount(ctx.author.id, payamount)
             await r.table("nekopet").get(str(ctx.author.id)).update({"food": 100}).run(self.bot.r_conn)
-            await ctx.send(f"**Paid {payamount} for your nekos food!**")
+            await ctx.send(f"<a:rainbowNekoDance:462373594555613214> | **Paid {payamount} for your nekos food!**")
         except Exception as e:
-            await ctx.send(f"**Failed to remove balance. `{e}`")
+            await ctx.send(f"❌ | **Failed to remove balance. `{e}`")
 
     @pet.command(name="train")
     async def neko_train(self, ctx):
