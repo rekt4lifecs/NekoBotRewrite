@@ -2,13 +2,14 @@ import rethinkdb as r
 import asyncio, aiohttp
 import discord
 from discord.ext import commands
+from hooks import ipc as ipchook
 
 class IPC:
 
     def __init__(self, bot):
         self.bot = bot
         self.has_started = False
-        self.webhook = ""
+        self.webhook = ipchook
 
     async def __post_hook(self, action:str):
         async with aiohttp.ClientSession() as cs:
