@@ -30,8 +30,6 @@ class IPC:
                     print("Failed to reload")
                     pass
                 await r.table("ipc").get("ipc").update({str(self.bot.instance): ""}).run(self.bot.r_conn)
-            else:
-                await self.__post_hook("Pong!")
             await asyncio.sleep(30)
 
     @commands.group(hidden=True)
