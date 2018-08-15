@@ -513,22 +513,22 @@ class General:
             em = discord.Embed(color=hexx)
             await msg.edit(embed=em.set_image(url=res['file']))
 
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def animepic(self, ctx):
-        url = "https://api.computerfreaker.cf/v1/anime"
-        await ctx.channel.trigger_typing()
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
-            em = discord.Embed()
-            msg = await ctx.send(embed=em.set_image(url=res['url']))
-            async with cs.get(res['url']) as r:
-                data = await r.read()
-            color_thief = ColorThief(BytesIO(data))
-            hexx = int(triplet(color_thief.get_color()), 16)
-            em = discord.Embed(color=hexx)
-            await msg.edit(embed=em.set_image(url=res['url']))
+    # @commands.command()
+    # @commands.cooldown(1, 5, commands.BucketType.user)
+    # async def animepic(self, ctx):
+    #     url = "https://api.computerfreaker.cf/v1/anime"
+    #     await ctx.channel.trigger_typing()
+    #     async with aiohttp.ClientSession() as cs:
+    #         async with cs.get(url) as r:
+    #             res = await r.json()
+    #         em = discord.Embed()
+    #         msg = await ctx.send(embed=em.set_image(url=res['url']))
+    #         async with cs.get(res['url']) as r:
+    #             data = await r.read()
+    #         color_thief = ColorThief(BytesIO(data))
+    #         hexx = int(triplet(color_thief.get_color()), 16)
+    #         em = discord.Embed(color=hexx)
+    #         await msg.edit(embed=em.set_image(url=res['url']))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
