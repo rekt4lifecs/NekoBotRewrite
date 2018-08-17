@@ -560,8 +560,7 @@ class General:
         Example Usage:
             n!permissions/n!perms @ReKT#0001 testing
         or
-            n!permissions/n!perms ReKT#0001 #testing
-        anyway doesn't matter ;p"""
+            n!permissions/n!perms ReKT#0001 #testing"""
         if user == None:
             user = ctx.message.author
 
