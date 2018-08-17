@@ -1,112 +1,55 @@
 from discord.ext import commands
-import discord, aiohttp, random, config, datetime
+import discord
+import aiohttp
+
+import config
 from io import BytesIO
-import os
-import rethinkdb as r
-import nekobot
-from .utils.hastebin import post as haste
+import random
+import datetime
 
 key = config.weeb
 auth = {"Authorization": "Wolke " + key}
 
-food = [
-    "🍪",
-    "🍣",
-    "🍟",
-    "🍕",
-    "🍚",
-    "🍇",
-    "🍓",
-    "🍔",
-    "🍰",
-    "🍄",
-    "🍡",
-    "🍛",
-    "🌵",
-    "🍜",
-    "🌽",
-    "🍶",
-    "🍆",
-    "🍌",
-    "🍬",
-    "🍋",
-    "🍹",
-    "🍝",
-    "🍮",
-    "🎂",
-    "🍏",
-    "🍈",
-    "🍠",
-    "☕",
-    "🍺",
-    "🍷",
-    "🍥",
-    "🥚",
-    "🍨",
-    "🍭",
-    "🍊",
-    "🍉",
-    "🍞",
-    "🍍",
-    "🍘",
-    "🍧"
-]
-
 class Fun:
-    """Fun Commands"""
 
     def __init__(self, bot):
         self.bot = bot
-        self.nekobot = nekobot.Client()
 
-    async def __has_voted(self, user:int):
-        if await r.table("votes").get(str(user)).run(self.bot.r_conn):
-            return True
-        else:
-            return False
+    async def __get_image(self, ctx, user=None):
+        if user:
+            return user.avatar_url_as(format="png")
 
-    @commands.command()
-    @commands.guild_only()
-    @commands.cooldown(1, 3, commands.BucketType.user)
-    async def catgirlmeme(self, ctx):
-        """Everything is a dollar not spent on genetically engendering catgirls for domestic ownership"""
-        if ctx.channel.is_nsfw():
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get("https://nekos.life/api/v2/img/gecg") as r:
-                    res = await r.json()
-            em = discord.Embed(color=0xDEADBF)
-            em.set_image(url=res["url"])
-            em.set_footer(text="nekos.life owo")
-            await ctx.send(embed=em)
-        else:
-            return await ctx.send("Use this in an nsfw channel just to make sure")
-
-    async def get_image(self, effect:str, ctx:commands.Context, user:discord.Member):
         await ctx.trigger_typing()
-        if not user:
-            message = ctx.message
-            if not len(message.attachments) >= 1:
-                def check(m):
-                    return m.channel == message.channel and m.author == message.author
-                try:
-                    await ctx.send("Please send an image to %s." % effect)
-                    x = await self.bot.wait_for('message', check=check, timeout=13)
-                except Exception:
-                    return await ctx.send("Timed out...")
-                if not len(x.attachments) >= 1:
-                    return await ctx.send("No images found.")
-                img = x.attachments[0].url
-            else:
-                img = message.attachments[0].url
-        else:
-            img = user.avatar_url_as(format="png")
-        return img
+
+        message = ctx.message
+
+        if len(message.attachments) > 0:
+            return message.attachments[0].url
+
+        def check(m):
+            return m.channel == message.channel and m.author == message.author
+
+        try:
+            await ctx.send("Send me an image!")
+            x = await self.bot.wait_for('message', check=check, timeout=15)
+        except:
+            return await ctx.send("Timed out...")
+
+        if not len(x.attachments) >= 1:
+            return await ctx.send("No images found.")
+
+        return x.attachments[0].url
+
+    def __embed_json(self, data, key="message"):
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=data[key])
+        return em
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def caption(self, ctx, user:discord.Member=None):
+    async def caption(self, ctx, user: discord.Member = None):
         """Caption an image"""
-        img = await self.get_image("caption", ctx, user)
+        img = await self.__get_image(ctx, user)
         if not isinstance(img, str):
             return img
         headers = {
@@ -128,18 +71,22 @@ class Fun:
             await ctx.send("Failed to get data.")
 
     @commands.command()
-    @commands.cooldown(1, 7, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def blurpify(self, ctx, user:discord.Member=None):
-        """Either blurpify a user or attach an image."""
-        img = await self.get_image("blurpify", ctx, user)
+        """Blurpify something!"""
+        img = await self.__get_image(ctx, user)
         if not isinstance(img, str):
             return img
 
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.blurpify(img)))
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=blurpify&image=%s" % img) as r:
+                res = await r.json()
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def phcomment(self, ctx, *, comment:str):
+    async def phcomment(self, ctx, *, comment: str):
         """PronHub Comment Image"""
         await ctx.trigger_typing()
         async with aiohttp.ClientSession() as cs:
@@ -149,11 +96,11 @@ class Fun:
                 res = await r.json()
         if not res["success"]:
             return await ctx.send("**Failed to successfully get image.**")
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res["message"]))
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def toxicity(self, ctx, *, text:str):
+    async def toxicity(self, ctx, *, text: str):
         """Get text toxicity levels"""
         try:
             API_KEY = "AIzaSyAc49LROgPF9IEiLDavWqwb2z8UndUUbcM"
@@ -194,7 +141,7 @@ class Fun:
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def weebify(self, ctx, *, text:str):
+    async def weebify(self, ctx, *, text: str):
         """Weebify Text"""
         try:
             key = config.idiotic_api
@@ -207,7 +154,7 @@ class Fun:
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def achievement(self, ctx, *, achievement:str):
+    async def achievement(self, ctx, *, achievement: str):
         """Achievement Generator"""
         await ctx.trigger_typing()
         try:
@@ -226,143 +173,143 @@ class Fun:
             await ctx.send(f"Failed to get data, `{res['errors'][0]['message']}`")
 
     @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def tweet(self, ctx, username:str, *, text:str):
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def tweet(self, ctx, username: str, *, text: str):
         """Tweet as someone."""
         await ctx.trigger_typing()
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.tweet(username, text)))
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=tweet"
+                              "&username=%s"
+                              "&text=%s" % (username, text,)) as r:
+                res = await r.json()
+
+        await ctx.send(embed=self.__embed_json(res))
+
+    # @commands.command() # Back soon - todo
+    # @commands.cooldown(1, 20, commands.BucketType.user)
+    # async def nichijou(self, ctx, text: str):
 
     @commands.command()
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def nichijou(self, ctx, text:str):
-        """Tweet as someone."""
-        await ctx.trigger_typing()
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.nichijou(text)))
-
-    @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def threats(self, ctx, user:discord.Member):
-        img = await self.get_image("threatify", ctx, user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def threats(self, ctx, user: discord.Member):
+        img = await self.__get_image(ctx, user)
         if not isinstance(img, str):
             return img
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.threats(img)))
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=threats&url=%s" % img) as r:
+                res = await r.json()
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command(aliases=['pillow'])
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def bodypillow(self, ctx, user: discord.Member):
         """Bodypillow someone"""
-        img = await self.get_image("bodypillow", ctx, user)
+        img = await self.__get_image(ctx, user)
         if not isinstance(img, str):
             return img
         async with aiohttp.ClientSession() as cs:
             async with cs.get("https://nekobot.xyz/api/imagegen?type=bodypillow&url=%s" % img) as r:
                 res = await r.json()
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res["message"]))
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def baguette(self, ctx, user:discord.Member):
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def baguette(self, ctx, user: discord.Member):
         """:^)"""
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.baguette(user.avatar_url_as(format="png"))))
+        await ctx.trigger_typing()
+        avatar = user.avatar_url_as(format="png")
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=baguette&url=%s" % avatar) as r:
+                res = await r.json()
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
-    @commands.cooldown(1, 7, commands.BucketType.user)
-    async def deepfry(self, ctx, user:discord.Member=None):
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def deepfry(self, ctx, user: discord.Member = None):
         """Deepfry a user"""
-        img = await self.get_image("deepfry", ctx, user)
+        img = await self.__get_image(ctx, user)
         if not isinstance(img, str):
             return img
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.deepfry(img)))
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=deepfry&image=%s" % img) as r:
+                res = await r.json()
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def clyde(self, ctx, *, text : str):
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.clyde(text)))
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def clyde(self, ctx, *, text: str):
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=clyde&text=%s" % text) as r:
+                res = await r.json()
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def joke(self, ctx):
         """Sends a Joke OwO"""
+        await ctx.trigger_typing()
         async with aiohttp.ClientSession(headers={"Accept": "application/json"}) as cs:
             async with cs.get('https://icanhazdadjoke.com/') as r:
                 res = await r.json()
-                e = discord.Embed(color=0xDEADBF, description=f"**{res['joke']}**")\
-                    .set_thumbnail(url="https://vignette.wikia.nocookie.net/2b2t8261/images/e/ed/LUL.png")
-                await ctx.send(embed=e)
+        await ctx.send(f"**{res['joke']}**")
 
     @commands.command()
-    @commands.cooldown(1, 3, commands.BucketType.user)
-    async def bigletter(self, ctx, *, text:str):
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def bigletter(self, ctx, *, text: str):
         """Big Letter Generator"""
         await ctx.trigger_typing()
+        if len(text) >= 500:
+            return await ctx.send("Text is too long ;w;")
         async with aiohttp.ClientSession() as cs:
-            async with cs.get("http://nekobot.xyz/api/text?type=bigletter&text="+text) as r:
+            async with cs.get("http://nekobot.xyz/api/text?type=bigletter&text=" + text) as r:
                 res = await r.json()
-        return await ctx.send(res["message"])
+        await ctx.send(res["message"])
 
     @commands.command()
-    @commands.cooldown(1, 20, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def ship(self, ctx, user1: discord.Member, user2: discord.Member = None):
         """Ship OwO"""
         if user2 is None:
             user2 = ctx.message.author
 
         await ctx.trigger_typing()
-        ranxd = random.randint(1, 2)
-        if ranxd == 1:
-            if not os.path.isfile(f"data/ship/mode1-{user1.id}-{user2.id}.png"):
-                async with aiohttp.ClientSession() as session:
-                    async with session.post('https://api.weeb.sh/auto-image/love-ship',
-                                            headers={'Authorization': f'Wolke {config.weeb}'},
-                                            data={'targetOne': user1.avatar_url, 'targetTwo': user2.avatar_url}) as response:
-                        t = await response.read()
-                        with open(f"data/ship/mode1{user1.id}-{user2.id}.png", "wb") as f:
-                            f.write(t)
-                        score = random.randint(0, 100)
-                        filled_progbar = round(score / 100 * 10)
-                        counter_ = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
+        user2url = user2.avatar_url
+        user1url = user1.avatar_url
 
-                        self_length = len(user1.name)
-                        first_length = round(self_length / 2)
-                        first_half = user1.name[0:first_length]
-                        usr_length = len(user2.name)
-                        second_length = round(usr_length / 2)
-                        second_half = user2.name[second_length:]
-                        finalName = first_half + second_half
-                        e = discord.Embed(color=0xDEADBF, title=f'{user1.name} ❤ {user2.name}', description=f"**Love %**\n"
-                                                                                            f"`{counter_}` **{score}%**\n\n"
-                                                                                            f"{finalName}")
-            await ctx.send(file=discord.File(fp=f'data/ship/mode1{user1.id}-{user2.id}.png'),
-                           embed=e.set_image(url=f'attachment://mode1{user1.id}-{user2.id}.png'))
-        else:
-            user2url = user2.avatar_url
-            user1url = user1.avatar_url
+        self_length = len(user1.name)
+        first_length = round(self_length / 2)
+        first_half = user1.name[0:first_length]
+        usr_length = len(user2.name)
+        second_length = round(usr_length / 2)
+        second_half = user2.name[second_length:]
+        finalName = first_half + second_half
 
-            self_length = len(user1.name)
-            first_length = round(self_length / 2)
-            first_half = user1.name[0:first_length]
-            usr_length = len(user2.name)
-            second_length = round(usr_length / 2)
-            second_half = user2.name[second_length:]
-            finalName = first_half + second_half
+        score = random.randint(0, 100)
+        filled_progbar = round(score / 100 * 10)
+        counter_ = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
 
-            score = random.randint(0, 100)
-            filled_progbar = round(score / 100 * 10)
-            counter_ = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://nekobot.xyz/api/imagegen?type=ship&user1={user1url}&user2={user2url}") as r:
-                    res = await r.json()
-            e = discord.Embed(color=0xDEADBF, title=f'{user1.name} ❤ {user2.name}', description=f"**Love %**\n"
-                                                                                                f"`{counter_}` **{score}%**\n\n"
-                                                                                                f"{finalName}")
-            if not res['success']:
-                return await ctx.send(
-                    embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
-            await ctx.send(content="{}".format(finalName),
-                           embed=e.set_image(url=res['message']))
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=ship&user1=%s&user2=%s" % (user1url, user2url,)) as r:
+                res = await r.json()
+
+        em = discord.Embed(color=0xDEADBF)
+        em.title = "%s ❤ %s" % (user1.name, user2.name,)
+        em.description = f"**Love %**\n" \
+                         f"`{counter_}` **{score}%**\n\n{finalName}"
+        em.set_image(url=res["message"])
+
+        await ctx.send(embed=em)
 
     @commands.command()
-    @commands.cooldown(1, 15, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def shitpost(self, ctx):
         """Shitpost ofc"""
         if not ctx.channel.is_nsfw:
@@ -383,98 +330,75 @@ class Fun:
             await ctx.send("Failed to get data, %s" % e)
 
     @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def captcha(self, ctx, user: discord.Member):
         """Captcha a User OWO"""
         await ctx.trigger_typing()
         url = user.avatar_url_as(format="png")
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.captcha(url, user.name)))
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=captcha&url=%s&username=%s" % (url, user.name,)) as r:
+                res = await r.json()
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def whowouldwin(self, ctx:commands.Context, user1: discord.Member, user2: discord.Member = None):
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def whowouldwin(self, ctx: commands.Context, user1: discord.Member, user2: discord.Member = None):
         """Who would win"""
         await ctx.trigger_typing()
         if user2 is None:
             user2 = ctx.message.author
         user1url = user1.avatar_url
         user2url = user2.avatar_url
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.whowouldwin(user1url, user2url)))
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=whowouldwin&user1=%s&user2=%s" % (user1url, user2url,)) as r:
+                res = await r.json()
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def awooify(self, ctx, user: discord.Member=None):
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def awooify(self, ctx, user: discord.Member = None):
         """AwWOOOOO"""
-        img = await self.get_image("awooify", ctx, user)
+        img = await self.__get_image(ctx, user)
         if not isinstance(img, str):
             return img
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.awooify(img)))
 
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def duck(self, ctx):
-        """Gets a duck image /shrug"""
-        self.bot.counter['duck'] += 1
-        url = "https://api.random-d.uk/random"
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=awooify&url=%s" % img) as r:
                 res = await r.json()
-        em = discord.Embed(color=0xDEADBF)
-        await ctx.send(embed=em.set_image(url=res['url']).set_footer(text=f"Ducks sent since last restart: {self.bot.counter['duck']}"))
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def changemymind(self, ctx, *, text:str):
-        if await self.__has_voted(ctx.author.id):
-            await ctx.trigger_typing()
-            await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.changemymind(text)))
-        else:
-            em = discord.Embed(color=0xDEADBF, description="https://discordbots.org/bot/nekobot/vote", title="owo whats this")
-            return await ctx.send(embed=em)
+    async def changemymind(self, ctx, *, text: str):
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=changemymind&text=%s" % text) as r:
+                res = await r.json()
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def magik(self, ctx, user:discord.Member=None):
+    async def magik(self, ctx, user: discord.Member = None):
         """Magikify a member"""
-        img = await self.get_image("magik", ctx, user)
+        img = await self.__get_image(ctx, user)
         if not isinstance(img, str):
             return img
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.magik(img)))
 
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def owoify(self, ctx, *, text:str = None):
-        try:
-            if text is None:
-                return await ctx.send("oopsie whoopsie you made a fucky wucky, you gave me no text to owoify")
-            else:
-                text = text.replace(' ', '%20')
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://nekos.life/api/v2/owoify?text={text}") as r:
-                    res = await r.json()
-            try:
-                em = discord.Embed(color=0xDEADBF, description=f"{res['owo']}", title="OwOified Text")
-                await ctx.send(embed=em)
-            except:
-                return await ctx.send("Failed to get the OwOified Text or you input is over 100 characters.")
-        except:
-            await ctx.send("Failed to owoify.")
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def lizard(self, ctx):
-        """Get a lizard owo"""
-        url = "https://nekos.life/api/v2/img/lizard"
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=magik&image=%s" % img) as r:
                 res = await r.json()
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['url']))
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def meme(self, ctx):
         """Get a dank meme OwO"""
-        sub = ["dankmemes", "animemes"] #Add more?
+        sub = ["dankmemes", "animemes"]  # Add more?
         url = f'https://api.imgur.com/3/gallery/r/{random.choice(sub)}/hot/{random.randint(1, 5)}'
         headers = {"Authorization": f"Client-ID {config.imgur}"}
         async with aiohttp.ClientSession() as cs:
@@ -494,10 +418,9 @@ class Fun:
 
         await ctx.send(embed=embed)
 
-
     @commands.command(aliases=["dick", "penis"])
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def dong(self, ctx, *, user : discord.Member):
+    async def dong(self, ctx, *, user: discord.Member):
         """Detects user's dong length"""
         state = random.getstate()
         random.seed(user.id)
@@ -507,16 +430,21 @@ class Fun:
         await ctx.send(embed=em)
 
     @commands.command(pass_context=True)
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def jpeg(self, ctx, user : discord.Member = None):
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def jpeg(self, ctx, user: discord.Member = None):
         """OwO Whats This"""
-        img = await self.get_image("jpeg", ctx, user)
+        img = await self.__get_image(ctx, user)
         if not isinstance(img, str):
             return img
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=await self.nekobot.jpeg(img)))
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=jpeg&url=%s" % img) as r:
+                res = await r.json()
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command(pass_context=True, no_pm=True)
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def gif(self, ctx, *keywords):
         """Retrieves first search result from giphy"""
         keywords = "+".join(keywords)
@@ -553,36 +481,28 @@ class Fun:
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def feed(self, ctx, user : discord.Member):
-        if user == ctx.message.author:
-            await ctx.send(f"-- {ctx.message.author.mention} eats {random.choice(food)} --")
-        else:
-            await ctx.send(f"-- Forces {random.choice(food)} down {user.name}'s throat --")
-
-    @commands.command()
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def iphonex(self, ctx:commands.Context, *, url: str):
+    async def iphonex(self, ctx, user:discord.Member=None):
         """Generate an iPhone X Image"""
+        img = await self.__get_image(ctx, user)
+        if not isinstance(img, str):
+            return img
         await ctx.trigger_typing()
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=iphonex&url={url}") as r:
+            async with cs.get(f"https://nekobot.xyz/api/imagegen?type=iphonex&url={img}") as r:
                 res = await r.json()
-        if not res['success']:
-            return await ctx.send("**Error generating image with that url.**")
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
-    @commands.cooldown(1, 20, commands.BucketType.user)
-    async def kannagen(self, ctx, *, text:str):
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def kannagen(self, ctx, *, text: str):
         """Generate Kanna"""
         await ctx.trigger_typing()
         url = f"https://nekobot.xyz/api/imagegen?type=kannagen&text={text}"
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 res = await r.json()
-        if not res['success']:
-            return await ctx.send(embed=discord.Embed(color=0xDEADBF, description="Failed to successfully get the image."))
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res['message']))
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command(aliases=['fite', 'rust'])
     @commands.cooldown(1, 7, commands.BucketType.user)
@@ -591,13 +511,14 @@ class Fun:
         if user2 == None:
             user2 = ctx.message.author
 
-        map = "https://vignette.wikia.nocookie.net/callofduty/images/3/33/Rust.jpg"
-        em = discord.Embed(color=0xDEADBF,
-                           title="Intense Rust 1v1")
-        em.set_image(url=map)
-        em.add_field(name=f"Round | {user1.name} vs {user2.name}",
-                     value=f"***pew pew*** {random.choice([user1.name, user2.name])} got the first hit and won OwO")
-        await ctx.send(embed=em)
+        win = random.choice([user1, user2])
+
+        if win == user1:
+            lose = user2
+        else:
+            lose = user1
+
+        await ctx.send("%s beat %s!" % (win.mention, lose.mention,))
 
 def setup(bot):
     bot.add_cog(Fun(bot))
