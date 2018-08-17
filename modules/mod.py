@@ -1,6 +1,6 @@
 from discord.ext import commands
 import discord, argparse, os, shlex, traceback, io, textwrap, asyncio, re
-from .utils import checks
+from .utils import checks, chat_formatting
 from contextlib import redirect_stdout
 from collections import Counter
 from .utils.hastebin import post as hastebin
@@ -415,15 +415,16 @@ class Moderation:
             await ctx.send('Reloaded <a:forsenPls:444882132343717898>')
 
     @commands.command(aliases=["ping"])
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def latency(self, ctx):
-        """If on instance 1 will return latencies otherwise will return Pong"""
-        if self.bot.instance != 0:
-            return await ctx.send("Pong!")
-        xd = '\n'.join(f'Shard {shard}: '+str(round(self.bot.latencies[shard][1]*1000)) + 'ms' for shard in self.bot.shards)
-        em = discord.Embed(color=0xDEADBF, title="Latency",
-                           description=f"```\n{xd}\n```")
-        await ctx.send(embed=em)
+        """Get bot latency across all shards"""
+        msg = ""
+        for x in range(self.bot.shard_count):
+            ping = await self.bot.redis.get(f"shard:{x}")
+            msg += f"Shard {x+1}: {ping.decode('utf8')}\n"
+
+        for i in chat_formatting.pagify(msg, page_length=1750):
+            await ctx.send(i)
 
     @commands.command(hidden=True, aliases=['exec'])
     @commands.is_owner()
