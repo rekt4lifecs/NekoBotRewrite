@@ -20,15 +20,22 @@ class IPC:
         if not self.has_started:
             self.has_started = True
         while self.has_started:
+            try:
+                [(await self.bot.redis.set(f"shard:{x[0]}", str(round(x[1] * 1000, 2)))) for x in self.bot.latencies]
+            except:
+                print("Failed to update latencies")
             data = await r.table("ipc").get("ipc").run(self.bot.r_conn)
             if not data[str(self.bot.instance)] == "":
-                await self.__post_hook("Reloaded " + data[str(self.bot.instance)])
-                try:
-                    self.bot.unload_extension("modules.%s" % data[str(self.bot.instance)])
-                    self.bot.load_extension("modules.%s" % data[str(self.bot.instance)])
-                except:
-                    print("Failed to reload")
-                    pass
+                if data[str(self.bot.instance)] == "ping":
+                    await self.__post_hook("Ping - %s" % self.bot.instance)
+                else:
+                    await self.__post_hook("Reloaded " + data[str(self.bot.instance)])
+                    try:
+                        self.bot.unload_extension("modules.%s" % data[str(self.bot.instance)])
+                        self.bot.load_extension("modules.%s" % data[str(self.bot.instance)])
+                    except:
+                        print("Failed to reload")
+                        pass
                 await r.table("ipc").get("ipc").update({str(self.bot.instance): ""}).run(self.bot.r_conn)
             await asyncio.sleep(30)
 
@@ -43,6 +50,12 @@ class IPC:
         """reload shit"""
         await r.table("ipc").get("ipc").update({"0": module, "1": module, "2": module}).run(self.bot.r_conn)
         await ctx.send("Added to queue")
+
+    @ipc.command(name="ping")
+    async def ipc_ping(self, ctx):
+        """Ping ipc"""
+        await ctx.send("Sending ping")
+        await r.table("ipc").get("ipc").update({"0": "ping", "1": "ping", "2": "ping"}).run(self.bot.r_conn)
 
     @ipc.command(name="force")
     async def ipc_force(self, ctx):
