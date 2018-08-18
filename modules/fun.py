@@ -185,9 +185,18 @@ class Fun:
 
         await ctx.send(embed=self.__embed_json(res))
 
-    # @commands.command() # Back soon - todo
-    # @commands.cooldown(1, 20, commands.BucketType.user)
-    # async def nichijou(self, ctx, text: str):
+    @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def nichijou(self, ctx, text: str):
+        if len(text) > 22:
+            return await ctx.send("Text too long ;w;")
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://i.ode.bz/auto/nichijou?text=%s" % text) as r:
+                res = await r.read()
+
+        file = discord.File(fp=BytesIO(res), filename="nichijou.gif")
+        await ctx.send(file=file)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
