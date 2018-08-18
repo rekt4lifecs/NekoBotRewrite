@@ -148,7 +148,7 @@ class Fun:
             async with aiohttp.ClientSession(headers={"Authorization": key}) as cs:
                 async with cs.get(f'https://dev.anidiots.guide/text/owoify?text={text}') as r:
                     res = await r.json()
-            await ctx.send(res['text'])
+            await ctx.send(res['text'].replace("@", "@\u200B"))
         except:
             await ctx.send("Failed to connect.")
 
