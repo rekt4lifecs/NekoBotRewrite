@@ -281,8 +281,14 @@ class Fun:
             user2 = ctx.message.author
 
         await ctx.trigger_typing()
-        user2url = user2.avatar_url
-        user1url = user1.avatar_url
+        if user1.avatar:
+            user1url = "https://cdn.discordapp.com/avatars/%s/%s.png" % (user1.id, user1.avatar,)
+        else:
+            user1url = "https://cdn.discordapp.com/embed/avatars/1.png"
+        if user2.avatar:
+            user2url = "https://cdn.discordapp.com/avatars/%s/%s.png" % (user2.id, user2.avatar,)
+        else:
+            user2url = "https://cdn.discordapp.com/embed/avatars/1.png"
 
         self_length = len(user1.name)
         first_length = round(self_length / 2)
