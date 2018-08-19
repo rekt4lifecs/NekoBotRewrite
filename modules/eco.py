@@ -84,10 +84,21 @@ class economy:
             pass
 
     async def __add_bettime(self, user:int):
+        try:
+            data = await r.table("economy").get(str(user)).run(self.bot.r_conn)
+            bettimes = data["bettimes"]
+            bettimes.append(str(int(time.time())))
+            await r.table("economy").get(str(user)).update({"bettimes": bettimes}).run(self.bot.r_conn)
+        except:
+            pass
+
+    async def __is_frozen(self, user:int):
         data = await r.table("economy").get(str(user)).run(self.bot.r_conn)
-        bettimes = data["bettimes"]
-        bettimes.append(str(int(time.time())))
-        await r.table("economy").get(str(user)).update({"bettimes": bettimes}).run(self.bot.r_conn)
+        frozen = data.get("frozen", False)
+        if frozen:
+            return True
+        else:
+            return False
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -104,7 +115,8 @@ class economy:
                 "id": str(user.id),
                 "balance": 0,
                 "lastpayday": "0",
-                "bettimes": []
+                "bettimes": [],
+                "frozen": False
             }
             await self.__post_to_hook("Register", ctx.author, 0)
             await r.table("economy").insert(data).run(self.bot.r_conn)
@@ -195,6 +207,8 @@ class economy:
         user_data = await r.table("economy").get(str(user.id)).run(self.bot.r_conn)
         last_payday = user_data["lastpayday"]
         user_balance = int(user_data["balance"])
+        if await self.__is_frozen(ctx.author.id):
+            return await ctx.send("This account is frozen")
 
         # Get the current day now
         today = datetime.datetime.utcfromtimestamp(time.time()).strftime("%d")
@@ -246,6 +260,11 @@ class economy:
         elif user.bot:
             return await ctx.send("You can't rep bots")
 
+        created = int(time.time()) - int(time.mktime(ctx.author.created_at.timetuple()))
+
+        if not created >= 604800:
+            return await ctx.send("**Your account is too new to give rep.**")
+
         await ctx.trigger_typing()
 
         async with aiohttp.ClientSession() as cs:
@@ -287,6 +306,9 @@ class economy:
 
         if not await self.__has_account(ctx.author.id):
             return await ctx.send("You don't have an account, you can make one with `register`")
+
+        if await self.__is_frozen(ctx.author.id):
+            return await ctx.send("This account is frozen")
 
         if amount <= 0:
             return await ctx.send("Your amount must be higher than 0")
@@ -355,6 +377,11 @@ class economy:
         elif not await self.__has_account(user.id):
             return await ctx.send("`%s` doesn't have an account, they can create one with `register`" % user.name)
 
+        if await self.__is_frozen(ctx.author.id):
+            return await ctx.send("This account is frozen")
+        if await self.__is_frozen(user.id):
+            return await ctx.send("The user you are sending to has a frozen account.")
+
         if amount < 10:
             return await ctx.send("The amount must be higher than 10")
         elif amount > 10000000:
@@ -385,6 +412,9 @@ class economy:
 
         if not await self.__has_account(ctx.author.id):
             return await ctx.send("You don't have a bank account...")
+
+        if await self.__is_frozen(ctx.author.id):
+            return await ctx.send("This account is frozen")
 
         author_balance = await self.__get_balance(ctx.author.id)
 
@@ -440,6 +470,9 @@ class economy:
 
         if not await self.__has_account(ctx.author.id):
             return await ctx.send("You don't have a bank account...")
+
+        if await self.__is_frozen(ctx.author.id):
+            return await ctx.send("This account is frozen")
 
         author_balance = await self.__get_balance(ctx.author.id)
 

@@ -874,7 +874,7 @@ class General:
         await p.paginate()
 
     @commands.group(hidden=True)
-    @checks.is_admin()
+    @commands.is_owner()
     async def config(self, ctx):
         """Configuration"""
         if ctx.invoked_subcommand is None:
@@ -882,7 +882,8 @@ class General:
                                description=" - avatar, **Owner Only**\n"
                                            "- username, **Owner Only**\n"
                                            "- blacklist, **Owner Only**\n"
-                                           "- reset, **Owner Only**")
+                                           "- reset, **Owner Only**\n"
+                                           "- freeze, **Owner Only**")
             await ctx.send(embed=em)
 
     @config.command(name="avatar", hidden=True)
@@ -928,6 +929,18 @@ class General:
         """Reset user"""
         await r.table("levelSystem").get(str(userid)).update({"xp": 0, "lastxptimes": [], "lastxp": "0"}).run(self.bot.r_conn)
         await ctx.send("Reset user.")
+
+    @config.command(hidden=True, name="freeze")
+    @commands.is_owner()
+    async def conf_freeze(self, ctx, userid:int):
+        """Freeze users from eco"""
+        data = await r.table("economy").get(str(userid)).run(self.bot.r_conn)
+        if data["frozen"]:
+            await r.table("economy").get(str(userid)).update({"frozen": False}).run(self.bot.r_conn)
+            await ctx.send("Unfroze user")
+        else:
+            await r.table("economy").get(str(userid)).update({"frozen": True}).run(self.bot.r_conn)
+            await ctx.send("Froze user")
 
     @commands.command(hidden=True)
     @commands.is_owner()
