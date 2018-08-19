@@ -325,6 +325,7 @@ class Fun:
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.guild_only()
     async def shitpost(self, ctx):
         """Shitpost ofc"""
         if not ctx.channel.is_nsfw:

@@ -224,7 +224,7 @@ class Moderation:
     @commands.command()
     @commands.guild_only()
     @checks.has_permissions(ban_members=True)
-    async def ban(self, ctx, member: MemberID, *, reason: ActionReason = None):
+    async def ban(self, ctx, member: discord.Member, *, reason: ActionReason = None):
         """Bans a member from the server."""
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
@@ -235,7 +235,7 @@ class Moderation:
             if reason is None:
                 reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
-            await ctx.guild.ban(discord.Object(id=member), reason=reason)
+            await ctx.guild.ban(member, reason=reason)
             await ctx.send(embed=discord.Embed(color=0x87ff8f, description=getlang(lang)["mod"]["banned"].format(member)))
         except:
             await ctx.send(getlang(lang)["mod"]["permission_error"])
