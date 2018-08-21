@@ -269,6 +269,12 @@ class General:
             lang = lang.decode('utf8')
         else:
             lang = "english"
+
+        if isinstance(ctx.channel, discord.TextChannel):
+            thisShard = ctx.guild.shard_id
+        else:
+            thisShard = 0
+
         info = discord.Embed(color=0xDEADBF,
                              title=getlang(lang)["general"]["info"]["info"],
                              description=getlang(lang)["general"]["info"]["stats"].format(millify(servers),
@@ -283,7 +289,8 @@ class General:
                                                                                           self.get_bot_uptime(),
                                                                                           millify(messages),
                                                                                           str(self.bot.command_usage.most_common(1)[0][0]),
-                                                                                          commands))
+                                                                                          commands,
+                                                                                          thisShard))
         info.add_field(name=getlang(lang)["general"]["info"]["links"]["name"],
                        value=getlang(lang)["general"]["info"]["links"]["links"])
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))

@@ -7,7 +7,7 @@
     },
     "info": {
       "info": "**Info**",
-      "stats": "Servers: **{0} ({1})**\nMembers: **{2}**\nBot Commands: **{3}**\nChannels: **{4}**\nShards: **{5}**\nBot in voice channel(s): **{6}**\nUptime: **{7}**\nMessages Read (Since Restart): **{8}**\nMost common command since restart: **{9}**\nCommands Used: **{10}**",
+      "stats": "Servers: **{0} ({1})**\nMembers: **{2}**\nBot Commands: **{3}**\nChannels: **{4}**\nShards: **{5}**\nThis Shard: **{11}**\nBot in voice channel(s): **{6}**\nUptime: **{7}**\nMessages Read (Since Restart): **{8}**\nMost common command since restart: **{9}**\nCommands Used: **{10}**",
       "links": {
         "name": "Links",
         "links": "[GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) | [Support Server](https://discord.gg/q98qeYN) | [Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | [Patreon](https://www.patreon.com/NekoBot)"
