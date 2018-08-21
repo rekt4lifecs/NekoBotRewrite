@@ -282,64 +282,54 @@ class Donator:
 
         await ctx.send(await hastepost(text))
 
-    @commands.command(name='upload')
-    @commands.cooldown(1, 15, commands.BucketType.user)
-    async def donator_upload(self, ctx:commands.Context):
-        """File Uploader"""
-        await ctx.trigger_typing()
-        author = ctx.message.author
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
-
-        async with self.bot.sql_conn.acquire() as conn:
-            async with conn.cursor() as db:
-                await db.execute("SELECT userid FROM donator")
-                alltokens = await db.fetchall()
-        tokenlist = []
-        for x in range(len(alltokens)):
-            tokenlist.append(int(alltokens[x][0]))
-
-        if author.id not in tokenlist:
-            return await ctx.send(embed=discord.Embed(color=0xff5630, title=getlang(lang)["donator"]["error"]["error"],
-                                                      description=getlang(lang)["donator"]["error"]["message"]))
-
-        await ctx.send("**Send an image/file to upload. Type `cancel` to cancel.**")
-
-        def check(m):
-            return m.author == author and m.channel == ctx.message.channel
-
-        msg = await self.bot.wait_for('message', check=check)
-
-        if msg.content.lower() in ['cancel', 'Cancel']:
-            return await ctx.send("**Cancelled.**")
-
-        try:
-            randomnum = self.id_generator()
-            url = msg.attachments[0].url
-            attachment = str(url).rpartition('.')[2]
-            if attachment not in ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'tiff', 'webp']:
-                return await ctx.send("**File type is forbiddon.**")
-            await ctx.trigger_typing()
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    t = await response.read()
-                    attach = f"{randomnum}.{attachment}"
-                    file = f"/var/www/html/" + attach
-                    with open(file, "wb") as f:
-                        f.write(t)
-                async with session.get("http://ip.42.pl/raw") as ip:
-                    myip = (await ip.read()).decode("utf-8")
-                async with session.get(f"https://nekobot.xyz/api/postimage?auth={config.dbpass}"
-                                       f"&type=x"
-                                       f"&url=http://{myip}/{attach}") as response:
-                    t = await response.json()
-            await ctx.send(t["message"])
-            os.remove(file)
-        except Exception as e:
-            return await ctx.send(f"**Error uploading file**\n\n{e}")
+    # @commands.command(name='upload')
+    # @commands.cooldown(1, 15, commands.BucketType.user)
+    # async def donator_upload(self, ctx:commands.Context):
+    #     """File Uploader"""
+    #     await ctx.trigger_typing()
+    #     author = ctx.message.author
+    #     lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+    #     if lang:
+    #         lang = lang.decode('utf8')
+    #     else:
+    #         lang = "english"
+    #
+    #     async with self.bot.sql_conn.acquire() as conn:
+    #         async with conn.cursor() as db:
+    #             await db.execute("SELECT userid FROM donator")
+    #             alltokens = await db.fetchall()
+    #     tokenlist = []
+    #     for x in range(len(alltokens)):
+    #         tokenlist.append(int(alltokens[x][0]))
+    #
+    #     if author.id not in tokenlist:
+    #         return await ctx.send(embed=discord.Embed(color=0xff5630, title=getlang(lang)["donator"]["error"]["error"],
+    #                                                   description=getlang(lang)["donator"]["error"]["message"]))
+    #
+    #     await ctx.send("**Send an image/file to upload. Type `cancel` to cancel.**")
+    #
+    #     def check(m):
+    #         return m.author == author and m.channel == ctx.message.channel
+    #
+    #     msg = await self.bot.wait_for('message', check=check)
+    #
+    #     if msg.content.lower() in ['cancel', 'Cancel']:
+    #         return await ctx.send("**Cancelled.**")
+    #
+    #     try:
+    #         randomnum = self.id_generator()
+    #         url = msg.attachments[0].url
+    #         attachment = str(url).rpartition('.')[2]
+    #         if attachment not in ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'tiff', 'webp']:
+    #             return await ctx.send("**File type is forbiddon.**")
+    #         await ctx.trigger_typing()
+    #         async with aiohttp.ClientSession() as session:
+    #             async with session.get(url) as response:
+    #                 t = await response.read()
+    #
+    #         await ctx.send(t["message"])
+    #     except Exception as e:
+    #         return await ctx.send(f"**Error uploading file**\n\n{e}")
 
     @commands.command(aliases=["autolood"])
     @commands.cooldown(1, 5, commands.BucketType.user)
