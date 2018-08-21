@@ -139,6 +139,7 @@ class economy:
             await ctx.send("💵 | Balance: **$0**")
 
     @commands.command()
+    @commands.guild_only()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def profile(self, ctx, user:discord.Member=None):
         """Get a users profile, if no user is given it will show your profile instead."""
@@ -178,6 +179,20 @@ class economy:
             level = 0
             required = 0
 
+        # Get users guild level
+        _guild_xp = await r.table("guildXP").get(str(ctx.guild.id)).run(self.bot.r_conn)
+        if _guild_xp:
+            try:
+                guild_xp = _guild_xp[str(ctx.author.id)]["xp"]
+            except:
+                guild_xp = 0
+            guild_level = self._find_level(guild_xp)
+            guild_required = self._level_exp(guild_level + 1)
+        else:
+            guild_xp = 0
+            guild_level = 0
+            guild_required = 0
+
         # Get user married to
         married = await r.table("marriage").get(str(user.id)).run(self.bot.r_conn)
         if not married:
@@ -187,8 +202,8 @@ class economy:
 
         em = discord.Embed(color=color)
         em.title = "%s's Profile" % user.name
-        wew = (f"${balance}", rep, level, xp, required, info,)
-        em.description = "💵 | Balance: **%s**\n📈 | Rep: **%s**\n🎮 | Level: **%s %s/%s**\n\n```\n%s\n```" % wew
+        wew = (f"${balance}", rep, level, xp, required, guild_level, guild_xp, guild_required, info,)
+        em.description = "💵 | Balance: **%s**\n📈 | Rep: **%s**\n🌎 | Level: **%s %s/%s**\n🎮 Server Level: **%s %s/%s**\n\n```\n%s\n```" % wew
         em.set_footer(text="Married to %s" % married)
         em.set_thumbnail(url=user.avatar_url)
 
@@ -798,13 +813,46 @@ class economy:
         em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
         return await msg.edit(embed=em)
 
+    async def __handle_guild_xp(self, guild:int, user:int):
+        if not await r.table("guildXP").get(str(guild)).run(self.bot.r_conn):
+            data = {
+                "id": str(guild)
+            }
+            await r.table("guildXP").insert(data).run(self.bot.r_conn)
+
+        guild_data = await r.table("guildXP").get(str(guild)).run(self.bot.r_conn)
+
+        user_exists = guild_data.get(str(user), None)
+
+        if not user_exists:
+            data = {
+                str(user): {
+                    "xp": 0,
+                    "lastxp": "0"
+                }
+            }
+        else:
+            data = {
+                str(user): {
+                    "xp": guild_data[str(user)]["xp"] + random.randint(1, 30),
+                    "lastxp": str(int(time.time()))
+                }
+            }
+
+        await r.table("guildXP").get(str(guild)).update(data).run(self.bot.r_conn)
+
     async def on_message(self, message):
         if message.author.bot:
             return
-        if random.randint(1, 7) == 1:
-            if not len(message.content) > 5:
-                return
-            author = message.author
+        if not isinstance(message.channel, discord.TextChannel):
+            return
+        if message.content == "":
+            return
+        if not len(message.content) > 5:
+            return
+        choice = random.randint(1, 7)
+        author = message.author
+        if choice == 1:
             if not await r.table("levelSystem").get(str(author.id)).run(self.bot.r_conn):
                 data = {
                     "id": str(author.id),
@@ -829,6 +877,8 @@ class economy:
                     "lastxptimes": lastxptimes
                 }
                 await r.table("levelSystem").get(str(author.id)).update(data).run(self.bot.r_conn)
+        elif choice == 2:
+            await self.__handle_guild_xp(message.guild.id, author.id)
 
 def setup(bot):
     bot.add_cog(economy(bot))
