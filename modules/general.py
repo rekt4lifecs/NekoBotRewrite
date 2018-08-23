@@ -10,7 +10,7 @@ from scipy import stats
 import numpy
 from colorthief import ColorThief
 from io import BytesIO
-from .utils import checks
+from .utils import instance_tools
 import qrcode, os, uuid
 import logging
 import base64
@@ -246,23 +246,12 @@ class General:
         """Get Bot's Info"""
         await ctx.trigger_typing()
 
-        servers = 0
-        members = 0
-        messages = 0
-        commands = 0
-        channels = 0
-
-        for x in range(0, 3):
-            y = (await self.bot.redis.get("instance%s-guilds" % x)).decode("utf8")
-            servers += int(y)
-            y = (await self.bot.redis.get("instance%s-users" % x)).decode("utf8")
-            members += int(y)
-            y = (await self.bot.redis.get("instance%s-messages" % x)).decode("utf8")
-            messages += int(y)
-            y = (await self.bot.redis.get("instance%s-commands" % x)).decode("utf8")
-            commands += int(y)
-            y = (await self.bot.redis.get("instance%s-channels" % x)).decode("utf8")
-            channels += int(y)
+        i = instance_tools.InstanceTools(self.bot.instances, self.bot.redis)
+        servers = await i.get_all_guilds()
+        members = await i.get_all_users()
+        channels = await i.get_all_channels()
+        messages = await i.get_all_messages()
+        command_count = await i.get_all_commands()
 
         lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
         if lang:
@@ -289,7 +278,7 @@ class General:
                                                                                           self.get_bot_uptime(),
                                                                                           millify(messages),
                                                                                           str(self.bot.command_usage.most_common(1)[0][0]),
-                                                                                          commands,
+                                                                                          command_count,
                                                                                           thisShard))
         info.add_field(name=getlang(lang)["general"]["info"]["links"]["name"],
                        value=getlang(lang)["general"]["info"]["links"]["links"])

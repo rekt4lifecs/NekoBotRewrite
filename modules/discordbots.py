@@ -1,6 +1,8 @@
 import asyncio, config, discord, random, aiohttp
 import logging
 
+from .utils import instance_tools
+
 log = logging.getLogger()
 
 messages = ["OwO Whats this", "MonkaS", "OwO", "Haiiiii", ".help", "🤔🤔🤔", "HMMM🤔", "USE n! WEW", "n!HELP REE"]
@@ -23,23 +25,23 @@ class DiscordBotsOrgAPI:
             while True:
                 log.info("Getting all servers.")
                 log.info("Attempting to update server count.")
-                instance1 = (await self.bot.redis.get("instance0-guilds")).decode("utf8")
-                instance2 = (await self.bot.redis.get("instance1-guilds")).decode("utf8")
-                instance3 = (await self.bot.redis.get("instance2-guilds")).decode("utf8")
-                servers = int(instance1) + int(instance2) + int(instance3)
+
+                i = instance_tools.InstanceTools(self.bot.instances, self.bot.redis)
+                guilds = await i.get_all_guilds()
+
                 game = discord.Streaming(name=random.choice(stats2), url="https://www.twitch.tv/rektdevlol")
                 await self.bot.change_presence(activity=game)
-                log.info("Servers: %s" % servers)
+                log.info("Servers: %s" % guilds)
                 if self.bot.instance == 0:
                     try:
                         url = "https://discordbots.org/api/bots/310039170792030211/stats"
                         payload = {
-                            "server_count": int(servers),
+                            "server_count": int(guilds),
                             "shard_count": self.bot.shard_count
                         }
                         async with aiohttp.ClientSession() as cs:
                             await cs.post(url, json=payload, headers={"Authorization": config.dbots_key})
-                        log.info("Posted server count. {}".format(servers))
+                        log.info("Posted server count. {}".format(guilds))
                     except Exception as e:
                         log.error('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
 
@@ -47,25 +49,25 @@ class DiscordBotsOrgAPI:
                         async with aiohttp.ClientSession() as session:
                             await session.post('https://bots.discord.pw/api/bots/310039170792030211/stats',
                                                     headers={'Authorization': f'{config.dpw_key}'},
-                                                    json={"server_count": int(servers),
+                                                    json={"server_count": int(guilds),
                                                           "shard_count": self.bot.shard_count})
                     except Exception as e:
                         log.error(f"Failed to post to pw, {e}")
                     try:
                         url = "https://discord.services/api/bots/310039170792030211"
                         payload = {
-                            "guild_count": int(servers)
+                            "guild_count": int(guilds)
                         }
                         async with aiohttp.ClientSession() as cs:
                             await cs.post(url, json=payload, headers={"Authorization": config.ds_key})
                     except Exception as e:
                         log.error(f"Failed to post to ds, {e}")
-                try:
-                    url = f"https://listcord.com/api/bot/{self.bot.user.id}/guilds"
-                    async with aiohttp.ClientSession() as cs:
-                        await cs.post(url, headers={"Authorization": config.listcord}, json={"guilds": int(servers)})
-                except Exception as e:
-                    log.error(f"Failed to post to listcord, {e}")
+                # try:
+                #     url = f"https://listcord.com/api/bot/{self.bot.user.id}/guilds"
+                #     async with aiohttp.ClientSession() as cs:
+                #         await cs.post(url, headers={"Authorization": config.listcord}, json={"guilds": int(guilds)})
+                # except Exception as e:
+                #     log.error(f"Failed to post to listcord, {e}")
                 await asyncio.sleep(1800)
 
     async def on_ready(self):
