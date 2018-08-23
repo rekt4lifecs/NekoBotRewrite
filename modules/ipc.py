@@ -28,6 +28,9 @@ class IPC:
             if not data[str(self.bot.instance)] == "":
                 if data[str(self.bot.instance)] == "ping":
                     await self.__post_hook("Ping - %s" % self.bot.instance)
+                if data[str(self.bot.instance)] == "shutdown":
+                    await self.__post_hook("Shutting down... bai")
+                    await self.bot.close()
                 else:
                     await self.__post_hook("Reloaded " + data[str(self.bot.instance)])
                     try:
@@ -43,19 +46,27 @@ class IPC:
     @commands.is_owner()
     async def ipc(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send("```\nHeccin ipc finally /shrug\n\nreload - reload shit\nforce - force loop\n```")
+            await ctx.send("```\nHeccin ipc finally /shrug\n\nreload - reload shit\nforce - force loop\nshutdown - bai```")
+
+    @ipc.command(name="shutdown")
+    async def ipc_shutdown(self, ctx):
+        """bai"""
+        await r.table("ipc").get("ipc").update({"0": "shutdown",
+                                                "1": "shutdown",
+                                                "2": "shutdown",
+                                                "3": "shutdown"}).run(self.bot.r_conn)
 
     @ipc.command(name="reload")
     async def ipc_reload(self, ctx, module:str):
         """reload shit"""
-        await r.table("ipc").get("ipc").update({"0": module, "1": module, "2": module}).run(self.bot.r_conn)
+        await r.table("ipc").get("ipc").update({"0": module, "1": module, "2": module, "3": module}).run(self.bot.r_conn)
         await ctx.send("Added to queue")
 
     @ipc.command(name="ping")
     async def ipc_ping(self, ctx):
         """Ping ipc"""
         await ctx.send("Sending ping")
-        await r.table("ipc").get("ipc").update({"0": "ping", "1": "ping", "2": "ping"}).run(self.bot.r_conn)
+        await r.table("ipc").get("ipc").update({"0": "ping", "1": "ping", "2": "ping", "3": "ping"}).run(self.bot.r_conn)
 
     @ipc.command(name="force")
     async def ipc_force(self, ctx):
