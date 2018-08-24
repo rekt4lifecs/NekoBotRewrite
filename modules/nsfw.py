@@ -399,7 +399,7 @@ class NSFW:
                 em.set_image(url=data["file_url"])
                 await ctx.send(embed=em)
         except:
-            await ctx.send("**Failed to connect to e621**")
+            await ctx.send("**Could not find anything.**")
 
     @commands.command()
     @commands.guild_only()
