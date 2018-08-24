@@ -63,7 +63,6 @@ list_ = [
     "Tatsumaki",
     "Kaname Madoka",
     "Sakura Kyouko",
-    "Hoshimiya Kate",
     "Fear Kubrick",
     "Sengoku Nadeko",
     "Kirima Sharo",
@@ -71,8 +70,10 @@ list_ = [
     "Kanna",
     "chifuyu_himeki",
     "holo",
-    "dva"
-] #"Louise Francoise Le Blanc De La Valliere",
+    "dva",
+    "megumin"
+] # "Louise Francoise Le Blanc De La Valliere",
+  # "Hoshimiya Kate",
 
 class CardGame:
     """Loli Card Gamelol"""
@@ -367,6 +368,8 @@ class CardGame:
             description = ""
         elif character == "dva":
             description = ""
+        elif character == "hibiki":
+            description = "Qtiest qt of all qts"
         else:
             description = ""
 
