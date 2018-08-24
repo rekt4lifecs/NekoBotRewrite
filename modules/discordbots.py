@@ -5,11 +5,10 @@ from .utils import instance_tools
 
 log = logging.getLogger()
 
-messages = ["OwO Whats this", "MonkaS", "OwO", "Haiiiii", ".help", "🤔🤔🤔", "HMMM🤔", "USE n! WEW", "n!HELP REE"]
 stats2 = ["OwO whats n!help", "🤔🤔🤔", "👀", "(╯°□°）╯︵ ┻━┻",
                   "¯\_(ツ)_/¯", "┬─┬ノ(ಠ_ಠノ)", "><(((('>", "_/\__/\__0>", "ô¿ô", "°º¤ø,¸¸,ø¤º°`°º¤ø,", "=^..^=",
                   "龴ↀ◡ↀ龴", "^⨀ᴥ⨀^", "^⨀ᴥ⨀^", "⨌⨀_⨀⨌", "•|龴◡龴|•", "ˁ˚ᴥ˚ˀ", "⦿⽘⦿", " (╯︵╰,)",
-                  " (╯_╰)", "㋡", "ˁ˚ᴥ˚ˀ", "\(^-^)/"]
+                  " (╯_╰)", "㋡", "ˁ˚ᴥ˚ˀ", "\(^-^)/", "uwu", ":lurk:"]
 
 class DiscordBotsOrgAPI:
     """Handles interactions with the discordbots.org API"""
@@ -29,7 +28,7 @@ class DiscordBotsOrgAPI:
                 i = instance_tools.InstanceTools(self.bot.instances, self.bot.redis)
                 guilds = await i.get_all_guilds()
 
-                game = discord.Streaming(name=random.choice(stats2), url="https://www.twitch.tv/rektdevlol")
+                game = discord.Streaming(name=random.choice(stats2), url="https://www.twitch.tv/nekoboat")
                 await self.bot.change_presence(activity=game)
                 log.info("Servers: %s" % guilds)
                 if self.bot.instance == 0:

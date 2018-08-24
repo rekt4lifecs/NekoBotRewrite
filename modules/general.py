@@ -467,6 +467,31 @@ class General:
         except Exception as e:
             await ctx.send(f"Error. {e}")
 
+    @commands.command(hidden=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def dominant(self, ctx):
+        """Get dominant color from image"""
+        if not len(ctx.message.attachments) >= 1:
+            return await ctx.send("No images given")
+
+        await ctx.trigger_typing()
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(ctx.message.attachments[0].url) as r:
+                res = await r.read()
+
+        color_thief = ColorThief(BytesIO(res))
+        rgb = color_thief.get_color()
+        hexx = int(triplet(rgb), 16)
+
+        em = discord.Embed(color=hexx)
+        em.title = "Most Dominant Colors"
+        em.add_field(name="Int", value=str(hexx))
+        em.add_field(name="RGB", value="R %s G %s B %s" % (rgb[0], rgb[1], rgb[2]))
+        em.add_field(name="Hex", value="0x"+str(triplet(rgb)).upper())
+        em.set_image(url=ctx.message.attachments[0].url)
+        await ctx.send(embed=em)
+
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def avatar(self, ctx, user: discord.Member = None, type:str = None):
@@ -1052,14 +1077,12 @@ class General:
         if command:
             entity = self.bot.get_cog(command) or self.bot.get_command(command)
 
-            if entity is None:
-                clean = command.replace('@', '@\u200b')
-                return await ctx.send(f'Command or category "{clean}" not found.')
-            elif isinstance(entity, commands.Command):
-                p = await HelpPaginator.from_command(ctx, entity)
-            else:
-                p = await HelpPaginator.from_cog(ctx, entity)
-            return await p.paginate()
+            if entity:
+                if isinstance(entity, commands.Command):
+                    p = await HelpPaginator.from_command(ctx, entity)
+                else:
+                    p = await HelpPaginator.from_cog(ctx, entity)
+                return await p.paginate()
         try:
             other = ""
             other += "`pet`, "
