@@ -231,7 +231,7 @@ class economy:
         if not tl >= 86400:
             i = datetime.timedelta(seconds=86400 - tl)
             d = datetime.datetime(1, 1, 1) + i
-            return await ctx.send("You have `%s:%s:%s` until your next daily." % (d.hour, d.minute, d.second,))
+            return await ctx.send("You have `%s` until your next daily." % d.strftime("%H:%M:%S"))
 
         if await self.__has_voted(user.id): # If user has voted
             em = discord.Embed(color=0xDEADBF)
