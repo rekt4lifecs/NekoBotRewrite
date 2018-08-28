@@ -225,18 +225,13 @@ class economy:
         if await self.__is_frozen(ctx.author.id):
             return await ctx.send("This account is frozen")
 
-        # Get the current day now
-        today = datetime.datetime.utcfromtimestamp(time.time()).strftime("%d")
-        # Get the day of the last payday
-        payday_day = datetime.datetime.utcfromtimestamp(int(last_payday)).strftime("%d")
-
-        if today == payday_day: # If the last payday was today
-            tommorow = datetime.datetime.now() + datetime.timedelta(1)
-            midnight = datetime.datetime(year=tommorow.year, month=tommorow.month,
-                                         day=tommorow.day, hour=0, minute=0, second=0)
-            m, s = divmod((midnight - datetime.datetime.now()).seconds, 60)
-            h, m = divmod(m, 60)
-            return await ctx.send("You have %s hours and %s minutes until your next daily." % (h, m,))
+        tn = int(time.time())
+        st = int(last_payday)
+        tl = tn - st
+        if not tl >= 86400:
+            i = datetime.timedelta(seconds=86400 - tl)
+            d = datetime.datetime(1, 1, 1) + i
+            return await ctx.send("You have `%s:%s:%s` until your next daily." % (d.hour, d.minute, d.second,))
 
         if await self.__has_voted(user.id): # If user has voted
             em = discord.Embed(color=0xDEADBF)
