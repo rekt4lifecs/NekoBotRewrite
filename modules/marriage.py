@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord, asyncio
 import ujson
 import rethinkdb as r
+from .utils import chat_formatting
 
 # Languages
 languages = ["english", "weeb", "tsundere", "polish", "spanish", "french"]
@@ -25,21 +26,18 @@ class Marriage:
         """Marry someone OwO"""
         author = ctx.author
 
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.author.id}-lang")
         if lang:
-            lang = lang.decode('utf8')
+            lang = lang.decode("utf8")
         else:
             lang = "english"
 
         if user == author:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["marry_self"]))
-            return
+            return await ctx.send(chat_formatting.bold(getlang(lang)["marriage"]["marry_self"]))
         if await r.table("marriage").get(str(author.id)).run(self.bot.r_conn):
-            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["author_married"]))
-            return
+            return await ctx.send(chat_formatting.bold(getlang(lang)["marriage"]["author_married"]))
         elif await r.table("marriage").get(str(user.id)).run(self.bot.r_conn):
-            await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["user_married"]))
-            return
+            return await ctx.send(chat_formatting.bold(getlang(lang)["marriage"]["user_married"]))
         else:
             await ctx.send(getlang(lang)["marriage"]["marry_msg"].format(author, user))
 
@@ -47,7 +45,7 @@ class Marriage:
                 return m.channel == ctx.message.channel and m.author == user
 
             try:
-                msg = await self.bot.wait_for('message', check=check, timeout=15.0)
+                msg = await self.bot.wait_for("message", check=check, timeout=15.0)
                 if msg.content.lower() != "yes":
                     return await ctx.send(embed=discord.Embed(color=0xff5630, description=getlang(lang)["marriage"]["cancelled"]))
             except asyncio.TimeoutError:
@@ -64,15 +62,14 @@ class Marriage:
         """Divorce ;-;"""
         author = ctx.message.author
 
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
+        lang = await self.bot.redis.get(f"{ctx.author.id}-lang")
         if lang:
-            lang = lang.decode('utf8')
+            lang = lang.decode("utf8")
         else:
             lang = "english"
 
         if not await r.table("marriage").get(str(author.id)).run(self.bot.r_conn):
-            return await ctx.send(embed=discord.Embed(color=0xff5630,
-                                                      description=getlang(lang)["marriage"]["not_married"]))
+            return await ctx.send(chat_formatting.bold(getlang(lang)["marriage"]["not_married"]))
         x = await r.table("marriage").get(str(author.id)).run(self.bot.r_conn)
         user_married_to = int(x["marriedTo"])
         married_to_name = await self.bot.get_user_info(user_married_to)
@@ -80,15 +77,14 @@ class Marriage:
         def check(m):
             return m.channel == ctx.message.channel and m.author == author
 
-        await ctx.send("Are you sure you want to divorce %s?" % (married_to_name,))
+        await ctx.send("**Are you sure you want to divorce %s?**" % (married_to_name,))
 
         try:
-            msg = await self.bot.wait_for('message', check=check, timeout=15.0)
+            msg = await self.bot.wait_for("message", check=check, timeout=15.0)
             if msg.content.lower() != "yes":
-                return await ctx.send(
-                    embed=discord.Embed(color=0xff5630, description="Cancelled"))
+                return await ctx.send("**Cancelled.**")
         except asyncio.TimeoutError:
-            await ctx.send(embed=discord.Embed(color=0xff5630, description="Cancelled"))
+            await ctx.send("**Cancelled.**")
             return
 
         await ctx.send(f"{author.name} divorced {married_to_name} 😦😢")
