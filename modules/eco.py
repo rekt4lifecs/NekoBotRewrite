@@ -279,7 +279,7 @@ class economy:
 
         async with aiohttp.ClientSession() as cs:
             async with cs.post("https://api.weeb.sh/reputation/310039170792030211/%s" % user.id,
-                               headers={"Authorization": "Wolke " + weeb},
+                               headers=auth,
                                data={"source_user": str(ctx.author.id)}) as r:
                 data = await r.json()
 
@@ -288,7 +288,7 @@ class economy:
                                                                             user.mention,))
             else:
                 async with cs.get("https://api.weeb.sh/reputation/310039170792030211/%s" % ctx.author.id,
-                                   headers={"Authorization": "Wolke " + weeb}) as r:
+                                   headers=auth) as r:
                     repdata = await r.json()
                 nextrep = repdata["user"]["nextAvailableReputations"][0]
                 timeleft = str(datetime.timedelta(milliseconds=nextrep)).rpartition(".")[0]
