@@ -187,6 +187,8 @@ class NSFW:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url, headers=headers) as r:
                 res =  await r.json()
+        if res["status"] == 429:
+            return await ctx.send("**Ratelimited, try again later.**")
         data = res['data']
         x = random.choice(data)
         em = discord.Embed(title=f"**{x['title']}**",
@@ -208,6 +210,8 @@ class NSFW:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url, headers=headers) as r:
                 res = await r.json()
+        if res["status"] == 429:
+            return await ctx.send("**Ratelimited, try again later.**")
         x = random.choice(res['data'])
         em = discord.Embed(title=f"**{x['title']}**",
                            color=0xDEADBF)
