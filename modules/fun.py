@@ -420,6 +420,8 @@ class Fun:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url, headers=headers) as r:
                 res = await r.json()
+        if res["status"] == 429:
+            return await ctx.send("**Ratelimited, try again later.**")
         js = random.choice(res['data'])
         if js['nsfw'] or js['is_ad']:
             while True:
