@@ -18,3 +18,4 @@ qrcode
 ujson
 listcord
 nekobot
+python-magic
