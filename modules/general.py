@@ -17,6 +17,7 @@ import base64
 from PIL import Image
 import urllib
 import rethinkdb as r
+import magic as pymagic
 
 log = logging.getLogger()
 
@@ -98,6 +99,12 @@ class General:
         async with aiohttp.ClientSession() as cs:
             async with cs.get(img) as r:
                 res = await r.read()
+
+        magic = pymagic.Magic(mime=True)
+        filetype = magic.from_buffer(res)
+
+        if not filetype.startswith("image/"):
+            return await ctx.send("Not a valid image.")
 
         with Image.open(BytesIO(res)) as img:
             img.convert("RGB")
