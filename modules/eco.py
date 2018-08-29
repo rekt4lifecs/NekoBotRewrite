@@ -291,8 +291,8 @@ class economy:
                                    headers=auth) as r:
                     repdata = await r.json()
                 nextrep = repdata["user"]["nextAvailableReputations"][0]
-                timeleft = str(datetime.timedelta(milliseconds=nextrep)).rpartition(".")[0]
-                await ctx.send("**%s, you can give more reputation in %s**" % (ctx.author.mention, timeleft,))
+                timeleft = (datetime.datetime(1, 1, 1) + datetime.timedelta(milliseconds=nextrep)).strftime("%H:%M:%S")
+                await ctx.send("**%s, you can give more reputation in `%s`**" % (ctx.author.mention, timeleft,))
 
     @commands.command()
     @commands.cooldown(1, 7, commands.BucketType.user)
