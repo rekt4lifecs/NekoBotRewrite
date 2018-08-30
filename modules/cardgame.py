@@ -442,7 +442,7 @@ class CardGame:
         for x in range(6):
             try:
                 card = cards[cardnum]
-                table.add_row([displaynum, card["name"], card["attack"], card["defense"]])
+                table.add_row([displaynum, card["name"].replace("_", " ").title(), card["attack"], card["defense"]])
             except:
                 table.add_row([displaynum, "Empty", "0", "0"])
 
@@ -451,7 +451,7 @@ class CardGame:
 
         await ctx.send("```\n%s\n```" % table)
 
-    @card.command(name='display')
+    @card.command(name="display", aliases=["show"])
     async def card_display(self, ctx, num: int):
         """Display your card(s)"""
         await ctx.trigger_typing()
