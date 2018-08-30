@@ -179,7 +179,7 @@ class NekoBot(commands.AutoShardedBot):
                 await self.redis.set("instance%s-channels" % self.instance, len(set(self.get_all_channels())))
                 logger.info(f"Updated Instance {self.instance}'s Guild Count with {len(self.guilds)}")
 
-                top_users = await r.table("economy").order_by(r.desc("balance")).limit(10).run(self.bot.r_conn)
+                top_users = await r.table("economy").order_by(r.desc("balance")).limit(10).run(self.r_conn)
 
                 if self.instance == 0:
 
