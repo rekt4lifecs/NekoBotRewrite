@@ -29,6 +29,7 @@ class IPC:
                 if data[str(self.bot.instance)] == "ping":
                     await self.__post_hook("Ping - %s" % self.bot.instance)
                 if data[str(self.bot.instance)] == "shutdown":
+                    await r.table("ipc").get("ipc").update({str(self.bot.instance): ""}).run(self.bot.r_conn)
                     await self.__post_hook("Shutting down... bai")
                     await self.bot.close()
                 else:
