@@ -353,7 +353,7 @@ class economy:
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(1, 15, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def top(self, ctx):
         """Get top economy users."""
         await self.__check_level_account(ctx.author.id)
@@ -364,13 +364,9 @@ class economy:
 
         top_users = await r.table("economy").order_by(r.desc("balance")).limit(10).run(self.bot.r_conn)
 
-        for user in top_users:
-            try:
-                username = str(await self.bot.get_user_info(int(user["id"])))
-            except:
-                username = "Unknown User"
-            balance = user["balance"]
-            table.add_row([username, "${:,}".format(balance)])
+        for i, user in enumerate(top_users):
+            username = (await self.bot.redis.get("top%s" % i)).decode("utf8")
+            table.add_row([username, "${:,}".format(user["balance"])])
 
         await ctx.send("```\n%s\n```" % table)
 
