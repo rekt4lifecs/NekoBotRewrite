@@ -370,7 +370,7 @@ class economy:
             except:
                 username = "Unknown User"
             balance = user["balance"]
-            table.add_row([username, balance])
+            table.add_row([username, "${:,}".format(balance)])
 
         await ctx.send("```\n%s\n```" % table)
 
