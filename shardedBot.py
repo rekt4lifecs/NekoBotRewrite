@@ -1,8 +1,8 @@
 from discord.ext import commands
-import logging, traceback, sys, discord
+import logging, traceback, discord
 from collections import Counter
 import datetime
-import aioredis, aiomysql
+import aioredis
 import os, asyncio
 import config
 import rethinkdb as r
@@ -111,7 +111,6 @@ class NekoBot(commands.AutoShardedBot):
                                           db="nekobot")
 
         self.loop.create_task(_init_rethink())
-
         self.loop.create_task(_init_redis())
 
         for file in os.listdir("modules"):
@@ -186,7 +185,7 @@ class NekoBot(commands.AutoShardedBot):
                     for i, u in enumerate(top_users):
                         try:
                             user = await self.get_user_info(int(u["id"]))
-                            username = user.name + user.discriminator
+                            username = user.name + "#" + user.discriminator
                         except:
                             username = "Unknown User"
 
