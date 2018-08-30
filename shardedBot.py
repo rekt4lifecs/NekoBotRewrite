@@ -105,11 +105,6 @@ class NekoBot(commands.AutoShardedBot):
         async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
 
-        async def _init_sql():
-            self.sql_conn = await aiomysql.create_pool(host='localhost', port=3306,
-                                                       user='root', password=config.dbpass,
-                                                       db='nekobot', loop=self.loop, autocommit=True)
-
         async def _init_rethink():
             r.set_loop_type("asyncio")
             self.r_conn = await r.connect(host="localhost",
@@ -117,7 +112,6 @@ class NekoBot(commands.AutoShardedBot):
 
         self.loop.create_task(_init_rethink())
 
-        self.loop.create_task(_init_sql())
         self.loop.create_task(_init_redis())
 
         for file in os.listdir("modules"):
@@ -155,7 +149,6 @@ class NekoBot(commands.AutoShardedBot):
     async def close(self):
         self.r_conn.close()
         self.redis.close()
-        self.sql_conn.close()
         await super().close()
 
     async def on_ready(self):
@@ -185,6 +178,19 @@ class NekoBot(commands.AutoShardedBot):
                 await self.redis.set("instance%s-commands" % self.instance, self.counter["commands_used"])
                 await self.redis.set("instance%s-channels" % self.instance, len(set(self.get_all_channels())))
                 logger.info(f"Updated Instance {self.instance}'s Guild Count with {len(self.guilds)}")
+
+                top_users = await r.table("economy").order_by(r.desc("balance")).limit(10).run(self.bot.r_conn)
+
+                if self.instance == 0:
+
+                    for i, u in enumerate(top_users):
+                        try:
+                            user = await self.get_user_info(int(u["id"]))
+                            username = user.name + user.discriminator
+                        except:
+                            username = "Unknown User"
+
+                        await self.redis.set("top%s" % i, username)
 
                 await asyncio.sleep(300)
 
