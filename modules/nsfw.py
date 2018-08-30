@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, random, aiohttp, requests
+import discord, random, aiohttp
 from bs4 import BeautifulSoup as bs
 from .utils import checks, chat_formatting, hastebin
 import config
@@ -114,29 +114,6 @@ class NSFW:
         embed = discord.Embed(color=0xDEADBF)
         embed.set_image(url=await self.nekobot.image("4k"))
         await ctx.send(embed=embed)
-
-    @commands.command()
-    @commands.guild_only()
-    async def phsearch(self, ctx, terms: str):
-        """Search from PronHub"""
-        if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-            return
-        try:
-            searchurl = "https://www.pornhub.com/video/search?search={}".format(terms.replace(" ", "+"))
-            url = requests.get(searchurl).text
-            soup = bs(url)
-            phtitle = soup.find("a", {"class": "img"})['title']
-            phurl = soup.find("a", {"class": "img"})['href']
-            href = "https://www.pornhub.com{}".format(phurl)
-            em = discord.Embed(title=phtitle,
-                               color=0xDEADBF,
-                               description=href)
-            await ctx.send(embed=em)
-        except Exception as e:
-            await ctx.send(embed=discord.Embed(title="Error",
-                                               color=0xDEADBF,
-                                               description="**`{}`**".format(e)).set_footer(text=f"Used by {ctx.message.author.name}"))
 
     @commands.command()
     @commands.guild_only()
