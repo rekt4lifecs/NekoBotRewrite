@@ -61,20 +61,6 @@ class Moderation:
         self.repl_sessions = {}
         self.repl_embeds = {}
 
-    async def execute(self, query: str, isSelect: bool = False, fetchAll: bool = False, commit: bool = False):
-        async with self.bot.sql_conn.acquire() as conn:
-            async with conn.cursor() as db:
-                await db.execute(query)
-                if isSelect:
-                    if fetchAll:
-                        values = await db.fetchall()
-                    else:
-                        values = await db.fetchone()
-                if commit:
-                    await conn.commit()
-            if isSelect:
-                return values
-
     def cleanup_code(self, content):
         """Automatically removes code blocks from the code."""
         # remove ```py\n```
@@ -789,18 +775,6 @@ class Moderation:
 
         args.search = max(0, min(2000, args.search)) # clamp from 0-2000
         await self.do_removal(ctx, args.search, predicate, before=args.before, after=args.after)
-
-    @commands.command(hidden=True)
-    @commands.is_owner()
-    async def sql(self, ctx, *, sql: str):
-        """Inject SQL"""
-        try:
-            x = await self.execute(query=sql, commit=True, isSelect=True, fetchAll=True)
-            await ctx.message.add_reaction("✅")
-            em = discord.Embed(color=0xDEADBF, title="SQL Result", description=f"```\n{x}\n```")
-            await ctx.send(embed=em)
-        except Exception as e:
-            await ctx.send(f"`{e}`")
 
     async def on_guild_join(self, guild):
         if not guild.large:
