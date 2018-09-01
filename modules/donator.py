@@ -149,10 +149,9 @@ class Donator:
         await ctx.trigger_typing()
         allkeys = await r.table("donator").order_by("id").run(self.bot.r_conn)
         table = PrettyTable()
-        table.field_names = ["User", "Key", "Expiry Date"]
+        table.field_names = ["User", "Key"]
         for key in allkeys:
-            expiry = str(datetime.datetime.fromtimestamp(int(key["created_at"])).strftime('%Y-%m-%d'))
-            table.add_row([str(key["user"]), str(key["id"]), expiry])
+            table.add_row([str(key["user"]), str(key["id"])])
         x = await haste(str(table))
         await ctx.send(x)
 
@@ -193,12 +192,12 @@ class Donator:
             or
             n!autolooder autolood_channel"""
 
-        if not await self.__has_donated(ctx.author.id):
-            return await ctx.send("You have not donated :c, you can donate at <https://www.patreon.com/NekoBot> <:AwooHappy:471598416238215179>")
-
         if await r.table("autolooder").get(str(ctx.guild.id)).run(self.bot.r_conn):
             await r.table("autolooder").get(str(ctx.guild.id)).delete().run(self.bot.r_conn)
             return await ctx.send("I have disable the autolooder for you <:lurk:356825018702888961>")
+
+        if not await self.__has_donated(ctx.author.id):
+            return await ctx.send("You have not donated :c, you can donate at <https://www.patreon.com/NekoBot> <:AwooHappy:471598416238215179>")
 
         if not channel:
             return await self.bot.send_cmd_help(ctx)
