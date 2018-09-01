@@ -911,8 +911,38 @@ class General:
                                            "- username, **Owner Only**\n"
                                            "- blacklist, **Owner Only**\n"
                                            "- reset, **Owner Only**\n"
-                                           "- freeze, **Owner Only**")
+                                           "- freeze, **Owner Only**\n"
+                                           "- createaccount, **Owner Only**\n"
+                                           "- addbalance, **Owner Only**")
             await ctx.send(embed=em)
+
+    @config.command(name="addbalance", hidden=True)
+    @commands.is_owner()
+    async def conf_add_balance(self, ctx, userid:int, amount:int):
+        """Add balance to a user"""
+        if not await r.table("economy").get(str(userid)).run(self.bot.r_conn):
+            return await ctx.send("This user has no account.")
+        u = await r.table("economy").get(str(userid)).run(self.bot.r_conn)
+        balance = u["balance"]
+        newbalance = balance + amount
+        await r.table("economy").get(str(userid)).update({"balance": newbalance}).run(self.bot.r_conn)
+        await ctx.send("Updated balance, user now has `%s`" % newbalance)
+
+    @config.command(name="createaccount", hidden=True)
+    @commands.is_owner()
+    async def conf_create_account(self, ctx, userid:int):
+        """Create an account for a user"""
+        if await r.table("economy").get(str(userid)).run(self.bot.r_conn):
+            return await ctx.send("This user already has an account.")
+        data = {
+            "id": str(userid),
+            "balance": 0,
+            "lastpayday": "0",
+            "bettimes": [],
+            "frozen": False
+        }
+        await r.table("economy").insert(data).run(self.bot.r_conn)
+        await ctx.send("Account created!")
 
     @config.command(name="avatar", hidden=True)
     @commands.is_owner()
