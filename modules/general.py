@@ -1127,47 +1127,14 @@ class General:
             other += "`imgwelcome`, "
             other += ", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Marriage"])
             embed = discord.Embed(color=0xDEADBF, title="NekoBot Help")
-            try:
-                embed.add_field(name="Donator",
-                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Donator" and not i.hidden]),
-                                inline=False)
-            except: pass
-            try:
-                embed.add_field(name="Economy",
-                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "economy" and not i.hidden]),
-                                inline=False)
-            except: pass
-            try:
-                embed.add_field(name="Fun",
-                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Fun" and not i.hidden]),
-                                inline=False)
-            except: pass
-            try:
-                embed.add_field(name="Games",
-                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Games" and not i.hidden]),
-                                inline=False)
-            except: pass
-            try:
-                embed.add_field(name="General",
-                                value=", ".join(
-                                    [f"`{i.name}`" for i in self.bot.commands if i.cog_name == "General" and not i.hidden]),
-                                inline=False)
-            except: pass
-            try:
-                embed.add_field(name="Moderation",
-                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Moderation" and not i.hidden]),
-                                inline=False)
-            except: pass
-            try:
-                embed.add_field(name="NSFW",
-                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "NSFW" and not i.hidden]),
-                                inline=False)
-            except: pass
-            try:
-                embed.add_field(name="Reactions",
-                                value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Reactions" and not i.hidden]),
-                                inline=False)
-            except: pass
+            c = ["Donator", "economy", "Fun", "Games", "General", "Moderation", "NSFW", "Reactions"]
+            for x in c:
+                try:
+                    embed.add_field(name=x.title(),
+                                    value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == x and not i.hidden]),
+                                    inline=False)
+                except:
+                    pass
             embed.add_field(name="Other", value=other, inline=False)
             await ctx.send(embed=embed)
         except discord.HTTPException:
