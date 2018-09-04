@@ -596,141 +596,17 @@ class General:
             channel = ctx.message.channel
         else:
             channel = discord.utils.get(ctx.message.guild.channels, name=channel)
+
+        y = "✅"
+        n = "❌"
+        msg = "Perms for %s in %s, ```\n" % (user.name.replace("@", "@\u200B"), channel.name.replace("@", "@\u200B"))
+
         try:
             perms = user.permissions_in(channel)
-            if perms.create_instant_invite:
-                create_instant_invite = "✅"
-            else:
-                create_instant_invite = "❌"
-            if perms.kick_members:
-                kick_members = "✅"
-            else:
-                kick_members = "❌"
-            if perms.ban_members:
-                ban_members = "✅"
-            else:
-                ban_members = "❌"
-            if perms.administrator:
-                administrator = "✅"
-            else:
-                administrator = "❌"
-            if perms.manage_channels:
-                manage_channels = "✅"
-            else:
-                manage_channels = "❌"
-            if perms.manage_guild:
-                manage_guild = "✅"
-            else:
-                manage_guild = "❌"
-            if perms.add_reactions:
-                add_reactions = "✅"
-            else:
-                add_reactions = "❌"
-            if perms.view_audit_log:
-                view_audit_log = "✅"
-            else:
-                view_audit_log = "❌"
-            if perms.read_messages:
-                read_messages = "✅"
-            else:
-                read_messages = "❌"
-            if perms.send_messages:
-                send_messages = "✅"
-            else:
-                send_messages = "❌"
-            if perms.send_tts_messages:
-                send_tts_messages = "✅"
-            else:
-                send_tts_messages = "❌"
-            if perms.manage_messages:
-                manage_messages = "✅"
-            else:
-                manage_messages = "❌"
-            if perms.embed_links:
-                embed_links = "✅"
-            else:
-                embed_links = "❌"
-            if perms.attach_files:
-                attach_files = "✅"
-            else:
-                attach_files = "❌"
-            if perms.read_message_history:
-                read_message_history = "✅"
-            else:
-                read_message_history = "❌"
-            if perms.mention_everyone:
-                mention_everyone = "✅"
-            else:
-                mention_everyone = "❌"
-            if perms.external_emojis:
-                external_emojis = "✅"
-            else:
-                external_emojis = "❌"
-            if perms.mute_members:
-                mute_members = "✅"
-            else:
-                mute_members = "❌"
-            if perms.deafen_members:
-                deafen_members = "✅"
-            else:
-                deafen_members = "❌"
-            if perms.move_members:
-                move_members = "✅"
-            else:
-                move_members = "❌"
-            if perms.change_nickname:
-                change_nickname = "✅"
-            else:
-                change_nickname = "❌"
-            if perms.manage_roles:
-                manage_roles = "✅"
-            else:
-                manage_roles = "❌"
-            if perms.manage_webhooks:
-                manage_webhooks = "✅"
-            else:
-                manage_webhooks = "❌"
-            if perms.manage_emojis:
-                manage_emojis = "✅"
-            else:
-                manage_emojis = "❌"
-            if perms.manage_nicknames:
-                manage_nicknames = "✅"
-            else:
-                manage_nicknames = "❌"
-
-            embed = discord.Embed(color=0xDEADBF,
-                                  title=f"Permissions for {user.name} in {channel.name}",
-                                  description=f"```css\n"
-                                              f"Administrator       {administrator}\n"
-                                              f"View Audit Log      {view_audit_log}\n"
-                                              f"Manage Server       {manage_guild}\n"
-                                              f"Manage Channels     {manage_channels}\n"
-                                              f"Kick Members        {kick_members}\n"
-                                              f"Ban Members         {ban_members}\n"
-                                              f"Create Invite       {create_instant_invite}\n"
-                                              f"Change Nickname     {change_nickname}\n"
-                                              f"Manage Nicknames    {manage_nicknames}\n"
-                                              f"Manage Emojis       {manage_emojis}\n"
-                                              f"Read Messages       {read_messages}\n"
-                                              f"Read History        {read_message_history}\n"
-                                              f"Send Messages       {send_messages}\n"
-                                              f"Send TTS Messages   {send_tts_messages}\n"
-                                              f"Manage Messages     {manage_messages}\n"
-                                              f"Embed Links         {embed_links}\n"
-                                              f"Attach Files        {attach_files}\n"
-                                              f"Mention Everyone    {mention_everyone}\n"
-                                              f"Use External Emotes {external_emojis}\n"
-                                              f"Add Reactions       {add_reactions}\n"
-                                              f"Manage Webhooks     {manage_webhooks}\n"
-                                              f"Manage Roles        {manage_roles}\n"
-                                              f"Mute Members        {mute_members}\n"
-                                              f"Deafen Members      {deafen_members}\n"
-                                              f"Move Members        {move_members}"
-                                              f"```")
-            if ctx.message.guild.owner_id == user.id:
-                embed.set_footer(text="Is Owner.")
-            await ctx.send(embed=embed)
+            for i in ["%s - %s" % (x[0], y if x[1] else n) for x in perms]:
+                msg += "%s\n" % i
+            msg += "\n```"
+            await ctx.send(msg)
         except:
             await ctx.send("Problem getting that channel...")
 
@@ -764,44 +640,17 @@ class General:
             async with cs.get(url) as r:
                 bot = await r.json()
         try:
-            em = discord.Embed(color=0xDEADBF, title=bot['username'] + "#" + bot['discriminator'],
-                               description=bot['shortdesc'])
-            try:
-                em.add_field(name="Prefix", value=bot['prefix'])
-            except:
-                pass
-            try:
-                em.add_field(name="Lib", value=bot['lib'])
-            except:
-                pass
-            try:
-                em.add_field(name="Owners", value=f"<@{bot['owners'][0]}>")
-            except:
-                pass
-            try:
-                em.add_field(name="Votes", value=bot['points'])
-            except:
-                pass
-            try:
-                em.add_field(name="Server Count", value=bot['server_count'])
-            except:
-                pass
-            try:
-                em.add_field(name="ID", value=bot['id'])
-            except:
-                pass
-            try:
-                em.add_field(name="Certified", value=bot['certifiedBot'])
-            except:
-                pass
-            try:
-                em.add_field(name="Links", value=f"[GitHub]({bot['github']}) - [Invite]({bot['invite']})")
-            except:
-                pass
-            try:
-                em.set_thumbnail(url=f"https://images.discordapp.net/avatars/{bot['id']}/{bot['avatar']}")
-            except:
-                pass
+            em = discord.Embed(color=0xDEADBF)
+            em.title = bot['username'] + "#" + bot['discriminator']
+            em.description = bot["shortdesc"]
+            em.add_field(name="Prefix", value=bot.get("prefix", "None"))
+            em.add_field(name="Lib", value=bot.get("lib"))
+            em.add_field(name="Owners", value=", ".join(["<@%s>" % i for i in bot.get("owners")]))
+            em.add_field(name="Votes", value=bot.get("points", "0"))
+            em.add_field(name="Server Count", value=bot.get("server_count", "0"))
+            em.add_field(name="ID", value=bot.get("id", "0"))
+            em.add_field(name="Certified", value=bot.get("certifiedBot", False))
+            em.set_thumbnail(url=f"https://images.discordapp.net/avatars/{bot['id']}/{bot['avatar']}")
         except:
             return await ctx.send("Failed to get bot data.")
 
