@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord, traceback, sys
+import discord
 import config, aiohttp, logging
 
 log = logging.getLogger()
@@ -8,6 +8,7 @@ class error_handler:
 
     def __init__(self, bot):
         self.bot = bot
+        self.webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
@@ -20,24 +21,30 @@ class error_handler:
                 await ctx.send(page)
 
     async def on_command_error(self, ctx, exception):
-        if str(exception) == "Command raised an exception: NotFound: NOT FOUND (status code: 404): Unknown Channel":
+
+        error = getattr(exception, "original", exception)
+        if isinstance(error, discord.NotFound):
             return
+        elif isinstance(error, discord.Forbidden):
+            return
+        elif isinstance(error, discord.HTTPException) or isinstance(error, aiohttp.ClientConnectionError):
+            async with aiohttp.ClientSession() as cs:
+                webhook = discord.Webhook.from_url(self.webhook_url, adapter=discord.AsyncWebhookAdapter(cs))
+                em = discord.Embed(color=16740159)
+                em.title = "Error in command %s, Instance %s" % (ctx.command.qualified_name, self.bot.instance)
+                em.description = "HTTPException"
+                await webhook.send(embed=em)
+            return await ctx.send("Failed to get data.")
+
         if isinstance(exception, commands.NoPrivateMessage):
             return
         elif isinstance(exception, commands.DisabledCommand):
-            return
-        elif isinstance(exception, discord.Forbidden):
-            return
-        elif isinstance(exception, discord.NotFound):
             return
         elif isinstance(exception, commands.CommandInvokeError):
             em = discord.Embed(color=0xDEADBF,
                                title="Error",
                                description=f"Error in command {ctx.command.qualified_name}, "
                                            f"[Support Server](https://discord.gg/q98qeYN).\n`{exception}`")
-            webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
-            if str(exception) == "Command raised an exception: Forbidden: FORBIDDEN (status code: 403): Missing Permissions":
-                return
             payload = {
                 "embeds": [
                     {
@@ -48,7 +55,7 @@ class error_handler:
                 ]
             }
             async with aiohttp.ClientSession() as cs:
-                async with cs.post(webhook_url, json=payload) as r:
+                async with cs.post(self.webhook_url, json=payload) as r:
                     await r.read()
             await ctx.send(embed=em)
             log.warning('In {}:'.format(ctx.command.qualified_name))
