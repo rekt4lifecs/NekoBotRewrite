@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord, config, aiohttp
 from collections import Counter
 import random
+from io import BytesIO
 
 key = config.weeb
 auth = {"Authorization": "Wolke " + key,
@@ -596,12 +597,10 @@ class Reactions:
         await ctx.trigger_typing()
         async with aiohttp.ClientSession() as session:
             async with session.post('https://api.weeb.sh/auto-image/waifu-insult',
-                                    headers={'Authorization': f'Wolke {config.weeb}'},
+                                    headers=auth,
                                     data={'avatar': user.avatar_url}) as response:
                 t = await response.read()
-                with open("res.png", "wb") as f:
-                    f.write(t)
-                await ctx.send(file=discord.File(fp='res.png'),
+                await ctx.send(file=discord.File(fp=BytesIO(t), filename="res.png"),
                                embed=discord.Embed(color=0xDEADBF).set_image(url="attachment://res.png"))
 
 def setup(bot):
