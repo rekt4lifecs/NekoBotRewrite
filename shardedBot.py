@@ -2,8 +2,9 @@ from discord.ext import commands
 import logging, traceback, discord
 from collections import Counter
 import datetime
-import aioredis
-import os, asyncio
+import asyncio, aioredis
+import os, sys
+
 import config
 import rethinkdb as r
 
@@ -70,11 +71,13 @@ color_format = formatter_message(FORMAT, True)
 logging.setLoggerClass(ColoredLogger)
 color_formatter = ColoredFormatter(color_format)
 console = logging.StreamHandler()
-file = logging.FileHandler(filename=f'logs/{datetime.datetime.utcnow()}.log', encoding='utf-8', mode='w')
 console.setFormatter(color_formatter)
-file.setFormatter(color_formatter)
 logger.addHandler(console)
-logger.addHandler(file)
+
+if sys.platform == "linux":
+    file = logging.FileHandler(filename=f'logs/{datetime.datetime.utcnow()}.log', encoding='utf-8', mode='w')
+    file.setFormatter(color_formatter)
+    logger.addHandler(file)
 
 async def _prefix_callable(bot, msg):
     prefix = await bot.redis.get(f"{msg.author.id}-prefix")
