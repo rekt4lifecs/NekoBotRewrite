@@ -57,7 +57,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(200, 20, commands.BucketType.user)
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def pgif(self, ctx):
         """Posts a Random PrOn GIF"""
         if not ctx.message.channel.is_nsfw():
@@ -79,7 +79,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def anal(self, ctx):
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
@@ -106,6 +106,7 @@ class NSFW:
 
     @commands.command(name="4k")
     @commands.guild_only()
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def _fourk(self, ctx):
         """Posts a random 4K Image OwO"""
         if not ctx.message.channel.is_nsfw():
@@ -117,6 +118,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(2, 5, commands.BucketType.user)
     async def yandere(self, ctx, tag: str):
         """Search Yande.re OwO"""
         if not ctx.message.channel.is_nsfw():
@@ -144,6 +146,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def boobs(self, ctx):
         """Get Random Boobs OwO"""
         if not ctx.message.channel.is_nsfw():
@@ -154,6 +157,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def girl(self, ctx):
         """Get a girl OwO"""
         if not ctx.message.channel.is_nsfw():
@@ -176,6 +180,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def bigboobs(self, ctx):
         """Big Boobs"""
         if not ctx.message.channel.is_nsfw():
@@ -198,6 +203,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def ass(self, ctx):
         """Get Random Ass OwO"""
         if not ctx.message.channel.is_nsfw():
@@ -210,7 +216,7 @@ class NSFW:
 
     @commands.command(aliases=["cum"])
     @commands.guild_only()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def cumsluts(self, ctx):
         """CumSluts"""
         if not ctx.message.channel.is_nsfw():
@@ -221,7 +227,7 @@ class NSFW:
 
     @commands.command(aliases=["thigh"])
     @commands.guild_only()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def thighs(self, ctx):
         """Thighs"""
         if not ctx.message.channel.is_nsfw():
@@ -236,7 +242,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def pussy(self, ctx):
         """Pussy owo"""
         if not ctx.message.channel.is_nsfw():
@@ -249,6 +255,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def gonewild(self, ctx):
         """r/GoneWild"""
         if not ctx.message.channel.is_nsfw():
@@ -261,6 +268,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(3, 7, commands.BucketType.user)
     async def doujin(self, ctx):
         """Get a Random Doujin"""
         if not ctx.message.channel.is_nsfw():
@@ -276,6 +284,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def lewdkitsune(self, ctx):
         """Lewd Kitsunes"""
         if not ctx.message.channel.is_nsfw():
@@ -287,6 +296,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def hentai(self, ctx):
         """Lood 2d girls"""
         if not ctx.message.channel.is_nsfw():
@@ -304,7 +314,7 @@ class NSFW:
             await ctx.send(embed=embed)
 
     @commands.command(name="rule34", aliases=["r34"])
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.guild_only()
     async def rule34(self, ctx, tag:str):
         """Search rule34"""
@@ -358,7 +368,7 @@ class NSFW:
     #         await ctx.send(":x: No image found. Sorry :/")
 
     @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.guild_only()
     async def e621(self, ctx, tag:str):
         """Search e621"""
@@ -384,7 +394,7 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(1, 2, commands.BucketType.user)
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def futa(self, ctx):
         """Grils with peepee's"""
         if not ctx.message.channel.is_nsfw():
@@ -395,7 +405,7 @@ class NSFW:
 
     @commands.command(aliases=["collar"])
     @commands.guild_only()
-    @commands.cooldown(1, 2, commands.BucketType.user)
+    @commands.cooldown(25, 10, commands.BucketType.user)
     async def collared(self, ctx):
         if not ctx.message.channel.is_nsfw():
             return await ctx.send("This is not an NSFW channel...", delete_after=5)
