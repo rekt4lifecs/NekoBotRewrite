@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 import aiohttp
+from PIL import Image
 
 import config
 from io import BytesIO
@@ -44,6 +45,47 @@ class Fun:
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=data[key])
         return em
+
+    @commands.command(aliases=["emotesplit"])
+    @commands.guild_only()
+    @commands.cooldown(1, 7, commands.BucketType.user)
+    async def emojisplit(self, ctx, emoji: discord.Emoji):
+        """Split an emote into 4"""
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(emoji.url) as r:
+                res = await r.read()
+
+        img = Image.open(BytesIO(res))
+        x, y = img.size
+
+        part1 = img.crop((0, 0, x / 2, y / 2))
+        part2 = img.crop((x / 2, 0, x, y / 2))
+        part3 = img.crop((0, y / 2, x / 2, y))
+        part4 = img.crop((x / 2, y / 2, x, y))
+
+        tmp_1 = BytesIO()
+        tmp_2 = BytesIO()
+        tmp_3 = BytesIO()
+        tmp_4 = BytesIO()
+
+        part1.save(tmp_1, format="png")
+        tmp_1.seek(0)
+        part2.save(tmp_2, format="png")
+        tmp_2.seek(0)
+        part3.save(tmp_3, format="png")
+        tmp_3.seek(0)
+        part4.save(tmp_4, format="png")
+        tmp_4.seek(0)
+
+        files = [
+            discord.File(tmp_1, "part1.png"),
+            discord.File(tmp_2, "part2.png"),
+            discord.File(tmp_3, "part3.png"),
+            discord.File(tmp_4, "part4.png")
+        ]
+
+        await ctx.send(files=files)
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
