@@ -229,7 +229,7 @@ class Fun:
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def nichijou(self, ctx, text: str):
+    async def nichijou(self, ctx, *, text: str):
         if len(text) > 22:
             return await ctx.send("Text too long ;w;")
         await ctx.trigger_typing()
