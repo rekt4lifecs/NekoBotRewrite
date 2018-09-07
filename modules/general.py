@@ -207,24 +207,6 @@ class General:
             return await self.bot.send_cmd_help(ctx)
         await ctx.send("I chose: **%s**!" % (random.choice(items)).replace("@", "@\u200B"))
 
-    @commands.command()
-    @commands.cooldown(1, 2, commands.BucketType.user)
-    async def flip(self, ctx):
-        """Flip a coin"""
-        x = random.randint(0, 1)
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-            if x == 1:
-                await ctx.send(getlang(lang)["general"]["flip"]["heads"], file=discord.File("data/heads.png"))
-            else:
-                await ctx.send(getlang(lang)["general"]["flip"]["tails"], file=discord.File("data/tails.png"))
-        else:
-            if x == 1:
-                await ctx.send("**Heads**", file=discord.File("data/heads.png"))
-            else:
-                await ctx.send("**Tails**", file=discord.File("data/tails.png"))
-
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
 
