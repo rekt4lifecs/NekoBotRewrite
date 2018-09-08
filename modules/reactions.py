@@ -39,16 +39,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.command()
-    @commands.cooldown(1, 1, commands.BucketType.user)
-    async def gasm(self, ctx):
-        await ctx.trigger_typing()
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://nekos.life/api/v2/img/gasm") as r:
-                res = await r.json()
-        await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=res["url"]))
-
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def confused(self, ctx):
         """?!??!?!?"""
@@ -59,7 +50,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def dance(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -69,7 +60,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def insult(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -79,7 +70,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def cry(self, ctx):
         """;w;"""
@@ -90,7 +81,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def jojo(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -100,7 +91,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def megumin(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -110,7 +101,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def pout(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -120,7 +111,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def sumfuk(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -130,7 +121,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def initiald(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -140,7 +131,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def deredere(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -150,7 +141,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def sleepy(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -160,7 +151,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def shrug(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -170,7 +161,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def hug(self, ctx, user: discord.Member):
         """Hug someone OwO"""
@@ -188,7 +179,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def kiss(self, ctx, user: discord.Member):
         """Kiss someone OwO"""
@@ -206,7 +197,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def pat(self, ctx, user: discord.Member):
         """Pat someone OwO"""
@@ -224,7 +215,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def cuddle(self, ctx, user: discord.Member):
         """Cudddddduuulzzzz OWO"""
@@ -243,7 +234,7 @@ class Reactions:
                 await ctx.send(embed=em)
 
     @commands.command(pass_context=True)
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     async def tickle(self, ctx, user: discord.Member):
         """Whats this OWO"""
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -261,7 +252,7 @@ class Reactions:
                 await ctx.send(embed=em)
 
     @commands.command(pass_context=True)
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     async def bite(self, ctx, user: discord.Member):
         """Bite someone OwO"""
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -278,7 +269,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def slap(self, ctx, user: discord.Member):
         """Ouch ;-;"""
@@ -296,7 +287,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def punch(self, ctx, user: discord.Member):
         """Ouch ;-;"""
@@ -315,7 +306,7 @@ class Reactions:
                 await ctx.send(embed=em)
 
     @commands.command(pass_context=True)
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     async def poke(self, ctx, user: discord.Member):
         """poke poke poke ^-^"""
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -332,7 +323,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def nom(self, ctx, user: discord.Member):
         """noomss on someone owo"""
@@ -350,7 +341,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def lick(self, ctx, user: discord.Member):
         """licks someone"""
@@ -368,7 +359,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def greet(self, ctx, user: discord.Member):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -385,7 +376,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def lewd(self, ctx):
         """Leeewd!!!"""
@@ -397,7 +388,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def trap(self, ctx):
         """its a trap owo"""
@@ -408,7 +399,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def owo(self, ctx):
         """OwO Whats This"""
@@ -419,7 +410,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def wasted(self, ctx):
         """Wastteeddd"""
@@ -431,7 +422,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def banghead(self, ctx):
         """Head banging intensifys"""
@@ -443,7 +434,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def discordmeme(self, ctx):
         """Discord Memes OwO"""
@@ -454,7 +445,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def stare(self, ctx):
         """Stares"""
@@ -465,7 +456,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def thinking(self, ctx):
         """THINKSSSS"""
@@ -476,7 +467,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def dab(self, ctx):
         """hits a thicc dab"""
@@ -515,7 +506,7 @@ class Reactions:
                     em.set_footer(text="nekos.life owo")
                     await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True, aliases=['foxgirls'])
     async def foxgirl(self, ctx):
         """Fox Girls OwO"""
@@ -527,7 +518,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def rem(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -538,7 +529,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def triggered(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -549,7 +540,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True)
     async def poi(self, ctx):
         async with aiohttp.ClientSession(headers=auth) as cs:
@@ -560,7 +551,7 @@ class Reactions:
                 em.set_image(url=res['url'])
                 await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command()
     async def why(self, ctx):
         """Why just why"""
@@ -571,7 +562,7 @@ class Reactions:
                 await ctx.send(embed=embed)
 
     @commands.command(pass_context=True)
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(2, 5, commands.BucketType.user)
     async def bang(self, ctx, user: discord.Member):
         """~BANG~"""
         async with aiohttp.ClientSession(headers=auth) as cs:
