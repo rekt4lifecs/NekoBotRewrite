@@ -15,7 +15,6 @@ import qrcode, os, uuid
 import logging
 import base64
 from PIL import Image
-import urllib
 import rethinkdb as r
 import magic as pymagic
 
@@ -143,16 +142,16 @@ class General:
             em.set_footer(text="Powered by whatanime.ga")
 
             try:
-                preview = f"https://whatanime.ga/preview.php?anilist_id={doc['anilist_id']}" \
-                          f"&file={urllib.parse.quote_plus(doc['filename'])}" \
+                preview = f"https://whatanime.ga/thumbnail.php?anilist_id={doc['anilist_id']}" \
+                          f"&file={doc['filename']}" \
                           f"&t={doc['at']}" \
                           f"&token={doc['tokenthumb']}"
                 async with aiohttp.ClientSession() as cs:
                     async with cs.get(preview) as r:
                         res = await r.read()
-
-                file = discord.File(res, filename="file.gif")
-                em.set_image(url="attachment://file.gif")
+                filetype = magic.from_buffer(res).rpartition("/")[2]
+                file = discord.File(res, filename="file.%s" % filetype)
+                em.set_image(url="attachment://file.%s" % filetype)
             except:
                 return await ctx.send(embed=em)
 
