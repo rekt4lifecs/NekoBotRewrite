@@ -2,13 +2,9 @@ from discord.ext import commands
 import discord, random, os, math, logging
 from PIL import Image, ImageFont, ImageDraw
 import rethinkdb as r
+from io import BytesIO
 
 log = logging.getLogger()
-
-#
-# Formatting
-# UserID | Name | Level | Type | Food | Play
-#
 
 class NekoPet:
 
@@ -91,10 +87,6 @@ class NekoPet:
             return await ctx.send("❌ | You don't have a pet to play with ;c, buy one with `n!pet shop`")
 
         pet_data = await r.table("nekopet").get(str(ctx.author.id)).run(self.bot.r_conn)
-        userpath = f"data/nekopet/{ctx.author.id}.png"
-
-        if os.path.exists(userpath):
-            os.remove(userpath)
 
         level = pet_data["level"]
         food = pet_data["food"]
@@ -102,32 +94,31 @@ class NekoPet:
         type = pet_data["type"]
 
         data_folder = "data/nekopet/"
-        background = Image.open(data_folder + "background.png").convert("RGBA")
+        background = Image.open(data_folder + pet_data.get("background", "background.png")).convert("RGBA")
         font = ImageFont.truetype("data/fonts/Neko.ttf", 30)
 
-        if int(type) == 1:
-            neko = data_folder + "neko1.png"
-        elif int(type) == 2:
-            neko = data_folder + "neko2.png"
-        elif int(type) == 3:
-            neko = data_folder + "neko3.png"
-        else:
-            neko = None
+        types = {
+            1: "neko1.png",
+            2: "neko2.png",
+            3: "neko3.png"
+        }
 
         draw = ImageDraw.Draw(background)
-        neko = Image.open(neko).resize((250, background.size[1]))
+        neko = Image.open(data_folder + types[int(type)]).resize((250, background.size[1]))
 
         background.alpha_composite(neko)
         draw.text((225, 5), f"{food}% Food", (255, 255, 255), font)
         draw.text((225, 45), f"{play}% Play", (255, 255, 255), font)
         draw.text((225, 85), f"Level {self._find_level(int(level))}", (255, 255, 255), font)
 
-        background.save(userpath)
+        temp = BytesIO()
+        background.save(temp, format="png")
+        temp.seek(0)
 
         em = discord.Embed(color=0xDEADBF, title=f"{ctx.message.author.name}'s Neko")
         em.set_footer(text=f"Level: {self._find_level(int(level))}, XP: {level}")
-        await ctx.send(file=discord.File(userpath),
-                       embed=em.set_image(url=f"attachment://{ctx.message.author.id}.png"))
+        await ctx.send(file=discord.File(fp=temp, filename="neko.png"),
+                       embed=em.set_image(url=f"attachment://neko.png"))
 
     @pet.command(name="shop")
     async def neko_shop(self, ctx):
@@ -139,7 +130,7 @@ class NekoPet:
             return m.channel == ctx.message.channel and m.author == ctx.message.author
 
         em = discord.Embed(color=0xDEADBF, title="Neko Shop",
-                           description="1 = Buy a Neko ($75,000)").set_footer(text="More coming soon...")
+                           description="1 = Buy a Neko ($75,000)\n2 = Buy backgrounds").set_footer(text="More coming soon...")
         em.set_footer(text="Type a number.")
         strt = await ctx.send(embed=em)
 
@@ -150,7 +141,7 @@ class NekoPet:
         try:
             content = int(msg.content)
         except:
-            return await ctx.send("Invalid option, returning...")
+            return await ctx.send("❌ | Invalid option, returning...")
 
         if content == 1:
             if await self.__check_pet(ctx.author.id):
@@ -169,6 +160,7 @@ class NekoPet:
                 await self.__remove_amount(ctx.author.id, 75000)
                 data = {
                     "id": str(ctx.author.id),
+                    "background": "background.png",
                     "level": 0,
                     "type": random.randint(1, 3),
                     "food": 100,
@@ -180,6 +172,58 @@ class NekoPet:
                 return await strt.edit(content="<a:rainbowNekoDance:462373594555613214> | Successfully bought a neko!")
             else:
                 return await strt.edit(content="❌ | Returned...")
+        elif content == 2:
+            if not await self.__check_pet(ctx.author.id):
+                return await strt.edit(embed=None, content="❌ | You don't have a pet to buy a background for")
+            em = discord.Embed(color=0xDEADBF)
+            em.title = "Backgrounds"
+            em.description = "1 = Default (Free)\n" \
+                             "2 = Cubes ($250,000)"
+            await strt.edit(embed=em)
+            try:
+                msg = await self.bot.wait_for('message', check=check, timeout=15.0)
+            except:
+                return await strt.edit(content="❌ | **Timed out...**", embed=None)
+            try:
+                msg = int(msg.content)
+            except:
+                return await strt.edit(content="❌ | Invalid option, returning...")
+            user_data = await r.table("nekopet").get(str(ctx.author.id)).run(self.bot.r_conn)
+            if msg == 1:
+                if user_data.get("background", "background.png") == "background.png":
+                    return await strt.edit(content="❌ | **You already have this background active**", embed=None)
+                await ctx.send("Are you sure you want to reset your background? (Type `yes` if you would like to.)")
+                try:
+                    msg = await self.bot.wait_for('message', check=check, timeout=15.0)
+                except:
+                    return await strt.edit(content="❌ | **Timed out...**", embed=None)
+                if msg.content.lower() == "yes":
+                    await r.table("nekopet").get(str(ctx.author.id)).update({"background": "background.png"}).run(self.bot.r_conn)
+                    return await ctx.send("<a:rainbowNekoDance:462373594555613214> | Successfully reset your background!")
+                else:
+                    return await strt.edit(content="❌ | Returned...")
+            elif msg == 2:
+                if user_data.get("background", "background.png") == "background2.png":
+                    return await strt.edit(content="❌ | **You already have this background active**", embed=None)
+                em = discord.Embed(color=0x7243DB)
+                await ctx.send(content="**Are you sure you want to buy a background?** (Type `yes` if you would like to.)",
+                               file=discord.File("data/nekopet/background2.png", filename="nekobackground.png"),
+                               embed=em.set_image(url="attachment://nekobackground.png"))
+                try:
+                    msg = await self.bot.wait_for('message', check=check, timeout=15.0)
+                except:
+                    return await strt.edit(content="❌ | **Timed out...**", embed=None)
+                if msg.content.lower() == "yes":
+                    if not await self.__can_purchase(ctx.author.id, 250000):
+                        return await ctx.send(content="❌ | **You don't have enough $ ;c**", embed=None)
+                    else:
+                        await self.__remove_amount(ctx.author.id, 250000)
+                        await r.table("nekopet").get(str(ctx.author.id)).update({"background": "background2.png"}).run(self.bot.r_conn)
+                        return await ctx.send("<a:rainbowNekoDance:462373594555613214> | Successfully bought the background!")
+                else:
+                    return await ctx.send(content="❌ | Returned...")
+            else:
+                return await ctx.send("❌ | Invalid option, returning...")
         else:
             return await ctx.send("❌ | Invalid option, returning...")
 
@@ -219,7 +263,7 @@ class NekoPet:
     async def on_message(self, message):
         if message.author.bot:
             return
-        if random.randint(1, 125) == 1:
+        if random.randint(1, 130) == 1:
             if await self.__check_pet(message.author.id):
                 data = await r.table("nekopet").get(str(message.author.id)).run(self.bot.r_conn)
                 if data["play"] <= 0:
