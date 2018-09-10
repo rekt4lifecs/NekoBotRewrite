@@ -1,4 +1,3 @@
-import rethinkdb as r
 import asyncio, aiohttp
 import discord
 from discord.ext import commands
@@ -24,23 +23,23 @@ class IPC:
                 [(await self.bot.redis.set(f"shard:{x[0]}", str(round(x[1] * 1000, 2)))) for x in self.bot.latencies]
             except:
                 print("Failed to update latencies")
-            data = await r.table("ipc").get("ipc").run(self.bot.r_conn)
-            if not data[str(self.bot.instance)] == "":
-                if data[str(self.bot.instance)] == "ping":
+            data = (await self.bot.redis.get("ipc:%s" % self.bot.instance)).decode("utf-8")
+            if not data == "":
+                if data == "ping":
                     await self.__post_hook("Ping - %s" % self.bot.instance)
-                if data[str(self.bot.instance)] == "shutdown":
-                    await r.table("ipc").get("ipc").update({str(self.bot.instance): ""}).run(self.bot.r_conn)
+                if data == "shutdown":
+                    await self.bot.redis.set("ipc:%s" % self.bot.instance, "")
                     await self.__post_hook("Shutting down... bai")
                     await self.bot.close()
                 else:
-                    await self.__post_hook("Reloaded " + data[str(self.bot.instance)])
+                    await self.__post_hook("Reloaded " + data)
                     try:
-                        self.bot.unload_extension("modules.%s" % data[str(self.bot.instance)])
-                        self.bot.load_extension("modules.%s" % data[str(self.bot.instance)])
+                        self.bot.unload_extension("modules.%s" % data)
+                        self.bot.load_extension("modules.%s" % data)
                     except:
                         print("Failed to reload")
                         pass
-                await r.table("ipc").get("ipc").update({str(self.bot.instance): ""}).run(self.bot.r_conn)
+                await self.bot.redis.set("ipc:%s" % self.bot.instance, "")
             await asyncio.sleep(30)
 
     @commands.group(hidden=True)
@@ -52,22 +51,22 @@ class IPC:
     @ipc.command(name="shutdown")
     async def ipc_shutdown(self, ctx):
         """bai"""
-        await r.table("ipc").get("ipc").update({"0": "shutdown",
-                                                "1": "shutdown",
-                                                "2": "shutdown",
-                                                "3": "shutdown"}).run(self.bot.r_conn)
+        for x in range(self.bot.instances):
+            await self.bot.redis.set("ipc:%s" % self.bot.instance, "shutdown")
 
     @ipc.command(name="reload")
     async def ipc_reload(self, ctx, module:str):
         """reload shit"""
-        await r.table("ipc").get("ipc").update({"0": module, "1": module, "2": module, "3": module}).run(self.bot.r_conn)
+        for x in range(self.bot.instances):
+            await self.bot.redis.set("ipc:%s" % self.bot.instance, module)
         await ctx.send("Added to queue")
 
     @ipc.command(name="ping")
     async def ipc_ping(self, ctx):
         """Ping ipc"""
         await ctx.send("Sending ping")
-        await r.table("ipc").get("ipc").update({"0": "ping", "1": "ping", "2": "ping", "3": "ping"}).run(self.bot.r_conn)
+        for x in range(self.bot.instances):
+            await self.bot.redis.set("ipc:%s" % self.bot.instance, "ping")
 
     @ipc.command(name="force")
     async def ipc_force(self, ctx):

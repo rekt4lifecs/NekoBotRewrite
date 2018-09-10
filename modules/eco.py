@@ -804,33 +804,33 @@ class economy:
         em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
         return await msg.edit(embed=em)
 
-    async def __handle_guild_xp(self, guild:int, user:int):
-        if not await r.table("guildXP").get(str(guild)).run(self.bot.r_conn):
-            data = {
-                "id": str(guild)
-            }
-            await r.table("guildXP").insert(data).run(self.bot.r_conn)
-
-        guild_data = await r.table("guildXP").get(str(guild)).run(self.bot.r_conn)
-
-        user_exists = guild_data.get(str(user), None)
-
-        if not user_exists:
-            data = {
-                str(user): {
-                    "xp": 0,
-                    "lastxp": "0"
-                }
-            }
-        else:
-            data = {
-                str(user): {
-                    "xp": guild_data[str(user)]["xp"] + random.randint(1, 30),
-                    "lastxp": str(int(time.time()))
-                }
-            }
-
-        await r.table("guildXP").get(str(guild)).update(data).run(self.bot.r_conn)
+    # async def __handle_guild_xp(self, guild:int, user:int):
+    #     if not await r.table("guildXP").get(str(guild)).run(self.bot.r_conn):
+    #         data = {
+    #             "id": str(guild)
+    #         }
+    #         await r.table("guildXP").insert(data).run(self.bot.r_conn)
+    #
+    #     guild_data = await r.table("guildXP").get(str(guild)).run(self.bot.r_conn)
+    #
+    #     user_exists = guild_data.get(str(user), None)
+    #
+    #     if not user_exists:
+    #         data = {
+    #             str(user): {
+    #                 "xp": 0,
+    #                 "lastxp": "0"
+    #             }
+    #         }
+    #     else:
+    #         data = {
+    #             str(user): {
+    #                 "xp": guild_data[str(user)]["xp"] + random.randint(1, 30),
+    #                 "lastxp": str(int(time.time()))
+    #             }
+    #         }
+    #
+    #     await r.table("guildXP").get(str(guild)).update(data).run(self.bot.r_conn)
 
     async def on_message(self, message):
         if message.author.bot:
@@ -841,10 +841,11 @@ class economy:
             return
         if not len(message.content) > 5:
             return
-        choice = random.randint(1, 7)
+        choice = random.randint(1, 15)
         author = message.author
         if choice == 1:
-            if not await r.table("levelSystem").get(str(author.id)).run(self.bot.r_conn):
+            user_data = await r.table("levelSystem").get(str(author.id)).run(self.bot.r_conn)
+            if not user_data:
                 data = {
                     "id": str(author.id),
                     "xp": 0,
@@ -853,14 +854,13 @@ class economy:
                     "lastxptimes": []
                 }
                 await r.table("levelSystem").insert(data).run(self.bot.r_conn)
-            user_data = await r.table("levelSystem").get(str(author.id)).run(self.bot.r_conn)
             if user_data["blacklisted"]:
                 return
             if (int(time.time()) - int(user_data["lastxp"])) >= 120:
                 lastxptimes = user_data["lastxptimes"]
                 lastxptimes.append(str(int(time.time())))
 
-                newxp = random.randint(1, 25)
+                newxp = random.randint(1, 30)
                 xp = user_data["xp"] + newxp
                 data = {
                     "xp": xp,
@@ -868,8 +868,8 @@ class economy:
                     "lastxptimes": lastxptimes
                 }
                 await r.table("levelSystem").get(str(author.id)).update(data).run(self.bot.r_conn)
-        elif choice == 2:
-            await self.__handle_guild_xp(message.guild.id, author.id)
+        # elif choice == 2:
+        #     await self.__handle_guild_xp(message.guild.id, author.id)
 
 def setup(bot):
     bot.add_cog(economy(bot))
