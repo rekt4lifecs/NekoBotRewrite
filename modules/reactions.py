@@ -1,598 +1,427 @@
 from discord.ext import commands
-import discord, config, aiohttp
-from collections import Counter
-import random
-from io import BytesIO
+import discord
+from .utils.weeb import Weeb
+import config
+import aiohttp
+from random import choice as randchoice
 
-key = config.weeb
-auth = {"Authorization": "Wolke " + key,
-        "User-Agent": "NekoBot/4.2.0"}
-
-class Reactions:
-    """Reactions"""
+class TestWeeb:
 
     def __init__(self, bot):
         self.bot = bot
-        self.counter = Counter()
+        self.weeb = Weeb(config.weeb, bot)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    async def __local_check(self, ctx):
+        return True if ctx.guild else False
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def awoo(self, ctx):
-        """AWOOOOOOOO"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=awoo') as r:
-                res = await r.json()
-                em = discord.Embed(title="AWOOOO",
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """Awooo!"""
+        color, url = await self.weeb.awoo()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def bang(self, ctx, user: discord.Member):
+        if user == ctx.author:
+            title = "Banged self ;w;"
+        else:
+            title = "%s banged %s >:)" % (ctx.author.name, user.name,)
+
+        color, url = await self.weeb.bang()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def blush(self, ctx):
-        """>~<"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=blush') as r:
-                res = await r.json()
-                em = discord.Embed(title=f"{ctx.message.author.name} blushes",
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """>///<"""
+        color, url = await self.weeb.blush()
+        em = discord.Embed(color=color, title="%s blushes >///<" % ctx.author.name).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def confused(self, ctx):
-        """?!??!?!?"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=clagwimoth') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """???"""
+        color, url = await self.weeb.clagwimoth()
+        em = discord.Embed(color=color, title="%s is confused ;w;" % ctx.author.name).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def dance(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=dance') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """Dance uwu"""
+        color, url = await self.weeb.dance()
+        em = discord.Embed(color=color, title="*%s dances*" % ctx.author.name).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
-    async def insult(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=dance') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def insult(self, ctx, user: discord.Member):
+        """Insult someone owo"""
+        if user == ctx.author:
+            title = "%s insulted themself ;w;" % ctx.author.name
+        else:
+            title = "%s insulted %s >:)" % (ctx.author.name, user.name,)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+        color, url = await self.weeb.insult()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def cry(self, ctx):
-        """;w;"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=cry') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """*cries*"""
+        color, url = await self.weeb.cry()
+        em = discord.Embed(color=color, title="*%s cries*" % ctx.author.name).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def jojo(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=jojo') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.jojo()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def megumin(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=megumin') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.megumin()
+        em = discord.Embed(color=color, title="Explosion!").set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def pout(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=pout') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.pout()
+        em = discord.Embed(color=color, title="*%s pouts*" % ctx.author.name).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def sumfuk(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=sumfuk') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.sumfuk()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def initiald(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=initial_d') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.initial_d()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def deredere(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=deredere') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.deredere()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def sleepy(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=sleepy') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.sleepy()
+        em = discord.Embed(color=color, title="%s is sleepy 💤" % ctx.author.name).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def shrug(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=shrug') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.shrug()
+        em = discord.Embed(color=color, title="*%s shrugs*" % ctx.author.name).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def hug(self, ctx, user: discord.Member):
-        """Hug someone OwO"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=hug') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = "NekoBot"
-                    text = "<:nekoHug:413608646988005376>"
-                else:
-                    user = user.name
-                    text = "(^･o･^)ﾉ”"
-                em = discord.Embed(title="**{}** hugged **{}** {}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """Hug someone (> ^_^ )>"""
+        if user == ctx.author:
+            title = "*%s hugs themself*" % ctx.author.name
+        else:
+            title = "*%s hugs %s* (> ^_^ )>" % (ctx.author.name, user.name)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+        color, url = await self.weeb.hug()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def kiss(self, ctx, user: discord.Member):
-        """Kiss someone OwO"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=kiss') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = "their arm ;-;"
-                    text = ""
-                else:
-                    user = user.name
-                    text = "❤(´ω｀*)"
-                em = discord.Embed(title="**{}** kissed **{}** {}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """Kiss someone >///<"""
+        if user == ctx.author:
+            title = "*%s kisses themself*" % ctx.author.name
+        else:
+            title = "*%s kisses %s* >///<" % (ctx.author.name, user.name)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+        color, url = await self.weeb.kiss()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def pat(self, ctx, user: discord.Member):
-        """Pat someone OwO"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=pat') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = "themself ;-;"
-                    text = ""
-                else:
-                    user = user.name
-                    text = "(^･o･^)ﾉ”"
-                em = discord.Embed(title="**{}** patted **{}** {}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """*pat pat pat*"""
+        if user == ctx.author:
+            title = "*%s pats themself*" % ctx.author.name
+        else:
+            title = "*%s pats %s*" % (ctx.author.name, user.name)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+        color, url = await self.weeb.pat()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def cuddle(self, ctx, user: discord.Member):
-        """Cudddddduuulzzzz OWO"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=cuddle') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = "themself ;-;"
-                    text = ""
-                else:
-                    user = user.name
-                    text = "OwO"
-                em = discord.Embed(title="**{}** cudddddllllllzzzzz **{}** {}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """Cuddle someone uwuw"""
+        if user == ctx.author:
+            title = "*%s cuddles themself*" % ctx.author.name
+        else:
+            title = "*%s cuddles %s* (>^_^)><(^o^<)" % (ctx.author.name, user.name)
 
-    @commands.command(pass_context=True)
-    @commands.cooldown(2, 5, commands.BucketType.user)
+        color, url = await self.weeb.cuddle()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def tickle(self, ctx, user: discord.Member):
-        """Whats this OWO"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=tickle') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = "themself :3"
-                    text = ""
-                else:
-                    user = user.name
-                    text = ""
-                em = discord.Embed(title="**{}** tickles **{}** {}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """Tickle someone >_<"""
+        if user == ctx.author:
+            title = "*%s tickles themself*" % ctx.author.name
+        else:
+            title = "*%s tickles %s* >_<" % (ctx.author.name, user.name)
 
-    @commands.command(pass_context=True)
-    @commands.cooldown(2, 5, commands.BucketType.user)
+        color, url = await self.weeb.tickle()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def bite(self, ctx, user: discord.Member):
-        """Bite someone OwO"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=bite') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = "themself and cries ;-;"
-                    text = ""
-                else:
-                    user = user.name
-                    text = ""
-                em = discord.Embed(title="**{}** bites **{}** {}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        if user == ctx.author:
+            title = "*%s bit themself*" % ctx.author.name
+        else:
+            title = "*%s bites %s*" % (ctx.author.name, user.name)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+        color, url = await self.weeb.bite()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def slap(self, ctx, user: discord.Member):
-        """Ouch ;-;"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=slap') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = "themself ;-;"
-                    text = ""
-                else:
-                    user = user.name
-                    text = "OwO"
-                em = discord.Embed(title="**{}** slaps **{}** {}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """Slap someone ;w;"""
+        if user == ctx.author:
+            title = "*%s slaps themself*" % ctx.author.name
+        else:
+            title = "*%s slaps %s*" % (ctx.author.name, user.name)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+        color, url = await self.weeb.slap()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def punch(self, ctx, user: discord.Member):
-        """Ouch ;-;"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=punch') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = "themself ;-;"
-                    text = ""
-                else:
-                    user = user.name
-                    text = "Ouchh"
-                em = discord.Embed(title="**{}** punches **{}** {}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """Punch someone >_<"""
+        if user == ctx.author:
+            title = "*%s punches themself*" % ctx.author.name
+        else:
+            title = "*%s punches %s* (>^_^)><(^o^<)" % (ctx.author.name, user.name)
 
-    @commands.command(pass_context=True)
-    @commands.cooldown(2, 5, commands.BucketType.user)
+        color, url = await self.weeb.punch()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def poke(self, ctx, user: discord.Member):
-        """poke poke poke ^-^"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=poke') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = "themself"
-                    text = ""
-                else:
-                    user = user.name
-                    text = "UwU"
-                em = discord.Embed(title="**{}** pokes **{}** {}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """Poke someone >///<"""
+        if user == ctx.author:
+            title = "*%s pokes themself*" % ctx.author.name
+        else:
+            title = "*%s pokes %s* >///<" % (ctx.author.name, user.name)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+        color, url = await self.weeb.poke()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def nom(self, ctx, user: discord.Member):
-        """noomss on someone owo"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=nom') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = "their leg"
-                    text = ""
-                else:
-                    user = user.name
-                    text = "... Delicious UwU"
-                em = discord.Embed(title="**{}** noms **{}**{}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """Nom!"""
+        if user == ctx.author:
+            title = "*%s noms on themself*" % ctx.author.name
+        else:
+            title = "*%s noms %s*" % (ctx.author.name, user.name)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+        color, url = await self.weeb.nom()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def lick(self, ctx, user: discord.Member):
-        """licks someone"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=lick') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = " their eye"
-                    text = ""
-                else:
-                    user = user.name
-                    text = "... Mmmm, salty OwO"
-                em = discord.Embed(title="**{}** licks **{}**{}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """*licks* >///<"""
+        if user == ctx.author:
+            title = "*%s licks themself*" % ctx.author.name
+        else:
+            title = "*%s licks %s*" % (ctx.author.name, user.name)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+        color, url = await self.weeb.lick()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def greet(self, ctx, user: discord.Member):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=greet') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = " themself"
-                    text = ""
-                else:
-                    user = user.name
-                    text = " UwU"
-                em = discord.Embed(title="**{}** greets **{}**{}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.greet()
+        em = discord.Embed(color=color, title="%s greets %s!" % (ctx.author.name, user.name)).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def lewd(self, ctx):
-        """Leeewd!!!"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=lewd') as r:
-                res = await r.json()
-                em = discord.Embed(title="LEWD!!",
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """So l-lewd >///<"""
+        color, url = await self.weeb.lewd()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def trap(self, ctx):
-        """its a trap owo"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=trap') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.trap()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def owo(self, ctx):
         """OwO Whats This"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=owo') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.owo()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def wasted(self, ctx):
-        """Wastteeddd"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=wasted') as r:
-                res = await r.json()
-                em = discord.Embed(title="**{}** is wasted".format(ctx.message.author.name),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.wasted()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def banghead(self, ctx):
-        """Head banging intensifys"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=banghead') as r:
-                res = await r.json()
-                em = discord.Embed(title="**{}** bangs their head".format(ctx.message.author.name),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """*bangs head*"""
+        color, url = await self.weeb.banghead()
+        em = discord.Embed(color=color, title="*%s bangs their head*" % ctx.author.name).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def discordmeme(self, ctx):
-        """Discord Memes OwO"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=discord_memes') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.discord_memes()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
-    async def stare(self, ctx):
-        """Stares"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=stare') as r:
-                res = await r.json()
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def stare(self, ctx, user: discord.Member = None):
+        """*Stares*"""
+        if user:
+            if user == ctx.author:
+                title = "*%s stares at themself* 👀" % ctx.author.name
+            else:
+                title = "*%s stares at %s* 👀" % (ctx.author.name, user.name)
+        else:
+            title = "*%s stares* 👀" % ctx.author.name
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+        color, url = await self.weeb.stare()
+        em = discord.Embed(color=color, title=title).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def thinking(self, ctx):
-        """THINKSSSS"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=thinking') as r:
-                res = await r.json()
-                em = discord.Embed(title="{} is thinking...".format(ctx.message.author.name),color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.thinking()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def dab(self, ctx):
-        """hits a thicc dab"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=dab') as r:
-                res = await r.json()
-                em = discord.Embed(title="**{}** hits a thicc dab".format(ctx.message.author.name),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        """Dab dab dab"""
+        color, url = await self.weeb.dab()
+        em = discord.Embed(color=color, title="*%s dabs*" % ctx.author.name).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command(aliases=["neko", "nko", "lewdneko", "nya"])
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def kemonomimi(self, ctx):
+        if not ctx.message.channel.is_nsfw():
+            color, url = await self.weeb.kemonomimi()
+            em = discord.Embed(color=color).set_image(url=url)
+            await ctx.send(embed=em)
+        else:
+            url = randchoice(['https://nekos.life/api/v2/img/nsfw_neko_gif', 'https://nekos.life/api/v2/img/lewd'])
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(url) as r:
+                    res = await r.json()
+            url = res["url"]
+            color = await self.weeb.get_dominant_color(url)
+            em = discord.Embed(color=color).set_image(url=url)
+            await ctx.send(embed=em)
 
     @commands.cooldown(1, 3, commands.BucketType.user)
-    @commands.guild_only()
-    @commands.command(pass_context=True, aliases=["neko", "nko", "lewdneko", "nya"])
-    async def kemonomimi(self, ctx):
-        """Girls with animal characteristics OwO"""
-        if not ctx.message.channel.is_nsfw():
-            async with aiohttp.ClientSession(headers=auth) as cs:
-                async with cs.get(f'https://api.weeb.sh/images/random?type={random.choice(["kemonomimi", "neko"])}') as r:
-                    res = await r.json()
-                    em = discord.Embed(
-                                       color=0xDEADBF)
-                    em.set_image(url=res['url'])
-                    await ctx.send(embed=em)
-        else:
-            async with aiohttp.ClientSession() as cs:
-                x = random.choice(['https://nekos.life/api/v2/img/nsfw_neko_gif', 'https://nekos.life/api/v2/img/lewd'])
-                async with cs.get(x) as r:
-                    res = await r.json()
-                    em = discord.Embed(color=0xDEADBF)
-                    try:
-                        urla = res['neko']
-                    except:
-                        urla = res['url']
-                    em.set_image(url=urla)
-                    em.set_footer(text="nekos.life owo")
-                    await ctx.send(embed=em)
-
-    @commands.cooldown(2, 5, commands.BucketType.user)
     @commands.command(pass_context=True, aliases=['foxgirls'])
     async def foxgirl(self, ctx):
         """Fox Girls OwO"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
+        async with aiohttp.ClientSession() as cs:
             async with cs.get('https://nekos.life/api/v2/img/fox_girl') as r:
                 res = await r.json()
-                em = discord.Embed(
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        url = res["url"]
+        color = await self.weeb.get_dominant_color(url)
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def rem(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=rem') as r:
-                res = await r.json()
-                em = discord.Embed(
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.rem()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def triggered(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=triggered') as r:
-                res = await r.json()
-                em = discord.Embed(
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.triggered()
+        em = discord.Embed(color=color, title="%s is triggered" % ctx.author.name).set_image(url=url)
+        await ctx.send(embed=em)
 
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command(pass_context=True)
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def poi(self, ctx):
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=poi') as r:
-                res = await r.json()
-                em = discord.Embed(
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
-
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    @commands.command()
-    async def why(self, ctx):
-        """Why just why"""
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://nekos.life/api/v2/why") as r:
-                res = await r.json()
-                embed = discord.Embed(title="WHY!!", description="{}".format(res['why']), color=0xDEADBF)
-                await ctx.send(embed=embed)
-
-    @commands.command(pass_context=True)
-    @commands.cooldown(2, 5, commands.BucketType.user)
-    async def bang(self, ctx, user: discord.Member):
-        """~BANG~"""
-        async with aiohttp.ClientSession(headers=auth) as cs:
-            async with cs.get('https://api.weeb.sh/images/random?type=bang') as r:
-                res = await r.json()
-                if user == ctx.message.author:
-                    user = "themself"
-                    text = ""
-                else:
-                    user = user.name
-                    text = "OOF"
-                em = discord.Embed(title="**{}** shot **{}**, {}".format(ctx.message.author.name, user, text),
-                                   color=0xDEADBF)
-                em.set_image(url=res['url'])
-                await ctx.send(embed=em)
+        color, url = await self.weeb.poi()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
 
     @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def insultwaifu(self, ctx, user : discord.Member = None):
-        """Insult Waifu"""
-        if user is None:
-            user = ctx.message.author
-        await ctx.trigger_typing()
-        async with aiohttp.ClientSession() as session:
-            async with session.post('https://api.weeb.sh/auto-image/waifu-insult',
-                                    headers=auth,
-                                    data={'avatar': user.avatar_url}) as response:
-                t = await response.read()
-                await ctx.send(file=discord.File(fp=BytesIO(t), filename="res.png"),
-                               embed=discord.Embed(color=0xDEADBF).set_image(url="attachment://res.png"))
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def deletthis(self, ctx):
+        color, url = await self.weeb.delet_this()
+        em = discord.Embed(color=color).set_image(url=url)
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.cooldown(1, 6, commands.BucketType.user)
+    async def insultwaifu(self, ctx):
+        data = await self.weeb.waifu_insult_gen(ctx.author.avatar_url_as(format="png"))
+        await ctx.send(file=discord.File(fp=data, filename="insultwaifu.png"))
 
 def setup(bot):
-    bot.add_cog(Reactions(bot))
+    bot.add_cog(TestWeeb(bot))
