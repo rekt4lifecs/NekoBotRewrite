@@ -220,7 +220,7 @@ class IMGWelcome:
 
         welcome_picture.save("data/welcome.png")
 
-        content = ((base64.b64decode(str(data["content"]).encode("utf8"))).decode("utf8")).replace("user", member.name).replace("server", guild.name)
+        content = ((base64.b64decode(str(data["content"]).encode("utf8"))).decode("utf8")).replace("user", member.name.replace("@", "@\u200B")).replace("server", guild.name)
 
         file = discord.File("data/welcome.png", filename="welcome.png")
         await channel.send(file=file, content=content)
