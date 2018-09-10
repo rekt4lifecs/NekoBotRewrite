@@ -5,7 +5,7 @@ import config
 import aiohttp
 from random import choice as randchoice
 
-class TestWeeb:
+class Reactions:
 
     def __init__(self, bot):
         self.bot = bot
@@ -424,4 +424,4 @@ class TestWeeb:
         await ctx.send(file=discord.File(fp=data, filename="insultwaifu.png"))
 
 def setup(bot):
-    bot.add_cog(TestWeeb(bot))
+    bot.add_cog(Reactions(bot))
