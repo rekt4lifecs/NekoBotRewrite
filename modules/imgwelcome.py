@@ -54,7 +54,10 @@ class IMGWelcome:
         def check(m):
             return m.author == ctx.message.author and m.channel == ctx.message.channel
 
-        msg = await self.bot.wait_for('message', check=check)
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=20)
+        except:
+            return await ctx.send("Timed out.")
 
         if len(msg.attachments) >= 1:
             attachment = str(msg.attachments[0].url).rpartition(".")[2]
