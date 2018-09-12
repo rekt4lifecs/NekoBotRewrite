@@ -28,8 +28,8 @@ class Donator:
         self.bot.loop.create_task(self.__autoloodme())
 
     async def __send_loods(self):
-        choices = ["hentai", "neko", "hentai_anal", "lewdneko", "lewdkitsune"]
         all_data = await rethonk.table("autolooder").order_by("id").run(self.bot.r_conn)
+        choices = all_data.get("choices", ["hentai", "neko", "hentai_anal", "lewdneko", "lewdkitsune"])
         async with aiohttp.ClientSession() as cs:
             for data in all_data:
                 log.info("Attempting to send to %s" % data["channel"])
@@ -205,7 +205,14 @@ class Donator:
         data = {
             "id": str(ctx.guild.id),
             "channel": str(channel.id),
-            "user": str(ctx.author.id)
+            "user": str(ctx.author.id),
+            "choices": [
+                "hentai",
+                "neko",
+                "hentai_anal",
+                "lewdneko",
+                "lewdkitsune"
+            ]
         }
         await r.table("autolooder").insert(data).run(self.bot.r_conn)
         await ctx.send("Enabled autolooder for `%s`!" % channel.name)
