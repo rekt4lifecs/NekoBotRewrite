@@ -11,6 +11,35 @@ import datetime
 key = config.weeb
 auth = {"Authorization": "Wolke " + key}
 
+monika_faces = [x for x in "abcdefghijklmnopqr"]
+natsuki_faces = [x for x in "abcdefghijklmnopqrstuvwxyz"]
+natsuki_faces.extend(["1t", "2bt", "2bta", "2btb", "2btc", "2btd", "2bte", "2btf", "2btg", "2bth", "2bti",
+                      "2t", "2ta", "2tb", "2tc", "2td", "2te", "2tf", "2tg", "2th", "2ti"])
+sayori_faces = [x for x in "abcdefghijklmnopqrstuvwxy"]
+yuri_faces = [x for x in "abcdefghijklmnopqrstuvwx"]
+yuri_faces.extend(["y1", "y2", "y3", "y4", "y5", "y6", "y7"])
+ddlc_items = {
+    "body": {
+        "monika": [ "1", "2" ],
+        "natsuki": [ "1b", "1", "2b", "2"],
+        "yuri": ["1b", "1", "2b", "2"],
+        "sayori": ["1b", "1", "2b", "2"]
+    },
+    "face": {
+        "monika": monika_faces,
+        "natsuki": natsuki_faces,
+        "yuri": yuri_faces,
+        "sayori": sayori_faces
+    }
+}
+
+ddlc_get_character = {
+    "y": "yuri",
+    "n": "natsuki",
+    "m": "monika",
+    "s": "sayori"
+}
+
 class Fun:
 
     def __init__(self, bot):
@@ -111,6 +140,58 @@ class Fun:
             await ctx.send(embed=em)
         except:
             await ctx.send("Failed to get data.")
+
+    @commands.command(aliases=["ddlcgen"])
+    @commands.cooldown(2, 7, commands.BucketType.user)
+    async def ddlc(self, ctx, character: str, text: commands.clean_content(fix_channel_mentions=True, escape_markdown=True),
+                   background: str = "class", body: str = "1", face: str = "a"):
+        """DDLC Gen hahayes
+        Place your text in "quotations" for more than 1 character.
+        Example:
+            n!ddlc yuri "OwO whats this" club 2 h
+
+        List of bodies for each character:
+            Monika: 1, 2
+            Natsuki: 1b, 1, 2b, 2
+            Sayori: 1b, 1, 2b, 2
+            Yuri: 1b, 1, 2b, 2
+
+        List of faces for each character:
+            Monika: a to r
+            Natsuki: a to z and more such as 1t, 2btf, 2th
+            Sayori: a to y
+            Yuri: a to w and y1 to y7
+
+        Backgrounds:
+            bedroom, class, closet, club, corridor, house, kitchen, residential, sayori_bedroom"""
+        characters = ["yuri", "monika", "sayori", "natsuki", "y", "m", "s", "n"]
+        character = character.lower()
+        if character not in characters:
+            return await ctx.send("Not a valid character.")
+        if len(text) >= 140:
+            return await ctx.send("Text too long ;w;")
+        background = background.lower()
+        backgrounds = ["bedroom", "class", "closet", "club", "corridor", "house", "kitchen", "residential", "sayori_bedroom"]
+        if background not in backgrounds:
+            return await ctx.send("Not a valid background must be one of " + ", ".join(["`%s`" % x for x in backgrounds]))
+        if len(character) == 1:
+            character = ddlc_get_character.get(character)
+        if not body in ddlc_items.get("body").get(character):
+            return await ctx.send("Not a valid body")
+        if not face in ddlc_items.get("face").get(character):
+            return await ctx.send("Not a valid face")
+
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=ddlc"
+                              "&character=%s"
+                              "&background=%s"
+                              "&body=%s"
+                              "&face=%s"
+                              "&text=%s" % (character, background, body, face, text)) as r:
+                res = await r.json()
+        em = discord.Embed(color=0xffe6f4).set_image(url=res["message"])
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
