@@ -395,18 +395,6 @@ class Fun:
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def bigletter(self, ctx, *, text: str):
-        """Big Letter Generator"""
-        await ctx.trigger_typing()
-        if len(text) >= 500:
-            return await ctx.send("Text is too long ;w;")
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("http://nekobot.xyz/api/text?type=bigletter&text=" + text) as r:
-                res = await r.json()
-        await ctx.send(res["message"])
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
     async def ship(self, ctx, user1: discord.Member, user2: discord.Member = None):
         """Ship OwO"""
         if user2 is None:
