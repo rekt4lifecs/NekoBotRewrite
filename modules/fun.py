@@ -435,6 +435,20 @@ class Fun:
         await ctx.send(embed=em)
 
     @commands.command()
+    @commands.cooldown(2, 5, commands.BucketType.user)
+    async def fact(self, ctx, *, text: str):
+        if len(text) > 165:
+            return await ctx.send("Text too long...")
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=fact"
+                              "&text=%s" % text) as r:
+                res = await r.json()
+
+        await ctx.trigger_typing()
+        em = discord.Embed(color=0xDEADBF)
+        await ctx.send(embed=em.set_image(url=res["message"]))
+
+    @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     @commands.guild_only()
     async def shitpost(self, ctx):
