@@ -29,9 +29,9 @@ class Donator:
 
     async def __send_loods(self):
         all_data = await rethonk.table("autolooder").order_by("id").run(self.bot.r_conn)
-        choices = all_data.get("choices", ["hentai", "neko", "hentai_anal", "lewdneko", "lewdkitsune"])
         async with aiohttp.ClientSession() as cs:
             for data in all_data:
+                choices = data.get("choices", ["hentai", "neko", "hentai_anal", "lewdneko", "lewdkitsune"])
                 log.info("Attempting to send to %s" % data["channel"])
                 try:
                     channel = self.bot.get_channel(int(data["channel"]))
