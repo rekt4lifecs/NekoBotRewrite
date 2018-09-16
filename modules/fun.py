@@ -435,6 +435,17 @@ class Fun:
         await ctx.send(embed=em)
 
     @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def lolice(self, ctx):
+        """KNOCK KNOCK KNOCK"""
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=lolice&url=%s" % ctx.author.avatar_url_as(format="png")) as r:
+                res = await r.json()
+        em = discord.Embed(color=0xDEADBF)
+        await ctx.send(embed=em.set_image(url=res["message"]))
+
+    @commands.command()
     @commands.cooldown(2, 5, commands.BucketType.user)
     async def fact(self, ctx, *, text: str):
         if len(text) > 165:
