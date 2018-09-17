@@ -260,20 +260,5 @@ class NekoPet:
         else:
             await ctx.send("**Your neko doesn't feel like playing, maybe try again later.**")
 
-    async def on_message(self, message):
-        if message.author.bot:
-            return
-        if random.randint(1, 130) == 1:
-            if await self.__check_pet(message.author.id):
-                data = await r.table("nekopet").get(str(message.author.id)).run(self.bot.r_conn)
-                if data["play"] <= 0:
-                    await r.table("nekopet").get(str(message.author.id)).delete().run(self.bot.r_conn)
-                else:
-                    await r.table("nekopet").get(str(message.author.id)).update({"play": data["play"] - random.randint(1, 20)}).run(self.bot.r_conn)
-                await r.table("nekopet").get(str(message.author.id)).update({"food": data["food"] - random.randint(1, 20)}).run(self.bot.r_conn)
-                if data["food"] <= 0:
-                    await r.table("nekopet").get(str(message.author.id)).delete().run(self.bot.r_conn)
-                    log.info(f"{message.author.name} Neko Died.")
-
 def setup(bot):
     bot.add_cog(NekoPet(bot))
