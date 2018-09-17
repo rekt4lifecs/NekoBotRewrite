@@ -1034,27 +1034,6 @@ class Moderation:
             await r.table("autorole").insert(data).run(self.bot.r_conn)
             return await ctx.send(f"Updated Autorole to {role.name}")
 
-    async def on_member_join(self, member):
-        server = member.guild
-        try:
-            if await r.table("autorole").get(str(server.id)).run(self.bot.r_conn):
-                data = await r.table("autorole").get(str(server.id)).run(self.bot.r_conn)
-                role = discord.utils.get(server.roles, id=int(data["role"]))
-                await member.add_roles(role, reason="Autorole")
-        except Exception as e:
-            log.warning(e)
-            pass
-
-    # async def on_member_update(self, before, after):
-    #     try:
-    #         if not before.guild.id == 221989003400970241:
-    #             return
-    #         if not before.display_name == after.display_name:
-    #             if not after.display_name[0] in list(str(string.ascii_letters)):
-    #                 await after.edit(nick="Hoister", reason="Hoisting")
-    #     except:
-    #         pass
-
     async def on_guild_remove(self, guild):
         if not guild.large:
             return

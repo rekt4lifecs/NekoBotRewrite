@@ -1,6 +1,6 @@
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont, ImageOps
-import discord, os, aiohttp, string
+import discord, os, aiohttp
 from io import BytesIO
 import textwrap
 import rethinkdb as r
@@ -125,6 +125,15 @@ class IMGWelcome:
 
     async def on_member_join(self, member):
         guild = member.guild
+
+        try:
+            if await rethonk.table("autorole").get(str(guild.id)).run(self.bot.r_conn):
+                data = await rethonk.table("autorole").get(str(guild.id)).run(self.bot.r_conn)
+                role = discord.utils.get(guild.roles, id=int(data["role"]))
+                await member.add_roles(role, reason="Autorole")
+        except:
+            pass
+
         if not await self.__is_enabled(guild.id):
             return
 
@@ -223,7 +232,10 @@ class IMGWelcome:
 
         welcome_picture.save("data/welcome.png")
 
-        content = ((base64.b64decode(str(data["content"]).encode("utf8"))).decode("utf8")).replace("user", member.name.replace("@", "@\u200B")).replace("server", guild.name)
+        try:
+            content = ((base64.b64decode(str(data["content"]).encode("utf8"))).decode("utf8")).replace("user", member.name.replace("@", "@\u200B")).replace("server", guild.name)
+        except:
+            content = "Welcome %s to %s!" % (member.name.replace("@", "@\u200B"), guild.name)
 
         file = discord.File("data/welcome.png", filename="welcome.png")
         await channel.send(file=file, content=content)

@@ -3,7 +3,8 @@ import logging, traceback, discord
 from collections import Counter
 import datetime
 import asyncio, aioredis
-import os, sys
+import os, sys, time
+import random
 
 import config
 import rethinkdb as r
@@ -142,11 +143,60 @@ class NekoBot(commands.AutoShardedBot):
             for page in pages:
                 await ctx.send(page)
 
+    async def nekopet_check(self, message):
+        if random.randint(1, 135) == 1:
+            data = await r.table("nekopet").get(str(message.author.id)).run(self.r_conn)
+            if data:
+                play_amt = random.randint(1, 20)
+                food_amt = random.randint(1, 20)
+                if (data.get("play") - play_amt) <= 0 or (data.get("food") - food_amt) <= 0:
+                    await r.table("nekopet").get(str(message.author.id)).delete().run(self.r_conn)
+                    logger.info("%s's neko died" % message.author.id)
+                else:
+                    await r.table("nekopet").get(str(message.author.id)).update({
+                        "play": data.get("play") - play_amt,
+                        "food": data.get("food") - food_amt
+                    }).run(self.r_conn)
+
+    async def __level_handler(self, message):
+        if not isinstance(message.channel, discord.TextChannel):
+            return
+        if message.content == "" or not len(message.content) > 5:
+            return
+
+        if random.randint(1, 15) == 1:
+            author = message.author
+            user_data = await r.table("levelSystem").get(str(author.id)).run(self.r_conn)
+            if not user_data:
+                data = {
+                    "id": str(author.id),
+                    "xp": 0,
+                    "lastxp": "0",
+                    "blacklisted": False,
+                    "lastxptimes": []
+                }
+                return await r.table("levelSystem").insert(data).run(self.r_conn)
+            if user_data.get("blacklisted", False):
+                return
+            if (int(time.time()) - int(user_data["lastxp"])) >= 120:
+                lastxptimes = user_data["lastxptimes"]
+                lastxptimes.append(str(int(time.time())))
+
+                xp = user_data["xp"] + random.randint(1, 30)
+                data = {
+                    "xp": xp,
+                    "lastxp": str(int(time.time())),
+                    "lastxptimes": lastxptimes
+                }
+                await r.table("levelSystem").get(str(author.id)).update(data).run(self.r_conn)
+
     async def on_message(self, message):
         self.counter["messages_read"] += 1
         if message.author.bot:
             return
         await self.process_commands(message)
+        await self.nekopet_check(message)
+        await self.__level_handler(message)
 
     async def close(self):
         self.r_conn.close()

@@ -832,44 +832,5 @@ class economy:
     #
     #     await r.table("guildXP").get(str(guild)).update(data).run(self.bot.r_conn)
 
-    async def on_message(self, message):
-        if message.author.bot:
-            return
-        if not isinstance(message.channel, discord.TextChannel):
-            return
-        if message.content == "":
-            return
-        if not len(message.content) > 5:
-            return
-        choice = random.randint(1, 15)
-        author = message.author
-        if choice == 1:
-            user_data = await r.table("levelSystem").get(str(author.id)).run(self.bot.r_conn)
-            if not user_data:
-                data = {
-                    "id": str(author.id),
-                    "xp": 0,
-                    "lastxp": "0",
-                    "blacklisted": False,
-                    "lastxptimes": []
-                }
-                await r.table("levelSystem").insert(data).run(self.bot.r_conn)
-            if user_data["blacklisted"]:
-                return
-            if (int(time.time()) - int(user_data["lastxp"])) >= 120:
-                lastxptimes = user_data["lastxptimes"]
-                lastxptimes.append(str(int(time.time())))
-
-                newxp = random.randint(1, 30)
-                xp = user_data["xp"] + newxp
-                data = {
-                    "xp": xp,
-                    "lastxp": str(int(time.time())),
-                    "lastxptimes": lastxptimes
-                }
-                await r.table("levelSystem").get(str(author.id)).update(data).run(self.bot.r_conn)
-        # elif choice == 2:
-        #     await self.__handle_guild_xp(message.guild.id, author.id)
-
 def setup(bot):
     bot.add_cog(economy(bot))
