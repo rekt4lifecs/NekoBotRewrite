@@ -1019,9 +1019,12 @@ class Moderation:
             n!autorole "All Cuties"
         """
         guild = ctx.message.guild
-        if role is None:
-            await r.table("autorole").get(str(guild.id)).delete().run(self.bot.r_conn)
-            return await ctx.send("Reset Autorole.")
+        if not role:
+            if await r.table("autorole").get(str(guild.id)).run(self.bot.r_conn):
+                await r.table("autorole").get(str(guild.id)).delete().run(self.bot.r_conn)
+                return await ctx.send("Reset Autorole.")
+            else:
+                return await self.bot.send_cmd_help(ctx)
         else:
             data = {
                 "id": str(guild.id),
