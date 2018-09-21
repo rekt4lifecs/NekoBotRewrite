@@ -2,7 +2,7 @@ import discord, random, time, datetime, asyncio
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
-import aiohttp, config, ujson
+import aiohttp, hooks, ujson
 import rethinkdb as r
 import os
 from prettytable import PrettyTable
@@ -80,6 +80,14 @@ class CardGame:
 
     def __init__(self, bot):
         self.bot = bot
+
+    async def __post_to_hook(self, action:str, user:discord.Member, amount):
+        try:
+            async with aiohttp.ClientSession() as cs:
+                webhook = discord.Webhook.from_url(hooks.get_url(), adapter=discord.AsyncWebhookAdapter(cs))
+                await webhook.send("User: %s (%s)\nAction: %s\nAmount: %s\nTime: %s" % (str(user), user.id, action, amount, int(time.time())))
+        except:
+            pass
 
     async def __has_account(self, user:int):
         if await r.table("cardgame").get(str(user)).run(self.bot.r_conn):
@@ -419,11 +427,17 @@ class CardGame:
             await ctx.send("❌ | **Cancelled Transaction.**")
             return
 
+        after_check = await r.table("cardgame").get(str(author.id)).run(self.bot.r_conn)
+        if after_check != data:
+            await self.__post_to_hook("Card Sell Fail 😤😤", author, 0)
+            return await ctx.send("Card has already been sold")
+
         await r.table("cardgame").get(str(author.id)).update({"cards": r.row["cards"].delete_at(num-1)}).run(self.bot.r_conn)
         economy = await r.table("economy").get(str(author.id)).run(self.bot.r_conn)
         await r.table("economy").get(str(author.id)).update({"balance": economy["balance"] + cardprice}).run(self.bot.r_conn)
 
         await ctx.send(f"Sold {cardname} for {cardprice}")
+        await self.__post_to_hook("Sold card", author, cardprice)
 
     @card.command(name='list')
     async def card_list(self, ctx):
