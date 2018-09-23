@@ -1,6 +1,5 @@
 from discord.ext import commands
 import discord, random, aiohttp
-from bs4 import BeautifulSoup as bs
 from .utils import checks, chat_formatting, hastebin
 import config
 import json
