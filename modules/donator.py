@@ -8,7 +8,6 @@ from prettytable import PrettyTable
 import random
 import string
 import time
-import datetime
 import logging
 
 from config import webhook_id, webhook_token

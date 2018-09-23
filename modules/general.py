@@ -284,19 +284,6 @@ class General:
                            description=f'{total} socket events observed ({cpm:.2f}/minute):\n{self.bot.socket_stats}')
         await ctx.send(embed=em)
 
-    @commands.command(aliases=["emojiinfo", "emote", "emoji"])
-    @commands.cooldown(1, 3, commands.BucketType.user)
-    async def emoteinfo(self, ctx, emote:discord.Emoji):
-        """Get Emote Info"""
-        em = discord.Embed(color=0xDEADBF)
-        em.add_field(name="Name", value=emote.name, inline=False)
-        em.add_field(name="ID", value=emote.id, inline=False)
-        em.add_field(name="Animated?", value=str(emote.animated), inline=False)
-        guild = emote.guild
-        em.add_field(name="Server", value=f"{guild.name} ({guild.id})", inline=False)
-        em.set_thumbnail(url=emote.url)
-        await ctx.send(embed=em)
-
     @commands.command(aliases=['user'])
     @commands.guild_only()
     async def userinfo(self, ctx, user: discord.Member = None):
