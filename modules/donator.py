@@ -23,34 +23,6 @@ class Donator:
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
 
-    async def on_ready(self):
-        self.bot.loop.create_task(self.__autoloodme())
-
-    async def __send_loods(self):
-        all_data = await rethonk.table("autolooder").order_by("id").run(self.bot.r_conn)
-        async with aiohttp.ClientSession() as cs:
-            for data in all_data:
-                choices = data.get("choices", ["hentai", "neko", "hentai_anal", "lewdneko", "lewdkitsune"])
-                log.info("Attempting to send to %s" % data["channel"])
-                try:
-                    channel = self.bot.get_channel(int(data["channel"]))
-                    if channel.is_nsfw():
-                        log.info("Sending loods to %s" % channel.id)
-                        em = discord.Embed(color=0xDEADBF)
-                        async with cs.get("https://nekobot.xyz/api/image?type=%s" % random.choice(choices)) as r:
-                            res = await r.json()
-                        em.set_image(url=res["message"])
-                        await channel.send(embed=em)
-                except Exception as e:
-                    log.info("Failed to send loods to %s, %s" % (data["channel"], e,))
-                    pass
-
-    async def __autoloodme(self):
-        while True:
-            log.info("Attempting to send loods")
-            await self.__send_loods()
-            await asyncio.sleep(3600)
-
     async def __post_to_hook(self, embed:discord.Embed):
         async with aiohttp.ClientSession() as cs:
             webhook = discord.Webhook.from_url("https://discordapp.com/api/webhooks/%s/%s" % (webhook_id, webhook_token,),
