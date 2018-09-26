@@ -1,0 +1,70 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2018-09-27 05:49+AUS Eastern Standard Time\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: modules/imgwelcome.py:39
+msgid ""
+"**n!imgwelcome img** - Set the background image\n"
+"**n!imgwelcome text** - Change the Welcome text above the image.\n"
+"**n!imgwelcome channel** - Set the welcome channel.\n"
+"**n!imgwelcome toggle** - Toggle on/off."
+msgstr ""
+
+#: modules/imgwelcome.py:51
+msgid "Disabled imgwelcoming"
+msgstr ""
+
+#: modules/imgwelcome.py:58
+msgid "Enabled imgwelcoming"
+msgstr ""
+
+#: modules/imgwelcome.py:65 modules/imgwelcome.py:111
+#: modules/imgwelcome.py:122
+msgid "Enable imgwelcoming with n!imgwelcome toggle"
+msgstr ""
+
+#: modules/imgwelcome.py:66
+msgid "Send an image or type anything without sending an image to reset back to default."
+msgstr ""
+
+#: modules/imgwelcome.py:74
+msgid "Timed out."
+msgstr ""
+
+#: modules/imgwelcome.py:79
+msgid "Not a valid image type <:bakaa:432914537608380419>"
+msgstr ""
+
+#: modules/imgwelcome.py:90
+msgid "Set image!"
+msgstr ""
+
+#: modules/imgwelcome.py:92
+msgid "Failed to set image... `%s`"
+msgstr ""
+
+#: modules/imgwelcome.py:96
+msgid "Reset Image."
+msgstr ""
+
+#: modules/imgwelcome.py:115
+msgid "Updated text!"
+msgstr ""
+
+#: modules/imgwelcome.py:126
+msgid "Updated to %s"
+msgstr ""
+
