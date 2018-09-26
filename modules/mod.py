@@ -49,6 +49,7 @@ class Moderation:
         # The following is for the new repl
         self.repl_sessions = {}
         self.repl_embeds = {}
+        self.lang = {}
         # self.languages = ["french", "polish", "spanish", "tsundere", "weeb"]
         self.languages = ["tsundere", "weeb"]
         for x in self.languages:
