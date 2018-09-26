@@ -4,7 +4,7 @@ import datetime, random, config, math, aiohttp, psutil
 from collections import Counter
 from .utils.chat_formatting import pagify
 from urllib.parse import quote_plus
-import string, ujson
+import string
 from .utils.paginator import EmbedPages, Pages, HelpPaginator
 from scipy import stats
 import numpy
@@ -17,6 +17,7 @@ import base64
 from PIL import Image
 import rethinkdb as r
 import magic as pymagic
+import gettext
 
 log = logging.getLogger()
 
@@ -49,25 +50,24 @@ def millify(n):
 
     return '{:.0f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
 
-# Languages
-languages = ["english", "weeb", "tsundere", "polish", "spanish", "french"]
-lang = {}
-
-for l in languages:
-    with open("lang/%s.json" % l, encoding="utf-8") as f:
-        lang[l] = ujson.load(f)
-
-def getlang(la:str):
-    return lang.get(la, None)
-
 class General:
     """General Commands"""
 
     def __init__(self, bot):
         self.bot = bot
         self.counter = Counter()
-        if not hasattr(bot, "games"):
+        if not hasattr(bot, "general"):
             self.bot.games = Counter()
+        self.lang = {}
+        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
+            self.lang[x] = gettext.translation("general", localedir="locale", languages=[x])
+
+    async def _get_text(self, ctx):
+        lang = await self.bot.get_language(ctx)
+        if lang:
+            return self.lang[lang].gettext
+        else:
+            return gettext.gettext
 
     async def on_socket_response(self, msg):
         self.bot.socket_stats[msg.get('t')] += 1
@@ -77,6 +77,7 @@ class General:
     @commands.guild_only()
     async def whatanime(self, ctx):
         """Check what the anime is from an image."""
+        _ = await self._get_text(ctx)
 
         if not len(ctx.message.attachments) == 0:
             img = ctx.message.attachments[0].url
@@ -85,13 +86,13 @@ class General:
                 return m.channel == ctx.message.channel and m.author == ctx.message.author
 
             try:
-                await ctx.send("Send me an image of an anime to search for.")
+                await ctx.send(_("Send me an image of an anime to search for."))
                 x = await self.bot.wait_for('message', check=check, timeout=15)
             except:
-                return await ctx.send("Timed out.")
+                return await ctx.send(_("Timed out."))
 
             if not len(x.attachments) >= 1:
-                return await ctx.send("You didn't give me a image.")
+                return await ctx.send(_("You didn't give me a image."))
 
             img = x.attachments[0].url
 
@@ -103,11 +104,11 @@ class General:
         filetype = magic.from_buffer(res)
 
         if not filetype.startswith("image/"):
-            return await ctx.send("Not a valid image.")
+            return await ctx.send(_("Not a valid image."))
 
         with Image.open(BytesIO(res)) as img:
-            img.convert("RGB")
             img.seek(0)
+            img.convert("RGB")
             img.resize((512, 288))
             i = BytesIO()
             img.save(i, format="PNG")
@@ -122,24 +123,24 @@ class General:
                     try:
                         res = await r.json()
                     except:
-                        return await ctx.send("File too large.")
+                        return await ctx.send(_("File too large."))
 
             if res["docs"] == []:
-                return await ctx.send("Nothing found.")
+                return await ctx.send(_("Nothing found."))
 
             doc = res["docs"][0]
 
             if doc["is_adult"] and not ctx.channel.is_nsfw:
-                return await ctx.send("Can't send NSFW in a non NSFW channel.")
+                return await ctx.send(_("Can't send NSFW in a non NSFW channel."))
 
             em = discord.Embed(color=0xDEADBF)
             em.title = doc["title_romaji"]
             em.url = "https://myanimelist.net/anime/%s" % doc["mal_id"]
-            em.add_field(name="Episode", value=str(doc["episode"]))
-            em.add_field(name="At", value=str(doc["at"]))
-            em.add_field(name="Matching %", value=str(round(doc["similarity"] * 100, 2)))
-            em.add_field(name="Native Title", value=doc["title_native"])
-            em.set_footer(text="Powered by whatanime.ga")
+            em.add_field(name=_("Episode"), value=str(doc["episode"]))
+            em.add_field(name=_("At"), value=str(doc["at"]))
+            em.add_field(name=_("Matching %"), value=str(round(doc["similarity"] * 100, 2)))
+            em.add_field(name=_("Native Title"), value=doc["title_native"])
+            em.set_footer(text=_("Powered by whatanime.ga"))
 
             try:
                 preview = f"https://whatanime.ga/thumbnail.php?anilist_id={doc['anilist_id']}" \
@@ -157,7 +158,7 @@ class General:
 
             await ctx.send(embed=em, file=file)
         except Exception as e:
-            return await ctx.send("Failed to get data, %s" % e)
+            return await ctx.send(_("Failed to get data, %s") % e)
 
     @commands.command()
     @commands.cooldown(1, 4, commands.BucketType.user)
@@ -182,20 +183,18 @@ class General:
     @commands.command(pass_context=True)
     async def cookie(self, ctx, user: discord.Member):
         """Give somebody a cookie :3"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
-        await ctx.send(getlang(lang)["general"]["cookie"].format(ctx.message.author.name, user.mention))
+        _ = await self._get_text(ctx)
+        await ctx.send(_("<:NekoCookie:408672929379909632> - **%s gave %s a cookie OwO** -"
+                         " <:NekoCookie:408672929379909632>") % (ctx.message.author.name, user.mention))
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def choose(self, ctx, *items):
         """Choose between multiple options"""
+        _ = await self._get_text(ctx)
         if not items:
             return await self.bot.send_cmd_help(ctx)
-        await ctx.send("I chose: **%s**!" % (random.choice(items)).replace("@", "@\u200B"))
+        await ctx.send(_("I chose: **%s**!") % (random.choice(items)).replace("@", "@\u200B"))
 
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
@@ -232,35 +231,44 @@ class General:
         messages = await i.get_all_messages()
         command_count = await i.get_all_commands()
 
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
 
         if isinstance(ctx.channel, discord.TextChannel):
             thisShard = ctx.guild.shard_id
         else:
             thisShard = 0
 
-        info = discord.Embed(color=0xDEADBF,
-                             title=getlang(lang)["general"]["info"]["info"],
-                             description=getlang(lang)["general"]["info"]["stats"].format(millify(servers),
-                                                                                          servers,
-                                                                                          millify(members),
-                                                                                          str(len(self.bot.commands)),
-                                                                                          millify(channels),
-                                                                                          self.bot.shard_count,
-                                                                                          # len(self.bot.lavalink.players.find_all(lambda
-                                                                                          #   p: p.is_playing))
-                                                                                          0,
-                                                                                          self.get_bot_uptime(),
-                                                                                          millify(messages),
-                                                                                          str(self.bot.command_usage.most_common(1)[0][0]),
-                                                                                          command_count,
-                                                                                          thisShard))
-        info.add_field(name=getlang(lang)["general"]["info"]["links"]["name"],
-                       value=getlang(lang)["general"]["info"]["links"]["links"])
+        # len(self.bot.lavalink.players.find_all(lambda p: p.is_playing))
+        info = discord.Embed(color=0xDEADBF, title=_("**Info**"))
+        stats = (
+            millify(servers), servers,
+            millify(members),
+            str(len(self.bot.commands)),
+            millify(channels),
+            self.bot.shard_count,
+            0,
+            self.get_bot_uptime(),
+            millify(messages),
+            str(self.bot.command_usage.most_common(1)[0][0]),
+            command_count,
+            thisShard
+        )
+        info.description = _("Servers: **%s (%s)**\n"
+                             "Members: **%s**\n"
+                             "Bot Commands: **%s**\n"
+                             "Channels: **%s**\n"
+                             "Shards: **%s**\n"
+                             "This Shard: **%s**\n"
+                             "Bot in voice channel(s): **%s**\n"
+                             "Uptime: **%s**\n"
+                             "Messages Read (Since Restart): **%s**\n"
+                             "Most common command since restart: **%s**\n"
+                             "Commands Used: **%s**") % stats
+        info.add_field(name=_("Links"),
+                       value=_("[GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) | "
+                               "[Support Server](https://discord.gg/q98qeYN) | "
+                               "[Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | "
+                               "[Patreon](https://www.patreon.com/NekoBot)"))
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
         await ctx.send(embed=info)
 
@@ -279,11 +287,7 @@ class General:
     @commands.guild_only()
     async def userinfo(self, ctx, user: discord.Member = None):
         """Get a users info."""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
 
         if user == None:
             user = ctx.message.author
@@ -295,15 +299,15 @@ class General:
         embed = discord.Embed(color=0xDEADBF)
         embed.set_author(name=user.name,
                          icon_url=user.avatar_url)
-        embed.add_field(name=getlang(lang)["general"]["userinfo"]["id"], value=user.id)
-        embed.add_field(name=getlang(lang)["general"]["userinfo"]["discrim"], value=user.discriminator)
-        embed.add_field(name=getlang(lang)["general"]["userinfo"]["bot"], value=str(user.bot))
-        embed.add_field(name=getlang(lang)["general"]["userinfo"]["created"], value=user.created_at.strftime("%d %b %Y %H:%M"))
-        embed.add_field(name=getlang(lang)["general"]["userinfo"]["joined"], value=user.joined_at.strftime("%d %b %Y %H:%M"))
-        embed.add_field(name=getlang(lang)["general"]["userinfo"]["animated_avatar"], value=str(user.is_avatar_animated()))
-        embed.add_field(name=getlang(lang)["general"]["userinfo"]["playing"], value=playinggame)
-        embed.add_field(name=getlang(lang)["general"]["userinfo"]["status"], value=user.status)
-        embed.add_field(name=getlang(lang)["general"]["userinfo"]["color"], value=user.color)
+        embed.add_field(name=_("ID"), value=user.id)
+        embed.add_field(name=_("Discriminator"), value=user.discriminator)
+        embed.add_field(name=_("Bot"), value=str(user.bot))
+        embed.add_field(name=_("Created"), value=user.created_at.strftime("%d %b %Y %H:%M"))
+        embed.add_field(name=_("Joined"), value=user.joined_at.strftime("%d %b %Y %H:%M"))
+        embed.add_field(name=_("Animated Avatar"), value=str(user.is_avatar_animated()))
+        embed.add_field(name=_("Playing"), value=playinggame)
+        embed.add_field(name=_("Status"), value=user.status)
+        embed.add_field(name=_("Color"), value=str(user.color))
 
         try:
             roles = [x.name for x in user.roles if x.name != "@everyone"]
@@ -324,11 +328,7 @@ class General:
     @commands.guild_only()
     async def serverinfo(self, ctx):
         """Display Server Info"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
 
         server = ctx.message.guild
 
@@ -339,18 +339,18 @@ class General:
                       m.status == discord.Status.idle])
 
         embed = discord.Embed(color=0xDEADBF)
-        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["name"], value=f"**{server.name}**\n({server.id})")
-        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["owner"], value=server.owner)
-        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["online"], value=f"**{online}/{len(server.members)}**")
-        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["created_at"], value=server.created_at.strftime("%d %b %Y %H:%M"))
-        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["channels"], value=f"Text Channels: **{len(server.text_channels)}**\n"
+        embed.add_field(name=_("Name"), value=f"**{server.name}**\n({server.id})")
+        embed.add_field(name=_("Owner"), value=server.owner)
+        embed.add_field(name=_("Online (Cached)"), value=f"**{online}/{len(server.members)}**")
+        embed.add_field(name=_("Created at"), value=server.created_at.strftime("%d %b %Y %H:%M"))
+        embed.add_field(name=_("Channels"), value=f"Text Channels: **{len(server.text_channels)}**\n"
                                                f"Voice Channels: **{len(server.voice_channels)}**\n"
                                                f"Categories: **{len(server.categories)}**\n"
                                                f"AFK Channel: **{server.afk_channel}**")
-        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["roles"], value=len(server.roles))
-        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["emojis"], value=f"{len(server.emojis)}/100")
-        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["region"], value=str(server.region).title())
-        embed.add_field(name=getlang(lang)["general"]["serverinfo"]["security"], value=f"Verification Level: **{verif}**\n"
+        embed.add_field(name=_("Roles"), value=str(len(server.roles)))
+        embed.add_field(name=_("Emojis"), value=f"{len(server.emojis)}/100")
+        embed.add_field(name=_("Region"), value=str(server.region).title())
+        embed.add_field(name=_("Security"), value=f"Verification Level: **{verif}**\n"
                                                f"Content Filter: **{server.explicit_content_filter}**")
 
         try:
@@ -364,26 +364,22 @@ class General:
     @commands.guild_only()
     async def channelinfo(self, ctx, channel: discord.TextChannel = None):
         """Get Channel Info"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
 
         if channel is None:
             channel = ctx.message.channel
 
         embed = discord.Embed(color=0xDEADBF,
                               description=channel.mention)
-        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["name"], value=channel.name)
-        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["guild"], value=channel.guild)
-        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["id"], value=channel.id)
-        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["category_id"], value=channel.category_id)
-        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["position"], value=channel.position)
-        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["nsfw"], value=str(channel.is_nsfw()))
-        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["members"], value=len(channel.members))
-        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["category"], value=channel.category)
-        embed.add_field(name=getlang(lang)["general"]["channelinfo"]["created_at"], value=channel.created_at.strftime("%d %b %Y %H:%M"))
+        embed.add_field(name=_("Name"), value=channel.name)
+        embed.add_field(name=_("Server"), value=channel.guild)
+        embed.add_field(name=_("ID"), value=channel.id)
+        embed.add_field(name=_("Category ID"), value=channel.category_id)
+        embed.add_field(name=_("Position"), value=channel.position)
+        embed.add_field(name=_("NSFW"), value=str(channel.is_nsfw()))
+        embed.add_field(name=_("Members (cached)"), value=str(len(channel.members)))
+        embed.add_field(name=_("Category"), value=channel.category)
+        embed.add_field(name=_("Created"), value=channel.created_at.strftime("%d %b %Y %H:%M"))
 
         await ctx.send(embed=embed)
 
@@ -391,9 +387,10 @@ class General:
     @commands.guild_only()
     async def urban(self, ctx, *, search_terms: str, definition_number: int = 1):
         """Search Urban Dictionary"""
+        _ = await self._get_text(ctx)
 
         if not ctx.channel.is_nsfw():
-            return await ctx.send("Please use this in an NSFW channel.", delete_after=5)
+            return await ctx.send(_("Please use this in an NSFW channel."), delete_after=5)
 
         def encode(s):
             return quote_plus(s, encoding='utf-8', errors='replace')
@@ -427,18 +424,17 @@ class General:
                 for page in msg:
                     await ctx.send(page)
             else:
-                await ctx.send("Your search terms gave no results.")
+                await ctx.send(_("Your search terms gave no results."))
         except IndexError:
-            await ctx.send("There is no definition #{}".format(pos + 1))
-        except Exception as e:
-            await ctx.send(f"Error. {e}")
+            await ctx.send(_("There is no definition #%s") % pos + 1)
 
     @commands.command(hidden=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def dominant(self, ctx):
         """Get dominant color from image"""
+        _ = await self._get_text(ctx)
         if not len(ctx.message.attachments) >= 1:
-            return await ctx.send("No images given")
+            return await ctx.send(_("No images given"))
 
         await ctx.trigger_typing()
 
@@ -451,7 +447,7 @@ class General:
         hexx = int(triplet(rgb), 16)
 
         em = discord.Embed(color=hexx)
-        em.title = "Most Dominant Colors"
+        em.title = _("Most Dominant Colors")
         em.add_field(name="Int", value=str(hexx))
         em.add_field(name="RGB", value="R %s G %s B %s" % (rgb[0], rgb[1], rgb[2]))
         em.add_field(name="Hex", value="0x"+str(triplet(rgb)).upper())
@@ -463,6 +459,7 @@ class General:
     async def avatar(self, ctx, user: discord.Member = None, type:str = None):
         """Get a user's avatar"""
         await ctx.channel.trigger_typing()
+        _ = await self._get_text(ctx)
         if user is None:
             user = ctx.message.author
         async with aiohttp.ClientSession() as cs:
@@ -470,7 +467,7 @@ class General:
                 res = await r.read()
         color_thief = ColorThief(BytesIO(res))
         hexx = int(triplet(color_thief.get_color()), 16)
-        em = discord.Embed(color=hexx, title=f"{user.name}'s Avatar")
+        em = discord.Embed(color=hexx, title=_("%s's Avatar") % user.name)
         if type is None or type not in ['jpeg', 'jpg', 'png']:
             await ctx.send(embed=em.set_image(url=user.avatar_url))
         else:
@@ -480,11 +477,7 @@ class General:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def coffee(self, ctx):
         """Coffee owo"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
 
         url = "https://coffee.alexflipnote.xyz/random.json"
         await ctx.channel.trigger_typing()
@@ -492,7 +485,7 @@ class General:
             async with cs.get(url) as r:
                 res = await r.json()
             em = discord.Embed()
-            msg = await ctx.send(getlang(lang)["general"]["coffee"], embed=em.set_image(url=res['file']))
+            msg = await ctx.send(_("*drinks coffee*"), embed=em.set_image(url=res['file']))
             async with cs.get(res['file']) as r:
                 data = await r.read()
             color_thief = ColorThief(BytesIO(data))
@@ -521,20 +514,16 @@ class General:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def qr(self, ctx, *, message: str):
         """Generate a QR Code"""
-        name = str(uuid.uuid4())
-        qrcode.make(message).save(f"{name}.png")
-        await ctx.send(file=discord.File(f"{name}.png"))
-        os.remove(f"{name}.png")
+        temp = BytesIO()
+        qrcode.make(message).save(temp)
+        temp.seek(0)
+        await ctx.send(file=discord.File(temp, filename="qr.png"))
 
     @commands.command()
     async def vote(self, ctx):
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
         embed = discord.Embed(color=0xDEADBF,
-                              title=getlang(lang)["general"]["voting_link"],
+                              title=_("Voting Link"),
                               description="https://discordbots.org/bot/310039170792030211/vote")
         await ctx.send(embed=embed)
 
@@ -548,6 +537,7 @@ class General:
             n!permissions/n!perms @ReKT#0001 testing
         or
             n!permissions/n!perms ReKT#0001 #testing"""
+        _ = await self._get_text(ctx)
         if user == None:
             user = ctx.message.author
 
@@ -558,7 +548,7 @@ class General:
 
         y = "✅"
         n = "❌"
-        msg = "Perms for %s in %s, ```\n" % (user.name.replace("@", "@\u200B"), channel.name.replace("@", "@\u200B"))
+        msg = _("Perms for %s in %s, ```\n") % (user.name.replace("@", "@\u200B"), channel.name.replace("@", "@\u200B"))
 
         try:
             perms = user.permissions_in(channel)
@@ -567,7 +557,7 @@ class General:
             msg += "\n```"
             await ctx.send(msg)
         except:
-            await ctx.send("Problem getting that channel...")
+            await ctx.send(_("Problem getting that channel..."))
 
     @commands.command(aliases=["8"], name="8ball")
     @commands.cooldown(1, 3, commands.BucketType.user)
@@ -594,6 +584,7 @@ class General:
         if bot_user == None:
             bot_user = self.bot.user
         await ctx.trigger_typing()
+        _ = await self._get_text(ctx)
         url = f"https://discordbots.org/api/bots/{bot_user.id}"
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
@@ -602,27 +593,26 @@ class General:
             em = discord.Embed(color=0xDEADBF)
             em.title = bot['username'] + "#" + bot['discriminator']
             em.description = bot["shortdesc"]
-            em.add_field(name="Prefix", value=bot.get("prefix", "None"))
-            em.add_field(name="Lib", value=bot.get("lib"))
-            em.add_field(name="Owners", value=", ".join(["<@%s>" % i for i in bot.get("owners")]))
-            em.add_field(name="Votes", value=bot.get("points", "0"))
-            em.add_field(name="Server Count", value=bot.get("server_count", "0"))
-            em.add_field(name="ID", value=bot.get("id", "0"))
-            em.add_field(name="Certified", value=bot.get("certifiedBot", False))
+            em.add_field(name=_("Prefix"), value=bot.get("prefix", "None"))
+            em.add_field(name=_("Lib"), value=bot.get("lib"))
+            em.add_field(name=_("Owners"), value=", ".join(["<@%s>" % i for i in bot.get("owners")]))
+            em.add_field(name=_("Votes"), value=bot.get("points", "0"))
+            em.add_field(name=_("Server Count"), value=bot.get("server_count", "0"))
+            em.add_field(name=_("ID"), value=bot.get("id", "0"))
+            em.add_field(name=_("Certified"), value=bot.get("certifiedBot", False))
             em.set_thumbnail(url=f"https://images.discordapp.net/avatars/{bot['id']}/{bot['avatar']}")
         except:
-            return await ctx.send("Failed to get bot data.")
+            return await ctx.send(_("Failed to get bot data."))
 
         await ctx.send(embed=em)
 
     @commands.command()
+    @commands.guild_only()
     @commands.cooldown(1, 15, commands.BucketType.user)
     async def discriminfo(self, ctx):
         """Get some stats about the servers discrims"""
         discrim_list = [int(u.discriminator) for u in ctx.guild.members]
 
-        # The range is so we can get any discrims that no one has.
-        # Just subtract one from the number of uses.
         count = Counter(discrim_list + [int(i) for i in range(1, 10000)])
         count = sorted(count.items(), key=lambda c: c[1], reverse=True)
 
@@ -851,23 +841,25 @@ class General:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def shorten(self, ctx, *, url:str):
         """Shorten a URL"""
+        _ = await self._get_text(ctx)
         url = f"https://api-ssl.bitly.com/v3/shorten?access_token={config.bitly}&longUrl={url}"
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
                 res = await r.json()
         if res["status_code"] != 200:
             em = discord.Embed(color=0xDEADBF, title="Error",
-                               description=f"Error: {res['status_txt']}\nMake sure the URL starts with http(s)://")
+                               description=_("Error: %s\nMake sure the URL starts with http(s)://") % res["status_txt"])
             return await ctx.send(embed=em)
-        em = discord.Embed(color=0xDEADBF, title="Shortened URL", description=res["data"]["url"])
+        em = discord.Embed(color=0xDEADBF, title=_("Shortened URL"), description=res["data"]["url"])
         await ctx.send(embed=em)
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def invite(self, ctx):
         """Get the bots invite"""
-        await ctx.send("**Invite the bot:** <https://uwu.whats-th.is/32dde7>\n"
-                       "**Support Server:** <https://discord.gg/q98qeYN>")
+        _ = await self._get_text(ctx)
+        await ctx.send(_("**Invite the bot:** <https://uwu.whats-th.is/32dde7>\n"
+                       "**Support Server:** <https://discord.gg/q98qeYN>"))
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -893,27 +885,30 @@ class General:
     async def prefix(self, ctx):
         """Get the bots current prefix."""
         currprefix = await self.bot.redis.get(f"{ctx.author.id}-prefix")
+        _ = await self._get_text(ctx)
         if currprefix:
             currprefix = currprefix.decode("utf8")
-            await ctx.send(f"Your custom prefix is set to `{currprefix}`")
+            await ctx.send(_("Your custom prefix is set to `%s`") % currprefix)
         else:
-            await ctx.send("My prefix is `n!` or `N!`")
+            await ctx.send(_("My prefix is `n!` or `N!`"))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def setprefix(self, ctx, prefix:str):
         """Set your custom prefix, use quotation marks like "baka " for spaces."""
+        _ = await self._get_text(ctx)
         if len(prefix) >= 12:
-            return await ctx.send("Your prefix is over 12 characters.")
+            return await ctx.send(_("Your prefix is over 12 characters."))
         await self.bot.redis.set(f"{ctx.author.id}-prefix", prefix)
-        await ctx.send(f"Set **your** custom prefix to `{prefix}`, you can remove it by pinging me and using delprefix.")
+        await ctx.send(_("Set **your** custom prefix to `%s`, you can remove it by pinging me and using delprefix.") % prefix)
 
     @commands.command(aliases=["deleteprefix", "resetprefix"])
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def delprefix(self, ctx):
         """Delete or reset your prefix"""
+        _ = await self._get_text(ctx)
         await self.bot.redis.delete(f"{ctx.author.id}-prefix")
-        await ctx.send("Deleted your prefix and reset it back to the default `n!`")
+        await ctx.send(_("Deleted your prefix and reset it back to the default `n!`"))
 
     @commands.command()
     @commands.cooldown(1, 6, commands.BucketType.user)
