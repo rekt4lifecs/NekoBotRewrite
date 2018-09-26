@@ -285,6 +285,7 @@ class General:
 
     @commands.command(aliases=['user'])
     @commands.guild_only()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def userinfo(self, ctx, user: discord.Member = None):
         """Get a users info."""
         _ = await self._get_text(ctx)
@@ -326,6 +327,7 @@ class General:
 
     @commands.command(aliases=['server'])
     @commands.guild_only()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def serverinfo(self, ctx):
         """Display Server Info"""
         _ = await self._get_text(ctx)
@@ -362,6 +364,7 @@ class General:
 
     @commands.command(aliases=['channel'])
     @commands.guild_only()
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def channelinfo(self, ctx, channel: discord.TextChannel = None):
         """Get Channel Info"""
         _ = await self._get_text(ctx)
@@ -608,7 +611,7 @@ class General:
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(1, 15, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def discriminfo(self, ctx):
         """Get some stats about the servers discrims"""
         discrim_list = [int(u.discriminator) for u in ctx.guild.members]
@@ -649,7 +652,8 @@ class General:
     # It's a converter, not a type annotation in this case
     # noinspection PyTypeChecker
     @commands.command()
-    @commands.cooldown(1, 15, commands.BucketType.user)
+    @commands.guild_only()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def discrim(self, ctx, discriminator: Discriminator = None,
                       *, selector: Selector = '='):
         """Search for specific discriminators.
