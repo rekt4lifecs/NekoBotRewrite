@@ -1,0 +1,166 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2018-09-27 06:24+AUS Eastern Standard Time\n"
+"PO-Revision-Date: 2018-09-27 06:28+1000\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 2.1.1\n"
+"Last-Translator: \n"
+"Language: tsu\n"
+
+#: modules/mod.py:126
+msgid "Starting dehoist..."
+msgstr "Starting dehoist..."
+
+#: modules/mod.py:136
+msgid ""
+"%s users dehoisted in %s,\n"
+"%s users failed to dehoist,\n"
+"Users Dehoisted: %s"
+msgstr ""
+"%s users dehoisted in %s,\n"
+"%s users failed to dehoist,\n"
+"Users Dehoisted: %s"
+
+#: modules/mod.py:150
+msgid "Starting undehoist..."
+msgstr "Starting undehoist..."
+
+#: modules/mod.py:160
+msgid ""
+"%s users undehoisted in %ss,\n"
+"%s failed,\n"
+"%s"
+msgstr ""
+"%s users undehoisted in %ss,\n"
+"%s failed,\n"
+"%s"
+
+#: modules/mod.py:175
+msgid "%s has been kicked"
+msgstr "I kicked %s hmph"
+
+#: modules/mod.py:177 modules/mod.py:207 modules/mod.py:222 modules/mod.py:236
+#: modules/mod.py:264
+msgid ""
+"I couldn't do that action, either I dont have permissions or my role is too "
+"low."
+msgstr ""
+"I couldn't do that action, either I dont have permissions or my role is too "
+"low."
+
+#: modules/mod.py:188
+msgid "That user was not found."
+msgstr "I couldn't find that user, tsk"
+
+#: modules/mod.py:190
+msgid "I couldn't ban that user."
+msgstr "I couldn't ban that user, tsk"
+
+#: modules/mod.py:205
+msgid "%s has been banned"
+msgstr "I banned %s for you hmph"
+
+#: modules/mod.py:220
+msgid "I have successfully softbanned that user."
+msgstr "I have softbanned that user uwu"
+
+#: modules/mod.py:248
+msgid "I have unbanned %s"
+msgstr "I have unbanned %s hmph"
+
+#: modules/mod.py:261
+msgid "Renamed %s"
+msgstr "Renamed %s"
+
+#: modules/mod.py:278
+msgid "Failed to mute."
+msgstr "I couldn't mute %s b-baka"
+
+#: modules/mod.py:280
+msgid "Muted user."
+msgstr "Muted user."
+
+#: modules/mod.py:293
+msgid "Failed to unmute."
+msgstr "I couldn't unmute hmph"
+
+#: modules/mod.py:295
+msgid "Unmuted user."
+msgstr "Muted them uwu"
+
+#: modules/mod.py:398
+msgid "Say poll option or %scancel to publish poll."
+msgstr "Say poll option or %scancel to publish poll."
+
+#: modules/mod.py:407
+msgid "%scancel"
+msgstr "%scancel"
+
+#: modules/mod.py:524
+msgid ""
+"**purge embeds** - Removes messages that have embeds in them.\n"
+"**purge files** - Removes messages that have attachments in them.\n"
+"**purge all** - Removes all messages.\n"
+"**purge user** - Removes all messages by the member.\n"
+"**purge contains** - Removes all messages containing a substring.\n"
+"**purge bot** - Removes a bot user's messages and messages with their "
+"optional prefix.\n"
+"**purge emoji** - Removes all messages containing custom emoji.\n"
+"**purge reactions** - Removes all reactions from messages that have them.\n"
+"**purge custom** - A more advanced purge command."
+msgstr ""
+"**purge embeds** - Removes messages that have embeds in them.\n"
+"**purge files** - Removes messages that have attachments in them.\n"
+"**purge all** - Removes all messages.\n"
+"**purge user** - Removes all messages by the member.\n"
+"**purge contains** - Removes all messages containing a substring.\n"
+"**purge bot** - Removes a bot user's messages and messages with their "
+"optional prefix.\n"
+"**purge emoji** - Removes all messages containing custom emoji.\n"
+"**purge reactions** - Removes all reactions from messages that have them.\n"
+"**purge custom** - A more advanced purge command."
+
+#: modules/mod.py:538
+msgid "Too many messages to search given (%s/2000)"
+msgstr "Too many messages to search given (%s/2000)"
+
+#: modules/mod.py:551
+msgid "I do not have permissions to delete messages."
+msgstr "I don't have permissions to delete messages, idiot"
+
+#: modules/mod.py:553
+msgid "Error: %s (try a smaller search?)"
+msgstr "Error: %s (try a smaller search?)"
+
+#: modules/mod.py:571
+msgid "Successfully removed %s messages."
+msgstr "Successfully removed %s messages."
+
+#: modules/mod.py:602
+msgid "The substring length must be at least 3 characters."
+msgstr "The substring length must be at least 3 characters."
+
+#: modules/mod.py:630
+msgid "Too many messages to search for (%s/2000)"
+msgstr "Too many messages to search for (%s/2000)"
+
+#: modules/mod.py:639
+msgid "Successfully removed %s reactions."
+msgstr "Successfully removed %s reactions hmph"
+
+#: modules/mod.py:1003
+msgid "Reset Autorole."
+msgstr "Reset Autorole."
+
+#: modules/mod.py:1013
+msgid "Updated Autorole to %s"
+msgstr "Updated Autorole to %s tsk"
