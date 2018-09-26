@@ -7,6 +7,7 @@ import base64, random
 import datetime, time, math
 from prettytable import PrettyTable
 import hooks
+import gettext
 
 auth = {"Authorization": "Wolke " + weeb,
         "User-Agent": "NekoBot/4.2.0"}
@@ -17,6 +18,9 @@ class economy:
 
     def __init__(self, bot):
         self.bot = bot
+        self.lang = {}
+        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
+            self.lang[x] = gettext.translation("economy", localedir="locale", languages=[x])
 
     def _required_exp(self, level: int):
         if level < 0:
@@ -100,16 +104,24 @@ class economy:
         else:
             return False
 
+    async def _get_text(self, ctx):
+        lang = await self.bot.get_language(ctx)
+        if lang:
+            return self.lang[lang].gettext
+        else:
+            return gettext.gettext
+
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def register(self, ctx):
         """Register an account."""
         user = ctx.author
+        _ = await self._get_text(ctx)
 
         await self.__check_level_account(user.id)
 
         if await self.__has_account(user.id):
-            await ctx.send("You already have an account.")
+            await ctx.send(_("You already have an account."))
         else:
             data = {
                 "id": str(user.id),
@@ -120,12 +132,13 @@ class economy:
             }
             await self.__post_to_hook("Register", ctx.author, 0)
             await r.table("economy").insert(data).run(self.bot.r_conn)
-            await ctx.send("Made an account!")
+            await ctx.send(_("Made an account!"))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def balance(self, ctx, user:discord.Member=None):
         """Show your or a users balance."""
+        _ = await self._get_text(ctx)
 
         if not user:
             user = ctx.author
@@ -134,14 +147,14 @@ class economy:
 
         if await self.__has_account(user.id):
             balance = await self.__get_balance(user.id)
-            await ctx.send("💵 | Balance: **$%s**" % balance)
+            await ctx.send("💵 | " + _("Balance: **$%s**") % balance)
         else:
-            await ctx.send("💵 | Balance: **$0**")
+            await ctx.send("💵 | " + _("Balance: **$0**"))
 
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def profile(self, ctx, user:discord.Member=None):
+    async def profile(self, ctx, user: discord.Member=None):
         """Get a users profile, if no user is given it will show your profile instead."""
         await ctx.trigger_typing()
 
@@ -214,16 +227,17 @@ class economy:
     async def daily(self, ctx):
         """Get your daily bonus credits"""
         user = ctx.author
+        _ = await self._get_text(ctx)
         await self.__check_level_account(user.id)
 
         if not await self.__has_account(user.id):
-            return await ctx.send("You don't have a bank account. Make one with `register`")
+            return await ctx.send(_("You don't have a bank account. Make one with `register`"))
 
         user_data = await r.table("economy").get(str(user.id)).run(self.bot.r_conn)
         last_payday = user_data["lastpayday"]
         user_balance = int(user_data["balance"])
         if await self.__is_frozen(ctx.author.id):
-            return await ctx.send("This account is frozen")
+            return await ctx.send(_("This account is frozen"))
 
         tn = int(time.time())
         st = int(last_payday)
@@ -231,28 +245,28 @@ class economy:
         if not tl >= 86400:
             i = datetime.timedelta(seconds=86400 - tl)
             d = datetime.datetime(1, 1, 1) + i
-            return await ctx.send("You have `%s` until your next daily." % d.strftime("%H:%M:%S"))
+            return await ctx.send(_("You have `%s` until your next daily.") % d.strftime("%H:%M:%S"))
 
         if await self.__has_voted(user.id): # If user has voted
             em = discord.Embed(color=0xDEADBF)
-            em.title = "Daily Voter Bonus"
+            em.title = _("Daily Voter Bonus")
             weekday = datetime.datetime.today().weekday()
             if weekday <= 4: # If its a weekend, give weekend bonus.
-                em.description = "You have received **12500** weekend bonus credits!"
+                em.description = _("You have received **12500** weekend bonus credits!")
                 await self.__post_to_hook("Daily (Vote Weekend)", ctx.author, 12500)
                 await self.__update_payday_time(user.id)
                 await self.__update_balance(user.id, user_balance + 12500)
             else:
-                em.description = "You have received **7500** credits!"
+                em.description = _("You have received **7500** credits!")
                 await self.__post_to_hook("Daily (Vote)", ctx.author, 7500)
                 await self.__update_payday_time(user.id)
                 await self.__update_balance(user.id, user_balance + 7500)
             await ctx.send(embed=em)
         else:
             em = discord.Embed(color=0xDEADBF)
-            em.title = "Daily Bonus"
-            em.description = "You have received **2500** credits!"
-            em.set_footer(text="Voting will give you 7500 👀")
+            em.title = _("Daily Bonus")
+            em.description = _("You have received **2500** credits!")
+            em.set_footer(text=_("Voting will give you 7500 👀"))
             await self.__post_to_hook("Daily (Non Vote)", ctx.author, 2500)
             await self.__update_payday_time(user.id)
             await self.__update_balance(user.id, user_balance + 2500)
@@ -262,18 +276,19 @@ class economy:
     @commands.cooldown(1, 7, commands.BucketType.user)
     async def rep(self, ctx, user:discord.Member):
         """Give a user reputation"""
+        _ = await self._get_text(ctx)
 
         await self.__check_level_account(ctx.author.id)
 
         if user == ctx.author:
-            return await ctx.send("You can't give yourself rep")
+            return await ctx.send(_("You can't give yourself rep"))
         elif user.bot:
-            return await ctx.send("You can't rep bots")
+            return await ctx.send(_("You can't rep bots"))
 
         created = int(time.time()) - int(time.mktime(ctx.author.created_at.timetuple()))
 
         if not created >= 604800:
-            return await ctx.send("**Your account is too new to give rep.**")
+            return await ctx.send(_("**Your account is too new to give rep.**"))
 
         await ctx.trigger_typing()
 
@@ -284,7 +299,7 @@ class economy:
                 data = await r.json()
 
             if data['status'] == 200:
-                await ctx.send("**%s has given %s 1 reputation point!**" % (ctx.author.name.replace("@", "@\u200B"),
+                await ctx.send(_("**%s has given %s 1 reputation point!**") % (ctx.author.name.replace("@", "@\u200B"),
                                                                             user.mention,))
             else:
                 async with cs.get("https://api.weeb.sh/reputation/310039170792030211/%s" % ctx.author.id,
@@ -292,20 +307,21 @@ class economy:
                     repdata = await r.json()
                 nextrep = repdata["user"]["nextAvailableReputations"][0]
                 timeleft = (datetime.datetime(1, 1, 1) + datetime.timedelta(milliseconds=nextrep)).strftime("%H:%M:%S")
-                await ctx.send("**%s, you can give more reputation in `%s`**" % (ctx.author.mention, timeleft,))
+                await ctx.send(_("**%s, you can give more reputation in `%s`**") % (ctx.author.mention, timeleft,))
 
     @commands.command()
     @commands.cooldown(1, 7, commands.BucketType.user)
     async def setdesc(self, ctx, *, description:str):
         """Set your profile description"""
         await self.__check_level_account(ctx.author.id)
+        _ = await self._get_text(ctx)
 
         if len(description) > 500:
-            return await ctx.send("Your description is too long.")
+            return await ctx.send(_("Your description is too long."))
 
         description = base64.b64encode(description.encode("utf8")).decode("utf8")
         await r.table("levels").get(str(ctx.author.id)).update({"info": description}).run(self.bot.r_conn)
-        await ctx.send("Updated Description!")
+        await ctx.send(_("Updated Description!"))
 
     @commands.command()
     @commands.cooldown(1, 15, commands.BucketType.user)
@@ -313,24 +329,25 @@ class economy:
     async def coinflip(self, ctx, amount:int):
         """Coinflip!"""
         await self.__check_level_account(ctx.author.id)
+        _ = await self._get_text(ctx)
 
         if not await self.__has_account(ctx.author.id):
-            return await ctx.send("You don't have an account, you can make one with `register`")
+            return await ctx.send(_("You don't have an account, you can make one with `register`"))
 
         if await self.__is_frozen(ctx.author.id):
-            return await ctx.send("This account is frozen")
+            return await ctx.send(_("This account is frozen"))
 
         if amount <= 0:
-            return await ctx.send("Your amount must be higher than 0")
+            return await ctx.send(_("Your amount must be higher than 0"))
         elif amount > 100000:
-            return await ctx.send("You can't bet past 100,000")
+            return await ctx.send(_("You can't bet past 100,000"))
 
         balance = await self.__get_balance(ctx.author.id)
 
         if (balance - amount) < 0:
-            return await ctx.send("You don't have that much to spend")
+            return await ctx.send(_("You don't have that much to spend"))
 
-        msg = await ctx.send("Flipping...")
+        msg = await ctx.send(_("Flipping..."))
         await asyncio.sleep(random.randint(1, 5))
 
         choice = random.randint(0, 1)
@@ -339,13 +356,13 @@ class economy:
         await self.__add_bettime(ctx.author.id)
 
         if choice == 1:
-            em.title = "You Won!"
-            em.description = "You won `%s`!" % int(amount * .5)
+            em.title = _("You Won!")
+            em.description = _("You won `%s`!") % int(amount * .5)
             await self.__post_to_hook("Coinflip Win", ctx.author, int(amount * .5))
             await self.__update_balance(ctx.author.id, balance + int(amount * .5))
         else:
-            em.title = "You Lost"
-            em.description = "You lost `%s`" % amount
+            em.title = _("You Lost")
+            em.description = _("You lost `%s`") % amount
             await self.__post_to_hook("Coinflip Loss", ctx.author, amount)
             await self.__update_balance(ctx.author.id, balance - amount)
 
@@ -375,65 +392,67 @@ class economy:
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def transfer(self, ctx, user: discord.Member, amount: int):
         """Transfer money to another user"""
+        _ = await self._get_text(ctx)
 
         await self.__check_level_account(ctx.author.id)
 
         if not await self.__has_account(ctx.author.id):
-            return await ctx.send("You don't have an account, you can create one with `register`")
+            return await ctx.send(_("You don't have an account, you can create one with `register`"))
         elif not await self.__has_account(user.id):
-            return await ctx.send("`%s` doesn't have an account, they can create one with `register`" % user.name)
+            return await ctx.send(_("`%s` doesn't have an account, they can create one with `register`") % user.name)
 
         if await self.__is_frozen(ctx.author.id):
-            return await ctx.send("This account is frozen")
+            return await ctx.send(_("This account is frozen"))
         if await self.__is_frozen(user.id):
-            return await ctx.send("The user you are sending to has a frozen account.")
+            return await ctx.send(_("The user you are sending to has a frozen account."))
 
         if amount < 10:
-            return await ctx.send("The amount must be higher than 10")
+            return await ctx.send(_("The amount must be higher than 10"))
         elif amount > 10000000:
-            return await ctx.send("You can't send more than $10 million at a time.")
+            return await ctx.send(_("You can't send more than $10 million at a time."))
         if user.bot:
-            return await ctx.send("You can't send bots money")
+            return await ctx.send(_("You can't send bots money"))
         elif user == ctx.author:
-            return await ctx.send("You can't send yourself money")
+            return await ctx.send(_("You can't send yourself money"))
 
         author_balance = await self.__get_balance(ctx.author.id)
         user_balance = await self.__get_balance(user.id)
 
         if (author_balance - amount) < 0:
-            return await ctx.send("You don't have that much to spend.")
+            return await ctx.send(_("You don't have that much to spend."))
 
         await self.__update_balance(user.id, user_balance + amount)
         await self.__update_balance(ctx.author.id, author_balance - amount)
         await self.__post_to_hook("Transfer", ctx.author, "%s to %s (%s)" % (amount, str(user), user.id))
 
-        await ctx.send("Successfully sent %s $%s" % (user.name, amount,))
+        await ctx.send(_("Successfully sent %s $%s") % (user.name, amount,))
 
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 7, commands.BucketType.user)
     async def roulette(self, ctx, amount: int, color: str):
+        _ = await self._get_text(ctx)
 
         await self.__check_level_account(ctx.author.id)
 
         if not await self.__has_account(ctx.author.id):
-            return await ctx.send("You don't have a bank account...")
+            return await ctx.send(_("You don't have a bank account..."))
 
         if await self.__is_frozen(ctx.author.id):
-            return await ctx.send("This account is frozen")
+            return await ctx.send(_("This account is frozen"))
 
         author_balance = await self.__get_balance(ctx.author.id)
 
         if amount <= 0:
-            return await ctx.send("You can't bet that low...")
+            return await ctx.send(_("You can't bet that low..."))
         if (author_balance - amount) < 0:
-            return await ctx.send("You don't have that much to bet...")
+            return await ctx.send(_("You don't have that much to bet..."))
         if amount > 75000:
-            return await ctx.send("You can't bet past 75k")
+            return await ctx.send(_("You can't bet past 75k"))
 
         color = color.lower()
         if color not in ["red", "green", "black"]:
-            return await ctx.send("Invalid color, available colors: `red`, `black`, `green`")
+            return await ctx.send(_("Invalid color, available colors: `red`, `black`, `green`"))
 
         await self.__update_balance(ctx.author.id, author_balance - amount)
         await self.__add_bettime(ctx.author.id)
@@ -449,7 +468,7 @@ class economy:
 
         if chosen_color != color:
             await self.__post_to_hook("Roulette Loss", ctx.author, amount)
-            return await ctx.send(f"It landed on `{chosen_color}`, you lost :c")
+            return await ctx.send(_("It landed on `%s`, you lost :c") % chosen_color)
         else:
             if chosen_color == "green":
                 await self.__post_to_hook("Roulette Won (green)", ctx.author, int(amount*36))
@@ -457,7 +476,7 @@ class economy:
                 return await ctx.send("You hit green!")
             await self.__post_to_hook("Roulette Won (%s)" % color, ctx.author, int(amount*.75))
             await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
-            return await ctx.send(f"It landed on `{chosen_color}` and you won!")
+            return await ctx.send(_("It landed on `%s` and you won!") % choice)
 
     async def delmsg(self, msg: discord.Message):
         try:
@@ -471,25 +490,26 @@ class economy:
     async def blackjack(self, ctx, amount: int):
         """Blackjack"""
         author = ctx.author
+        _ = await self._get_text(ctx)
 
         await self.__check_level_account(author.id)
 
         if not await self.__has_account(ctx.author.id):
-            return await ctx.send("You don't have a bank account...")
+            return await ctx.send(_("You don't have a bank account..."))
 
         if await self.__is_frozen(ctx.author.id):
-            return await ctx.send("This account is frozen")
+            return await ctx.send(_("This account is frozen"))
 
         author_balance = await self.__get_balance(ctx.author.id)
 
         if amount <= 0:
-            await ctx.send("You can't bet that low...")
+            await ctx.send(_("You can't bet that low..."))
             return
         if (author_balance - amount) < 0:
-            await ctx.send("You don't have that much to bet...")
+            await ctx.send(_("You don't have that much to bet..."))
             return
         if amount > 50000:
-            await ctx.send("You can't bet past 50k")
+            await ctx.send(_("You can't bet past 50k"))
             return
 
         await self.__update_balance(ctx.author.id, author_balance - amount)
@@ -558,23 +578,23 @@ class economy:
                 break
 
         win_embed = discord.Embed(color=0xDEADBF)
-        win_embed.title = "Blackjack Win"
-        win_embed.description = "**%s** (%s) has won %s" % (ctx.author.name, ctx.author.id, int(amount * .75))
+        win_embed.title = _("Blackjack Win")
+        win_embed.description = _("**%s** (%s) has won %s") % (ctx.author.name, ctx.author.id, int(amount * .75))
 
         lose_embed = discord.Embed(color=0xDEADBF)
-        lose_embed.title = "Blackjack Lose"
-        lose_embed.description = "**%s** (%s) has lost %s" % (ctx.author.name, ctx.author.id, int(amount))
+        lose_embed.title = _("Blackjack Lose")
+        lose_embed.description = _("**%s** (%s) has lost %s") % (ctx.author.name, ctx.author.id, int(amount))
 
         em = discord.Embed(color=0xDEADBF)
-        em.title = "Blackjack"
-        em.description = "Type `hit` or `stay`."
-        author_value = f"%s %s | %s %s" % (card_list[author_deck[0]], author_deck_n[0],
+        em.title = _("Blackjack")
+        em.description = _("Type `hit` or `stay`.")
+        author_value = "%s %s | %s %s" % (card_list[author_deck[0]], author_deck_n[0],
                                            card_list[author_deck[1]], author_deck_n[1],)
-        bot_value = f"%s %s | ? ?" % (card_list[bot_deck[0]], bot_deck_n[0])
+        bot_value = "%s %s | ? ?" % (card_list[bot_deck[0]], bot_deck_n[0])
         author_total = int(author_deck_n[0]) + int(author_deck_n[1])
         bot_total = int(bot_deck_n[0]) + int(bot_deck_n[1])
-        em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-        em.add_field(name="My Cards (?)", value=bot_value, inline=True)
+        em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+        em.add_field(name=_("My Cards (?)"), value=bot_value, inline=True)
 
         msg = await ctx.send(embed=em)
 
@@ -596,24 +616,24 @@ class economy:
 
         if move == 1:
             em = discord.Embed(color=0xDEADBF)
-            em.title = "Blackjack"
+            em.title = _("Blackjack")
 
-            author_value = f"%s %s | %s %s" % (card_list[author_deck[0]], author_deck_n[0],
+            author_value = "%s %s | %s %s" % (card_list[author_deck[0]], author_deck_n[0],
                                                card_list[author_deck[1]], author_deck_n[1],)
-            bot_value = f"%s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
+            bot_value = "%s %s | %s %s" % (card_list[bot_deck[0]], bot_deck_n[0],
                                             card_list[bot_deck[1]], bot_deck_n[1])
 
             if author_total > bot_total:
-                em.description = "You beat me!"
+                em.description = _("You beat me!")
                 await self.__post_to_hook("Blackjack Won", ctx.author, amount)
-                em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-                em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+                em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+                em.add_field(name=_("My Cards (%s)") % bot_total, value=bot_value, inline=True)
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * .5))
             else:
-                em.description = "I beat you >:3"
+                em.description = _("I beat you >:3")
                 await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
-                em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-                em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+                em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+                em.add_field(name=_("My Cards (%s)") % bot_total, value=bot_value, inline=True)
 
             return await msg.edit(embed=em)
 
@@ -627,14 +647,14 @@ class economy:
 
         if author_total > 21 or bot_total > 21:
             em = discord.Embed(color=0xDEADBF)
-            em.title = "Blackjack"
+            em.title = _("Blackjack")
 
             if author_total > 21:
-                em.description = "You went over 21 and I won >:3"
+                em.description = _("You went over 21 and I won >:3")
                 await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
 
             else:
-                em.description = "I went over 21 and you won ;w;"
+                em.description = _("I went over 21 and you won ;w;")
                 await self.__post_to_hook("Blackjack Won", ctx.author, amount)
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
 
@@ -642,16 +662,16 @@ class economy:
                                                     card_list[bot_deck[1]], bot_deck_n[1],
                                                     card_list[bot_deck[2]], bot_deck_n[2],)
 
-            em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-            em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+            em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+            em.add_field(name=_("My Cards (%s)") % bot_total, value=bot_value, inline=True)
 
             return await msg.edit(embed=em)
 
         em = discord.Embed(color=0xDEADBF)
-        em.title = "Blackjack"
-        em.description = "Type `hit` or `stay`."
-        em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-        em.add_field(name="My Cards (?)", value=bot_value, inline=True)
+        em.title = _("Blackjack")
+        em.description = _("Type `hit` or `stay`.")
+        em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+        em.add_field(name=_("My Cards (?)"), value=bot_value, inline=True)
         await msg.edit(embed=em)
 
         while True:
@@ -669,19 +689,19 @@ class economy:
 
         if move == 1:
             em = discord.Embed(color=0xDEADBF)
-            em.title = "Blackjack"
+            em.title = _("Blackjack")
 
             if author_total > bot_total:
-                em.description = "You beat me!"
+                em.description = _("You beat me!")
                 await self.__post_to_hook("Blackjack Won", ctx.author, amount)
-                em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-                em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+                em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+                em.add_field(name=_("My Cards (%s)") % bot_total, value=bot_value, inline=True)
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
             else:
-                em.description = "I beat you >:3"
+                em.description = _("I beat you >:3")
                 await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
-                em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-                em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+                em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+                em.add_field(name=_("My Cards (%s)") % bot_total, value=bot_value, inline=True)
             return await msg.edit(embed=em)
 
         author_total = int(author_deck_n[0]) + int(author_deck_n[1]) + int(author_deck_n[2]) + int(author_deck_n[3])
@@ -695,14 +715,14 @@ class economy:
 
         if author_total > 21 or bot_total > 21:
             em = discord.Embed(color=0xDEADBF)
-            em.title = "Blackjack"
+            em.title = _("Blackjack")
 
             if author_total > 21:
-                em.description = "You went over 21 and I won >:3"
+                em.description = _("You went over 21 and I won >:3")
                 await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
 
             else:
-                em.description = "I went over 21 and you won ;w;"
+                em.description = _("I went over 21 and you won ;w;")
                 await self.__post_to_hook("Blackjack Won", ctx.author, amount)
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
 
@@ -711,16 +731,16 @@ class economy:
                                                             card_list[bot_deck[2]], bot_deck_n[2],
                                                             card_list[bot_deck[3]], bot_deck_n[3],)
 
-            em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-            em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+            em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+            em.add_field(name=_("My Cards (%s)") % bot_total, value=bot_value, inline=True)
 
             return await msg.edit(embed=em)
 
         em = discord.Embed(color=0xDEADBF)
-        em.title = "Blackjack"
-        em.description = "Type `hit` or `stay`."
-        em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-        em.add_field(name="My Cards (?)", value=bot_value, inline=True)
+        em.title = _("Blackjack")
+        em.description = _("Type `hit` or `stay`.")
+        em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+        em.add_field(name=_("My Cards (?)"), value=bot_value, inline=True)
         await msg.edit(embed=em)
 
         while True:
@@ -738,19 +758,19 @@ class economy:
 
         if move == 1:
             em = discord.Embed(color=0xDEADBF)
-            em.title = "Blackjack"
+            em.title = _("Blackjack")
 
             if author_total > bot_total:
-                em.description = "You beat me!"
+                em.description = _("You beat me!")
                 await self.__post_to_hook("Blackjack Won", ctx.author, amount)
-                em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-                em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+                em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+                em.add_field(name=_("My Cards (%s)") % bot_total, value=bot_value, inline=True)
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
             else:
-                em.description = "I beat you >:3"
+                em.description = _("I beat you >:3")
                 await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
-                em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-                em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+                em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+                em.add_field(name=_("My Cards (%s)") % bot_total, value=bot_value, inline=True)
 
             return await msg.edit(embed=em)
 
@@ -767,14 +787,14 @@ class economy:
 
         if author_total > 21 or bot_total > 21:
             em = discord.Embed(color=0xDEADBF)
-            em.title = "Blackjack"
+            em.title = _("Blackjack")
 
             if author_total > 21:
-                em.description = "You went over 21 and I won >:3"
+                em.description = _("You went over 21 and I won >:3")
                 await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
 
             else:
-                em.description = "I went over 21 and you won ;w;"
+                em.description = _("I went over 21 and you won ;w;")
                 await self.__post_to_hook("Blackjack Won", ctx.author, amount)
                 await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
 
@@ -784,24 +804,24 @@ class economy:
                                                                     card_list[bot_deck[3]], bot_deck_n[3],
                                                                     card_list[bot_deck[4]], bot_deck_n[4],)
 
-            em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-            em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+            em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+            em.add_field(name=_("My Cards (%s)") % bot_total, value=bot_value, inline=True)
 
             return await msg.edit(embed=em)
 
         em = discord.Embed(color=0xDEADBF)
-        em.title = "Blackjack"
+        em.title = _("Blackjack")
 
         if author_total > bot_total:
-            em.description = "You beat me ;w;"
+            em.description = _("You beat me ;w;")
             await self.__post_to_hook("Blackjack Won", ctx.author, amount)
             await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
         else:
-            em.description = "I beat you >:3"
+            em.description = _("I beat you >:3")
             await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
 
-        em.add_field(name="Your Cards (%s)" % author_total, value=author_value, inline=True)
-        em.add_field(name="My Cards (%s)" % bot_total, value=bot_value, inline=True)
+        em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
+        em.add_field(name=_("My Cards (%s)") % bot_total, value=bot_value, inline=True)
         return await msg.edit(embed=em)
 
     # async def __handle_guild_xp(self, guild:int, user:int):
