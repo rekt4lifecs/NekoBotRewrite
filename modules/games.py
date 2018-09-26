@@ -2,16 +2,28 @@ from discord.ext import commands
 import discord, config, aiohttp
 import base64, json
 import os
+import gettext
 
 class Games:
 
     def __init__(self, bot):
         self.bot = bot
+        self.lang = {}
+        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
+            self.lang[x] = gettext.translation("errors", localedir="locale", languages=[x])
+
+    async def _get_text(self, ctx):
+        lang = await self.bot.get_language(ctx)
+        if lang:
+            return self.lang[lang].gettext
+        else:
+            return gettext.gettext
 
     @commands.command()
     @commands.cooldown(1, 7, commands.BucketType.user)
     async def osu(self, ctx, username:str):
         """Get osu stats"""
+        _ = await self._get_text(ctx)
         try:
             await ctx.trigger_typing()
             url = "https://osu.ppy.sh/api/get_user?k=%s&u=%s" % (config.osu_key, username,)
@@ -19,7 +31,7 @@ class Games:
                 async with cs.get(url) as r:
                     data = await r.json()
             if data == []:
-                return await ctx.send("User not found.")
+                return await ctx.send(_("User not found."))
 
             data = data[0]
             level = float(data["level"])
@@ -41,32 +53,33 @@ class Games:
             filled_progbar = round(score / 100 * 10)
             level_graphx = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
 
-            msg = "OSU! Profile for `%s`\n" % username
+            msg = _("OSU! Profile for `%s`\n") % username
             msg += "```\n"
-            msg += "Level - %s [ %s ] %s\n" % (int_level, level_graphx, next_level,)
-            msg += "Rank - %s\n" % rank
-            msg += "Country Rank - %s\n" % crank
-            msg += f"Accuracy - {accuracy}%\n"
-            msg += "PP - %s\n" % pp
-            msg += "SS - %s (SS+ %s)\n" % (ss, ssp,)
-            msg += "S  - %s (S+ %s)\n" % (s, sp,)
-            msg += "A  - %s\n" % a
+            msg += _("Level - %s [ %s ] %s\n") % (int_level, level_graphx, next_level,)
+            msg += _("Rank - %s\n") % rank
+            msg += _("Country Rank - %s\n") % crank
+            msg += _("Accuracy - %s\n") % str(accuracy) + "%"
+            msg += _("PP - %s\n") % pp
+            msg += _("SS - %s (SS+ %s)\n") % (ss, ssp,)
+            msg += _("S  - %s (S+ %s)\n") % (s, sp,)
+            msg += _("A  - %s\n") % a
             msg += "```"
 
             await ctx.send(msg)
 
         except Exception as e:
-            return await ctx.send("Failed to fetch data, %s" % e)
+            return await ctx.send(_("Failed to fetch data, %s") % e)
 
     @commands.command()
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def pubg(self, ctx, region:str, username:str):
         """Get PUBG Stats"""
         await ctx.trigger_typing()
+        _ = await self._get_text(ctx)
         try:
             regions = ["krjp", "jp", "na", "eu", "oc", "kakao", "sea", "sa", "as"]
             if region not in regions:
-                em = discord.Embed(color=0xDEADBF, title="Error", description="Invalid Region Code.")
+                em = discord.Embed(color=0xDEADBF, title=_("Error"), description=_("Invalid Region Code."))
                 return await ctx.send(embed=em)
             base = f"https://api.playbattlegrounds.com/shards/pc-{region}"
             headers = {"Authorization": f"Bearer {config.pubg}",
@@ -99,17 +112,17 @@ class Games:
                         walkDistance = player["attributes"]["stats"]["walkDistance"]
                         winPlace = player["attributes"]["stats"]["winPlace"]
             em = discord.Embed(color=0xDEADBF, title=f"Last Game Stats for {username}")
-            em.add_field(name="Kills", value=kills)
-            em.add_field(name="Headshots", value=headshotKills)
-            em.add_field(name="Assists", value=assists)
-            em.add_field(name="Longest Kill", value=longestKill)
-            em.add_field(name="Damage Dealt", value=damageDealt)
-            em.add_field(name="Win Place", value=winPlace)
-            em.add_field(name="Walk Distance", value=walkDistance)
-            em.add_field(name="Heals",   value=heals)
+            em.add_field(name=_("Kills"), value=kills)
+            em.add_field(name=_("Headshots"), value=headshotKills)
+            em.add_field(name=_("Assists"), value=assists)
+            em.add_field(name=_("Longest Kill"), value=longestKill)
+            em.add_field(name=_("Damage Dealt"), value=damageDealt)
+            em.add_field(name=_("Win Place"), value=winPlace)
+            em.add_field(name=_("Walk Distance"), value=walkDistance)
+            em.add_field(name=_("Heals"), value=heals)
             await ctx.send(embed=em)
         except Exception as e:
-            await ctx.send("Failed to get data, error: `{e}`")
+            await ctx.send(_("Failed to get data, error: `%s`") % e)
 
     @commands.command()
     @commands.cooldown(1, 25, commands.BucketType.user)
@@ -129,7 +142,7 @@ class Games:
             embed.set_image(url=skin)
             await ctx.send(embed=embed)
         except:
-            await ctx.send("**Failed to get user**")
+            await ctx.send(_("**Failed to get user**"))
 
     # @commands.command(aliases=['ow'])
     # @commands.cooldown(1, 5, commands.BucketType.user)
