@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 import config, aiohttp, logging
+import gettext
 
 log = logging.getLogger()
 
@@ -9,6 +10,16 @@ class error_handler:
     def __init__(self, bot):
         self.bot = bot
         self.webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
+        self.lang = {}
+        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
+            self.lang[x] = gettext.translation("errors", localedir="locale", languages=[x])
+
+    async def _get_text(self, ctx):
+        lang = await self.bot.get_language(ctx)
+        if lang:
+            return self.lang[lang].gettext
+        else:
+            return gettext.gettext
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
@@ -34,17 +45,14 @@ class error_handler:
                 em.title = "Error in command %s, Instance %s" % (ctx.command.qualified_name, self.bot.instance)
                 em.description = "HTTPException"
                 await webhook.send(embed=em)
-            return await ctx.send("Failed to get data.")
+            _ = await self._get_text(ctx)
+            return await ctx.send(_("Failed to get data."))
 
         if isinstance(exception, commands.NoPrivateMessage):
             return
         elif isinstance(exception, commands.DisabledCommand):
             return
         elif isinstance(exception, commands.CommandInvokeError):
-            em = discord.Embed(color=0xDEADBF,
-                               title="Error",
-                               description=f"Error in command {ctx.command.qualified_name}, "
-                                           f"[Support Server](https://discord.gg/q98qeYN).\n`{exception}`")
             payload = {
                 "embeds": [
                     {
@@ -55,8 +63,11 @@ class error_handler:
                 ]
             }
             async with aiohttp.ClientSession() as cs:
-                async with cs.post(self.webhook_url, json=payload) as r:
-                    await r.read()
+                await cs.post(self.webhook_url, json=payload)
+            em = discord.Embed(color=0xDEADBF,
+                               title="Error",
+                               description=f"Error in command {ctx.command.qualified_name}, "
+                                           f"[Support Server](https://discord.gg/q98qeYN).\n`{exception}`")
             await ctx.send(embed=em)
             log.warning('In {}:'.format(ctx.command.qualified_name))
             log.warning('{}: {}'.format(exception.original.__class__.__name__, exception.original))
@@ -65,9 +76,11 @@ class error_handler:
         elif isinstance(exception, commands.MissingRequiredArgument):
             await self.send_cmd_help(ctx)
         elif isinstance(exception, commands.CheckFailure):
-            await ctx.send('You are not allowed to use that command.', delete_after=5)
+            _ = await self._get_text(ctx)
+            await ctx.send(_('You are not allowed to use that command.'), delete_after=5)
         elif isinstance(exception, commands.CommandOnCooldown):
-            await ctx.send('Command is on cooldown... {:.2f}s left'.format(exception.retry_after), delete_after=5)
+            _ = await self._get_text(ctx)
+            await ctx.send(_('Command is on cooldown... {:.2f}s left').format(exception.retry_after), delete_after=5)
         elif isinstance(exception, commands.CommandNotFound):
             return
         else:
