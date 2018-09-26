@@ -11,7 +11,7 @@ import numpy
 from colorthief import ColorThief
 from io import BytesIO
 from .utils import instance_tools
-import qrcode, os, uuid
+import qrcode
 import logging
 import base64
 from PIL import Image
