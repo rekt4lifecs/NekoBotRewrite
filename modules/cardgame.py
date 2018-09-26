@@ -72,7 +72,7 @@ class CardGame:
         self.bot = bot
         self.lang = {}
         for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
-            self.lang[x] = gettext.translation("cardgame", localedir="locale", languages=[x])
+            self.lang[x] = gettext.translation("donator", localedir="locale", languages=[x])
 
     async def __post_to_hook(self, action:str, user:discord.Member, amount):
         try:
