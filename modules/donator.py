@@ -1,8 +1,7 @@
 from discord.ext import commands
 import discord
 import rethinkdb as r
-import rethinkdb as rethonk
-import asyncio, aiohttp
+import aiohttp
 from prettytable import PrettyTable
 
 import random
@@ -12,6 +11,7 @@ import logging
 
 from config import webhook_id, webhook_token
 from .utils.hastebin import post as haste
+import gettext
 
 log = logging.getLogger()
 
@@ -19,6 +19,9 @@ class Donator:
 
     def __init__(self, bot):
         self.bot = bot
+        self.lang = {}
+        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
+            self.lang[x] = gettext.translation("cardgame", localedir="locale", languages=[x])
 
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
@@ -39,11 +42,12 @@ class Donator:
         else:
             return False
 
-    @commands.is_owner()
-    @commands.command(hidden=True)
-    async def forcelood(self, ctx):
-        await ctx.send("Forcing")
-        await self.__send_loods()
+    async def _get_text(self, ctx):
+        lang = await self.bot.get_language(ctx)
+        if lang:
+            return self.lang[lang].gettext
+        else:
+            return gettext.gettext
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -58,9 +62,10 @@ class Donator:
     async def donator_trapcard(self, ctx, user: discord.Member):
         """Trap a user!"""
         await ctx.trigger_typing()
+        _ = await self._get_text(ctx)
 
         if not await self.__has_donated(ctx.author.id):
-            return await ctx.send("You need to be a **donator** to use this command.")
+            return await ctx.send(_("You need to be a **donator** to use this command."))
 
         async with aiohttp.ClientSession() as session:
             url = f"https://nekobot.xyz/api/imagegen" \
@@ -94,24 +99,24 @@ class Donator:
     async def redeem(self, ctx, *, key: str):
         """Redeem your donation key"""
         await ctx.trigger_typing()
-
+        _ = await self._get_text(ctx)
 
         data = await r.table("donator").get(key).run(self.bot.r_conn)
         if not data:
             await self.__post_to_hook(discord.Embed(color=0xff6f3f, title="Invalid Token",
                                                     description="```css\n%s (%s) input an invalid token %s\n```" % (ctx.author, ctx.author.id, key,)))
-            return await ctx.send("**Not a valid key...**")
+            return await ctx.send(_("**Not a valid key...**"))
 
         if not data["user"]:
             await self.__post_to_hook(discord.Embed(color=0xff6f3f, title="Token Accepted",
                                                     description="```css\nUser: %s (%s)\nToken [ %s ]\n```" % (ctx.author, ctx.author.id, key,)))
             await r.table("donator").get(key).update({"user": str(ctx.author.id)}).run(self.bot.r_conn)
-            await ctx.send("**Token Accepted!**")
+            await ctx.send(_("**Token Accepted!**"))
         else:
             await self.__post_to_hook(discord.Embed(color=0xff6f3f, title="Invalid Token - In use",
                                                     description="```css\n%s (%s) input an invalid token %s\n```" % (
                                                     ctx.author, ctx.author.id, key,)))
-            return await ctx.send("**Token is already in use.**")
+            return await ctx.send(_("**Token is already in use.**"))
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -145,11 +150,12 @@ class Donator:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def donate(self, ctx):
         await ctx.trigger_typing()
+        _ = await self._get_text(ctx)
 
         if not await self.__has_donated(ctx.author.id):
-            await ctx.send("You can donate at <https://www.patreon.com/NekoBot>!")
+            await ctx.send(_("You can donate at <https://www.patreon.com/NekoBot>!"))
         else:
-            await ctx.send("You have already donated <:ChocoHappy:429538812855582721><a:rainbowNekoDance:462373594555613214>")
+            await ctx.send(_("You have already donated <:ChocoHappy:429538812855582721><a:rainbowNekoDance:462373594555613214>"))
 
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
@@ -162,13 +168,14 @@ class Donator:
             n!autolooder #autolood_channel
             or
             n!autolooder autolood_channel"""
+        _ = await self._get_text(ctx)
 
         if await r.table("autolooder").get(str(ctx.guild.id)).run(self.bot.r_conn):
             await r.table("autolooder").get(str(ctx.guild.id)).delete().run(self.bot.r_conn)
-            return await ctx.send("I have disable the autolooder for you <:lurk:356825018702888961>")
+            return await ctx.send(_("I have disable the autolooder for you <:lurk:356825018702888961>"))
 
         if not await self.__has_donated(ctx.author.id):
-            return await ctx.send("You have not donated :c, you can donate at <https://www.patreon.com/NekoBot> <:AwooHappy:471598416238215179>")
+            return await ctx.send(_("You have not donated :c, you can donate at <https://www.patreon.com/NekoBot> <:AwooHappy:471598416238215179>"))
 
         if not channel:
             return await self.bot.send_cmd_help(ctx)
@@ -186,7 +193,7 @@ class Donator:
             ]
         }
         await r.table("autolooder").insert(data).run(self.bot.r_conn)
-        await ctx.send("Enabled autolooder for `%s`!" % channel.name)
+        await ctx.send(_("Enabled autolooder for `%s`!") % channel.name)
 
 def setup(bot):
     bot.add_cog(Donator(bot))
