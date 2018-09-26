@@ -6,11 +6,22 @@ import textwrap
 import rethinkdb as r
 import rethinkdb as rethonk
 import base64
+import gettext
 
 class IMGWelcome:
 
     def __init__(self, bot):
         self.bot = bot
+        self.lang = {}
+        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
+            self.lang[x] = gettext.translation("imgwelcome", localedir="locale", languages=[x])
+
+    async def _get_text(self, ctx):
+        lang = await self.bot.get_language(ctx)
+        if lang:
+            return self.lang[lang].gettext
+        else:
+            return gettext.gettext
 
     async def __is_enabled(self, guild:int):
         if await r.table("imgwelcome").get(str(guild)).run(self.bot.r_conn):
@@ -23,33 +34,36 @@ class IMGWelcome:
     @commands.has_permissions(administrator=True)
     async def imgwelcome(self, ctx):
         if ctx.invoked_subcommand is None:
+            _ = await self._get_text(ctx)
             em = discord.Embed(color=0xDEADBF, title="IMG Welcomer",
-                               description="**n!imgwelcome img** - Set the background image\n"
+                               description=_("**n!imgwelcome img** - Set the background image\n"
                                            "**n!imgwelcome text** - Change the Welcome text above the image.\n"
                                            "**n!imgwelcome channel** - Set the welcome channel.\n"
-                                           "**n!imgwelcome toggle** - Toggle on/off.")
+                                           "**n!imgwelcome toggle** - Toggle on/off."))
             await ctx.send(embed=em)
 
     @imgwelcome.command(name="toggle")
     async def imgwelcome_toggle(self, ctx):
         """Toggle on/off the imgwelcomer"""
+        _ = await self._get_text(ctx)
         if await self.__is_enabled(ctx.guild.id):
             await r.table("imgwelcome").get(str(ctx.guild.id)).delete().run(self.bot.r_conn)
-            await ctx.send("Disabled imgwelcoming")
+            await ctx.send(_("Disabled imgwelcoming"))
         else:
             await r.table("imgwelcome").insert({
                 "id": str(ctx.guild.id),
                 "channel": str(ctx.channel.id),
                 "content": "V2VsY29tZSB1c2VyIHRvIHNlcnZlciE="
             }).run(self.bot.r_conn)
-            await ctx.send("Enabled imgwelcoming")
+            await ctx.send(_("Enabled imgwelcoming"))
 
     @imgwelcome.command(name="img")
     async def imgwelcome_img(self, ctx):
         """Set the image"""
+        _ = await self._get_text(ctx)
         if not await self.__is_enabled(ctx.guild.id):
-            return await ctx.send("Enable imgwelcoming with n!imgwelcome toggle")
-        await ctx.send("Send an image or type anything without sending an image to reset back to default.")
+            return await ctx.send(_("Enable imgwelcoming with n!imgwelcome toggle"))
+        await ctx.send(_("Send an image or type anything without sending an image to reset back to default."))
 
         def check(m):
             return m.author == ctx.message.author and m.channel == ctx.message.channel
@@ -57,12 +71,12 @@ class IMGWelcome:
         try:
             msg = await self.bot.wait_for('message', check=check, timeout=20)
         except:
-            return await ctx.send("Timed out.")
+            return await ctx.send(_("Timed out."))
 
         if len(msg.attachments) >= 1:
             attachment = str(msg.attachments[0].url).rpartition(".")[2]
             if attachment.lower() not in ["png", "jpg", "jpeg", "gif"]:
-                return await ctx.send("Not a valid image type <:bakaa:432914537608380419>")
+                return await ctx.send(_("Not a valid image type <:bakaa:432914537608380419>"))
             if os.path.exists(f"data/imgwelcome/{ctx.guild.id}.png"):
                 os.remove(f"data/imgwelcome/{ctx.guild.id}.png")
             try:
@@ -73,13 +87,13 @@ class IMGWelcome:
                 bg = Image.new("RGBA", (500, 150), (0, 0, 0, 0))
                 bg.alpha_composite(img, (0, 0))
                 bg.save(f"data/imgwelcome/{ctx.guild.id}.png")
-                await ctx.send("Set image!")
+                await ctx.send(_("Set image!"))
             except Exception as e:
-                await ctx.send(f"Failed to set image... {e}")
+                await ctx.send(_("Failed to set image... `%s`") % e)
         else:
             if os.path.exists(f"data/imgwelcome/{ctx.guild.id}.png"):
                 os.remove(f"data/imgwelcome/{ctx.guild.id}.png")
-            await ctx.send("Reset Image.")
+            await ctx.send(_("Reset Image."))
 
     @imgwelcome.command(name="text")
     async def imgwelcome_text(self, ctx, *, text:str):
@@ -92,23 +106,24 @@ class IMGWelcome:
             n!imgwelcome text Welcome user to server!
         """
 
+        _ = await self._get_text(ctx)
         if not await self.__is_enabled(ctx.guild.id):
-            return await ctx.send("Enable imgwelcoming with n!imgwelcome toggle")
+            return await ctx.send(_("Enable imgwelcoming with n!imgwelcome toggle"))
 
         text = (base64.b64encode(text.encode("utf8"))).decode("utf8")
         await r.table("imgwelcome").get(str(ctx.guild.id)).update({"content": text}).run(self.bot.r_conn)
-        await ctx.send("Updating text!")
+        await ctx.send(_("Updated text!"))
 
     @imgwelcome.command(name="channel")
     async def imgwelcome_channel(self, ctx, channel:discord.TextChannel):
         """Select a channel to use for imgwelcoming, can be a channel mention or the exact name of it"""
-
+        _ = await self._get_text(ctx)
         if not await self.__is_enabled(ctx.guild.id):
-            return await ctx.send("Enable imgwelcoming with n!imgwelcome toggle")
+            return await ctx.send(_("Enable imgwelcoming with n!imgwelcome toggle"))
 
 
         await r.table("imgwelcome").get(str(ctx.guild.id)).update({"channel": str(channel.id)}).run(self.bot.r_conn)
-        await ctx.send("Updated to %s" % channel.name)
+        await ctx.send(_("Updated to %s") % channel.name)
 
     @commands.command(hidden=True)
     @commands.is_owner()
