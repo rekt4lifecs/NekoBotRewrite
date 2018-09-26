@@ -1,0 +1,121 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2018-09-27 03:13+AUS Eastern Standard Time\n"
+"PO-Revision-Date: 2018-09-27 06:57+1000\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 2.1.1\n"
+"Last-Translator: \n"
+"Language: we_EB\n"
+
+#: modules/cardgame.py:119
+msgid ""
+"A loli roleplaying card game ofc!\n"
+"\n"
+"**Commands**\n"
+"**n!card daily** - Get your daily cards\n"
+"**n!card display** - Display a card of yours\n"
+"**n!card list** - Lists your cards\n"
+"**n!card sell** - Sell a card\n"
+"**n!card transfer** - Transfer Cards"
+msgstr ""
+"a wowi wowepwayinyg c-cawd game ofc! UWU\n"
+"\n"
+"**c-commanyds X3**\n"
+"**n!card daily** - get youw daiwy cawds :3\n"
+"**n!card display** - dispway a-a c-cawd of youws :3\n"
+"**n!card list** - w-wists y-youw cawds :3\n"
+"**n!card sell** - s-seww a-a cawd X3\n"
+"**n!card transfer** - twanysfew cawds uwu"
+
+#: modules/cardgame.py:133
+msgid "You can't send yourself cards"
+msgstr "y-you c-cany't s-senyd youwsewf cawds uwu"
+
+#: modules/cardgame.py:135
+msgid "You can't send bots cards."
+msgstr "y-you cany't senyd b-bots cawds. owo"
+
+#: modules/cardgame.py:140
+msgid "Not a valid number"
+msgstr "ny-nyot a-a v-vawid nyumbew owo"
+
+#: modules/cardgame.py:143
+msgid "Not a valid card number."
+msgstr "nyot a vawid c-cawd ny-nyumbew. owo"
+
+#: modules/cardgame.py:154
+msgid "%s has no slots left"
+msgstr "%s h-has nyo s-swots w-weft UWU"
+
+#: modules/cardgame.py:159
+msgid "Not a valid card."
+msgstr "nyot a v-vawid cawd. UWU"
+
+#: modules/cardgame.py:169
+msgid "Transferred card to %s!"
+msgstr "twanysfewwed cawd t-to %s!"
+
+#: modules/cardgame.py:297
+msgid "Wait another %sh %sm before using daily again..."
+msgstr "wait anyothew %sh %sm befowe usinyg daiwy againy... UwU"
+
+#: modules/cardgame.py:300
+msgid "All of your slots are full ;w;"
+msgstr "aww o-of youw swots a-awe fuww ;w; owo"
+
+#: modules/cardgame.py:316
+msgid "Given character **%s!**"
+msgstr "giveny chawactew **%s!** x3"
+
+#: modules/cardgame.py:397 modules/cardgame.py:476
+msgid "**Out of card range.**"
+msgstr "**out of cawd wanyge.** uwu"
+
+#: modules/cardgame.py:404
+msgid ""
+"â | **You don't have a bank account to sell your cards, make one with `n!"
+"register`**"
+msgstr ""
+"**you dony't have a banyk accounyt t-to s-seww youw cawds, make onye with "
+"`-`ny!wegistew`** UwU"
+
+#: modules/cardgame.py:409
+msgid "No cards in this slot..."
+msgstr "ny-nyo cawds iny t-this swot... X3"
+
+#: modules/cardgame.py:418
+msgid "%s, type `yes` to sell **%s** for %s"
+msgstr "%s, type `yes` to seww **%s** f-fow %s OwO"
+
+#: modules/cardgame.py:426 modules/cardgame.py:428
+msgid "â | **Cancelled Transaction.**"
+msgstr "**canycewwed twanysactiony.** UWU"
+
+#: modules/cardgame.py:434
+msgid "Card has already been sold"
+msgstr "cawd h-has awweady beeny s-sowd OwO"
+
+#: modules/cardgame.py:440
+msgid "Sold %s for %s"
+msgstr "sowd %s fow %s UWU"
+
+#: modules/cardgame.py:484
+msgid "Empty Slot..."
+msgstr "empty s-swot... X3"
+
+#: modules/cardgame.py:495
+msgid "Attack"
+msgstr "attack :3"
+
+#: modules/cardgame.py:496
+msgid "Defense"
+msgstr "d-defenyse owo"
