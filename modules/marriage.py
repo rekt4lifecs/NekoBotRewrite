@@ -70,7 +70,7 @@ class Marriage:
             return await ctx.send(chat_formatting.bold(_("You are not married")))
         x = await r.table("marriage").get(str(author.id)).run(self.bot.r_conn)
         user_married_to = int(x["marriedTo"])
-        married_to_name = (await self.bot.get_user_info(user_married_to)).replace("@", "@\u200B")
+        married_to_name = (await self.bot.get_user_info(user_married_to)).name.replace("@", "@\u200B")
 
         def check(m):
             return m.channel == ctx.message.channel and m.author == author
