@@ -5,6 +5,7 @@ import config
 import json
 import nekobot
 import rethinkdb as r
+import gettext
 
 class NSFW:
     """NSFW Commands OwO"""
@@ -13,6 +14,16 @@ class NSFW:
         self.bot = bot
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
         self.nekobot = nekobot.Client(loop=self.bot.loop)
+        self.lang = {}
+        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
+            self.lang[x] = gettext.translation("nekopet", localedir="locale", languages=[x])
+
+    async def _get_text(self, ctx):
+        lang = await self.bot.get_language(ctx)
+        if lang:
+            return self.lang[lang].gettext
+        else:
+            return gettext.gettext
 
     async def __has_voted(self, user:int):
         if await r.table("votes").get(str(user)).run(self.bot.r_conn):
@@ -59,8 +70,9 @@ class NSFW:
     @commands.cooldown(25, 10, commands.BucketType.user)
     async def pgif(self, ctx):
         """Posts a Random PrOn GIF"""
+        _ = await self._get_text(ctx)
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         if await self.__has_voted(ctx.author.id):
             em = discord.Embed(color=0xDEADBF)
@@ -70,18 +82,19 @@ class NSFW:
         else:
             embed = discord.Embed(color=0xDEADBF,
                                   title="WOAH",
-                                  description="Have you voted yet <:smirkGuns:417969421252952085>\n"
-                                              "https://discordbots.org/bot/310039170792030211/vote")
+                                  description=_("Have you voted yet <:smirkGuns:417969421252952085>\n"
+                                              "https://discordbots.org/bot/310039170792030211/vote"))
             if not ctx.message.channel.is_nsfw():
-                embed.set_footer(text="Use in a NSFW Channel BTW...")
+                embed.set_footer(text=_("Use in a NSFW Channel BTW..."))
             await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(25, 10, commands.BucketType.user)
     async def anal(self, ctx):
+        _ = await self._get_text(ctx)
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         embed = discord.Embed(color=0xDEADBF)
         embed.set_image(url=await self.nekobot.image("anal"))
@@ -108,8 +121,9 @@ class NSFW:
     @commands.cooldown(25, 10, commands.BucketType.user)
     async def _fourk(self, ctx):
         """Posts a random 4K Image OwO"""
+        _ = await self._get_text(ctx)
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         embed = discord.Embed(color=0xDEADBF)
         embed.set_image(url=await self.nekobot.image("4k"))
@@ -120,8 +134,9 @@ class NSFW:
     @commands.cooldown(2, 5, commands.BucketType.user)
     async def yandere(self, ctx, tag: str):
         """Search Yande.re OwO"""
+        _ = await self._get_text(ctx)
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         else:
             try:
@@ -132,13 +147,13 @@ class NSFW:
                 if res != []:
                     img = random.choice(res)
                     if "loli" in img["tags"] or "shota" in img["tags"]:
-                        return await ctx.send("Loli or shota was found in this post.")
+                        return await ctx.send(_("Loli or shota was found in this post."))
                     em = discord.Embed(color=0xDEADBF)
                     em.set_image(url=img['jpeg_url'])
                     await ctx.send(embed=em)
                 else:
-                    e = discord.Embed(color=0xDEADBF, title="⚠ Error",
-                                      description="Yande.re has no images for requested tags.")
+                    e = discord.Embed(color=0xDEADBF, title="⚠ " + _("Error"),
+                                      description=_("Yande.re has no images for requested tags."))
                     await ctx.send(embed=e)
             except Exception as e:
                 await ctx.send(":x: `{}`".format(e))
@@ -148,8 +163,9 @@ class NSFW:
     @commands.cooldown(25, 10, commands.BucketType.user)
     async def boobs(self, ctx):
         """Get Random Boobs OwO"""
+        _ = await self._get_text(ctx)
         if not ctx.message.channel.is_nsfw():
-            return await ctx.send("This is not an NSFW channel...", delete_after=5)
+            return await ctx.send(_("This is not an NSFW channel..."), delete_after=5)
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=await self.boobbot("boobs"))
         await ctx.send(embed=em)
@@ -168,7 +184,8 @@ class NSFW:
             async with cs.get(url, headers=headers) as r:
                 res =  await r.json()
         if res["status"] == 429:
-            return await ctx.send("**Ratelimited, try again later.**")
+            _ = await self._get_text(ctx)
+            return await ctx.send(_("**Ratelimited, try again later.**"))
         data = res['data']
         x = random.choice(data)
         em = discord.Embed(title=f"**{x['title']}**",
@@ -192,7 +209,8 @@ class NSFW:
             async with cs.get(url, headers=headers) as r:
                 res = await r.json()
         if res["status"] == 429:
-            return await ctx.send("**Ratelimited, try again later.**")
+            _ = await self._get_text(ctx)
+            return await ctx.send(_("**Ratelimited, try again later.**"))
         x = random.choice(res['data'])
         em = discord.Embed(title=f"**{x['title']}**",
                            color=0xDEADBF)
@@ -205,8 +223,9 @@ class NSFW:
     @commands.cooldown(25, 10, commands.BucketType.user)
     async def ass(self, ctx):
         """Get Random Ass OwO"""
+        _ = await self._get_text(ctx)
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=await self.nekobot.image("ass"))
@@ -219,7 +238,8 @@ class NSFW:
     async def cumsluts(self, ctx):
         """CumSluts"""
         if not ctx.message.channel.is_nsfw():
-            return await ctx.send("This is not an NSFW channel...", delete_after=5)
+            _ = await self._get_text(ctx)
+            return await ctx.send(_("This is not an NSFW channel..."), delete_after=5)
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=await self.boobbot("cumsluts"))
         await ctx.send(embed=em)
@@ -230,7 +250,8 @@ class NSFW:
     async def thighs(self, ctx):
         """Thighs"""
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            _ = await self._get_text(ctx)
+            await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         em = discord.Embed(color=0xDEADBF)
         async with aiohttp.ClientSession() as cs:
@@ -245,7 +266,8 @@ class NSFW:
     async def pussy(self, ctx):
         """Pussy owo"""
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            _ = await self._get_text(ctx)
+            await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=await self.nekobot.image("pussy"))
@@ -258,7 +280,8 @@ class NSFW:
     async def gonewild(self, ctx):
         """r/GoneWild"""
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            _ = await self._get_text(ctx)
+            await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=await self.nekobot.image("gonewild"))
@@ -271,7 +294,8 @@ class NSFW:
     async def doujin(self, ctx):
         """Get a Random Doujin"""
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            _ = await self._get_text(ctx)
+            await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         else:
             url = "http://nhentai.net/random/"
@@ -287,7 +311,8 @@ class NSFW:
     async def lewdkitsune(self, ctx):
         """Lewd Kitsunes"""
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
+            _ = await self._get_text(ctx)
+            await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=await self.nekobot.image("lewdkitsune"))
@@ -298,8 +323,9 @@ class NSFW:
     @commands.cooldown(25, 10, commands.BucketType.user)
     async def hentai(self, ctx):
         """Lood 2d girls"""
+        _ = await self._get_text(ctx)
         if not ctx.message.channel.is_nsfw():
-            await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>\nhttps://nekobot.xyz/hentai.png")
+            await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>\nhttps://nekobot.xyz/hentai.png"))
             return
         if await self.__has_voted(ctx.author.id):
             em = discord.Embed(color=0xDEADBF)
@@ -308,8 +334,8 @@ class NSFW:
         else:
             embed = discord.Embed(color=0xDEADBF,
                                   title="oof",
-                                  description="Have you voted yet <:smirkGuns:417969421252952085>\n"
-                                              "https://discordbots.org/bot/310039170792030211/vote")
+                                  description=_("Have you voted yet <:smirkGuns:417969421252952085>\n"
+                                              "https://discordbots.org/bot/310039170792030211/vote"))
             await ctx.send(embed=embed)
 
     @commands.command(name="rule34", aliases=["r34"])
@@ -317,15 +343,16 @@ class NSFW:
     @commands.guild_only()
     async def rule34(self, ctx, tag:str):
         """Search rule34"""
+        _ = await self._get_text(ctx)
         if not ctx.message.channel.is_nsfw():
-            return await ctx.send("This is not an NSFW channel...", delete_after=5)
+            return await ctx.send(_("This is not an NSFW channel..."), delete_after=5)
         try:
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f"https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags={tag}") as r:
                     data = json.loads(await r.text())
             non_loli = list(filter(lambda x: 'loli' not in x['tags'] and 'shota' not in x['tags'], data))
             if len(non_loli) == 0:
-                em = discord.Embed(color=0xff6f3f, title="Warning", description="Loli/Shota in search.")
+                em = discord.Embed(color=0xff6f3f, title="Warning", description=_("Loli/Shota in search."))
                 return await ctx.send(embed=em)
             response = non_loli[random.randint(0, len(non_loli) - 1)]
             img = f"https://img.rule34.xxx/images/{response['directory']}/{response['image']}"
@@ -333,7 +360,7 @@ class NSFW:
             em.set_image(url=img)
             await ctx.send(embed=em)
         except json.JSONDecodeError:
-            await ctx.send(":x: No image found. Sorry :/")
+            await ctx.send(_(":x: No image found. Sorry :/"))
 
     # IP Banned from r34 on api dedi?
     # @commands.command(name="rule34magik", aliases=["r34magik", "r34m", "rule34magick"])
@@ -371,8 +398,9 @@ class NSFW:
     @commands.guild_only()
     async def e621(self, ctx, tag:str):
         """Search e621"""
+        _ = await self._get_text(ctx)
         if not ctx.message.channel.is_nsfw():
-            return await ctx.send("This is not an NSFW channel...", delete_after=5)
+            return await ctx.send(_("This is not an NSFW channel..."), delete_after=5)
         try:
             ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:62.0) Gecko/20100101 Firefox/62.0"
             async with ctx.typing():
@@ -382,14 +410,14 @@ class NSFW:
                         res = await r.json()
                 data = random.choice(res)
                 if data == []:
-                    return await ctx.send("**No images found**")
+                    return await ctx.send(_("**No images found**"))
                 if "loli" in data["tags"] or "shota" in data["tags"]:
-                    return await ctx.send("**Children found in image.**")
+                    return await ctx.send(_("**Children found in image.**"))
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=data["file_url"])
                 await ctx.send(embed=em)
         except:
-            await ctx.send("**Could not find anything.**")
+            await ctx.send(_("**Could not find anything.**"))
 
     @commands.command()
     @commands.guild_only()
@@ -397,7 +425,8 @@ class NSFW:
     async def futa(self, ctx):
         """Grils with peepee's"""
         if not ctx.message.channel.is_nsfw():
-            return await ctx.send("This is not an NSFW channel...", delete_after=5)
+            _ = await self._get_text(ctx)
+            return await ctx.send(_("This is not an NSFW channel..."), delete_after=5)
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=await self.boobbot("futa"))
         await ctx.send(embed=em)
@@ -407,7 +436,8 @@ class NSFW:
     @commands.cooldown(25, 10, commands.BucketType.user)
     async def collared(self, ctx):
         if not ctx.message.channel.is_nsfw():
-            return await ctx.send("This is not an NSFW channel...", delete_after=5)
+            _ = await self._get_text(ctx)
+            return await ctx.send(_("This is not an NSFW channel..."), delete_after=5)
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=await self.boobbot("collared"))
         await ctx.send(embed=em)
@@ -419,17 +449,17 @@ class NSFW:
         """Make a channel NSFW."""
         if channel is None:
             channel = ctx.message.channel
-
+        _ = await self._get_text(ctx)
         try:
             if channel.is_nsfw():
                 await channel.edit(nsfw=False)
-                await ctx.send(f"I have removed NSFW permissions from {channel.name}")
+                await ctx.send(_("I have removed NSFW permissions from %s") % channel.name)
             else:
                 await channel.edit(nsfw=True)
-                await ctx.send(f"I have have made {channel.name} an NSFW channel for you <3")
+                await ctx.send(_("I have have made %s an NSFW channel for you <3") % channel.name)
         except:
             try:
-                await ctx.send("I can't make that channel NSFW or don't have permissions to ;c")
+                await ctx.send(_("I can't make that channel NSFW or don't have permissions to ;c"))
             except:
                 pass
 
