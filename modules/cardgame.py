@@ -2,21 +2,11 @@ import discord, random, time, datetime, asyncio
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
-import aiohttp, hooks, ujson
+import aiohttp, hooks
 import rethinkdb as r
 import os
 from prettytable import PrettyTable
-
-# Languages
-languages = ["english", "weeb", "tsundere", "polish", "spanish", "french"]
-lang = {}
-
-for l in languages:
-    with open("lang/%s.json" % l, encoding="utf-8") as f:
-        lang[l] = ujson.load(f)
-
-def getlang(la:str):
-    return lang.get(la, None)
+import gettext
 
 list_ = [
     "Shiro",
@@ -76,10 +66,13 @@ list_ = [
   # "Hoshimiya Kate",
 
 class CardGame:
-    """Loli Card Gamelol"""
+    """Loli Card Gamelol xDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"""
 
     def __init__(self, bot):
         self.bot = bot
+        self.lang = {}
+        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
+            self.lang[x] = gettext.translation("cardgame", localedir="locale", languages=[x])
 
     async def __post_to_hook(self, action:str, user:discord.Member, amount):
         try:
@@ -107,37 +100,47 @@ class CardGame:
         if not await self.__has_account(user):
             await self.__create_account(user)
 
+    async def _get_text(self, ctx):
+        lang = await self.bot.get_language(ctx)
+        if lang:
+            return self.lang[lang].gettext
+        else:
+            return gettext.gettext
+
     @commands.group()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def card(self, ctx: commands.Context):
         """Loli Card Game OwO"""
-        lang = await self.bot.redis.get(f"{ctx.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
 
         await self.__check_for_user(ctx.author.id)
 
         if ctx.invoked_subcommand is None:
-            return await ctx.send(getlang(lang)["cardgame"]["card_help"])
+            return await ctx.send(_("A loli roleplaying card game ofc!\n\n"
+                                    "**Commands**\n"
+                                    "**n!card daily** - Get your daily cards\n"
+                                    "**n!card display** - Display a card of yours\n"
+                                    "**n!card list** - Lists your cards\n"
+                                    "**n!card sell** - Sell a card\n"
+                                    "**n!card transfer** - Transfer Cards"))
 
     @card.command(name="transfer")
     async def card_transfer(self, ctx, card_number, user:discord.Member):
         """Transfer cards to other users"""
+        _ = await self._get_text(ctx)
 
         if user == ctx.author:
-            return await ctx.send("You can't send yourself cards")
+            return await ctx.send(_("You can't send yourself cards"))
         elif user.bot:
-            return await ctx.send("You can't send bots cards.")
+            return await ctx.send(_("You can't send bots cards."))
 
         try:
             card_number = int(card_number)
         except:
-            return await ctx.send("Not a valid number")
+            return await ctx.send(_("Not a valid number"))
 
         if card_number > 6 or card_number <= 0:
-            return await ctx.send("Not a valid card number.")
+            return await ctx.send(_("Not a valid card number."))
 
         await self.__check_for_user(ctx.author.id)
         await self.__check_for_user(user.id)
@@ -148,12 +151,12 @@ class CardGame:
         user_cards = user_data["cards"]
 
         if len(user_cards) >= 6:
-            return await ctx.send("%s has no slots left" % user.mention)
+            return await ctx.send(_("%s has no slots left") % user.mention)
 
         try:
             card = author_cards[card_number-1]
         except:
-            return await ctx.send("Not a valid card.")
+            return await ctx.send(_("Not a valid card."))
 
         user_cards.append(card)
 
@@ -163,7 +166,7 @@ class CardGame:
 
         await r.table("cardgame").get(str(ctx.author.id)).update({"cards": r.row["cards"].delete_at(card_number-1)}).run(self.bot.r_conn)
         await r.table("cardgame").get(str(user.id)).update(newdata).run(self.bot.r_conn)
-        await ctx.send("Transferred card to %s!"% user.mention)
+        await ctx.send(_("Transferred card to %s!") % user.mention)
 
     # @card.command(name='fight', aliases=['battle'])
     # async def card_battle(self, ctx, user: discord.Member):
@@ -272,11 +275,7 @@ class CardGame:
     @card.command(name='daily')
     async def card_daily(self, ctx):
         """Get your card daily"""
-        lang = await self.bot.redis.get(f"{ctx.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
 
         await self.__check_for_user(ctx.author.id)
 
@@ -295,10 +294,10 @@ class CardGame:
                                          day=tommorow.day, hour=0, minute=0, second=0)
             m, s = divmod((midnight - datetime.datetime.now()).seconds, 60)
             h, m = divmod(m, 60)
-            return await ctx.send("You have %s hours and %s minutes until your next daily." % (h, m,))
+            return await ctx.send(_("Wait another %sh %sm before using daily again...") % (h, m,))
 
         if len(cards) >= 6:
-            return await ctx.send(getlang(lang)["cardgame"]["daily"]["slots_full"])
+            return await ctx.send(_("All of your slots are full ;w;"))
 
         character_loli = str(random.choice(list_)).lower().replace(' ', '_')
 
@@ -314,7 +313,7 @@ class CardGame:
         }
 
         await r.table("cardgame").get(str(author.id)).update(newdata).run(self.bot.r_conn)
-        await ctx.send(getlang(lang)["cardgame"]["daily"]["given_char"].format(character_loli.replace('_', ' ').title()))
+        await ctx.send(_("Given character **%s!**") % character_loli.replace('_', ' ').title())
 
     def _generate_card(self, character: str, num: int, attack: int, defense: int):
         card_name = f"data/{character}.jpg"
@@ -386,26 +385,28 @@ class CardGame:
         draw.text((344, 550), str(defense), (0, 0, 0), lower_font)
         draw.text((40, 477), textwrap.fill(description, 37), (0, 0, 0), font=desc_font)
 
-        img.save(f"data/cards/{num}.png")
+        img.save(f"data/cards/{num}.png")  # there is a thing called BytesIO oldme smh
 
     @card.command(name='sell')
     async def card_sell(self, ctx, num: int):
         """Sell a card"""
+        _ = await self._get_text(ctx)
+
         await self.__check_for_user(ctx.author.id)
         if num > 6 or num < 1:
-            return await ctx.send("**Out of card range.**")
+            return await ctx.send(_("**Out of card range.**"))
 
-        author = ctx.message.author
+        author = ctx.author
         data = await r.table("cardgame").get(str(author.id)).run(self.bot.r_conn)
         cards = data["cards"]
 
         if not await r.table("economy").get(str(author.id)).run(self.bot.r_conn):
-            return await ctx.send("❌ | **You don't have a bank account to sell your cards, make one with `n!register`**")
+            return await ctx.send(_("❌ | **You don't have a bank account to sell your cards, make one with `n!register`**"))
 
         try:
             card = cards[num-1]
         except:
-            return await ctx.send("No cards in this slot...")
+            return await ctx.send(_("No cards in this slot..."))
 
         cardname = card["name"]
         cardname_en = str(card["name"]).replace('_', ' ').title()
@@ -414,7 +415,7 @@ class CardGame:
 
         cardprice = int(random.randint(10000, 15000) + (((attack * .25) + (defense * .25)) * 1000))
 
-        await ctx.send(f"{author.mention}, type `yes` to sell **{cardname_en}** for {cardprice}")
+        await ctx.send(_("%s, type `yes` to sell **%s** for %s") % (author.mention, cardname_en, cardprice))
 
         def check(m):
             return m.channel == ctx.message.channel and m.author == author
@@ -422,21 +423,21 @@ class CardGame:
         try:
             x = await self.bot.wait_for('message', check=check, timeout=15.0)
             if not str(x.content).lower() == "yes":
-                return await ctx.send("❌ | **Cancelled Transaction.**")
+                return await ctx.send(_("❌ | **Cancelled Transaction.**"))
         except asyncio.TimeoutError:
-            await ctx.send("❌ | **Cancelled Transaction.**")
+            await ctx.send(_("❌ | **Cancelled Transaction.**"))
             return
 
         after_check = await r.table("cardgame").get(str(author.id)).run(self.bot.r_conn)
         if after_check != data:
             await self.__post_to_hook("Card Sell Fail 😤😤", author, 0)
-            return await ctx.send("Card has already been sold")
+            return await ctx.send(_("Card has already been sold"))
 
         await r.table("cardgame").get(str(author.id)).update({"cards": r.row["cards"].delete_at(num-1)}).run(self.bot.r_conn)
         economy = await r.table("economy").get(str(author.id)).run(self.bot.r_conn)
         await r.table("economy").get(str(author.id)).update({"balance": economy["balance"] + cardprice}).run(self.bot.r_conn)
 
-        await ctx.send(f"Sold {cardname} for {cardprice}")
+        await ctx.send(_("Sold %s for %s") % (cardname, cardprice))
         await self.__post_to_hook("Sold card", author, cardprice)
 
     @card.command(name='list')
@@ -469,19 +470,18 @@ class CardGame:
     async def card_display(self, ctx, num: int):
         """Display your card(s)"""
         await ctx.trigger_typing()
+        _ = await self._get_text(ctx)
         await self.__check_for_user(ctx.author.id)
         if num > 6 or num < 1:
-            return await ctx.send("**Out of card range.**")
+            return await ctx.send(_("**Out of card range.**"))
 
         data = await r.table("cardgame").get(str(ctx.author.id)).run(self.bot.r_conn)
         cards = data["cards"]
 
-        author = ctx.message.author
-
         try:
             card = cards[num-1]
         except:
-            return await ctx.send("Empty Slot...")
+            return await ctx.send(_("Empty Slot..."))
 
         num = ctx.author.id
 
@@ -492,16 +492,15 @@ class CardGame:
         self._generate_card(character_name, num, attack, defense)
 
         embed = discord.Embed(color=0xDEADBF, title=character_name_en)
-        embed.add_field(name="Attack", value=str(attack))
-        embed.add_field(name="Defense", value=str(defense))
+        embed.add_field(name=_("Attack"), value=str(attack))
+        embed.add_field(name=_("Defense"), value=str(defense))
 
         await ctx.send(file=discord.File(f'data/cards/{num}.png'), embed=embed.set_image(url=f'attachment://{num}.png'))
-        os.remove("data/cards/%s.png" % num)
+        os.remove("data/cards/%s.png" % num)  # smh
 
     @card.command(name='generate', hidden=True)
     @commands.is_owner()
     async def card_gen(self, ctx, character: str = "shiro", attack: int = 1, defense: int = 1):
-        """Recieve your dailies"""
         card_name = f"data/{character}.jpg"
         img = Image.open('data/card.jpg')
         _character = Image.open(card_name).resize((314, 313))
@@ -520,7 +519,6 @@ class CardGame:
         img.save(f"data/cards/{num}.png")
         await ctx.send(file=discord.File(f"data/cards/{num}.png"),
                        embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{num}.png'))
-
 
     @card.command(name='forcegive', hidden=True)
     @commands.is_owner()
