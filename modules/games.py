@@ -127,6 +127,7 @@ class Games:
     @commands.command()
     @commands.cooldown(1, 25, commands.BucketType.user)
     async def minecraft(self, ctx, username:str):
+        _ = await self._get_text(ctx)
         try:
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(f"https://api.mojang.com/users/profiles/minecraft/{username}") as r:
