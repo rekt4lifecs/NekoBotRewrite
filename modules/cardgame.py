@@ -71,9 +71,20 @@ class CardGame:
     def __init__(self, bot):
         self.bot = bot
         self.lang = {}
-        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
-            self.lang[x] = gettext.translation("donator", localedir="locale", languages=[x])
+        # self.languages = ["french", "polish", "spanish", "tsundere", "weeb"]
+        self.languages = ["tsundere", "weeb"]
+        for x in self.languages:
+            self.lang[x] = gettext.translation("cardgame", localedir="locale", languages=[x])
 
+    async def _get_text(self, ctx):
+        lang = await self.bot.get_language(ctx)
+        if lang:
+            if lang in self.languages:
+                return self.lang[lang].gettext
+            else:
+                return gettext.gettext
+        else:
+            return gettext.gettext
     async def __post_to_hook(self, action:str, user:discord.Member, amount):
         try:
             async with aiohttp.ClientSession() as cs:
@@ -99,13 +110,6 @@ class CardGame:
     async def __check_for_user(self, user:int):
         if not await self.__has_account(user):
             await self.__create_account(user)
-
-    async def _get_text(self, ctx):
-        lang = await self.bot.get_language(ctx)
-        if lang:
-            return self.lang[lang].gettext
-        else:
-            return gettext.gettext
 
     @commands.group()
     @commands.cooldown(1, 5, commands.BucketType.user)

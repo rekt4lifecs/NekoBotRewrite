@@ -20,8 +20,20 @@ class Donator:
     def __init__(self, bot):
         self.bot = bot
         self.lang = {}
-        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
-            self.lang[x] = gettext.translation("cardgame", localedir="locale", languages=[x])
+        # self.languages = ["french", "polish", "spanish", "tsundere", "weeb"]
+        self.languages = ["tsundere", "weeb"]
+        for x in self.languages:
+            self.lang[x] = gettext.translation("donator", localedir="locale", languages=[x])
+
+    async def _get_text(self, ctx):
+        lang = await self.bot.get_language(ctx)
+        if lang:
+            if lang in self.languages:
+                return self.lang[lang].gettext
+            else:
+                return gettext.gettext
+        else:
+            return gettext.gettext
 
     def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
@@ -41,13 +53,6 @@ class Donator:
             return True
         else:
             return False
-
-    async def _get_text(self, ctx):
-        lang = await self.bot.get_language(ctx)
-        if lang:
-            return self.lang[lang].gettext
-        else:
-            return gettext.gettext
 
     @commands.command(hidden=True)
     @commands.is_owner()

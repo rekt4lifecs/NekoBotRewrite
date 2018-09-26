@@ -19,9 +19,20 @@ class economy:
     def __init__(self, bot):
         self.bot = bot
         self.lang = {}
-        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
+        # self.languages = ["french", "polish", "spanish", "tsundere", "weeb"]
+        self.languages = ["tsundere", "weeb"]
+        for x in self.languages:
             self.lang[x] = gettext.translation("economy", localedir="locale", languages=[x])
 
+    async def _get_text(self, ctx):
+        lang = await self.bot.get_language(ctx)
+        if lang:
+            if lang in self.languages:
+                return self.lang[lang].gettext
+            else:
+                return gettext.gettext
+        else:
+            return gettext.gettext
     def _required_exp(self, level: int):
         if level < 0:
             return 0
@@ -103,13 +114,6 @@ class economy:
             return True
         else:
             return False
-
-    async def _get_text(self, ctx):
-        lang = await self.bot.get_language(ctx)
-        if lang:
-            return self.lang[lang].gettext
-        else:
-            return gettext.gettext
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
