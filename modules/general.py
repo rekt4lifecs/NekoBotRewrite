@@ -160,27 +160,18 @@ class General:
             return await ctx.send("Failed to get data, %s" % e)
 
     @commands.command()
-    @commands.cooldown(1, 3, commands.BucketType.user)
-    async def setlang(self, ctx, lang:str=None):
-        """Change the bot language for you."""
-        if lang is None:
-            em = discord.Embed(color=0xDEADBF, title="Change Language.",
-                               description="Usage: `n!setlang <language>`\n"
-                                           "Example: `n!setlank english`\n"
-                                           "\n"
-                                           "List of current languages:\n"
-                                           "`english`,\n"
-                                           "`weeb`,\n"
-                                           "`tsundere` - computerfreaker#4054\n"
-                                           "`polish` - YebakazLLE#7118\n"
-                                           "`spanish` - ΛTLΛS Dinoseto & Luketten\n"
-                                           "`french` - ShiroNeko#7379 & Anderson")
-            return await ctx.send(embed=em)
-        if lang.lower() in languages:
-            await self.bot.redis.set(f"{ctx.message.author.id}-lang", lang.lower())
-            await ctx.send(f"Set language to {lang.title()}!")
+    @commands.cooldown(1, 4, commands.BucketType.user)
+    async def setlang(self, ctx, language: str):
+        """Change the bots language"""
+        languages = ["french", "polish", "spanish", "tsundere", "weeb", "english"]
+        if not language.lower() in languages:
+            return await ctx.send("That's not a valid language you baka, my languages:\n%s"
+                                  % (", ".join(["`%s`" % l for l in languages]),))
+        if language.lower() == "english":
+            await self.bot.redis.delete("%s-lang" % ctx.author.id)
         else:
-            await ctx.send("Invalid language.")
+            await self.bot.redis.set("%s-lang" % ctx.author.id, language.lower())
+        await ctx.send("Changed language to %s" % language.lower().title())
 
     @commands.command()
     async def lmgtfy(self, ctx, *, search_terms: str):
