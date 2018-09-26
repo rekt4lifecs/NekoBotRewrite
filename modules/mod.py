@@ -9,7 +9,7 @@ import string
 import time
 import config
 import aiohttp
-import re, ujson, inspect, datetime, collections
+import re, gettext, inspect, datetime, collections
 import logging
 import rethinkdb as r
 
@@ -39,17 +39,6 @@ async def run_cmd(cmd: str) -> str:
     results = await process.communicate()
     return "".join(x.decode("utf-8") for x in results)
 
-# Languages
-languages = ["english", "weeb", "tsundere", "polish", "spanish", "french"]
-lang = {}
-
-for l in languages:
-    with open("lang/%s.json" % l, encoding="utf-8") as f:
-        lang[l] = ujson.load(f)
-
-def getlang(la:str):
-    return lang.get(la, None)
-
 class Moderation:
     """Moderation Tools"""
 
@@ -60,6 +49,16 @@ class Moderation:
         # The following is for the new repl
         self.repl_sessions = {}
         self.repl_embeds = {}
+        self.lang = {}
+        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
+            self.lang[x] = gettext.translation("mod", localedir="locale", languages=[x])
+
+    async def _get_text(self, ctx):
+        lang = await self.bot.get_language(ctx)
+        if lang:
+            return self.lang[lang].gettext
+        else:
+            return gettext.gettext
 
     def cleanup_code(self, content):
         """Automatically removes code blocks from the code."""
@@ -120,15 +119,11 @@ class Moderation:
     @checks.is_admin()
     async def dehoist(self, ctx):
         """Dehoister"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
         users_dehoisted = []
         users_failed = []
         starttime = int(time.time())
-        await ctx.send(getlang(lang)["mod"]["dehoist"]["start"])
+        await ctx.send(_("Starting dehoist..."))
         for user in ctx.message.guild.members:
             try:
                 if not user.display_name[0] in list(str(string.ascii_letters)):
@@ -138,10 +133,9 @@ class Moderation:
                 users_failed.append(user.id)
                 pass
         hastepaste = await hastebin("\n".join(users_dehoisted))
-        await ctx.send(getlang(lang)["mod"]["dehoist"]["end"].format(len(users_dehoisted),
-                                                                     int(time.time() - starttime),
-                                                                     len(users_failed),
-                                                                     hastepaste))
+        await ctx.send(_("%s users dehoisted in %s,\n"
+                         "%s users failed to dehoist,\n"
+                         "Users Dehoisted: %s") % (len(users_dehoisted), int(time.time() - starttime), len(users_failed), hastepaste))
 
     @commands.command()
     @commands.cooldown(1, 60, commands.BucketType.user)
@@ -152,7 +146,8 @@ class Moderation:
         users_undehoisted = []
         users_failed = []
         starttime = int(time.time())
-        await ctx.send("Starting undehoist...")
+        _ = await self._get_text(ctx)
+        await ctx.send(_("Starting undehoist..."))
         for user in ctx.guild.members:
             try:
                 if user.display_name == "Hoister":
@@ -162,38 +157,37 @@ class Moderation:
                 users_failed.append(user.id)
                 pass
         hastepaste = await hastebin("\n".join(users_undehoisted))
-        await ctx.send(f"{len(users_undehoisted)} users undehoisted in {int(time.time() - starttime)}s, {len(users_failed)} failed. {hastepaste}")
+        await ctx.send(_("%s users undehoisted in %ss,\n"
+                         "%s failed,\n"
+                         "%s") % len(users_undehoisted), int(time.time() - starttime), len(users_failed), hastepaste)
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(5, 10, commands.BucketType.user)
     @checks.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: ActionReason = None):
         """Kicks a member from the server."""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
         try:
             if reason is None:
                 reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
             await member.kick(reason=reason)
-            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=getlang(lang)["mod"]["kicked"].format(member)))
+            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=_("%s has been kicked") % member.mention))
         except:
-            await ctx.send(getlang(lang)["mod"]["permission_error"])
+            await ctx.send(_("I couldn't do that action, either I dont have permissions or my role is too low."))
 
     @commands.command()
     @commands.guild_only()
     @checks.has_permissions(ban_members=True)
     async def hackban(self, ctx, member_id:int):
         """Bans a user from their ID"""
-
+        _ = await self._get_text(ctx)
         try:
             await self.bot.http.ban(member_id, ctx.guild.id)
         except discord.NotFound:
-            return await ctx.send("That user was not found.")
+            return await ctx.send(_("That user was not found."))
         except discord.Forbidden:
-            return await ctx.send("I couldn't ban that user.")
+            return await ctx.send(_("I couldn't ban that user."))
 
         await ctx.send('\N{OK HAND SIGN}')
 
@@ -202,19 +196,15 @@ class Moderation:
     @checks.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason: ActionReason = None):
         """Bans a member from the server."""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
         try:
             if reason is None:
                 reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
             await ctx.guild.ban(member, reason=reason)
-            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=getlang(lang)["mod"]["banned"].format(member)))
+            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=_("%s has been banned") % member.mention))
         except:
-            await ctx.send(getlang(lang)["mod"]["permission_error"])
+            await ctx.send(_("I couldn't do that action, either I dont have permissions or my role is too low."))
 
     @commands.command()
     @commands.guild_only()
@@ -222,75 +212,56 @@ class Moderation:
     async def softban(self, ctx, user:discord.Member):
         """Softban a user, bans a user to delete all their messages and unbans after."""
 
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
 
         try:
             await ctx.guild.ban(user, reason=f"Softbanned by {ctx.author.name}", delete_message_days=7)
             await ctx.guild.unban(user)
-            await ctx.send("I have successfully softbanned that user.")
+            await ctx.send(_("I have successfully softbanned that user."))
         except:
-            await ctx.send(getlang(lang)["mod"]["permission_error"])
+            await ctx.send(_("I couldn't do that action, either I dont have permissions or my role is too low."))
 
     @commands.command()
     @commands.guild_only()
     @checks.has_permissions(ban_members=True)
     async def massban(self, ctx, reason: ActionReason, *members: MemberID):
         """Ban multiple people at once."""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
         try:
             for member_id in members:
                 await ctx.guild.ban(discord.Object(id=member_id), reason=reason)
 
             await ctx.send('\N{OK HAND SIGN}')
         except:
-            await ctx.send(getlang(lang)["mod"]["permission_error"])
+            await ctx.send(_("I couldn't do that action, either I dont have permissions or my role is too low."))
 
     @commands.command()
     @commands.guild_only()
     @checks.has_permissions(ban_members=True)
     async def unban(self, ctx, member: BannedMember, *, reason: ActionReason = None):
         """Unbans a member from the server."""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
         if reason is None:
             reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
         await ctx.guild.unban(member.user, reason=reason)
-        if member.reason:
-            await ctx.send(getlang(lang)["mod"]["unbanned_reason"].format(member))
-        else:
-            await ctx.send(getlang(lang)["mod"]["unbanned"].format(member))
+        await ctx.send(_("I have unbanned %s") % member.name)
 
     @commands.command()
     @commands.guild_only()
     @checks.admin_or_permissions(manage_nicknames=True)
     async def rename(self, ctx, user : discord.Member, *, nickname =""):
         """Rename a user"""
-        lang = await self.bot.redis.get(f"{ctx.message.author.id}-lang")
-        if lang:
-            lang = lang.decode('utf8')
-        else:
-            lang = "english"
+        _ = await self._get_text(ctx)
         nickname = nickname.strip()
         if nickname == "":
             nickname = None
         try:
             await user.edit(nick=nickname)
-            await ctx.send(embed=discord.Embed(color=0x87ff8f, description=getlang(lang)["mod"]["renamed"].format(user)))
+            await ctx.send(_("Renamed %s") % user)
         except:
             e = discord.Embed(color=0xff5630, title="⚠ Error",
-                              description=getlang(lang)["mod"]["permission_error"])
+                              description=_("I couldn't do that action, either I dont have permissions or my role is too low."))
             await ctx.send(embed=e)
 
     @commands.command()
@@ -299,13 +270,14 @@ class Moderation:
         """Mutes a user from the channel."""
 
         reason = f'Muted by {ctx.author} (ID: {ctx.author.id})'
+        _ = await self._get_text(ctx)
 
         try:
             await ctx.channel.set_permissions(member, send_messages=False, reason=reason)
         except:
-            await ctx.send("Failed to mute.")
+            await ctx.send(_("Failed to mute."))
         else:
-            await ctx.send('Muted user.')
+            await ctx.send(_("Muted user."))
 
     @commands.command()
     @commands.has_permissions(manage_roles=True)
@@ -313,13 +285,14 @@ class Moderation:
         """Unmutes a user from the channel."""
 
         reason = f'Unmuted by {ctx.author} (ID: {ctx.author.id})'
+        _ = await self._get_text(ctx)
 
         try:
             await ctx.channel.set_permissions(member, send_messages=True, reason=reason)
         except:
-            await ctx.send("Failed to unmute.")
+            await ctx.send(_("Failed to unmute."))
         else:
-            await ctx.send('Unmuted user.')
+            await ctx.send(_("Unmuted user."))
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -416,11 +389,13 @@ class Moderation:
         messages = [ctx.message]
         answers = []
 
+        _ = await self._get_text(ctx)
+
         def check(m):
             return m.author == ctx.author and m.channel == ctx.channel and len(m.content) <= 100
 
         for i in range(20):
-            messages.append(await ctx.send(f'Say poll option or {ctx.prefix}cancel to publish poll.'))
+            messages.append(await ctx.send(_("Say poll option or %scancel to publish poll.") % ctx.prefix))
 
             try:
                 entry = await self.bot.wait_for('message', check=check, timeout=60.0)
@@ -429,7 +404,7 @@ class Moderation:
 
             messages.append(entry)
 
-            if entry.clean_content.startswith(f'{ctx.prefix}cancel'):
+            if entry.clean_content.startswith(_("%scancel") % ctx.prefix):
                 break
 
             answers.append((to_emoji(i), entry.clean_content))
@@ -540,15 +515,13 @@ class Moderation:
     @checks.has_permissions(manage_messages=True)
     async def purge(self, ctx):
         """Removes messages that meet a criteria."""
-        
-        if ctx.message.author.id == 137487801498337280:
-            await ctx.send("😠")
-            return
+
+        _ = await self._get_text(ctx)
 
         if ctx.invoked_subcommand is None:
             embed = discord.Embed(color=0xDEADBF,
                                   title="Purge",
-                                  description="**purge embeds** - Removes messages that have embeds in them.\n"
+                                  description=_("**purge embeds** - Removes messages that have embeds in them.\n"
                                               "**purge files** - Removes messages that have attachments in them.\n"
                                               "**purge all** - Removes all messages.\n"
                                               "**purge user** - Removes all messages by the member.\n"
@@ -556,12 +529,13 @@ class Moderation:
                                               "**purge bot** - Removes a bot user's messages and messages with their optional prefix.\n"
                                               "**purge emoji** - Removes all messages containing custom emoji.\n"
                                               "**purge reactions** - Removes all reactions from messages that have them.\n"
-                                              "**purge custom** - A more advanced purge command.")
+                                              "**purge custom** - A more advanced purge command."))
             await ctx.send(embed=embed)
 
     async def do_removal(self, ctx, limit, predicate, *, before=None, after=None):
+        _ = await self._get_text(ctx)
         if limit > 2000:
-            return await ctx.send(f'Too many messages to search given ({limit}/2000)')
+            return await ctx.send(_("Too many messages to search given (%s/2000)") % limit)
 
         if before is None:
             before = ctx.message
@@ -574,9 +548,9 @@ class Moderation:
         try:
             deleted = await ctx.channel.purge(limit=limit, before=before, after=after, check=predicate)
         except discord.Forbidden:
-            return await ctx.send('I do not have permissions to delete messages.')
+            return await ctx.send(_("I do not have permissions to delete messages."))
         except discord.HTTPException as e:
-            return await ctx.send(f'Error: {e} (try a smaller search?)')
+            return await ctx.send(_("Error: %s (try a smaller search?)") % e)
 
         try:
             await ctx.message.delete()
@@ -594,7 +568,7 @@ class Moderation:
         to_send = '\n'.join(messages)
 
         if len(to_send) > 2000:
-            e = discord.Embed(color=0x87ff8f, description=f'Successfully removed {deleted} messages.')
+            e = discord.Embed(color=0x87ff8f, description=_("Successfully removed %s messages.") % deleted)
             await ctx.send(embed=e, delete_after=4)
         else:
             await ctx.send(to_send, delete_after=4)
@@ -622,8 +596,10 @@ class Moderation:
     @purge.command()
     async def contains(self, ctx, *, substr: str):
         """Removes all messages containing a substring."""
+
         if len(substr) < 3:
-            await ctx.send('The substring length must be at least 3 characters.')
+            _ = await self._get_text(ctx)
+            await ctx.send(_("The substring length must be at least 3 characters."))
         else:
             await self.do_removal(ctx, 100, lambda e: substr in e.content)
 
@@ -648,9 +624,10 @@ class Moderation:
     @purge.command(name='reactions')
     async def _reactions(self, ctx, search=100):
         """Removes all reactions from messages that have them."""
+        _ = await self._get_text(ctx)
 
         if search > 2000:
-            return await ctx.send(f'Too many messages to search for ({search}/2000)')
+            return await ctx.send(_("Too many messages to search for (%s/2000)") % search)
 
         total_reactions = 0
         async for message in ctx.history(limit=search, before=ctx.message):
@@ -659,7 +636,7 @@ class Moderation:
                 await message.clear_reactions()
 
         await ctx.send(embed=discord.Embed(color=0x87ff8f,
-                                           description=f'Successfully removed {total_reactions} reactions.'))
+                                           description=_("Successfully removed %s reactions.") % total_reactions))
 
     @purge.command()
     async def custom(self, ctx, *, args: str):
@@ -1018,11 +995,12 @@ class Moderation:
             n!autorole @Members
             n!autorole "All Cuties"
         """
-        guild = ctx.message.guild
+        guild = ctx.guild
+        _ = await self._get_text(ctx)
         if not role:
             if await r.table("autorole").get(str(guild.id)).run(self.bot.r_conn):
                 await r.table("autorole").get(str(guild.id)).delete().run(self.bot.r_conn)
-                return await ctx.send("Reset Autorole.")
+                return await ctx.send(_("Reset Autorole."))
             else:
                 return await self.bot.send_cmd_help(ctx)
         else:
@@ -1032,7 +1010,7 @@ class Moderation:
             }
             await r.table("autorole").get(str(guild.id)).delete().run(self.bot.r_conn)
             await r.table("autorole").insert(data).run(self.bot.r_conn)
-            return await ctx.send(f"Updated Autorole to {role.name}")
+            return await ctx.send(_("Updated Autorole to %s") % role.name)
 
     async def on_guild_remove(self, guild):
         if not guild.large:
