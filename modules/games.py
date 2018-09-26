@@ -9,13 +9,18 @@ class Games:
     def __init__(self, bot):
         self.bot = bot
         self.lang = {}
-        for x in ["french", "polish", "spanish", "tsundere", "weeb"]:
+        # self.languages = ["french", "polish", "spanish", "tsundere", "weeb"]
+        self.languages = ["tsundere", "weeb"]
+        for x in self.languages:
             self.lang[x] = gettext.translation("games", localedir="locale", languages=[x])
 
     async def _get_text(self, ctx):
         lang = await self.bot.get_language(ctx)
         if lang:
-            return self.lang[lang].gettext
+            if lang in self.languages:
+                return self.lang[lang].gettext
+            else:
+                return gettext.gettext
         else:
             return gettext.gettext
 

@@ -1,7 +1,6 @@
 from discord.ext import commands
 import discord
 import aiohttp
-from PIL import Image
 
 import config
 from io import BytesIO
