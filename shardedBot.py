@@ -125,6 +125,17 @@ class NekoBot(commands.AutoShardedBot):
                 except:
                     logger.warning("Failed to load {}.".format(name))
                     traceback.print_exc()
+
+    async def get_language(self, ctx):
+        data = await self.redis.get("%s-lang" % ctx.author.id)
+        if not data:
+            return None
+        dec = data.decode("utf8")
+        if dec == "english":
+            await self.redis.delete("%s-lang" % ctx.author.id)
+            return None
+        return dec
+
     async def on_command_error(self, context, exception):
         if isinstance(exception, commands.CommandNotFound):
             return
