@@ -632,7 +632,7 @@ class economy:
                 await self.__post_to_hook("Blackjack Won", ctx.author, amount)
                 em.add_field(name=_("Your Cards (%s)") % author_total, value=author_value, inline=True)
                 em.add_field(name=_("My Cards (%s)") % bot_total, value=bot_value, inline=True)
-                await self.__update_balance(ctx.author.id, author_balance + int(amount * .5))
+                await self.__update_balance(ctx.author.id, author_balance + int(amount * .75))
             else:
                 em.description = _("I beat you >:3")
                 await self.__post_to_hook("Blackjack Loss", ctx.author, amount)
