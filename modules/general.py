@@ -471,11 +471,14 @@ class General:
         _ = await self._get_text(ctx)
         if user is None:
             user = ctx.message.author
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(user.avatar_url_as(format='png')) as r:
-                res = await r.read()
-        color_thief = ColorThief(BytesIO(res))
-        hexx = int(triplet(color_thief.get_color()), 16)
+        try:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(user.avatar_url_as(format='png')) as r:
+                    res = await r.read()
+            color_thief = ColorThief(BytesIO(res))
+            hexx = int(triplet(color_thief.get_color()), 16)
+        except:
+            hexx = 0xdeadbf
         em = discord.Embed(color=hexx, title=_("%s's Avatar") % user.name)
         if type is None or type not in ['jpeg', 'jpg', 'png']:
             await ctx.send(embed=em.set_image(url=user.avatar_url))
