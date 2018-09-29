@@ -22,6 +22,14 @@ class Reactions:
         em = discord.Embed(color=color).set_image(url=url)
         await ctx.send(embed=em)
 
+    @commands.command(aliases=["handholding"])
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def handhold(self, ctx, user: discord.Member):
+        """Handhold >///<"""
+        color, url = await self.weeb.handholding()
+        em = discord.Embed(color=color, title="*%s holds %s's hand* >///<" % (ctx.author.name, user.name,))
+        await ctx.send(embed=em.set_image(url=url))
+
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def bang(self, ctx, user: discord.Member):
