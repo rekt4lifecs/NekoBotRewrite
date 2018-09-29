@@ -143,30 +143,6 @@ class Moderation:
                          "Users Dehoisted: %s") % (len(users_dehoisted), int(time.time() - starttime), len(users_failed), hastepaste))
 
     @commands.command()
-    @commands.cooldown(1, 60, commands.BucketType.user)
-    @commands.guild_only()
-    @checks.is_admin()
-    async def undehoist(self, ctx):
-        """Undehoist"""
-        users_undehoisted = []
-        users_failed = []
-        starttime = int(time.time())
-        _ = await self._get_text(ctx)
-        await ctx.send(_("Starting undehoist..."))
-        for user in ctx.guild.members:
-            try:
-                if user.display_name == "Hoister":
-                    await user.edit(nick=None)
-                    users_undehoisted.append(f"{user.name}-{user.id}")
-            except:
-                users_failed.append(user.id)
-                pass
-        hastepaste = await hastebin("\n".join(users_undehoisted))
-        await ctx.send(_("%s users undehoisted in %ss,\n"
-                         "%s failed,\n"
-                         "%s") % len(users_undehoisted), int(time.time() - starttime), len(users_failed), hastepaste)
-
-    @commands.command()
     @commands.guild_only()
     @commands.cooldown(5, 10, commands.BucketType.user)
     @checks.has_permissions(kick_members=True)
@@ -249,8 +225,8 @@ class Moderation:
         if reason is None:
             reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
-        await ctx.guild.unban(member.user, reason=reason)
-        await ctx.send(_("I have unbanned %s") % member.name)
+        await ctx.guild.unban(member, reason=reason)
+        await ctx.send(_("I have unbanned %s") % member)
 
     @commands.command()
     @commands.guild_only()
@@ -385,6 +361,15 @@ class Moderation:
                 await ctx.send(f'`{command}`: {pa}')
             else:
                 await ctx.send(f"`{command}`: ```{result}```\n")
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def screenshot(self, ctx, *, url: str):
+        """Get screenshots of a webpage"""
+        with ctx.typing():
+            await run_cmd("python3.6 screenshot.py %s" % url)
+            await ctx.send(file=discord.File("ss.png", filename="screenshot.png"))
+            os.remove("ss.png")
 
     @commands.command()
     @commands.guild_only()
