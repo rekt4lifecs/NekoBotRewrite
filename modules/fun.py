@@ -46,7 +46,10 @@ class Fun:
 
     async def __get_image(self, ctx, user=None):
         if user:
-            return user.avatar_url_as(format="png")
+            if user.is_avatar_animated():
+                return user.avatar_url_as(format="gif")
+            else:
+                return user.avatar_url_as(format="png")
 
         await ctx.trigger_typing()
 
@@ -73,6 +76,21 @@ class Fun:
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=data[key])
         return em
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def animeface(self, ctx, user: discord.Member = None):
+        """Detect anime faces in an image"""
+        img = await self.__get_image(ctx, user)
+        if not isinstance(img, str):
+            return img
+
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=animeface&image=%s" % img) as r:
+                res = await r.json()
+
+        await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
