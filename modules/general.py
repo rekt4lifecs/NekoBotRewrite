@@ -170,7 +170,7 @@ class General:
     async def setlang(self, ctx, language: str):
         """Change the bots language"""
         # languages = ["french", "polish", "spanish", "tsundere", "weeb", "english"]
-        languages = ["weeb", "english", "tsundere", "chinese"]
+        languages = ["weeb", "english", "tsundere"]
         if not language.lower() in languages:
             return await ctx.send("That's not a valid language you baka, my languages:\n%s"
                                   % (", ".join(["`%s`" % l for l in languages]),))
@@ -924,7 +924,7 @@ class General:
         await ctx.send(_("Deleted your prefix and reset it back to the default `n!`"))
 
     @commands.command()
-    @commands.cooldown(4, 10, commands.BucketType.guild)
+    @commands.cooldown(2, 10, commands.BucketType.guild)
     async def help(self, ctx, command:str=None):
         """Help!"""
         if command:
