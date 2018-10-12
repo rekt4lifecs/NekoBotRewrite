@@ -51,7 +51,7 @@ class Moderation:
         self.repl_embeds = {}
         self.lang = {}
         # self.languages = ["french", "polish", "spanish", "tsundere", "weeb"]
-        self.languages = ["tsundere", "weeb"]
+        self.languages = ["tsundere", "weeb", "chinese"]
         for x in self.languages:
             self.lang[x] = gettext.translation("mod", localedir="locale", languages=[x])
 

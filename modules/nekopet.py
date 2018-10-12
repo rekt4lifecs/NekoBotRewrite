@@ -13,7 +13,7 @@ class NekoPet:
         self.bot = bot
         self.lang = {}
         # self.languages = ["french", "polish", "spanish", "tsundere", "weeb"]
-        self.languages = ["tsundere", "weeb"]
+        self.languages = ["tsundere", "weeb", "chinese"]
         for x in self.languages:
             self.lang[x] = gettext.translation("nekopet", localedir="locale", languages=[x])
 

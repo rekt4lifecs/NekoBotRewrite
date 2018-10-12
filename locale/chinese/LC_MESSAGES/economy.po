@@ -1,0 +1,266 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2018-09-27 04:00+AUS Eastern Standard Time\n"
+"PO-Revision-Date: 2018-09-27 16:23+0800\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 2.1.1\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: zh_TW\n"
+
+#: modules/eco.py:124
+msgid "You already have an account."
+msgstr "你以擁有一個帳戶。"
+
+#: modules/eco.py:135
+msgid "Made an account!"
+msgstr "創立一個帳戶！"
+
+#: modules/eco.py:150
+msgid "Balance: **$%s**"
+msgstr "餘額: **$%s**"
+
+#: modules/eco.py:152
+msgid "Balance: **$0**"
+msgstr "餘額: **$0**"
+
+#: modules/eco.py:234
+msgid "You don't have a bank account. Make one with `register`"
+msgstr "你沒有銀行帳戶。使用`register`來創建一個帳戶"
+
+#: modules/eco.py:240 modules/eco.py:338 modules/eco.py:405 modules/eco.py:442
+#: modules/eco.py:501
+msgid "This account is frozen"
+msgstr "此帳戶已被凍結"
+
+#: modules/eco.py:248
+msgid "You have `%s` until your next daily."
+msgstr "你還需要等待`%s` 來領取每日獎金。"
+
+#: modules/eco.py:252
+msgid "Daily Voter Bonus"
+msgstr "每日投票額外獎勵"
+
+#: modules/eco.py:255
+msgid "You have received **12500** weekend bonus credits!"
+msgstr "已將 **12500** 週末獎金放入你的帳戶！"
+
+#: modules/eco.py:260
+msgid "You have received **7500** credits!"
+msgstr "已將 **7500** 放入你的帳戶！"
+
+#: modules/eco.py:267
+msgid "Daily Bonus"
+msgstr "領取每日獎金"
+
+#: modules/eco.py:268
+msgid "You have received **2500** credits!"
+msgstr "已將 **2500** 放入你的帳戶！"
+
+#: modules/eco.py:269
+msgid "Voting will give you 7500 ð"
+msgstr "投票將會給予你額外7500獎金"
+
+#: modules/eco.py:284
+msgid "You can't give yourself rep"
+msgstr "你無法更換你自己的職位"
+
+#: modules/eco.py:286
+msgid "You can't rep bots"
+msgstr "你無法更換機器人的職位"
+
+#: modules/eco.py:291
+msgid "**Your account is too new to give rep.**"
+msgstr "**無法給予新的帳號職位**"
+
+#: modules/eco.py:302
+msgid "**%s has given %s 1 reputation point!**"
+msgstr "**%s 給予 %s 1 聲望點！**"
+
+#: modules/eco.py:310
+msgid "**%s, you can give more reputation in `%s`**"
+msgstr "**%s，你可以在 `%s`中獲得更多聲望**"
+
+#: modules/eco.py:320
+msgid "Your description is too long."
+msgstr "你的自我介紹太長了。"
+
+#: modules/eco.py:324
+msgid "Updated Description!"
+msgstr "已更新你的自我介紹！"
+
+#: modules/eco.py:335
+msgid "You don't have an account, you can make one with `register`"
+msgstr "你沒有帳戶，你可以使用`register`來創立一個帳戶"
+
+#: modules/eco.py:341
+msgid "Your amount must be higher than 0"
+msgstr "你的金額必須大於零"
+
+#: modules/eco.py:343
+msgid "You can't bet past 100,000"
+msgstr "你不能下注超過十萬"
+
+#: modules/eco.py:348
+msgid "You don't have that much to spend"
+msgstr "你的戶頭沒有足夠的金額"
+
+#: modules/eco.py:350
+msgid "Flipping..."
+msgstr "翻轉..."
+
+#: modules/eco.py:359
+msgid "You Won!"
+msgstr "你贏了！"
+
+#: modules/eco.py:360
+msgid "You won `%s`!"
+msgstr "你贏得了 `%s`！"
+
+#: modules/eco.py:364
+msgid "You Lost"
+msgstr "你輸了"
+
+#: modules/eco.py:365
+msgid "You lost `%s`"
+msgstr "你輸給了`%s`"
+
+#: modules/eco.py:400
+msgid "You don't have an account, you can create one with `register`"
+msgstr "你沒有帳戶，你可以使用`register`來創立一個帳戶"
+
+#: modules/eco.py:402
+msgid "`%s` doesn't have an account, they can create one with `register`"
+msgstr "`%s` 沒有帳戶，你可以使用`register`來創立一個帳戶"
+
+#: modules/eco.py:407
+msgid "The user you are sending to has a frozen account."
+msgstr "此用戶將會被凍結帳戶。"
+
+#: modules/eco.py:410
+msgid "The amount must be higher than 10"
+msgstr "每次賭注金額必須超過10"
+
+#: modules/eco.py:412
+msgid "You can't send more than $10 million at a time."
+msgstr "你不能在一次下注中超過十萬。"
+
+#: modules/eco.py:414
+msgid "You can't send bots money"
+msgstr "你不能給予機器人金錢"
+
+#: modules/eco.py:416
+msgid "You can't send yourself money"
+msgstr "你不能給予你自己金錢"
+
+#: modules/eco.py:422
+msgid "You don't have that much to spend."
+msgstr "你的戶頭沒有足夠的金額。"
+
+#: modules/eco.py:428
+msgid "Successfully sent %s $%s"
+msgstr "成功轉賬%s $%s"
+
+#: modules/eco.py:439 modules/eco.py:498
+msgid "You don't have a bank account..."
+msgstr "你沒有銀行帳戶..."
+
+#: modules/eco.py:447 modules/eco.py:506
+msgid "You can't bet that low..."
+msgstr "你不能下這麼小的賭注..."
+
+#: modules/eco.py:449 modules/eco.py:509
+msgid "You don't have that much to bet..."
+msgstr "你沒有這麼多金錢..."
+
+#: modules/eco.py:451
+msgid "You can't bet past 75k"
+msgstr "你不能下注超過75000"
+
+#: modules/eco.py:455
+msgid "Invalid color, available colors: `red`, `black`, `green`"
+msgstr "無效的顏色，有效的顏色：`red`,、`black`, `green`"
+
+#: modules/eco.py:471
+msgid "It landed on `%s`, you lost :c"
+msgstr "它落在了 `%s`你輸了 :c"
+
+#: modules/eco.py:479
+msgid "It landed on `%s` and you won!"
+msgstr "它落在了 `%s`你贏了！"
+
+#: modules/eco.py:512
+msgid "You can't bet past 50k"
+msgstr "你不能下注超過50000"
+
+#: modules/eco.py:581
+msgid "Blackjack Win"
+msgstr "贏得二十一點"
+
+#: modules/eco.py:582
+msgid "**%s** (%s) has won %s"
+msgstr "**%s** (%s) 贏得 %s"
+
+#: modules/eco.py:585
+msgid "Blackjack Lose"
+msgstr "輸了二十一點"
+
+#: modules/eco.py:586
+msgid "**%s** (%s) has lost %s"
+msgstr "**%s** (%s) 輸了 %s"
+
+#: modules/eco.py:589 modules/eco.py:619 modules/eco.py:650 modules/eco.py:671
+#: modules/eco.py:692 modules/eco.py:718 modules/eco.py:740 modules/eco.py:761
+#: modules/eco.py:790 modules/eco.py:813
+msgid "Blackjack"
+msgstr "二十一點"
+
+#: modules/eco.py:590 modules/eco.py:672 modules/eco.py:741
+msgid "Type `hit` or `stay`."
+msgstr "輸入`hit` 或 `stay`。"
+
+#: modules/eco.py:596 modules/eco.py:629 modules/eco.py:635 modules/eco.py:665
+#: modules/eco.py:673 modules/eco.py:697 modules/eco.py:703 modules/eco.py:734
+#: modules/eco.py:742 modules/eco.py:766 modules/eco.py:772 modules/eco.py:807
+#: modules/eco.py:823
+msgid "Your Cards (%s)"
+msgstr "你的手牌 (%s)"
+
+#: modules/eco.py:597 modules/eco.py:674 modules/eco.py:743
+msgid "My Cards (?)"
+msgstr "我的手牌 (?)"
+
+#: modules/eco.py:627 modules/eco.py:695 modules/eco.py:764
+msgid "You beat me!"
+msgstr "你贏我了！"
+
+#: modules/eco.py:630 modules/eco.py:636 modules/eco.py:666 modules/eco.py:698
+#: modules/eco.py:704 modules/eco.py:735 modules/eco.py:767 modules/eco.py:773
+#: modules/eco.py:808 modules/eco.py:824
+msgid "My Cards (%s)"
+msgstr "我的手牌 (%s)"
+
+#: modules/eco.py:633 modules/eco.py:701 modules/eco.py:770 modules/eco.py:820
+msgid "I beat you >:3"
+msgstr "我贏你囉！ >:3"
+
+#: modules/eco.py:653 modules/eco.py:721 modules/eco.py:793
+msgid "You went over 21 and I won >:3"
+msgstr "你超過了21點所以這局我贏了！>:3"
+
+#: modules/eco.py:657 modules/eco.py:725 modules/eco.py:797
+msgid "I went over 21 and you won ;w;"
+msgstr "我超過了21點所以這局你贏了 ;w;"
+
+#: modules/eco.py:816
+msgid "You beat me ;w;"
+msgstr "你贏了 ;w;"

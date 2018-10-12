@@ -1,0 +1,122 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2018-09-27 03:13+AUS Eastern Standard Time\n"
+"PO-Revision-Date: 2018-09-27 16:24+0800\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 2.1.1\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: zh_TW\n"
+
+#: modules/cardgame.py:119
+msgid ""
+"A loli roleplaying card game ofc!\n"
+"\n"
+"**Commands**\n"
+"**n!card daily** - Get your daily cards\n"
+"**n!card display** - Display a card of yours\n"
+"**n!card list** - Lists your cards\n"
+"**n!card sell** - Sell a card\n"
+"**n!card transfer** - Transfer Cards"
+msgstr ""
+"蘿莉角色扮演卡牌遊戲!\n"
+"\n"
+"**Commands**\n"
+"**n!card daily** - 領取你的每日卡片額度\n"
+"**n!card display** - 顯示你的卡片\n"
+"**n!card list** - 列出你的所有卡片\n"
+"**n!card sell** - 賣出一張你所擁有的手牌\n"
+"**n!card transfer** - 交換一張卡牌"
+
+#: modules/cardgame.py:133
+msgid "You can't send yourself cards"
+msgstr "你不能給自己發牌"
+
+#: modules/cardgame.py:135
+msgid "You can't send bots cards."
+msgstr "你不能發給機器人卡牌。"
+
+#: modules/cardgame.py:140
+msgid "Not a valid number"
+msgstr "無效的動作或是項目"
+
+#: modules/cardgame.py:143
+msgid "Not a valid card number."
+msgstr "無效的卡牌數量。"
+
+#: modules/cardgame.py:154
+msgid "%s has no slots left"
+msgstr "沒有剩餘背包空間放置卡牌"
+
+#: modules/cardgame.py:159
+msgid "Not a valid card."
+msgstr "無效的卡牌。"
+
+#: modules/cardgame.py:169
+msgid "Transferred card to %s!"
+msgstr "已轉移卡片至!"
+
+#: modules/cardgame.py:297
+msgid "Wait another %sh %sm before using daily again..."
+msgstr "請等待 %sh %sm 再次領取每日卡牌額度。"
+
+#: modules/cardgame.py:300
+msgid "All of your slots are full ;w;"
+msgstr "你沒有任何背包空間存放新的卡牌 ;w;"
+
+#: modules/cardgame.py:316
+msgid "Given character **%s!**"
+msgstr "給予一個角色 **%s!**"
+
+#: modules/cardgame.py:397 modules/cardgame.py:476
+msgid "**Out of card range.**"
+msgstr "**超過卡片有效範圍**"
+
+#: modules/cardgame.py:404
+msgid ""
+"â | **You don't have a bank account to sell your cards, make one with `n!"
+"register`**"
+msgstr ""
+"â | **你沒有建立一個銀行帳戶來出售你的卡牌，請使用 `n!register`指令來進行註"
+"冊**"
+
+#: modules/cardgame.py:409
+msgid "No cards in this slot..."
+msgstr "此空間裡沒有任何卡片。"
+
+#: modules/cardgame.py:418
+msgid "%s, type `yes` to sell **%s** for %s"
+msgstr "%s，輸入 是 來販賣 **%s** 給 %s"
+
+#: modules/cardgame.py:426 modules/cardgame.py:428
+msgid "â | **Cancelled Transaction.**"
+msgstr "â | **已取消此筆交易**"
+
+#: modules/cardgame.py:434
+msgid "Card has already been sold"
+msgstr "卡牌已售出"
+
+#: modules/cardgame.py:440
+msgid "Sold %s for %s"
+msgstr "販賣 %s 給 %s"
+
+#: modules/cardgame.py:484
+msgid "Empty Slot..."
+msgstr "清空背包..."
+
+#: modules/cardgame.py:495
+msgid "Attack"
+msgstr "進攻"
+
+#: modules/cardgame.py:496
+msgid "Defense"
+msgstr "防禦"
