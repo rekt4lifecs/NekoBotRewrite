@@ -170,7 +170,7 @@ class General:
     async def setlang(self, ctx, language: str):
         """Change the bots language"""
         # languages = ["french", "polish", "spanish", "tsundere", "weeb", "english"]
-        languages = ["weeb", "english", "tsundere"]
+        languages = ["weeb", "english", "tsundere", "chinese"]
         if not language.lower() in languages:
             return await ctx.send("That's not a valid language you baka, my languages:\n%s"
                                   % (", ".join(["`%s`" % l for l in languages]),))
