@@ -1,0 +1,98 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2018-09-27 06:46+AUS Eastern Standard Time\n"
+"PO-Revision-Date: 2018-10-01 10:02+0800\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 2.1.1\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: zh_TW\n"
+
+#: modules/nsfw.py:75 modules/nsfw.py:97 modules/nsfw.py:126
+#: modules/nsfw.py:139 modules/nsfw.py:228 modules/nsfw.py:254
+#: modules/nsfw.py:270 modules/nsfw.py:284 modules/nsfw.py:298
+#: modules/nsfw.py:315
+msgid "This is not a NSFW Channel <:deadStare:417437129501835279>"
+msgstr "此頻道不是 NSFW 頻道 <:deadStare:417437129501835279>"
+
+#: modules/nsfw.py:85 modules/nsfw.py:337
+msgid ""
+"Have you voted yet <:smirkGuns:417969421252952085>\n"
+"https://discordbots.org/bot/310039170792030211/vote"
+msgstr ""
+"你還沒有完成投票 <:smirkGuns:417969421252952085>\n"
+"https://discordbots.org/bot/310039170792030211/vote"
+
+#: modules/nsfw.py:88
+msgid "Use in a NSFW Channel BTW..."
+msgstr "請在 NSFW 頻道使中這個…"
+
+#: modules/nsfw.py:150
+msgid "Loli or shota was found in this post."
+msgstr "在此文章中包含蘿莉或正太。"
+
+#: modules/nsfw.py:155
+msgid "Error"
+msgstr "錯誤"
+
+#: modules/nsfw.py:156
+msgid "Yande.re has no images for requested tags."
+msgstr "Yande.re 裡沒有找到這類圖片或標籤。"
+
+#: modules/nsfw.py:168 modules/nsfw.py:242 modules/nsfw.py:348
+#: modules/nsfw.py:403 modules/nsfw.py:429 modules/nsfw.py:440
+msgid "This is not an NSFW channel..."
+msgstr "這裡不是 NSWF 頻道..."
+
+#: modules/nsfw.py:188 modules/nsfw.py:213
+msgid "**Ratelimited, try again later.**"
+msgstr "**Ratelimited，請稍後再試。**"
+
+#: modules/nsfw.py:328
+msgid ""
+"This is not a NSFW Channel <:deadStare:417437129501835279>\n"
+"https://nekobot.xyz/hentai.png"
+msgstr ""
+"這裡不是 NSWF 頻道 <:deadStare:417437129501835279>\n"
+"https://nekobot.xyz/hentai.png"
+
+#: modules/nsfw.py:355
+msgid "Loli/Shota in search."
+msgstr "搜尋 蘿莉 / 正太。"
+
+#: modules/nsfw.py:363
+msgid ":x: No image found. Sorry :/"
+msgstr ":x： 抱歉，沒有找到圖片 :/"
+
+#: modules/nsfw.py:413
+msgid "**No images found**"
+msgstr "**查無圖片**"
+
+#: modules/nsfw.py:415
+msgid "**Children found in image.**"
+msgstr "**在圖片中找到孩子。**"
+
+#: modules/nsfw.py:420
+msgid "**Could not find anything.**"
+msgstr "**找不到任何資料**"
+
+#: modules/nsfw.py:456
+msgid "I have removed NSFW permissions from %s"
+msgstr "我已從 %s 刪除了 NSFW 權限 "
+
+#: modules/nsfw.py:459
+msgid "I have have made %s an NSFW channel for you <3"
+msgstr "我以為你創立 %s 一個 NSFW 頻道 <3"
+
+#: modules/nsfw.py:462
+msgid "I can't make that channel NSFW or don't have permissions to ;c"
+msgstr "我不能使該頻道或我在 NSFW 沒有權限 ;c"

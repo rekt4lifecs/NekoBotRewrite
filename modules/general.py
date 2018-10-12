@@ -60,7 +60,7 @@ class General:
             self.bot.games = Counter()
         self.lang = {}
         # self.languages = ["french", "polish", "spanish", "tsundere", "weeb"]
-        self.languages = ["tsundere", "weeb"]
+        self.languages = ["tsundere", "weeb", "chinese"]
         for x in self.languages:
             self.lang[x] = gettext.translation("general", localedir="locale", languages=[x])
 
@@ -170,7 +170,7 @@ class General:
     async def setlang(self, ctx, language: str):
         """Change the bots language"""
         # languages = ["french", "polish", "spanish", "tsundere", "weeb", "english"]
-        languages = ["weeb", "english", "tsundere"]
+        languages = ["weeb", "english", "tsundere", "chinese"]
         if not language.lower() in languages:
             return await ctx.send("That's not a valid language you baka, my languages:\n%s"
                                   % (", ".join(["`%s`" % l for l in languages]),))

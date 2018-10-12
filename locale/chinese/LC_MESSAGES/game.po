@@ -1,0 +1,110 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2018-09-27 04:29+AUS Eastern Standard Time\n"
+"PO-Revision-Date: 2018-09-27 16:43+0800\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 2.1.1\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: zh_TW\n"
+
+#: modules/games.py:34
+msgid "User not found."
+msgstr "找不到使用者資料。"
+
+#: modules/games.py:56
+msgid "OSU! Profile for `%s`\n"
+msgstr "OSU! 個人資料查詢 `%s`\n"
+
+#: modules/games.py:58
+msgid "Level - %s [ %s ] %s\n"
+msgstr "等級 - %s [ %s ] %s\n"
+
+#: modules/games.py:59
+msgid "Rank - %s\n"
+msgstr "排名 - %s\n"
+
+#: modules/games.py:60
+msgid "Country Rank - %s\n"
+msgstr "依據國家排名 - %s\n"
+
+#: modules/games.py:61
+msgid "Accuracy - %s\n"
+msgstr "準確 - %s\n"
+
+#: modules/games.py:62
+msgid "PP - %s\n"
+msgstr ""
+
+#: modules/games.py:63
+msgid "SS - %s (SS+ %s)\n"
+msgstr ""
+
+#: modules/games.py:64
+msgid "S  - %s (S+ %s)\n"
+msgstr ""
+
+#: modules/games.py:65
+msgid "A  - %s\n"
+msgstr ""
+
+#: modules/games.py:71
+msgid "Failed to fetch data, %s"
+msgstr "無法獲得數據， %s"
+
+#: modules/games.py:82
+msgid "Error"
+msgstr "錯誤"
+
+#: modules/games.py:82
+msgid "Invalid Region Code."
+msgstr "無效的區域代碼。"
+
+#: modules/games.py:115
+msgid "Kills"
+msgstr "擊殺"
+
+#: modules/games.py:116
+msgid "Headshots"
+msgstr "暴頭"
+
+#: modules/games.py:117
+msgid "Assists"
+msgstr "助攻"
+
+#: modules/games.py:118
+msgid "Longest Kill"
+msgstr "連續擊殺"
+
+#: modules/games.py:119
+msgid "Damage Dealt"
+msgstr "造成的傷害"
+
+#: modules/games.py:120
+msgid "Win Place"
+msgstr "勝利之地"
+
+#: modules/games.py:121
+msgid "Walk Distance"
+msgstr "移動步行距離"
+
+#: modules/games.py:122
+msgid "Heals"
+msgstr "治療量"
+
+#: modules/games.py:125
+msgid "Failed to get data, error: `%s`"
+msgstr "無法獲得數據，錯誤：`%s`"
+
+#: modules/games.py:145
+msgid "**Failed to get user**"
+msgstr "**無法獲得使用者**"
