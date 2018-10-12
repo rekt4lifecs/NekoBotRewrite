@@ -61,7 +61,8 @@ list_ = [
     "chifuyu_himeki",
     "holo",
     "dva",
-    "megumin"
+    "megumin",
+    "Halloween NekoBot" # Special Halloween Card hahayes
 ] # "Louise Francoise Le Blanc De La Valliere",
   # "Hoshimiya Kate",
 
@@ -72,7 +73,7 @@ class CardGame:
         self.bot = bot
         self.lang = {}
         # self.languages = ["french", "polish", "spanish", "tsundere", "weeb"]
-        self.languages = ["tsundere", "weeb"]
+        self.languages = ["tsundere", "weeb", "chinese"]
         for x in self.languages:
             self.lang[x] = gettext.translation("cardgame", localedir="locale", languages=[x])
 
@@ -413,7 +414,7 @@ class CardGame:
             return await ctx.send(_("No cards in this slot..."))
 
         cardname = card["name"]
-        cardname_en = str(card["name"]).replace('_', ' ').title()
+        cardname_en = str(cardname).replace('_', ' ').title()
         attack = card["attack"]
         defense = card["defense"]
 
@@ -441,7 +442,7 @@ class CardGame:
         economy = await r.table("economy").get(str(author.id)).run(self.bot.r_conn)
         await r.table("economy").get(str(author.id)).update({"balance": economy["balance"] + cardprice}).run(self.bot.r_conn)
 
-        await ctx.send(_("Sold %s for %s") % (cardname, cardprice))
+        await ctx.send(_("Sold %s for %s") % (cardname_en, cardprice))
         await self.__post_to_hook("Sold card", author, cardprice)
 
     @card.command(name='list')
