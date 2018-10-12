@@ -924,7 +924,7 @@ class General:
         await ctx.send(_("Deleted your prefix and reset it back to the default `n!`"))
 
     @commands.command()
-    @commands.cooldown(1, 6, commands.BucketType.user)
+    @commands.cooldown(4, 10, commands.BucketType.guild)
     async def help(self, ctx, command:str=None):
         """Help!"""
         if command:
