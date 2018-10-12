@@ -95,6 +95,17 @@ class NSFW:
 
     @commands.command()
     @commands.guild_only()
+    @commands.cooldown(10, 10, commands.BucketType.user)
+    async def yaoi(self, ctx):
+        _ = await self._get_text(ctx)
+        if not ctx.message.channel.is_nsfw():
+            return await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=await self.boobbot("yaoi"))
+        await ctx.send(embed=em)
+
+    @commands.command()
+    @commands.guild_only()
     @commands.cooldown(25, 10, commands.BucketType.user)
     async def anal(self, ctx):
         _ = await self._get_text(ctx)
