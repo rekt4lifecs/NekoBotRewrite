@@ -7,6 +7,7 @@ import rethinkdb as r
 import os
 from prettytable import PrettyTable
 import gettext
+from io import BytesIO
 
 list_ = [
     "Shiro",
@@ -390,7 +391,7 @@ class CardGame:
         draw.text((344, 550), str(defense), (0, 0, 0), lower_font)
         draw.text((40, 477), textwrap.fill(description, 37), (0, 0, 0), font=desc_font)
 
-        img.save(f"data/cards/{num}.png")  # there is a thing called BytesIO oldme smh
+        img.save(f"data/cards/{num}.png")  # there is a thing called BytesIO oldme smh todo
 
     @card.command(name='sell')
     async def card_sell(self, ctx, num: int):
@@ -520,10 +521,11 @@ class CardGame:
         draw.text((255, 550), str(attack), (0, 0, 0), lower_font)
         draw.text((344, 550), str(defense), (0, 0, 0), lower_font)
 
-        num = random.randint(1, 10000000)
-        img.save(f"data/cards/{num}.png")
-        await ctx.send(file=discord.File(f"data/cards/{num}.png"),
-                       embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://{num}.png'))
+        temp = BytesIO()
+        img.save(temp, format="png")
+        temp.seek(0)
+        await ctx.send(file=discord.File(fp=temp, filename="generated.png"),
+                       embed=discord.Embed(color=0xDEADBF).set_image(url=f'attachment://generated.png'))
 
     @card.command(name='forcegive', hidden=True)
     @commands.is_owner()
