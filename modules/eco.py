@@ -12,8 +12,6 @@ import gettext
 auth = {"Authorization": "Wolke " + weeb,
         "User-Agent": "NekoBot/4.2.0"}
 
-# Todo languages
-
 class economy:
 
     def __init__(self, bot):
