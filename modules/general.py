@@ -252,12 +252,12 @@ class General:
             str(len(self.bot.commands)),
             millify(channels),
             self.bot.shard_count,
+            thisShard,
             0,
             self.get_bot_uptime(),
             millify(messages),
             str(self.bot.command_usage.most_common(1)[0][0]),
-            command_count,
-            thisShard
+            command_count
         )
         info.description = _("Servers: **%s (%s)**\n"
                              "Members: **%s**\n"
