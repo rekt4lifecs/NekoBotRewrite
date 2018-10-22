@@ -2,7 +2,7 @@ import discord, random, time, datetime, asyncio
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
-import aiohttp, hooks
+import aiohttp
 import rethinkdb as r
 import os
 from prettytable import PrettyTable
@@ -87,11 +87,16 @@ class CardGame:
                 return gettext.gettext
         else:
             return gettext.gettext
+
     async def __post_to_hook(self, action:str, user:discord.Member, amount):
         try:
             async with aiohttp.ClientSession() as cs:
-                webhook = discord.Webhook.from_url(hooks.get_url(), adapter=discord.AsyncWebhookAdapter(cs))
-                await webhook.send("User: %s (%s)\nAction: %s\nAmount: %s\nTime: %s" % (str(user), user.id, action, amount, int(time.time())))
+                await cs.post("http://localhost:1241", json={
+                    "user": str(user.id),
+                    "action": action,
+                    "amount": amount,
+                    "time": str(int(time.time()))
+                })
         except:
             pass
 
