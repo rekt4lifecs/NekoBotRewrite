@@ -335,7 +335,7 @@ class Moderation:
         except Exception:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
-            await ctx.send('Reloaded <a:forsenPls:444882132343717898>')
+            await ctx.send('Reloaded <a:anone:502539278841282561>')
 
     @commands.command(aliases=["ping"])
     @commands.cooldown(1, 10, commands.BucketType.user)
