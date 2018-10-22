@@ -122,7 +122,7 @@ class General:
         try:
             await ctx.trigger_typing()
             async with aiohttp.ClientSession() as cs:
-                async with cs.post("https://whatanime.ga/api/search?token=%s" % config.whatanime,
+                async with cs.post("https://trace.moe/api/search?token=%s" % config.whatanime,
                                    data={"image": str(base64.b64encode(i.read()).decode("utf8"))},
                                    headers={"Content-Type": "application/x-www-form-urlencoded"}) as r:
                     try:
@@ -145,10 +145,10 @@ class General:
             em.add_field(name=_("At"), value=str(doc["at"]))
             em.add_field(name=_("Matching %"), value=str(round(doc["similarity"] * 100, 2)))
             em.add_field(name=_("Native Title"), value=doc["title_native"])
-            em.set_footer(text=_("Powered by whatanime.ga"))
+            em.set_footer(text=_("Powered by trace.moe"))
 
             try:
-                preview = f"https://whatanime.ga/thumbnail.php?anilist_id={doc['anilist_id']}" \
+                preview = f"https://trace.moe/thumbnail.php?anilist_id={doc['anilist_id']}" \
                           f"&file={doc['filename']}" \
                           f"&t={doc['at']}" \
                           f"&token={doc['tokenthumb']}"
@@ -943,7 +943,7 @@ class General:
             other += "`imgwelcome`, "
             other += ", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Marriage"])
             embed = discord.Embed(color=0xDEADBF, title="NekoBot Help")
-            c = ["Donator", "economy", "Fun", "Games", "General", "Moderation", "NSFW", "Reactions"]
+            c = ["Donator", "economy", "Fun", "Games", "General", "Moderation", "NSFW", "Reactions", "Audio"]
             for x in c:
                 try:
                     embed.add_field(name=x.title(),
