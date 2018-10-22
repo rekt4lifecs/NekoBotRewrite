@@ -297,7 +297,7 @@ class Moderation:
         except Exception:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
-            await ctx.send('Loaded <a:forsenPls:444882132343717898>')
+            await ctx.send('Loaded <a:anone:502539278841282561>')
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -309,7 +309,7 @@ class Moderation:
         except Exception:
             await ctx.send(f'```py\n{traceback.format_exc()}\n```')
         else:
-            await ctx.send('Unloaded <a:forsenPls:444882132343717898>')
+            await ctx.send('Unloaded <a:anone:502539278841282561>')
 
     @commands.command(name='reload', hidden=True)
     @commands.is_owner()
