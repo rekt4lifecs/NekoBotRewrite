@@ -1,12 +1,11 @@
 import rethinkdb as r
 from discord.ext import commands
 import discord
-from config import weeb, dbots_key
+from config import weeb
 import aiohttp, asyncio
 import base64, random
 import datetime, time, math
 from prettytable import PrettyTable
-import hooks
 import gettext
 
 auth = {"Authorization": "Wolke " + weeb,
@@ -31,6 +30,7 @@ class economy:
                 return gettext.gettext
         else:
             return gettext.gettext
+
     def _required_exp(self, level: int):
         if level < 0:
             return 0
@@ -91,8 +91,12 @@ class economy:
     async def __post_to_hook(self, action:str, user:discord.Member, amount):
         try:
             async with aiohttp.ClientSession() as cs:
-                webhook = discord.Webhook.from_url(hooks.get_url(), adapter=discord.AsyncWebhookAdapter(cs))
-                await webhook.send("User: %s (%s)\nAction: %s\nAmount: %s\nTime: %s" % (str(user), user.id, action, amount, int(time.time())))
+                await cs.post("http://localhost:1241", json={
+                    "user": str(user.id),
+                    "action": action,
+                    "amount": amount,
+                    "time": str(int(time.time()))
+                })
         except:
             pass
 
