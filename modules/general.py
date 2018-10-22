@@ -946,12 +946,17 @@ class General:
             c = ["Donator", "economy", "Fun", "Games", "General", "Moderation", "NSFW", "Reactions", "Audio"]
             c.sort()
             for x in c:
-                try:
-                    embed.add_field(name=x.title(),
-                                    value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == x and not i.hidden]),
+                if x == "NSFW" and isinstance(ctx.channel, discord.TextChannel) and not ctx.channel.is_nsfw():
+                    embed.add_field(name="NSFW",
+                                    value="Hidden in non NSFW channel, you can enable NSFW channels by using `n!nsfw` or going in the channels settings <a:bearCop:457881833191768066>",
                                     inline=False)
-                except:
-                    pass
+                else:
+                    try:
+                        embed.add_field(name=x.title(),
+                                        value=", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == x and not i.hidden]),
+                                        inline=False)
+                    except:
+                        pass
             embed.add_field(name="Other", value=other, inline=False)
             await ctx.send(embed=embed)
         except discord.HTTPException:
