@@ -78,7 +78,7 @@ class General:
         self.bot.socket_stats[msg.get('t')] += 1
 
     @commands.command()
-    @commands.cooldown(2, 45, commands.BucketType.user)
+    @commands.cooldown(2, 25, commands.BucketType.user)
     @commands.guild_only()
     async def whatanime(self, ctx):
         """Check what the anime is from an image."""
