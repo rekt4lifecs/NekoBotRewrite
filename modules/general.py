@@ -944,6 +944,7 @@ class General:
             other += ", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Marriage"])
             embed = discord.Embed(color=0xDEADBF, title="NekoBot Help")
             c = ["Donator", "economy", "Fun", "Games", "General", "Moderation", "NSFW", "Reactions", "Audio"]
+            c.sort()
             for x in c:
                 try:
                     embed.add_field(name=x.title(),
