@@ -100,6 +100,13 @@ class Audio:
         self.bot.lavalink.hooks.clear()
 
     async def _track_hook(self, event):
+        if isinstance(event, lavalink.Events.StatsUpdateEvent):
+            log.info("Lavalink Stats: CPU Load - %s | "
+                     "Playing Players: %s | "
+                     "Uptime: %s" % (event.stats.cpu.lavalink_load, event.stats.playing_players,
+                                     lavalink.Utils.format_time(event.stats.uptime)))
+            return
+
         channel = self.bot.get_channel(event.player.fetch("channel"))
         if not channel:
             return
