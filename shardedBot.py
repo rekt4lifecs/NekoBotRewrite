@@ -155,7 +155,7 @@ class NekoBot(commands.AutoShardedBot):
                 await ctx.send(page)
 
     async def nekopet_check(self, message):
-        if random.randint(1, 135) == 1:
+        if random.randint(1, 300) == 1:
             data = await r.table("nekopet").get(str(message.author.id)).run(self.r_conn)
             if data:
                 play_amt = random.randint(1, 20)
@@ -200,6 +200,27 @@ class NekoBot(commands.AutoShardedBot):
                     "lastxptimes": lastxptimes
                 }
                 await r.table("levelSystem").get(str(author.id)).update(data).run(self.r_conn)
+        elif random.randint(1, 15) == 1:
+            guildXP = await r.table("guildXP").get(str(message.guild.id)).run(self.r_conn)
+            if not guildXP or not guildXP.get(str(message.author.id)):
+                data = {
+                    str(message.author.id): {
+                        "lastxp": str(int(time.time())),
+                        "xp": 0
+                    }
+                }
+                if not guildXP:
+                    data["id"] = str(message.guild.id)
+                return await r.table("guildXP").get(str(message.guild.id)).update(data).run(self.r_conn)
+            if (int(time.time()) - int(guildXP.get(str(message.author.id))["lastxp"])) >= 120:
+                xp = guildXP.get(str(message.author.id))["xp"] + random.randint(1, 30)
+                data = {
+                    str(message.author.id): {
+                        "xp": xp,
+                        "lastxp": str(int(time.time()))
+                    }
+                }
+                await r.table("guildXP").get(str(message.guild.id)).update(data).run(self.r_conn)
 
     async def on_message(self, message):
         self.counter["messages_read"] += 1
