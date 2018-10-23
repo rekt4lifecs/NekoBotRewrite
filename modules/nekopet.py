@@ -119,11 +119,12 @@ class NekoPet:
         types = {
             1: "neko1.png",
             2: "neko2.png",
-            3: "neko3.png"
+            3: "neko3.png",
+            4: "neko4.png"
         }
 
         draw = ImageDraw.Draw(background)
-        neko = Image.open(data_folder + types[int(type)]).resize((250, background.size[1]))
+        neko = Image.open(data_folder + types[int(type)]).resize((250, background.size[1])).convert("RGBA")
 
         background.alpha_composite(neko)
         draw.text((225, 5), f"{food}% Food", (255, 255, 255), font)
@@ -138,6 +139,12 @@ class NekoPet:
         em.set_footer(text=f"Level: {self._find_level(int(level))}, XP: {level}")
         await ctx.send(file=discord.File(fp=temp, filename="neko.png"),
                        embed=em.set_image(url=f"attachment://neko.png"))
+
+    def get_neko_type(self):
+        if random.randint(1, 500) == 1:
+            return 4
+        else:
+            return random.randint(1, 3)
 
     @pet.command(name="shop")
     async def neko_shop(self, ctx):
@@ -182,7 +189,7 @@ class NekoPet:
                     "id": str(ctx.author.id),
                     "background": "background.png",
                     "level": 0,
-                    "type": random.randint(1, 3),
+                    "type": self.get_neko_type(),
                     "food": 100,
                     "play": 100
                 }
