@@ -135,7 +135,7 @@ class NekoPet:
         background.save(temp, format="png")
         temp.seek(0)
 
-        em = discord.Embed(color=0xDEADBF, title=f"{ctx.message.author.name}'s Neko")
+        em = discord.Embed(color=0xDEADBF, title=f"{ctx.message.author.name}'s " + "neko" if not int(type) == 4 else "86")
         em.set_footer(text=f"Level: {self._find_level(int(level))}, XP: {level}")
         await ctx.send(file=discord.File(fp=temp, filename="neko.png"),
                        embed=em.set_image(url=f"attachment://neko.png"))
