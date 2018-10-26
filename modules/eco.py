@@ -76,12 +76,6 @@ class economy:
                 res = await r.json()
         return res
 
-    async def __has_voted(self, user:int):
-        if await r.table("votes").get(str(user)).run(self.bot.r_conn):
-            return True
-        else:
-            return False
-
     async def __update_balance(self, user:int, amount:int):
         await r.table("economy").get(str(user)).update({"balance": int(amount)}).run(self.bot.r_conn)
 
@@ -253,30 +247,20 @@ class economy:
             d = datetime.datetime(1, 1, 1) + i
             return await ctx.send(_("You have `%s` until your next daily.") % d.strftime("%H:%M:%S"))
 
-        if await self.__has_voted(user.id): # If user has voted
-            em = discord.Embed(color=0xDEADBF)
-            em.title = _("Daily Voter Bonus")
-            weekday = datetime.datetime.today().weekday()
-            if weekday <= 4: # If its a weekend, give weekend bonus.
-                em.description = _("You have received **12500** weekend bonus credits!")
-                await self.__post_to_hook("Daily (Vote Weekend)", ctx.author, 12500)
-                await self.__update_payday_time(user.id)
-                await self.__update_balance(user.id, user_balance + 12500)
-            else:
-                em.description = _("You have received **7500** credits!")
-                await self.__post_to_hook("Daily (Vote)", ctx.author, 7500)
-                await self.__update_payday_time(user.id)
-                await self.__update_balance(user.id, user_balance + 7500)
-            await ctx.send(embed=em)
-        else:
-            em = discord.Embed(color=0xDEADBF)
-            em.title = _("Daily Bonus")
-            em.description = _("You have received **2500** credits!")
-            em.set_footer(text=_("Voting will give you 7500 👀"))
-            await self.__post_to_hook("Daily (Non Vote)", ctx.author, 2500)
+        msg = ""
+        msg += "Daily Credits\n"
+        weekday = datetime.datetime.today().weekday()
+        if weekday <= 5:
+            msg += _("You have received **12500** weekend bonus credits!")
+            await self.__post_to_hook("Daily (Vote Weekend)", ctx.author, 12500)
             await self.__update_payday_time(user.id)
-            await self.__update_balance(user.id, user_balance + 2500)
-            await ctx.send(embed=em)
+            await self.__update_balance(user.id, user_balance + 12500)
+        else:
+            msg += _("You have received **7500** credits!")
+            await self.__post_to_hook("Daily (Vote)", ctx.author, 7500)
+            await self.__update_payday_time(user.id)
+            await self.__update_balance(user.id, user_balance + 7500)
+        await ctx.send(msg)
 
     @commands.command()
     @commands.cooldown(1, 7, commands.BucketType.user)
