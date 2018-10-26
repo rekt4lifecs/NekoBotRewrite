@@ -32,42 +32,10 @@ class Audio:
             self.bot.loop.create_task(self.__post_to_hook("Registered hook"))
             self.bot.lavalink.register_hook(self._track_hook)
 
-        self.testing = [
-            280158289667555328,
-            290448285217456130,
-            486908108786892800,
-            227110473466773504,
-            101036217214181376,
-            366057487679619074,
-            325231623262044162,
-            102165107244539904,
-            219067402174988290,
-            138302166619258880,
-            248294452307689473,
-            133111159887888385,
-            140149699486154753,
-            266277541646434305,
-            255281782696443905,
-            372873278387388417,
-            229552088525438977,
-            107130754189766656,
-            145557815287611393,
-            270133511325876224
-        ]
         self.lang = {}
         self.languages = ["tsundere", "weeb", "chinese"]
         for x in self.languages:
             self.lang[x] = gettext.translation("general", localedir="locale", languages=[x])
-
-    async def __has_donated(self, user:int):
-        all_data = await r.table("donator").order_by("id").run(self.bot.r_conn)
-        users = []
-        for data in all_data:
-            users.append(data["user"])
-        if str(user) in users:
-            return True
-        else:
-            return False
 
     async def _get_text(self, ctx):
         lang = await self.bot.get_language(ctx)
@@ -143,9 +111,6 @@ class Audio:
     async def play(self, ctx, *, query: str):
         _ = await self._get_text(ctx)
 
-        if not await self.__has_donated(ctx.author.id) or ctx.author.id not in self.testing:
-            return await ctx.send(_("Audio in testing for 7 days"))
-
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
         if not player.is_connected:
@@ -177,7 +142,7 @@ class Audio:
             async with aiohttp.ClientSession() as cs:
                 async with cs.post("https://lava.nekobot.xyz/api", json=data, headers=ll_headers) as r:
                     res = await r.json()
-            if res["message"].startswith("http"):
+            if not res["message"].startswith("http"):
                 return await ctx.send(_("Failed to get data ;w;"))
             query = res["message"]
 
@@ -248,9 +213,6 @@ class Audio:
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def listenmoe(self, ctx):
         _ = await self._get_text(ctx)
-
-        if not await self.__has_donated(ctx.author.id) or ctx.author.id not in self.testing:
-            return await ctx.send(_("Audio in testing for 7 days"))
 
         player = self.bot.lavalink.players.get(ctx.guild.id)
 
