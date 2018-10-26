@@ -18,7 +18,7 @@ from PIL import Image
 import rethinkdb as r
 import magic as pymagic
 import gettext
-
+import asyncio
 log = logging.getLogger()
 
 LOWERCASE, UPPERCASE = 'x', 'X'
@@ -77,6 +77,24 @@ class General:
     async def on_socket_response(self, msg):
         self.bot.socket_stats[msg.get('t')] += 1
 
+    def whatanime_embedbuilder(self, _, doc: dict):
+        em = discord.Embed(color=0xDEADBF)
+        em.title = doc["title_romaji"]
+        em.url = "https://myanimelist.net/anime/%s" % doc["mal_id"]
+        em.add_field(name=_("Episode"), value=str(doc["episode"]))
+        em.add_field(name=_("At"), value=str(doc["at"]))
+        em.add_field(name=_("Matching %"), value=str(round(doc["similarity"] * 100, 2)))
+        em.add_field(name=_("Native Title"), value=doc["title_native"])
+        em.set_footer(text=_("Powered by trace.moe"))
+        return em
+
+    def whatanime_prefbuilder(self, doc):
+        preview = f"https://trace.moe/thumbnail.php?anilist_id={doc['anilist_id']}" \
+                  f"&file={doc['filename']}" \
+                  f"&t={doc['at']}" \
+                  f"&token={doc['tokenthumb']}"
+        return preview
+
     @commands.command()
     @commands.cooldown(2, 25, commands.BucketType.user)
     @commands.guild_only()
@@ -114,56 +132,42 @@ class General:
         with Image.open(BytesIO(res)) as img:
             img.seek(0)
             img.convert("RGB")
-            img.resize((512, 288))
+            img.thumbnail((512, 288), Image.ANTIALIAS)
             i = BytesIO()
             img.save(i, format="PNG")
             i.seek(0)
 
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.post("https://trace.moe/api/search?token=%s" % config.whatanime,
+                               data={"image": str(base64.b64encode(i.read()).decode("utf8"))},
+                               headers={"Content-Type": "application/x-www-form-urlencoded"}) as r:
+                try:
+                    res = await r.json()
+                except:
+                    return await ctx.send(_("File too large."))
+
+        if not res["docs"]:
+            return await ctx.send(_("Nothing found."))
+
+        doc = res["docs"][0]
+        if doc["is_adult"] and not ctx.channel.is_nsfw:
+            return await ctx.send(_("Can't send NSFW in a non NSFW channel."))
+
+        em = self.whatanime_embedbuilder(_, doc)
+
         try:
-            await ctx.trigger_typing()
             async with aiohttp.ClientSession() as cs:
-                async with cs.post("https://trace.moe/api/search?token=%s" % config.whatanime,
-                                   data={"image": str(base64.b64encode(i.read()).decode("utf8"))},
-                                   headers={"Content-Type": "application/x-www-form-urlencoded"}) as r:
-                    try:
-                        res = await r.json()
-                    except:
-                        return await ctx.send(_("File too large."))
+                async with cs.get(self.whatanime_prefbuilder(doc)) as r:
+                    imres = await r.read()
+            filetype = magic.from_buffer(imres).rpartition("/")[2]
+            file = discord.File(imres, filename="file.%s" % filetype)
+            em.set_image(url="attachment://file.%s" % filetype)
+        except:
+            file = None
+            em.set_image(url="https://nekobot.xyz/placeholder.png")
 
-            if res["docs"] == []:
-                return await ctx.send(_("Nothing found."))
-
-            doc = res["docs"][0]
-
-            if doc["is_adult"] and not ctx.channel.is_nsfw:
-                return await ctx.send(_("Can't send NSFW in a non NSFW channel."))
-
-            em = discord.Embed(color=0xDEADBF)
-            em.title = doc["title_romaji"]
-            em.url = "https://myanimelist.net/anime/%s" % doc["mal_id"]
-            em.add_field(name=_("Episode"), value=str(doc["episode"]))
-            em.add_field(name=_("At"), value=str(doc["at"]))
-            em.add_field(name=_("Matching %"), value=str(round(doc["similarity"] * 100, 2)))
-            em.add_field(name=_("Native Title"), value=doc["title_native"])
-            em.set_footer(text=_("Powered by trace.moe"))
-
-            try:
-                preview = f"https://trace.moe/thumbnail.php?anilist_id={doc['anilist_id']}" \
-                          f"&file={doc['filename']}" \
-                          f"&t={doc['at']}" \
-                          f"&token={doc['tokenthumb']}"
-                async with aiohttp.ClientSession() as cs:
-                    async with cs.get(preview) as r:
-                        res = await r.read()
-                filetype = magic.from_buffer(res).rpartition("/")[2]
-                file = discord.File(res, filename="file.%s" % filetype)
-                em.set_image(url="attachment://file.%s" % filetype)
-            except:
-                return await ctx.send(embed=em)
-
-            await ctx.send(embed=em, file=file)
-        except Exception as e:
-            return await ctx.send(_("Failed to get data, %s") % e)
+        await ctx.send(embed=em, file=file)
 
     @commands.command()
     @commands.cooldown(1, 4, commands.BucketType.user)
