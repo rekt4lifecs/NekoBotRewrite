@@ -195,7 +195,7 @@ class Audio:
                     x = int(x.content)
                 except:
                     return await ctx.send(_("Not a valid number, returning"))
-                if x not in range(1, len(tracks)):
+                if x not in list(range(1, len(tracks) + 1)):
                     return await ctx.send(_("Not a valid option, returning"))
 
                 track = tracks[x - 1]
@@ -316,6 +316,225 @@ class Audio:
 
         await ctx.send(_("Skipped **%s**") % player.current.title.replace("@", "@\u200B"))
         await player.skip()
+
+    @commands.group(aliases=["playlists"])
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def playlist(self, ctx):
+        if not await r.table("playlists").get(str(ctx.author.id)).run(self.bot.r_conn):
+            await r.table("playlists").insert({
+                "id": str(ctx.author.id),
+                "playlists": {}
+            }).run(self.bot.r_conn)
+        if ctx.invoked_subcommand is None:
+            return await self.bot.send_cmd_help(ctx)
+
+    @playlist.command(name="add")
+    async def playlist_add(self, ctx, playlist_name, *, song):
+        """Add songs to one of your playlists"""
+        playlists = (await r.table("playlists").get(str(ctx.author.id)).run(self.bot.r_conn))["playlists"]
+        playlist = playlists.get(playlist_name, [])
+        if len(playlist) > 15:
+            return await ctx.send("You have too much tracks already in this playlist you baka")
+        if not playlist:
+            if (len(playlists) + 1) > 10:
+                return await ctx.send("You have too much playlists already")
+        await ctx.trigger_typing()
+
+        if not url_rx.match(song):
+            song = "ytsearch:" + song
+
+        results = await self.bot.lavalink.get_tracks(song)
+
+        if not results or not results["tracks"]:
+            return await ctx.send("I found nothing ;w;")
+
+        if results["loadType"] == "PLAYLIST_LOADED":
+            tracks = results["tracks"]
+
+            if len(tracks) > 15:
+                return await ctx.send("Too much tracks in this playlist ;w;")
+            elif (len(tracks) + len(playlist)) > 15:
+                return await ctx.send("Too much in queue already ;w;")
+
+            for track in tracks:
+                if not track["info"]["length"] > 3600000:
+                    playlist.append(track)
+
+            await ctx.send("Added **%s** to the playlist" % results["playlistInfo"]["name"].replace("@", "@\u200B"))
+            await r.table("playlists").get(str(ctx.author.id)).update({"playlists": {playlist_name: playlist}}).run(
+                self.bot.r_conn)
+        else:
+            if len(results["tracks"]) < 2:
+                track = results["tracks"][0]
+                if track["info"]["isStream"]:
+                    return await ctx.send("I can't add streams to playlists")
+                if track["info"]["length"] > 3600000:
+                    return await ctx.send("That song is too long for me to play ;w;")
+                await ctx.send("Added **%s** to playlist" % track["info"]["title"].replace("@", "@\u200B"))
+                playlist.append(track)
+                await r.table("playlists").get(str(ctx.author.id)).update({"playlists": {playlist_name: playlist}}).run(
+                    self.bot.r_conn)
+            else:
+                tracks = results["tracks"][:5]
+                msg = "Type a number of a track to play.```\n"
+                for i, track in enumerate(tracks, start=1):
+                    msg += "%s. %s\n" % (i, track["info"]["title"].replace("@", "@\u200B"))
+                msg += "```"
+                msg = await ctx.send(msg)
+
+                def check(m):
+                    return m.channel == ctx.channel and m.author == ctx.author
+
+                try:
+                    x = await self.bot.wait_for("message", check=check, timeout=10.0)
+                except:
+                    try:
+                        await msg.delete()
+                    except:
+                        pass
+                    return await ctx.send("Timed out.")
+
+                try:
+                    x = int(x.content)
+                except:
+                    return await ctx.send("Not a valid number, returning")
+                if x not in list(range(1, len(tracks) + 1)):
+                    return await ctx.send("Not a valid option, returning")
+
+                track = tracks[x - 1]
+
+                if track["info"]["isStream"]:
+                    return await ctx.send("I can't add streams to playlists")
+                if track["info"]["length"] > 3600000:
+                    return await ctx.send("That song is too long for me to play ;w;")
+
+                await ctx.send("Added **%s** to playlist" % track["info"]["title"].replace("@", "@\u200B"))
+                playlist.append(track)
+                await r.table("playlists").get(str(ctx.author.id)).update({"playlists": {playlist_name: playlist}}).run(
+                    self.bot.r_conn)
+
+    @playlist.command(name="play")
+    async def playlist_play(self, ctx, playlist_name):
+        """Add one of your playlists to the queue"""
+        _ = await self._get_text(ctx)
+        playlists = (await r.table("playlists").get(str(ctx.author.id)).run(self.bot.r_conn))["playlists"]
+        if not playlists.get(playlist_name):
+            return await ctx.send("You don't have a playlist with that name >~<")
+
+        playlist = playlists.get(playlist_name)
+        player = self.bot.lavalink.players.get(ctx.guild.id)
+
+        if not player.is_connected:
+            if not ctx.author.voice or not ctx.author.voice.channel:
+                return await ctx.send(_("You are not in any voice channel ;w;"))
+
+            permissions = ctx.author.voice.channel.permissions_for(ctx.me)
+
+            if not permissions.connect or not permissions.speak:
+                return await ctx.send(_("Missing permissions to connect or speak ;w;"))
+            player.store("channel", ctx.channel.id)
+            await player.connect(ctx.author.voice.channel.id)
+        else:
+            if player.connected_channel.id != ctx.author.voice.channel.id:
+                return await ctx.send(_("Join my voice channel you baka"))
+
+        if len(player.queue) + len(playlist) > 50:
+            return await ctx.send(_("You are too much songs in your queue you baka"))
+
+        for track in playlist:
+            player.add(requester=ctx.author.id, track=track)
+
+        await ctx.send("Added playlist to queue")
+
+        if not player.is_playing:
+            await player.play()
+
+    @playlist.command(name="display", aliases=["show", "view"])
+    async def playlist_display(self, ctx, playlist_name=None):
+        """Display one of your playlists"""
+        playlists = (await r.table("playlists").get(str(ctx.author.id)).run(self.bot.r_conn))["playlists"]
+        if not playlists:
+            return await ctx.send("You don't have any playlists")
+
+        if playlist_name:
+            if not playlists.get(playlist_name):
+                return await ctx.send("You don't have a playlist with that name >~<")
+            msg = "Your Playlists Tracks:\n"
+            for i, track in enumerate(playlists.get(playlist_name), start=1):
+                if url_rx.match(track["info"]["title"]):
+                    pass
+                if i > 15:
+                    break
+                msg += "**%s.** %s\n" % (i, track["info"]["title"].replace("@", "@\u200B"))
+
+            await ctx.send(msg)
+        else:
+            msg = "Your Playlists:\n"
+            for i, playlist in enumerate(playlists, start=1):
+                if url_rx.match(playlist):
+                    pass
+                msg += "**%s.** %s\n" % (i, playlist.replace("@", "@\u200B"))
+
+            await ctx.send(msg)
+
+    @playlist.command(name="remove")
+    async def playlist_remove(self, ctx, playlist_name):
+        """Remove a song from the playlist"""
+        playlists = (await r.table("playlists").get(str(ctx.author.id)).run(self.bot.r_conn))["playlists"]
+        playlist = playlists.get(playlist_name)
+        if not playlist:
+            return await ctx.send("You don't have a playlist with that name >~<")
+
+        msg = "**Type the number of a song to remove:**```\n"
+        for i, track in enumerate(playlist, start=1):
+            msg += "%s. %s\n" % (i, track["info"]["title"].replace("@", "@\u200B"))
+        msg += "```"
+
+        await ctx.send(msg)
+
+        def check(m):
+            return m.channel == ctx.channel and m.author == ctx.author
+
+        try:
+            x = await self.bot.wait_for("message", check=check, timeout=10.0)
+        except:
+            try:
+                await msg.delete()
+            except:
+                pass
+            return await ctx.send("Timed out.")
+
+        try:
+            x = int(x.content)
+        except:
+            return await ctx.send("Not a valid number, returning")
+        if x not in list(range(1, len(playlist) + 1)):
+            print(len(playlist))
+            return await ctx.send("Not a valid option, returning")
+
+        song = playlist[x - 1]
+        new_playlist = []
+        for track in playlist:
+            if not track == song:
+                new_playlist.append(track)
+
+        await ctx.send("Removed from playlist")
+        if new_playlist:
+            await r.table("playlists").get(str(ctx.author.id)).update({"playlists": {playlist_name: new_playlist}}).run(
+                self.bot.r_conn)
+        else:
+            await r.table("playlists").get(str(ctx.author.id)).update({"playlists": {playlist_name: r.literal()}}).run(
+                self.bot.r_conn)
+
+    @playlist.command(name="delete")
+    async def playlist_delete(self, ctx, playlist_name):
+        """Delete a playlist"""
+        playlists = (await r.table("playlists").get(str(ctx.author.id)).run(self.bot.r_conn))["playlists"]
+        if not playlists.get(playlist_name):
+            return await ctx.send("You don't have a playlist with that name >~<")
+        await r.table("playlists").get(str(ctx.author.id)).update({"playlists": {playlist_name: r.literal()}}).run(
+            self.bot.r_conn)
+        await ctx.send("Deleted playlist.")
 
 def setup(bot):
     bot.add_cog(Audio(bot))
