@@ -30,12 +30,6 @@ class NSFW:
         else:
             return gettext.gettext
 
-    async def __has_voted(self, user:int):
-        if await r.table("votes").get(str(user)).run(self.bot.r_conn):
-            return True
-        else:
-            return False
-
     async def log_error(self, error:str):
         webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
         webhook = discord.Webhook.from_url(webhook_url, adapter=discord.AsyncWebhookAdapter(self.session))
@@ -79,19 +73,10 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
-        if await self.__has_voted(ctx.author.id):
-            em = discord.Embed(color=0xDEADBF)
-            em.set_image(url=await self.nekobot.image("pgif"))
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=await self.nekobot.image("pgif"))
 
-            await ctx.send(embed=em)
-        else:
-            embed = discord.Embed(color=0xDEADBF,
-                                  title="WOAH",
-                                  description=_("Have you voted yet <:smirkGuns:417969421252952085>\n"
-                                              "https://discordbots.org/bot/310039170792030211/vote"))
-            if not ctx.message.channel.is_nsfw():
-                embed.set_footer(text=_("Use in a NSFW Channel BTW..."))
-            await ctx.send(embed=embed)
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.guild_only()
@@ -115,22 +100,6 @@ class NSFW:
         embed = discord.Embed(color=0xDEADBF)
         embed.set_image(url=await self.nekobot.image("anal"))
         await ctx.send(embed=embed)
-
-    # @commands.command(aliases=["DVA", "d.va"])
-    # @commands.guild_only()
-    # @commands.cooldown(1, 1, commands.BucketType.user)
-    # async def dva(self, ctx):
-    #     await ctx.trigger_typing()
-    #     if not ctx.message.channel.is_nsfw():
-    #         await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
-    #         return
-    #     async with aiohttp.ClientSession() as cs:
-    #         async with cs.get("https://api.computerfreaker.cf/v1/dva") as r:
-    #             res = await r.json()
-    #     data = res['url']
-    #     embed = discord.Embed(color=0xDEADBF)
-    #     embed.set_image(url=data)
-    #     await ctx.send(embed=embed)
 
     @commands.command(name="4k")
     @commands.guild_only()
@@ -343,16 +312,9 @@ class NSFW:
         if not ctx.message.channel.is_nsfw():
             await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>\nhttps://nekobot.xyz/hentai.png"))
             return
-        if await self.__has_voted(ctx.author.id):
-            em = discord.Embed(color=0xDEADBF)
-            em.set_image(url=await self.nekobot.image("hentai"))
-            await ctx.send(embed=em)
-        else:
-            embed = discord.Embed(color=0xDEADBF,
-                                  title="oof",
-                                  description=_("Have you voted yet <:smirkGuns:417969421252952085>\n"
-                                              "https://discordbots.org/bot/310039170792030211/vote"))
-            await ctx.send(embed=embed)
+        em = discord.Embed(color=0xDEADBF)
+        em.set_image(url=await self.nekobot.image("hentai"))
+        await ctx.send(embed=em)
 
     @commands.command(name="rule34", aliases=["r34"])
     @commands.cooldown(2, 5, commands.BucketType.user)
@@ -377,37 +339,6 @@ class NSFW:
             await ctx.send(embed=em)
         except json.JSONDecodeError:
             await ctx.send(_(":x: No image found. Sorry :/"))
-
-    # IP Banned from r34 on api dedi?
-    # @commands.command(name="rule34magik", aliases=["r34magik", "r34m", "rule34magick"])
-    # @commands.cooldown(1, 5, commands.BucketType.user)
-    # @commands.guild_only()
-    # async def rule34m(self, ctx, tag:str):
-    #     """Magikify Rule34 Searches"""
-    #     if not ctx.message.channel.is_nsfw():
-    #         return await ctx.send("This is not an NSFW channel...", delete_after=5)
-    #     try:
-    #         async with ctx.typing():
-    #             async with aiohttp.ClientSession() as cs:
-    #                 async with cs.get(f"https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags={tag}") as r:
-    #                     data = json.loads(await r.text())
-    #             non_loli = list(filter(lambda x: 'loli' not in x['tags'] and 'shota' not in x['tags'], data))
-    #             if len(non_loli) == 0:
-    #                 em = discord.Embed(color=0xff6f3f, title="Warning", description="Loli/Shota in search.")
-    #                 return await ctx.send(embed=em)
-    #             response = non_loli[random.randint(0, len(non_loli) - 1)]
-    #             img = f"https://img.rule34.xxx/images/{response['directory']}/{response['image']}"
-    #
-    #             try:
-    #                 img = await self.nekobot.magik(img)
-    #             except:
-    #                 return await ctx.send("Failed to get data.")
-    #
-    #             em = discord.Embed(color=0xDEADBF)
-    #             em.set_image(url=img)
-    #             await ctx.send(embed=em)
-    #     except json.JSONDecodeError:
-    #         await ctx.send(":x: No image found. Sorry :/")
 
     @commands.command()
     @commands.cooldown(2, 5, commands.BucketType.user)
