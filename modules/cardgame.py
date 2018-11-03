@@ -62,10 +62,10 @@ list_ = [
     "chifuyu_himeki",
     "holo",
     "dva",
-    "megumin",
-    "Halloween NekoBot" # Special Halloween Card hahayes
-] # "Louise Francoise Le Blanc De La Valliere",
-  # "Hoshimiya Kate",
+    "megumin"
+]   # "Halloween NekoBot" # Special Halloween Card hahayes
+    # "Louise Francoise Le Blanc De La Valliere",
+    # "Hoshimiya Kate",
 
 class CardGame:
     """Loli Card Gamelol xDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"""
