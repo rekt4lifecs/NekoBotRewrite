@@ -277,7 +277,6 @@ class General:
         info.add_field(name=_("Links"),
                        value=_("[GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) | "
                                "[Support Server](https://discord.gg/q98qeYN) | "
-                               "[Vote OwO](https://discordbots.org/bot/310039170792030211/vote) | "
                                "[Patreon](https://www.patreon.com/NekoBot)"))
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format='png'))
         await ctx.send(embed=info)
@@ -300,7 +299,7 @@ class General:
         """Get a users info."""
         _ = await self._get_text(ctx)
 
-        if user == None:
+        if not user:
             user = ctx.message.author
         try:
             playinggame = user.activity.title
@@ -509,22 +508,22 @@ class General:
             em = discord.Embed(color=hexx)
             await msg.edit(embed=em.set_image(url=res['file']))
 
-    # @commands.command()
-    # @commands.cooldown(1, 5, commands.BucketType.user)
-    # async def animepic(self, ctx):
-    #     url = "https://api.computerfreaker.cf/v1/anime"
-    #     await ctx.channel.trigger_typing()
-    #     async with aiohttp.ClientSession() as cs:
-    #         async with cs.get(url) as r:
-    #             res = await r.json()
-    #         em = discord.Embed()
-    #         msg = await ctx.send(embed=em.set_image(url=res['url']))
-    #         async with cs.get(res['url']) as r:
-    #             data = await r.read()
-    #         color_thief = ColorThief(BytesIO(data))
-    #         hexx = int(triplet(color_thief.get_color()), 16)
-    #         em = discord.Embed(color=hexx)
-    #         await msg.edit(embed=em.set_image(url=res['url']))
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def animepic(self, ctx):
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/v2/image/animepic") as r:
+                res = await r.json()
+            image = res["message"]
+            em = discord.Embed()
+            msg = await ctx.send(embed=em.set_image(url=image))
+            async with cs.get(image) as r:
+                data = await r.read()
+            color_thief = ColorThief(BytesIO(data))
+            hexx = int(triplet(color_thief.get_color()), 16)
+            em = discord.Embed(color=hexx)
+            await msg.edit(embed=em.set_image(url=image))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -595,32 +594,31 @@ class General:
 
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
-    async def botinfo(self, ctx, bot_user : discord.Member = None):
-        """Get Bot Info"""
+    async def botinfo(self, ctx, bot_user: discord.Member):
+        """Get a Bots Info"""
         if bot_user == None:
             bot_user = self.bot.user
         await ctx.trigger_typing()
         _ = await self._get_text(ctx)
-        url = f"https://discordbots.org/api/bots/{bot_user.id}"
+        url = "https://bots.discord.pw/api/bots/%s" % bot_user.id
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
+            async with cs.get(url, headers={"Authorization": config.dpw_key}) as r:
+                if r.status == 404:
+                    return await ctx.send("Thats not a valid bot")
                 bot = await r.json()
         try:
-            em = discord.Embed(color=0xDEADBF)
-            em.title = bot['username'] + "#" + bot['discriminator']
-            em.description = bot["shortdesc"]
+            em = discord.Embed(color=0xDEADBF, url="https://bots.discord.pw/bots/%s" % bot_user.id)
+            em.title = bot_user.name + "#" + bot_user.discriminator
+            em.description = bot["description"]
             em.add_field(name=_("Prefix"), value=bot.get("prefix", "None"))
-            em.add_field(name=_("Lib"), value=bot.get("lib"))
-            em.add_field(name=_("Owners"), value=", ".join(["<@%s>" % i for i in bot.get("owners")]))
-            em.add_field(name=_("Votes"), value=bot.get("points", "0"))
-            em.add_field(name=_("Server Count"), value=bot.get("server_count", "0"))
-            em.add_field(name=_("ID"), value=bot.get("id", "0"))
-            em.add_field(name=_("Certified"), value=bot.get("certifiedBot", False))
-            em.set_thumbnail(url=f"https://images.discordapp.net/avatars/{bot['id']}/{bot['avatar']}")
+            em.add_field(name=_("Lib"), value=bot.get("library"))
+            em.add_field(name=_("Owners"), value=", ".join(["<@%s>" % i for i in bot.get("owner_ids")]))
+            em.add_field(name=_("ID"), value=bot.get("client_id"))
+            em.add_field(name=_("Website"), value=bot.get("website") if bot.get("website") != "" else "None")
+            em.set_thumbnail(url=bot_user.avatar_url_as(format="png"))
+            await ctx.send(embed=em)
         except:
             return await ctx.send(_("Failed to get bot data."))
-
-        await ctx.send(embed=em)
 
     @commands.command()
     @commands.guild_only()
