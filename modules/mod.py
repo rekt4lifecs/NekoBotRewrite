@@ -118,6 +118,139 @@ class Moderation:
                 raise commands.BadArgument(f'reason is too long ({len(argument)}/{reason_max})')
             return ret
 
+    async def _has_custom_roles_enabled(self, guild: int):
+        if not await r.table("customroles").get(str(guild)).run(self.bot.r_conn):
+            return False
+        else:
+            return True
+
+    def _get_role_from_id(self, roles: discord.Guild.roles, role_to_find):
+        found = []
+        for role in roles:
+            if role.id == int(role_to_find):
+                found.append(role)
+        return found
+
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    @commands.group(aliases=["customrole", "role"])
+    async def customroles(self, ctx):
+        if ctx.invoked_subcommand is None:
+            return await self.bot.send_cmd_help(ctx)
+
+    @customroles.command(name="join")
+    async def __join(self, ctx, role: discord.Role = None):
+        """Join a role"""
+        if not await self._has_custom_roles_enabled(ctx.guild.id):
+            return await ctx.send("This server has no custom roles setup.")
+
+        roles = (await r.table("customroles").get(str(ctx.guild.id)).run(self.bot.r_conn))["roles"]
+
+        if not role:
+
+            if not roles:
+                return await ctx.send("No roles have been added for users to join")
+
+            em = discord.Embed(color=0xDEADBF)
+            em.title = "Available Custom Roles"
+            desc = "Usage: n!customrole join <role>\n**Roles:**\n"
+            newrolearray = []
+            for roleId in roles:
+                roleInfo = self._get_role_from_id(ctx.guild.roles, roleId)
+                if roleInfo:
+                    newrolearray.append(roleId)
+                    desc += "%s\n" % roleInfo[0].name
+            em.description = desc
+            await ctx.send(embed=em)
+            if len(roles) != len(newrolearray):
+                await r.table("customroles").get(str(ctx.guild.id)).update({"roles": newrolearray}).run(self.bot.r_conn)
+            return
+
+        if str(role.id) not in roles:
+            return await ctx.send("That's not a valid role I can give you ;w;")
+        else:
+            if role.id in [x.id for x in ctx.author.roles]:
+                return await ctx.send("You already have that role")
+            roleInfo = self._get_role_from_id(ctx.guild.roles, role.id)
+            try:
+                await ctx.author.add_roles(roleInfo[0], reason="Custom role")
+                await ctx.message.add_reaction("\u2705")
+            except discord.Forbidden:
+                return await ctx.send("I don't have permissions to give roles to users")
+
+    @customroles.command(name="leave")
+    async def __leave(self, ctx, role: discord.Role):
+        """Leave a role"""
+        if not await self._has_custom_roles_enabled(ctx.guild.id):
+            return await ctx.send("This server has no custom roles setup.")
+
+        roles = (await r.table("customroles").get(str(ctx.guild.id)).run(self.bot.r_conn))["roles"]
+
+        if str(role.id) not in roles:
+            return await ctx.send("That's not a valid role I can remove from you ;w;")
+        else:
+            if role.id in [x.id for x in ctx.author.roles]:
+                roleInfo = self._get_role_from_id(ctx.guild.roles, role.id)
+                try:
+                    await ctx.author.remove_roles(roleInfo[0], reason="Custom role")
+                    await ctx.message.add_reaction("\u2705")
+                except discord.Forbidden:
+                    await ctx.send("I don't have permissions to remove roles from users")
+            else:
+                await ctx.send("You don't even have that role, how am I suppose to remove it")
+
+    @customroles.command(name="addrole")
+    @commands.has_permissions(manage_roles=True)
+    async def __addrole(self, ctx, role: discord.Role):
+        """Add a role for users to be able to join"""
+        if not await self._has_custom_roles_enabled(ctx.guild.id):
+            return await ctx.send("This server has no custom roles setup.")
+
+        roles = (await r.table("customroles").get(str(ctx.guild.id)).run(self.bot.r_conn))["roles"]
+
+        if str(role.id) in roles:
+            return await ctx.send("I already have that role set for users to be able to join")
+        elif role.id == ctx.guild.id:
+            return await ctx.send("I can't add that role")
+        newrolearray = roles
+        newrolearray.append(str(role.id))
+        await r.table("customroles").get(str(ctx.guild.id)).update({"roles": newrolearray}).run(self.bot.r_conn)
+        await ctx.send("Added role!")
+
+    @customroles.command(name="removerole")
+    @commands.has_permissions(manage_roles=True)
+    async def __removerole(self, ctx, role: discord.Role):
+        """Remove a role from people to be able to join"""
+        if not await self._has_custom_roles_enabled(ctx.guild.id):
+            return await ctx.send("This server has no custom roles setup.")
+
+        roles = (await r.table("customroles").get(str(ctx.guild.id)).run(self.bot.r_conn))["roles"]
+
+        if str(role.id) not in roles:
+            return await ctx.send("That role is already not setup for users to join")
+        elif role.id == ctx.guild.id:
+            return await ctx.send("I can't remove that role")
+        newrolearray = []
+        for roleId in roles:
+            if str(roleId) != str(role.id):
+                newrolearray.append(str(role.id))
+        await r.table("customroles").get(str(ctx.guild.id)).update({"roles": newrolearray}).run(self.bot.r_conn)
+        await ctx.send("Removed role!")
+
+    @customroles.command(name="toggle")
+    @commands.has_permissions(manage_roles=True)
+    async def __toggle(self, ctx):
+        """Toggle reaction roles for your server"""
+        if await self._has_custom_roles_enabled(ctx.guild.id):
+            await r.table("customroles").get(str(ctx.guild.id)).delete().run(self.bot.r_conn)
+            await ctx.send("Removed custom roles from this server")
+        else:
+            await r.table("customroles").insert({
+                "id": str(ctx.guild.id),
+                "roles": [],
+                "setupUser": str(ctx.author.id)
+            }).run(self.bot.r_conn)
+            await ctx.send("Enabled custom roles for this server!")
+
     @commands.command()
     @commands.cooldown(1, 60, commands.BucketType.user)
     @commands.guild_only()
