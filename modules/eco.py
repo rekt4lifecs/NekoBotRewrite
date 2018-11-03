@@ -31,6 +31,16 @@ class economy:
         else:
             return gettext.gettext
 
+    async def __has_donated(self, user:int):
+        all_data = await r.table("donator").order_by("id").run(self.bot.r_conn)
+        users = []
+        for data in all_data:
+            users.append(data["user"])
+        if str(user) in users:
+            return True
+        else:
+            return False
+
     def _required_exp(self, level: int):
         if level < 0:
             return 0
@@ -249,12 +259,12 @@ class economy:
 
         msg = ""
         msg += "Daily Credits\n"
-        weekday = datetime.datetime.today().weekday()
-        if weekday <= 5:
-            msg += _("You have received **12500** weekend bonus credits!")
-            await self.__post_to_hook("Daily (Vote Weekend)", ctx.author, 12500)
+        has_donated = ctx.author.id in (await r.table("donator").get("5").run(self.bot.r_conn))["5s"]
+        if has_donated:
+            msg += _("You have received **25000** weekend bonus credits!")
+            await self.__post_to_hook("Daily (Vote Weekend)", ctx.author, 25000)
             await self.__update_payday_time(user.id)
-            await self.__update_balance(user.id, user_balance + 12500)
+            await self.__update_balance(user.id, user_balance + 25000)
         else:
             msg += _("You have received **7500** credits!")
             await self.__post_to_hook("Daily (Vote)", ctx.author, 7500)
@@ -474,6 +484,17 @@ class economy:
         except:
             pass
 
+    # holy
+    # fuck
+    # shit
+    # code
+    # ahead
+    # beware
+    # !
+    # !
+    # !
+    # !
+    # for loops when
     @commands.command(aliases=['bj'])
     @commands.guild_only()
     @commands.cooldown(1, 10, commands.BucketType.user)
