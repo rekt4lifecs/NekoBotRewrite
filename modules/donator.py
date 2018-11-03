@@ -48,7 +48,7 @@ class Donator:
         all_data = await r.table("donator").order_by("id").run(self.bot.r_conn)
         users = []
         for data in all_data:
-            users.append(data["user"])
+            users.append(data.get("user", "none"))
         if str(user) in users:
             return True
         else:
