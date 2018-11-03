@@ -155,7 +155,7 @@ class NekoBot(commands.AutoShardedBot):
                 await ctx.send(page)
 
     async def nekopet_check(self, message):
-        if random.randint(1, 300) == 1:
+        if random.randint(1, 200) == 1:
             data = await r.table("nekopet").get(str(message.author.id)).run(self.r_conn)
             if data:
                 play_amt = random.randint(1, 20)
