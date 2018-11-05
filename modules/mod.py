@@ -138,7 +138,7 @@ class Moderation:
             return await self.bot.send_cmd_help(ctx)
 
     @customroles.command(name="join")
-    async def __join(self, ctx, role: discord.Role = None):
+    async def __join(self, ctx, *, role: discord.Role = None):
         """Join a role"""
         if not await self._has_custom_roles_enabled(ctx.guild.id):
             return await ctx.send("This server has no custom roles setup.")
@@ -178,7 +178,7 @@ class Moderation:
                 return await ctx.send("I don't have permissions to give roles to users")
 
     @customroles.command(name="leave")
-    async def __leave(self, ctx, role: discord.Role):
+    async def __leave(self, ctx, *, role: discord.Role):
         """Leave a role"""
         if not await self._has_custom_roles_enabled(ctx.guild.id):
             return await ctx.send("This server has no custom roles setup.")
@@ -200,7 +200,7 @@ class Moderation:
 
     @customroles.command(name="addrole")
     @commands.has_permissions(manage_roles=True)
-    async def __addrole(self, ctx, role: discord.Role):
+    async def __addrole(self, ctx, *, role: discord.Role):
         """Add a role for users to be able to join"""
         if not await self._has_custom_roles_enabled(ctx.guild.id):
             return await ctx.send("This server has no custom roles setup.")
@@ -218,7 +218,7 @@ class Moderation:
 
     @customroles.command(name="removerole")
     @commands.has_permissions(manage_roles=True)
-    async def __removerole(self, ctx, role: discord.Role):
+    async def __removerole(self, ctx, *, role: discord.Role):
         """Remove a role from people to be able to join"""
         if not await self._has_custom_roles_enabled(ctx.guild.id):
             return await ctx.send("This server has no custom roles setup.")
