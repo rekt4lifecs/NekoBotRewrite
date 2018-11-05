@@ -47,6 +47,7 @@ numpy
 # NekoBotRewrite\modules\donator.py: 6
 # NekoBotRewrite\modules\eco.py: 8
 prettytable
+opencv-python
 
 # NekoBotRewrite\modules\general.py: 3
 psutil
