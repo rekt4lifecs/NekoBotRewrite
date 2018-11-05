@@ -352,7 +352,7 @@ class General:
         embed = discord.Embed(color=0xDEADBF)
         embed.add_field(name=_("Name"), value=f"**{server.name}**\n({server.id})")
         embed.add_field(name=_("Owner"), value=server.owner)
-        embed.add_field(name=_("Online (Cached)"), value=f"**{online}/{len(server.members)}**")
+        embed.add_field(name=_("Online (Cached)"), value=f"**{online}/{server.member_count}**")
         embed.add_field(name=_("Created at"), value=server.created_at.strftime("%d %b %Y %H:%M"))
         embed.add_field(name=_("Channels"), value=f"Text Channels: **{len(server.text_channels)}**\n"
                                                f"Voice Channels: **{len(server.voice_channels)}**\n"
