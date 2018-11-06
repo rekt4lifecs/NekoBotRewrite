@@ -346,6 +346,7 @@ class economy:
         await ctx.send(file=discord.File(fp=temp, filename="profile.png"))
 
     @commands.command()
+    @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def daily(self, ctx):
         """Get your daily bonus credits"""
