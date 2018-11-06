@@ -8,8 +8,70 @@ import datetime, time, math
 from prettytable import PrettyTable
 import gettext
 
+import cv2
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont
+import textwrap
+from io import BytesIO
+
 auth = {"Authorization": "Wolke " + weeb,
         "User-Agent": "NekoBot/4.2.0"}
+
+def interpolate(f_co, t_co, interval):
+    det_co = [(t - f) / interval for f, t in zip(f_co, t_co)]
+    for i in range(interval):
+        yield [round(f + det * i) for f, det in zip(f_co, det_co)]
+
+def get_rgb(h):
+    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+
+__cjk = [
+    {"from": ord(u"\u4E00"), "to": ord(u"\u9fff")},
+    {"from": ord(u"\u3400"), "to": ord(u"\u4dbf")},
+    {"from": ord(u"\U00020000"), "to": ord(u"\U0002A6DF")},
+    {"from": ord(u"\U0002A700"), "to": ord(u"\U0002B73F")},
+    {"from": ord(u"\U0002B740"), "to": ord(u"\U0002B81F")},
+    {"from": ord(u"\U0002B820"), "to": ord(u"\U0002CEAF")},
+    {"from": ord(u"\uF900"), "to": ord(u"\uFAFF")},
+    {"from": ord(u"\u3400"), "to": ord(u"\u4dbf")},
+    {"from": ord(u"\uAC00"), "to": ord(u"\uD7AF")},
+    {"from": ord(u"\u3041"), "to": ord(u"\u3094")},
+    {"from": ord(u"\u3099"), "to": ord(u"\u909E")},
+    {"from": ord(u"\u3000"), "to": ord(u"\u303F")}
+]
+
+__gradients = [
+    ["fad0c4", "ff9a9e"],
+    ["fbc2eb", "a18cd1"],
+    ["fad0c4", "ffd1ff"],
+    ["ff9a9e", "fecfef"],
+    ["fdcbf1", "e6dee9"],
+    ["fbc2eb", "a6c1ee"],
+    ["fccb90", "d57eeb"],
+    ["fed6e3", "a8edea"],
+    ["fef9d7", "d299c2"],
+    ["f6f3ff", "cd9cf2"],
+    ["cfc7f8", "ebbba7"],
+    ["f5efef", "feada6"],
+    ["fbc8d4", "9795f0"],
+    ["97d9e1", "d9afd9"],
+    ["f3e7e9", "dad4ec"],
+    ["ffdde1", "ee9ca7"],
+    ["e6dee9", "bdc2e8"],
+    ["bfd9fe", "df89b5"]
+]
+
+def get_random_gradients():
+    a, b = random.choice(__gradients)
+    return get_rgb(a), get_rgb(b)
+
+def checkCJK(text: str):
+    i = False
+    for l in text:
+        if any([range["from"] <= ord(l) <= range["to"] for range in __cjk]):
+            i = True
+            break
+    return i
 
 class economy:
 
@@ -41,6 +103,7 @@ class economy:
         else:
             return False
 
+    # yes i stole this
     def _required_exp(self, level: int):
         if level < 0:
             return 0
@@ -161,6 +224,57 @@ class economy:
         else:
             await ctx.send("💵 | " + _("Balance: **$0**"))
 
+    def _generate_profile(self, xp, username, description, balance, married_to, reputation):
+        img = np.zeros((400, 400, 3), np.uint8)
+        c1, c2 = get_random_gradients()
+        for x, color in enumerate(interpolate(c1, c2, img.shape[1] * 2)):
+            cv2.line(img, (x, 0), (0, x), tuple(color), 1)
+        cv2.line(img, (25, 130), (375, 130), (0, 0, 0), 1)
+        overlay = img.copy()
+        cv2.rectangle(overlay, (16, 137), (384, 157), (255, 255, 255), -1)
+        cv2.addWeighted(overlay, 0.25, img, 0.75, 0, img)
+        overlay = img.copy()
+        cv2.rectangle(overlay, (16, 170), (200, 385), (40, 40, 40), -1)
+        cv2.addWeighted(overlay, 0.07, img, 0.93, 0, img)
+
+        level = self._find_level(xp)
+        required_xp = self._level_exp(level + 1)
+
+        xp_percentage = int(xp / required_xp * 100)
+        cv2.rectangle(img, (16, 137), (round(3.68 * xp_percentage) + 16, 157), (240, 240, 240), -1)
+
+        img = Image.fromarray(img)
+        description_font = ImageFont.truetype("data/fonts/RobotoCondensed/RobotoCondensed-Light.ttf", 17)
+        side_font = ImageFont.truetype("data/fonts/RobotoCondensed/RobotoCondensed-Light.ttf", 25)
+        xp_font = ImageFont.truetype("data/fonts/RobotoCondensed/RobotoCondensed-Bold.ttf", 13)
+        # lilbigger = ImageFont.truetype("data/fonts/RobotoCondensed/RobotoCondensed-Light.ttf", 20)
+        draw = ImageDraw.Draw(img)
+
+        if checkCJK(username):
+            username_font = ImageFont.truetype("data/fonts/Noto/NotoSerifCJKjp-Light.otf",
+                                               33 if len(username) <= 16 else 27)
+            w, h = draw.textsize(username, username_font)
+            draw.text(((img.width - w) / 2, 85 if len(username) <= 16 else 93), username, 0, username_font)
+        else:
+            username_font = ImageFont.truetype("data/fonts/Noto/NotoSans-SemiCondensedLight.ttf",
+                                               37 if len(username) <= 16 else 33)
+            w, h = draw.textsize(username, username_font)
+            draw.text(((img.width - w) / 2, 83), username, 0, username_font)
+
+        draw.text((25, 180), textwrap.fill(description, 20), 0, description_font)
+        draw.text((22, 139), "%sXP" % xp, (140, 140, 140), xp_font)
+        draw.text(((img.width - draw.textsize("Level %s" % level, xp_font)[0]) / 2, 139),
+                  "Level %s" % level, (100, 100, 100), xp_font)
+        draw.text(({1: 355, 2: 350, 3: 345,
+                    4: 337, 5: 328, 6: 320,
+                    7: 313, 8: 306, 9: 300}[len(str(required_xp))], 139), "%sXP" % required_xp, (140, 140, 140),
+                  xp_font)
+        draw.text((210, 175), "$" + str(balance), 0, side_font)
+        draw.text((210, 203), "%s Reputation" % reputation, 0, side_font)
+        # draw.text((210, 231), "<3 %s" % married_to, 0, lilbigger) # backsoon
+
+        return img
+
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 10, commands.BucketType.user)
@@ -176,11 +290,9 @@ class economy:
         # Level Check
         if not await self.__has_level_account(user.id):
             info = ""
-            color = int("deadbf", 16)
         else:
             userinfo = await r.table("levels").get(str(user.id)).run(self.bot.r_conn)
             info = base64.b64decode(userinfo["info"]).decode("utf8")
-            color = int(userinfo["color"], 16)
 
         # Economy Check
         if not await self.__has_account(user.id):
@@ -195,26 +307,23 @@ class economy:
         xp = await r.table("levelSystem").get(str(user.id)).run(self.bot.r_conn)
         if xp:
             xp = xp["xp"]
-            level = self._find_level(xp)
-            required = self._level_exp(level + 1)
         else:
             xp = 0
-            level = 0
-            required = 0
 
         # Get users guild level
-        _guild_xp = await r.table("guildXP").get(str(ctx.guild.id)).run(self.bot.r_conn)
-        if _guild_xp:
-            try:
-                guild_xp = _guild_xp[str(ctx.author.id)]["xp"]
-            except:
-                guild_xp = 0
-            guild_level = self._find_level(guild_xp)
-            guild_required = self._level_exp(guild_level + 1)
-        else:
-            guild_xp = 0
-            guild_level = 0
-            guild_required = 0
+        # Not needed now
+        # _guild_xp = await r.table("guildXP").get(str(ctx.guild.id)).run(self.bot.r_conn)
+        # if _guild_xp:
+        #     try:
+        #         guild_xp = _guild_xp[str(ctx.author.id)]["xp"]
+        #     except:
+        #         guild_xp = 0
+        #     guild_level = self._find_level(guild_xp)
+        #     guild_required = self._level_exp(guild_level + 1)
+        # else:
+        #     guild_xp = 0
+        #     guild_level = 0
+        #     guild_required = 0
 
         # Get user married to
         married = await r.table("marriage").get(str(user.id)).run(self.bot.r_conn)
@@ -223,14 +332,18 @@ class economy:
         else:
             married = await self.bot.get_user_info(married["marriedTo"])
 
-        em = discord.Embed(color=color)
-        em.title = "%s's Profile" % user.name
-        wew = (f"${balance}", rep, level, xp, required, guild_level, guild_xp, guild_required, info,)
-        em.description = "💵 | Balance: **%s**\n📈 | Rep: **%s**\n🌎 | Level: **%s %s/%s**\n🎮 Server Level: **%s %s/%s**\n\n```\n%s\n```" % wew
-        em.set_footer(text="Married to %s" % married)
-        em.set_thumbnail(url=user.avatar_url)
+        # em = discord.Embed(color=color)
+        #         # em.title = "%s's Profile" % user.name
+        #         # wew = (f"${balance}", rep, level, xp, required, guild_level, guild_xp, guild_required, info,)
+        #         # em.description = "💵 | Balance: **%s**\n📈 | Rep: **%s**\n🌎 | Level: **%s %s/%s**\n🎮 Server Level: **%s %s/%s**\n\n```\n%s\n```" % wew
+        #         # em.set_footer(text="Married to %s" % married)
+        #         # em.set_thumbnail(url=user.avatar_url)
 
-        await ctx.send(embed=em)
+        temp = BytesIO()
+        self._generate_profile(int(xp), user.name, info, int(balance), married, rep).save(temp, format="png")
+        temp.seek(0)
+
+        await ctx.send(file=discord.File(fp=temp, filename="profile.png"))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
