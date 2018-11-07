@@ -224,7 +224,17 @@ class economy:
         else:
             await ctx.send("💵 | " + _("Balance: **$0**"))
 
-    def _generate_profile(self, xp, username, description, balance, married_to, reputation):
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def genprofile(self, ctx):
+        temp = BytesIO()
+        (await self._generate_profile(1000, "test profile", "test description", 500000, [
+            "469920504250236948", "270133511325876224", "327144735359762432", "159985870458322944", "160105994217586689"
+        ], 5)).save(temp, format="png")
+        temp.seek(0)
+        await ctx.send(file=discord.File(fp=temp, filename="profile.png"))
+
+    async def _generate_profile(self, xp, username, description, balance, married_to, reputation):
         img = np.zeros((400, 400, 3), np.uint8)
         c1, c2 = get_random_gradients()
         for x, color in enumerate(interpolate(c1, c2, img.shape[1] * 2)):
@@ -244,10 +254,11 @@ class economy:
         cv2.rectangle(img, (16, 137), (round(3.68 * xp_percentage) + 16, 157), (240, 240, 240), -1)
 
         img = Image.fromarray(img)
-        description_font = ImageFont.truetype("data/fonts/RobotoCondensed/RobotoCondensed-Light.ttf", 17)
         side_font = ImageFont.truetype("data/fonts/RobotoCondensed/RobotoCondensed-Light.ttf", 25)
         xp_font = ImageFont.truetype("data/fonts/RobotoCondensed/RobotoCondensed-Bold.ttf", 13)
-        # lilbigger = ImageFont.truetype("data/fonts/RobotoCondensed/RobotoCondensed-Light.ttf", 20)
+        marriage_title_font = ImageFont.truetype("data/fonts/RobotoCondensed/RobotoCondensed-Light.ttf", 22)
+        marriage_user_font = ImageFont.truetype("data/fonts/RobotoCondensed/RobotoCondensed-Light.ttf", 19)
+        marriage_user_font_cjk = ImageFont.truetype("data/fonts/Noto/NotoSerifCJKjp-Light.otf", 19)
         draw = ImageDraw.Draw(img)
 
         if checkCJK(username):
@@ -261,7 +272,16 @@ class economy:
             w, h = draw.textsize(username, username_font)
             draw.text(((img.width - w) / 2, 83), username, 0, username_font)
 
-        draw.text((25, 180), textwrap.fill(description, 20), 0, description_font)
+        description = textwrap.fill(description, 20)
+
+        if checkCJK(description):
+            description_font = ImageFont.truetype("data/fonts/Noto/NotoSerifCJKjp-Light.otf", 15)
+            st = 176
+        else:
+            description_font = ImageFont.truetype("data/fonts/RobotoCondensed/RobotoCondensed-Light.ttf", 17)
+            st = 180
+
+        draw.text((25, st), description, 0, description_font)
         draw.text((22, 139), "%sXP" % xp, (140, 140, 140), xp_font)
         draw.text(((img.width - draw.textsize("Level %s" % level, xp_font)[0]) / 2, 139),
                   "Level %s" % level, (100, 100, 100), xp_font)
@@ -271,7 +291,19 @@ class economy:
                   xp_font)
         draw.text((210, 175), "$" + str(balance), 0, side_font)
         draw.text((210, 203), "%s Reputation" % reputation, 0, side_font)
-        # draw.text((210, 231), "<3 %s" % married_to, 0, lilbigger) # backsoon
+        draw.text((210, 240), "Married to", 0, marriage_title_font)
+
+        for i, user in enumerate(married_to, start=1):
+            user = self.bot.get_user(int(user))
+            if not user:
+                user = await self.bot.get_user_info(int(user))
+            if checkCJK(user.name):
+                m_font = marriage_user_font_cjk
+                st = 240
+            else:
+                st = 245
+                m_font = marriage_user_font
+            draw.text((210, st + (i * 20)), user.name, 0, m_font)
 
         return img
 
@@ -327,10 +359,10 @@ class economy:
 
         # Get user married to
         married = await r.table("marriage").get(str(user.id)).run(self.bot.r_conn)
-        if not married:
-            married = "Nobody"
+        if married:
+            married = married.get("marriedTo", [])
         else:
-            married = await self.bot.get_user_info(married["marriedTo"])
+            married = []
 
         # em = discord.Embed(color=color)
         #         # em.title = "%s's Profile" % user.name
@@ -340,7 +372,7 @@ class economy:
         #         # em.set_thumbnail(url=user.avatar_url)
 
         temp = BytesIO()
-        self._generate_profile(int(xp), user.name, info, int(balance), married, rep).save(temp, format="png")
+        (await self._generate_profile(int(xp), user.name, info, int(balance), married, rep)).save(temp, format="png")
         temp.seek(0)
 
         await ctx.send(file=discord.File(fp=temp, filename="profile.png"))
