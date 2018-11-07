@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord
 import config, aiohttp, logging
 import gettext
+import traceback, sys
 
 log = logging.getLogger()
 
@@ -76,6 +77,7 @@ class error_handler:
             await ctx.send(embed=em)
             log.warning('In {}:'.format(ctx.command.qualified_name))
             log.warning('{}: {}'.format(exception.original.__class__.__name__, exception.original))
+            traceback.print_exc(file=sys.stdout)
         elif isinstance(exception, commands.BadArgument):
             await self.send_cmd_help(ctx)
         elif isinstance(exception, commands.MissingRequiredArgument):
