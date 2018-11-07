@@ -45,6 +45,17 @@ class Marriage:
         elif len(author_data.get("marriedTo", [])) >= 5:
             return await ctx.send(bold(_("You are married to too many users")))
 
+        user_data = await r.table("marriage").get(str(user.id)).run(self.bot.r_conn)
+        if not user_data:
+            user_data = {
+                "id": str(user.id),
+                "marriedTo": []
+            }
+            await r.table("marriage").insert(user_data).run(self.bot.r_conn)
+
+        if len(user_data.get("marriedTo", [])) >= 5:
+            return await ctx.send(_("That user is already married to too many users"))
+
         a_name = ctx.author.name.replace("@", "@\u200B")
         u_name = user.name.replace("@", "@\u200B")
         await ctx.send(_("%s is wanting to marry %s!\n%s type yes to accept!") % (a_name, u_name, user.mention))
@@ -57,14 +68,6 @@ class Marriage:
             return await ctx.send(_("Marriage Cancelled."))
 
         await ctx.send(f"🎉 {ctx.author.mention} ❤ {user.mention} 🎉")
-
-        user_data = await r.table("marriage").get(str(user.id)).run(self.bot.r_conn)
-        if not user_data:
-            user_data = {
-                "id": str(user.id),
-                "marriedTo": []
-            }
-            await r.table("marriage").insert(user_data).run(self.bot.r_conn)
 
         author_marriedTo = author_data.get("marriedTo", [])
         user_marriedTo = user_data.get("marriedTo", [])
