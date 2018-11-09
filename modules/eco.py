@@ -291,19 +291,23 @@ class economy:
                   xp_font)
         draw.text((210, 175), "${:,}".format(balance), 0, side_font)
         draw.text((210, 203), "%s Reputation" % reputation, 0, side_font)
-        draw.text((210, 240), "Married to", 0, marriage_title_font)
 
-        for i, userID in enumerate(married_to, start=1):
-            user = self.bot.get_user(int(userID))
-            if not user:
-                user = await self.bot.get_user_info(int(userID))
-            if checkCJK(user.name):
-                m_font = marriage_user_font_cjk
-                st = 240
-            else:
-                st = 245
-                m_font = marriage_user_font
-            draw.text((210, st + (i * 20)), user.name, 0, m_font)
+        if married_to:
+            draw.text((210, 240), "Married to", 0, marriage_title_font)
+
+            for i, userID in enumerate(married_to, start=1):
+                user = self.bot.get_user(int(userID))
+                if not user:
+                    user = await self.bot.get_user_info(int(userID))
+                if checkCJK(user.name):
+                    m_font = marriage_user_font_cjk
+                    st = 240
+                else:
+                    st = 245
+                    m_font = marriage_user_font
+                draw.text((210, st + (i * 20)), user.name, 0, m_font)
+        else:
+            draw.text((210, 240), "Married to nobody", 0, marriage_title_font)
 
         return img
 
