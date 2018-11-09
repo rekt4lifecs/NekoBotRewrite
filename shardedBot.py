@@ -257,7 +257,7 @@ class NekoBot(commands.AutoShardedBot):
             self.instancePoster = True
             while self.instancePoster:
                 await self.redis.set("instance%s-guilds" % self.instance, len(self.guilds))
-                await self.redis.set("instance%s-users" % self.instance, len(set(self.get_all_members())))
+                await self.redis.set("instance%s-users" % self.instance, sum([x.member_count for x in self.guilds]))
                 await self.redis.set("instance%s-messages" % self.instance, self.counter["messages_read"])
                 await self.redis.set("instance%s-commands" % self.instance, self.counter["commands_used"])
                 await self.redis.set("instance%s-channels" % self.instance, len(set(self.get_all_channels())))
