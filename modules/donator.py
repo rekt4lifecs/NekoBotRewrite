@@ -54,6 +54,43 @@ class Donator:
         else:
             return False
 
+    async def on_message(self, message):
+        if not message.guild:
+            return
+        if message.guild.id == 221989003400970241 and message.channel.id == 431887286246834178 and len(message.embeds) >= 1:
+            embed = message.embeds[0]
+            if embed.title == "Patreon Update.":
+                user = embed.footer.text
+                if isinstance(user, discord.Embed.Empty):
+                    return
+                fuckingweeb = self.bot.get_user(270133511325876224)
+                if embed.description.startswith("pledges:delete"):
+                    keys = await r.table("donator").order_by("").run(self.bot.r_conn)
+                    keys = [x for x in keys if x.get("user") == str(user)][0]
+                    await r.table("donator").get(str(keys)).delete().run(self.bot.r_conn)
+                    embed = discord.Embed(color=0xff6f3f, title="Token Deleted",
+                                          description=f"```css\n"
+                                                      f"Key: [ {keys} ] \n"
+                                                      f"```")
+                    await self.__post_to_hook(embed)
+                    await fuckingweeb.send("Deleted key for %s" % user)
+                elif embed.description.startswith("pledges:create"):
+                    x1 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
+                    x2 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
+                    x3 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
+                    token = f"{x1}-{x2}-{x3}"
+                    data = {
+                        "id": token,
+                        "user": str(user),
+                        "created_at": int(time.time())
+                    }
+                    await r.table("donator").insert(data).run(self.bot.r_conn)
+                    await fuckingweeb.send("Given key for %s" % user)
+                    user = await self.bot.get_user_info(int(user))
+                    await self.__post_to_hook(discord.Embed(color=0xff6f3f, title="Token Accepted",
+                                                            description="```css\nUser: %s (%s)\nToken [ %s ]\n```" % (user, user.id, token,)))
+                    await user.send("Thank you for donating, perks should now be active for you ❤")
+
     @commands.command(hidden=True)
     @commands.is_owner()
     async def sendkey(self, ctx, UserID:int, *, key: str):
