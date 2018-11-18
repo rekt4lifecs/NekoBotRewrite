@@ -426,9 +426,12 @@ class Reactions:
         await ctx.send(embed=em)
 
     @commands.command()
-    @commands.cooldown(1, 6, commands.BucketType.user)
-    async def insultwaifu(self, ctx):
-        data = await self.weeb.waifu_insult_gen(ctx.author.avatar_url_as(format="png"))
+    @commands.guild_only()
+    @commands.cooldown(1, 4, commands.BucketType.user)
+    async def insultwaifu(self, ctx, user: discord.Member = None):
+        if not user:
+            user = ctx.author
+        data = await self.weeb.waifu_insult_gen(user.avatar_url_as(format="png"))
         await ctx.send(file=discord.File(fp=data, filename="insultwaifu.png"))
 
 def setup(bot):
