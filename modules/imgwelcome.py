@@ -68,15 +68,21 @@ class IMGWelcome:
         _ = await self._get_text(ctx)
         if not await self.__is_enabled(ctx.guild.id):
             return await ctx.send(_("Enable imgwelcoming with n!imgwelcome toggle"))
-        await ctx.send(_("Send an image or type anything without sending an image to reset back to default."))
 
-        def check(m):
-            return m.author == ctx.message.author and m.channel == ctx.message.channel
+        if len(ctx.message.attachments) == 0:
 
-        try:
-            msg = await self.bot.wait_for('message', check=check, timeout=20)
-        except:
-            return await ctx.send(_("Timed out."))
+            await ctx.send(_("Send an image or type anything without sending an image to reset back to default."))
+
+            def check(m):
+                return m.author == ctx.message.author and m.channel == ctx.message.channel
+
+            try:
+                msg = await self.bot.wait_for('message', check=check, timeout=20)
+            except:
+                return await ctx.send(_("Timed out."))
+        
+        else:
+            msg = ctx.message
 
         if len(msg.attachments) >= 1:
             attachment = str(msg.attachments[0].url).rpartition(".")[2]
