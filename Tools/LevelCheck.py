@@ -51,6 +51,8 @@ def get_top():
         average = int(float(np.mean(i)))
 
         if average < top_seconds:
+            r.table("levelSystem").get(str(user["id"])).update({"xp": 0, "lastxptimes": [], "lastxp": "0", "blacklisted": True}).run(r_conn)
+            print("Reset %s" % user["id"])
             users.append(f"ID: {user['id']} Average: {average} Amount: {len(i)}")
 
     print("\n".join(users))

@@ -202,7 +202,7 @@ class Donator:
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
-    @commands.command(aliases=["autolood"])
+    @commands.command(aliases=["autolood", "autolewd"])
     async def autolooder(self, ctx, channel:discord.TextChannel=None):
         """
         Enable/Disable the autolooder for your server, mention an already added channel to disable.
@@ -236,6 +236,43 @@ class Donator:
         }
         await r.table("autolooder").insert(data).run(self.bot.r_conn)
         await ctx.send(_("Enabled autolooder for `%s`!") % channel.name)
+
+
+    @commands.guild_only()
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(1, 2, commands.BucketType.user)
+    @commands.command(aliases=["autoloodersetting", "autolewdsetting", "autoloodsettings", "autolewdsettings", "autoloodersettings"])
+    async def autoloodsetting(self, ctx, imgtype: str = None):
+        """Toggle autolood options for the current servers autolewder
+
+        Image Types: pgif, 4k, hentai, holo, lewdneko, neko, lewdkitsune, kemonomimi, anal, hentai_anal, gonewild, kanna, ass, pussy, thigh
+        Example: n!autoloodtoggle holo"""
+        _ = await self._get_text(ctx)
+
+        data = await r.table("autolooder").get(str(ctx.guild.id)).run(self.bot.r_conn)
+        if not data:
+            return await ctx.send("Autolooder is not enabled on this server")
+
+        if imgtype is None:
+            return await ctx.send("Enabled Types: %s" % ", ".join(["`%s`" % i for i in data.get("choices", [])]))
+
+        options = ["pgif", "4k", "hentai", "holo", "lewdneko", "neko", "lewdkitsune", "kemonomimi", "anal",
+                   "hentai_anal", "gonewild", "kanna", "ass", "pussy", "thigh"]
+
+        imgtype = imgtype.lower()
+        if imgtype not in options:
+            return await ctx.send("Not a valid type, valid types: %s" % ", ".join(["`%s`" % i for i in options]))
+
+        if imgtype in data.get("choices", []):
+            newchoices = []
+            for choice in data.get("choices", []):
+                if choice != imgtype:
+                    newchoices.append(choice)
+        else:
+            newchoices = data.get("choices", []) + [imgtype]
+
+        await r.table("autolooder").get(str(ctx.guild.id)).update({"choices": newchoices}).run(self.bot.r_conn)
+        await ctx.send("Toggled option for %s!" % imgtype)
 
 def setup(bot):
     bot.add_cog(Donator(bot))
