@@ -142,6 +142,8 @@ class General:
             async with cs.post("https://trace.moe/api/search?token=%s" % config.whatanime,
                                data={"image": str(base64.b64encode(i.read()).decode("utf8"))},
                                headers={"Content-Type": "application/x-www-form-urlencoded"}) as r:
+                if r.status == 503:
+                    return await ctx.send("Service down for maintenance")
                 try:
                     res = await r.json()
                 except:
