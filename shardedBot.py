@@ -262,20 +262,6 @@ class NekoBot(commands.AutoShardedBot):
                 await self.redis.set("instance%s-commands" % self.instance, self.counter["commands_used"])
                 await self.redis.set("instance%s-channels" % self.instance, len(set(self.get_all_channels())))
                 logger.info(f"Updated Instance {self.instance}'s Guild Count with {len(self.guilds)}")
-
-                if self.instance == 0:
-
-                    top_users = await r.table("economy").order_by(r.desc("balance")).limit(10).run(self.r_conn)
-
-                    for i, u in enumerate(top_users):
-                        try:
-                            user = await self.get_user_info(int(u["id"]))
-                            username = user.name + "#" + user.discriminator
-                        except:
-                            username = "Unknown User"
-
-                        await self.redis.set("top%s" % i, username)
-
                 await asyncio.sleep(300)
 
     def run(self):

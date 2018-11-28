@@ -529,11 +529,11 @@ class economy:
         table = PrettyTable()
         table.field_names = ["Username", "Balance"]
 
-        top_users = await r.table("economy").order_by(r.desc("balance")).limit(10).run(self.bot.r_conn)
-
-        for i, user in enumerate(top_users):
-            username = (await self.bot.redis.get("top%s" % i)).decode("utf8")
-            table.add_row([username, "${:,}".format(user["balance"])])
+        for i in range(10):
+            username = (await self.bot.redis.get("top%s:name" % i))
+            balance = (await self.bot.redis.get("top%s" % i))
+            print("%s. %s %s" % (i, username, balance))
+            table.add_row([username.decode("utf8"), balance.decode("utf8")])
 
         await ctx.send("```\n%s\n```" % table)
 
