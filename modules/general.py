@@ -78,14 +78,13 @@ class General:
         event = msg.get("t")
         self.bot.socket_stats[event] += 1
         data = msg.get("d", {})
-        if data.get("guild_id"):
-            if event == "GUILD_CREATE":
-                await self.bot.redis.set("guild:%s:cache" % data.get("guild_id"), json.dumps({
-                    "id": data.get("guild_id"),
-                    "icon": data.get("icon")
-                }))
-            elif event == "GUILD_DELETE":
-                await self.bot.redis.delete("guild:%s:cache" % data.get("guild_id"))
+        if event == "GUILD_CREATE":
+            await self.bot.redis.set("guild:%s:cache" % data.get("guild_id"), json.dumps({
+                "id": data.get("guild_id"),
+                "icon": data.get("icon")
+            }))
+        elif event == "GUILD_DELETE":
+            await self.bot.redis.delete("guild:%s:cache" % data.get("guild_id"))
 
     def whatanime_embedbuilder(self, _, doc: dict):
         em = discord.Embed(color=0xDEADBF)
