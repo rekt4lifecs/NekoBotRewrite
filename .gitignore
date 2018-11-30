@@ -17,3 +17,4 @@ transactions.json
 .config.json
 
 __pycache__
+Tools/
