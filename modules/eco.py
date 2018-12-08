@@ -535,7 +535,6 @@ class economy:
         for i in range(10):
             username = (await self.bot.redis.get("top%s:name" % i))
             balance = (await self.bot.redis.get("top%s" % i))
-            print("%s. %s %s" % (i, username, balance))
             table.add_row([username.decode("utf8"), balance.decode("utf8")])
 
         await ctx.send("```\n%s\n```" % table)
