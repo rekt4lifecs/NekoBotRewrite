@@ -47,10 +47,10 @@ class DiscordBotsOrgAPI:
 
                     try:
                         async with aiohttp.ClientSession() as session:
-                            await session.post('https://bots.discord.pw/api/bots/310039170792030211/stats',
+                            await session.post("https://discord.bots.gg/api/v1/bots/310039170792030211/stats",
                                                     headers={'Authorization': f'{config.dpw_key}'},
-                                                    json={"server_count": int(guilds),
-                                                          "shard_count": self.bot.shard_count})
+                                                    json={"guildCount": int(guilds),
+                                                          "shardCount": self.bot.shard_count})
                     except Exception as e:
                         log.error(f"Failed to post to pw, {e}")
                     try:
