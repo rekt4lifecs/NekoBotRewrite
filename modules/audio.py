@@ -66,6 +66,7 @@ class Audio:
         self.bot.lavalink.players.clear()
         self.bot.lavalink.unregister_hook(self._track_hook)
         self.bot.lavalink.hooks.clear()
+        del self.bot.lavalink
 
     async def _track_hook(self, event):
         if isinstance(event, lavalink.Events.StatsUpdateEvent):
