@@ -604,27 +604,27 @@ class General:
         await ctx.send(embed=discord.Embed(title=random.choice(answers), color=0xDEADBF))
 
     @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.cooldown(1, 7, commands.BucketType.user)
     async def botinfo(self, ctx, bot_user: discord.Member):
         """Get a Bots Info"""
         if bot_user == None:
             bot_user = self.bot.user
         await ctx.trigger_typing()
         _ = await self._get_text(ctx)
-        url = "https://bots.discord.pw/api/bots/%s" % bot_user.id
+        url = "https://discord.bots.gg/api/v1/bots/%s" % bot_user.id
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url, headers={"Authorization": config.dpw_key}) as r:
                 if r.status == 404:
                     return await ctx.send("Thats not a valid bot")
                 bot = await r.json()
         try:
-            em = discord.Embed(color=0xDEADBF, url="https://bots.discord.pw/bots/%s" % bot_user.id)
+            em = discord.Embed(color=0xDEADBF)
             em.title = bot_user.name + "#" + bot_user.discriminator
-            em.description = bot["description"]
+            em.description = bot["shortDescription"]
             em.add_field(name=_("Prefix"), value=bot.get("prefix", "None"))
-            em.add_field(name=_("Lib"), value=bot.get("library"))
-            em.add_field(name=_("Owners"), value=", ".join(["<@%s>" % i for i in bot.get("owner_ids")]))
-            em.add_field(name=_("ID"), value=bot.get("client_id"))
+            em.add_field(name=_("Lib"), value=bot.get("libraryName"))
+            em.add_field(name=_("Owners"), value="%s#%s" % (bot["owner"]["username"], bot["owner"]["discriminator"]))
+            em.add_field(name=_("ID"), value=bot.get("clientId"))
             em.add_field(name=_("Website"), value=bot.get("website") if bot.get("website") != "" else "None")
             em.set_thumbnail(url=bot_user.avatar_url_as(format="png"))
             await ctx.send(embed=em)
