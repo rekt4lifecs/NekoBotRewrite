@@ -3,8 +3,6 @@ import discord, random, aiohttp
 from .utils import checks, chat_formatting, hastebin
 import config
 import json
-import nekobot
-import rethinkdb as r
 import gettext
 
 class NSFW:
@@ -12,8 +10,6 @@ class NSFW:
 
     def __init__(self, bot):
         self.bot = bot
-        self.session = aiohttp.ClientSession(loop=self.bot.loop)
-        self.nekobot = nekobot.Client(loop=self.bot.loop)
         self.lang = {}
         # self.languages = ["french", "polish", "spanish", "tsundere", "weeb"]
         self.languages = ["tsundere", "weeb", "chinese"]
@@ -32,37 +28,36 @@ class NSFW:
 
     async def log_error(self, error:str):
         webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
-        webhook = discord.Webhook.from_url(webhook_url, adapter=discord.AsyncWebhookAdapter(self.session))
+        async with aiohttp.ClientSession() as cs:
+            webhook = discord.Webhook.from_url(webhook_url, adapter=discord.AsyncWebhookAdapter(cs))
 
-        em = discord.Embed(color=0xff6f3f)
-        em.title = "Error"
-        em.description = chat_formatting.box(error, "python")
-        em.set_footer(text="Instance %s" % self.bot.instance)
+            em = discord.Embed(color=0xff6f3f)
+            em.title = "Error"
+            em.description = chat_formatting.box(error, "python")
+            em.set_footer(text="Instance %s" % self.bot.instance)
 
-        await webhook.send(embed=em)
+            await webhook.send(embed=em)
+
+    async def nekobot(self, imgtype: str):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/image?type=%s" % imgtype) as res:
+                res = await res.json()
+        return res.get("message")
 
     async def boobbot(self, imgtype:str):
-        url = config.boobbot["base"] + imgtype
         auth = {"key": config.boobbot["key"]}
-        data = await self.session.get(url, headers=auth)
-
-        try:
-            x = await data.json()
-        except aiohttp.ContentTypeError:
-            if imgtype == "boobs":
+        url = "https://nekobot.xyz/placeholder.png"
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(config.boobbot["base"] + imgtype, headers=auth) as res:
                 try:
-                    async with aiohttp.ClientSession() as cs:
-                        async with cs.get("http://api.oboobs.ru/boobs/" % random.randint(0, 12058)) as r:
-                            res = await r.json()
-                    return res["preview"]
+                    x = await res.json()
+                    url = x.get("url")
                 except:
-                    pass
-            content = await data.text()
-            status = data.status
-            content = await hastebin.post(str(content))
-            await self.log_error(f"Content Type Error:\n({status}) {content}")
-            return "https://nekobot.xyz/placeholder.png"
-        return x.get("url")
+                    content = await res.text()
+                    status = res.status
+                    content = await hastebin.post(str(content))
+                    await self.log_error(f"Content Type Error:\n({status}) {content}")
+        return url
 
     @commands.command()
     @commands.guild_only()
@@ -74,7 +69,7 @@ class NSFW:
             await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=await self.nekobot.image("pgif"))
+        em.set_image(url=await self.nekobot("pgif"))
 
         await ctx.send(embed=em)
 
@@ -98,7 +93,7 @@ class NSFW:
             await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         embed = discord.Embed(color=0xDEADBF)
-        embed.set_image(url=await self.nekobot.image("anal"))
+        embed.set_image(url=await self.nekobot("anal"))
         await ctx.send(embed=embed)
 
     @commands.command(name="4k")
@@ -111,7 +106,7 @@ class NSFW:
             await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         embed = discord.Embed(color=0xDEADBF)
-        embed.set_image(url=await self.nekobot.image("4k"))
+        embed.set_image(url=await self.nekobot("4k"))
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -124,24 +119,19 @@ class NSFW:
             await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         else:
-            try:
-                query = ("https://yande.re/post.json?limit=100&tags=" + tag)
-                async with aiohttp.ClientSession() as cs:
-                    async with cs.get(query) as r:
-                        res = await r.json()
-                if res != []:
-                    img = random.choice(res)
-                    if "loli" in img["tags"] or "shota" in img["tags"]:
-                        return await ctx.send(_("Loli or shota was found in this post."))
-                    em = discord.Embed(color=0xDEADBF)
-                    em.set_image(url=img['jpeg_url'])
-                    await ctx.send(embed=em)
-                else:
-                    e = discord.Embed(color=0xDEADBF, title="⚠ " + _("Error"),
-                                      description=_("Yande.re has no images for requested tags."))
-                    await ctx.send(embed=e)
-            except Exception as e:
-                await ctx.send(":x: `{}`".format(e))
+            query = ("https://yande.re/post.json?limit=100&tags=" + tag)
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(query) as res:
+                    res = await res.json()
+            if res != []:
+                img = random.choice(res)
+                if "loli" in img["tags"] or "shota" in img["tags"]:
+                    return await ctx.send(_("Loli or shota was found in this post."))
+                em = discord.Embed(color=0xDEADBF)
+                em.set_image(url=img['jpeg_url'])
+                await ctx.send(embed=em)
+            else:
+                await ctx.send("No tags found.")
 
     @commands.command()
     @commands.guild_only()
@@ -166,8 +156,8 @@ class NSFW:
         headers = {"Authorization": f"Client-ID {config.imgur}"}
         url = f'https://api.imgur.com/3/gallery/r/bodyperfection/hot/{random.randint(1, 5)}'
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(url, headers=headers) as r:
-                res =  await r.json()
+            async with cs.get(url, headers=headers) as res:
+                res =  await res.json()
         if res["status"] == 429:
             _ = await self._get_text(ctx)
             return await ctx.send(_("**Ratelimited, try again later.**"))
@@ -191,8 +181,8 @@ class NSFW:
         headers = {"Authorization": f"Client-ID {config.imgur}"}
         url = f'https://api.imgur.com/3/gallery/r/{sub}/hot/{random.randint(1, 5)}'
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(url, headers=headers) as r:
-                res = await r.json()
+            async with cs.get(url, headers=headers) as res:
+                res = await res.json()
         if res["status"] == 429:
             _ = await self._get_text(ctx)
             return await ctx.send(_("**Ratelimited, try again later.**"))
@@ -213,7 +203,7 @@ class NSFW:
             await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=await self.nekobot.image("ass"))
+        em.set_image(url=await self.nekobot("ass"))
 
         await ctx.send(embed=em)
 
@@ -240,8 +230,8 @@ class NSFW:
             return
         em = discord.Embed(color=0xDEADBF)
         async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://nekobot.xyz/api/v2/image/thighs") as r:
-                res = await r.json()
+            async with cs.get("https://nekobot.xyz/api/v2/image/thighs") as res:
+                res = await res.json()
         em.set_image(url=res["message"])
         await ctx.send(embed=em)
 
@@ -255,7 +245,7 @@ class NSFW:
             await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=await self.nekobot.image("pussy"))
+        em.set_image(url=await self.nekobot("pussy"))
 
         await ctx.send(embed=em)
 
@@ -269,7 +259,7 @@ class NSFW:
             await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=await self.nekobot.image("gonewild"))
+        em.set_image(url=await self.nekobot("gonewild"))
 
         await ctx.send(embed=em)
 
@@ -283,12 +273,12 @@ class NSFW:
             await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         else:
-            url = "http://nhentai.net/random/"
-            res = await self.session.get(url)
-            url = res.url
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get("http://nhentai.net/random/") as res:
+                    res = res.url
             await ctx.send(embed=discord.Embed(color=0xDEADBF,
                                                title="Random Doujin",
-                                               description=str(url)))
+                                               description=str(res)))
 
     @commands.command()
     @commands.guild_only()
@@ -300,7 +290,7 @@ class NSFW:
             await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>"))
             return
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=await self.nekobot.image("lewdkitsune"))
+        em.set_image(url=await self.nekobot("lewdkitsune"))
         await ctx.send(embed=em)
 
     @commands.command()
@@ -313,7 +303,7 @@ class NSFW:
             await ctx.send(_("This is not a NSFW Channel <:deadStare:417437129501835279>\nhttps://nekobot.xyz/hentai.png"))
             return
         em = discord.Embed(color=0xDEADBF)
-        em.set_image(url=await self.nekobot.image("hentai"))
+        em.set_image(url=await self.nekobot("hentai"))
         await ctx.send(embed=em)
 
     @commands.command(name="rule34", aliases=["r34"])
@@ -326,8 +316,8 @@ class NSFW:
             return await ctx.send(_("This is not an NSFW channel..."), delete_after=5)
         try:
             async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags={tag}") as r:
-                    data = json.loads(await r.text())
+                async with cs.get(f"https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags={tag}") as res:
+                    data = json.loads(await res.text())
             non_loli = list(filter(lambda x: 'loli' not in x['tags'] and 'shota' not in x['tags'], data))
             if len(non_loli) == 0:
                 em = discord.Embed(color=0xff6f3f, title="Warning", description=_("Loli/Shota in search."))
@@ -353,13 +343,13 @@ class NSFW:
             async with ctx.typing():
                 async with aiohttp.ClientSession() as cs:
                     async with cs.get(f"https://e621.net/post/index.json?limit=15&tags={tag}",
-                                      headers={"User-Agent": ua}) as r:
-                        res = await r.json()
+                                      headers={"User-Agent": ua}) as res:
+                        res = await res.json()
                 data = random.choice(res)
                 if data == []:
                     return await ctx.send(_("**No images found**"))
                 if "loli" in data["tags"] or "shota" in data["tags"]:
-                    return await ctx.send(_("**Children found in image.**"))
+                    return await ctx.send(_("**Loli/Shota found in image.**"))
                 em = discord.Embed(color=0xDEADBF)
                 em.set_image(url=data["file_url"])
                 await ctx.send(embed=em)
