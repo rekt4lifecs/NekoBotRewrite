@@ -470,7 +470,7 @@ class Moderation:
         else:
             await ctx.send('Reloaded <a:anone:502539278841282561>')
 
-    @commands.command(aliases=["ping"])
+    @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def latency(self, ctx):
         """Get bot latency across all shards"""
@@ -481,6 +481,13 @@ class Moderation:
 
         for i in chat_formatting.pagify(msg, page_length=1750):
             await ctx.send(i)
+
+    @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def ping(self, ctx):
+        s = time.time()
+        msg = await ctx.send("Ping")
+        await msg.edit(content="Ping, %sms" % round((time.time() - s) * 1000, 2))
 
     @commands.command(hidden=True, aliases=['exec'])
     @commands.is_owner()
