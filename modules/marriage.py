@@ -4,6 +4,7 @@ import gettext
 import rethinkdb as r
 from .utils.chat_formatting import bold
 import re
+import base64, json
 
 class Marriage:
 
@@ -24,6 +25,22 @@ class Marriage:
                 return gettext.gettext
         else:
             return gettext.gettext
+
+    async def get_cached_user(self, user_id: int):
+        cache = await self.bot.redis.get("user_cache:{}".format(user_id))
+        if cache is None:
+            cache = await self.bot.get_user_info(user_id)
+            cache = {
+                "name": cache.name,
+                "id": cache.id,
+                "discriminator": cache.discriminator
+            }
+            await self.bot.redis.set("user_cache:{}".format(user_id), base64.b64encode(
+                json.dumps(cache).encode("utf8")
+            ).decode("utf8"), expire=1800)
+        else:
+            cache = json.loads(base64.b64decode(cache))
+        return cache
 
     @commands.command()
     @commands.guild_only()
@@ -81,7 +98,7 @@ class Marriage:
     @commands.guild_only()
     @commands.cooldown(1, 4, commands.BucketType.user)
     async def divorce(self, ctx, user):
-        """Divorce ;-;"""
+        """Divorce somebody that you are married to, can be from an mention, their name or an id"""
         _ = await self._get_text(ctx)
 
         try:
@@ -127,6 +144,23 @@ class Marriage:
         await r.table("marriage").get(str(user.id)).update({"marriedTo": new_user_married}).run(self.bot.r_conn)
         await r.table("marriage").get(str(ctx.author.id)).update({"marriedTo": new_author_married}).run(self.bot.r_conn)
         await ctx.send("%s divorced %s 😦😢" % (ctx.author.name.replace("@", "@\u200B"), user.name.replace("@", "@\u200B")))
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def marriages(self, ctx):
+        """Show who you are married to"""
+        data = await r.table("marriage").get(str(ctx.author.id)).run(self.bot.r_conn)
+        if not data:
+            return await ctx.send("You are not married to anybody")
+
+        message = "**Married To**:\n"
+        for uid in data.get("marriedTo", []):
+            cached = await self.get_cached_user(int(uid))
+            message += "    - **{}#{}** ({})\n".format(
+                cached["name"], cached["discriminator"], cached["id"]
+            )
+
+        await ctx.send(message)
 
 def setup(bot):
     bot.add_cog(Marriage(bot))

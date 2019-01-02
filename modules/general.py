@@ -545,14 +545,6 @@ class General:
         temp.seek(0)
         await ctx.send(file=discord.File(temp, filename="qr.png"))
 
-    @commands.command()
-    async def vote(self, ctx):
-        _ = await self._get_text(ctx)
-        embed = discord.Embed(color=0xDEADBF,
-                              title=_("Voting Link"),
-                              description="https://discordbots.org/bot/310039170792030211/vote")
-        await ctx.send(embed=embed)
-
     @commands.command(aliases=["perms"])
     @commands.guild_only()
     @commands.cooldown(1, 5, commands.BucketType.user)

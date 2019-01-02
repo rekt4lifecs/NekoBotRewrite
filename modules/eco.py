@@ -9,6 +9,7 @@ from prettytable import PrettyTable
 import gettext
 
 import cv2
+import json
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
@@ -82,6 +83,22 @@ class economy:
         self.languages = ["tsundere", "weeb", "chinese"]
         for x in self.languages:
             self.lang[x] = gettext.translation("economy", localedir="locale", languages=[x])
+
+    async def get_cached_user(self, user_id: int):
+        cache = await self.bot.redis.get("user_cache:{}".format(user_id))
+        if cache is None:
+            cache = await self.bot.get_user_info(user_id)
+            cache = {
+                "name": cache.name,
+                "id": cache.id,
+                "discriminator": cache.discriminator
+            }
+            await self.bot.redis.set("user_cache:{}".format(user_id), base64.b64encode(
+                json.dumps(cache).encode("utf8")
+            ).decode("utf8"), expire=1800)
+        else:
+            cache = json.loads(base64.b64decode(cache))
+        return cache
 
     async def _get_text(self, ctx):
         lang = await self.bot.get_language(ctx)
@@ -296,16 +313,18 @@ class economy:
             draw.text((210, 240), "Married to", 0, marriage_title_font)
 
             for i, userID in enumerate(married_to, start=1):
-                user = self.bot.get_user(int(userID))
-                if not user:
-                    user = await self.bot.get_user_info(int(userID))
-                if checkCJK(user.name):
-                    m_font = marriage_user_font_cjk
-                    st = 240
-                else:
-                    st = 245
-                    m_font = marriage_user_font
-                draw.text((210, st + (i * 20)), user.name, 0, m_font)
+                try:
+                    user = (await self.get_cached_user(userID))["name"]
+
+                    if checkCJK(user):
+                        m_font = marriage_user_font_cjk
+                        st = 240
+                    else:
+                        m_font = marriage_user_font
+                        st = 245
+                    draw.text((210, st + (i * 20)), user, 0, m_font)
+                except:
+                    draw.text((210, st + (i * 20)), "Unknown User", 0, marriage_user_font)
         else:
             draw.text((210, 240), "Married to nobody", 0, marriage_title_font)
 
