@@ -3,6 +3,7 @@ import discord, asyncio
 import gettext
 import rethinkdb as r
 from .utils.chat_formatting import bold
+import re
 
 class Marriage:
 
@@ -79,12 +80,22 @@ class Marriage:
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def divorce(self, ctx, user: discord.Member):
+    async def divorce(self, ctx, user):
         """Divorce ;-;"""
         _ = await self._get_text(ctx)
 
-        if user == ctx.author:
-            return await ctx.send("You can't divorce yourself")
+        try:
+            converter = commands.UserConverter()
+            user = await converter.convert(ctx, user)
+        except commands.BadArgument:
+            user_re_match = re.match("[0-9]{12,22}", user)
+            if user_re_match is None:
+                return await self.bot.send_cmd_help(ctx)
+            user = await self.bot.get_user_info(int(user_re_match.group(0)))
+
+        if user.id == ctx.author.id:
+            return await ctx.send(_("You can't divorce yourself"))
+
         author_data = await r.table("marriage").get(str(ctx.author.id)).run(self.bot.r_conn)
         if not author_data:
             return await ctx.send(bold(_("You are not married")))
