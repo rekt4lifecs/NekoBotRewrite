@@ -554,7 +554,7 @@ class Moderation:
         for emoji, _ in answers:
             await actual_poll.add_reaction(emoji)
 
-    @commands.command(pass_context=True, hidden=True, name='eval')
+    @commands.command(hidden=True, name='eval')
     @commands.is_owner()
     async def _eval(self, ctx, *, body: str):
         """Evaluates a code"""
@@ -1114,8 +1114,9 @@ class Moderation:
 
     @commands.command()
     @commands.guild_only()
+    @commands.has_permissions(manage_roles=True)
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def autorole(self, ctx, role:discord.Role=None):
+    async def autorole(self, ctx, *, role: discord.Role=None):
         """Sets the autorole.
 
         (Case sensitive)
