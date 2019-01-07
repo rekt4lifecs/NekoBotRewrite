@@ -66,8 +66,8 @@ texts = {
         "*%s licks %s*"
     ],
     "stare": [
-        "*%s stares at themself* 👀",
-        "*%s stares* 👀"
+        "*%s stares* 👀",
+        "*%s stares at %s* 👀"
     ]
 }
 
@@ -335,8 +335,11 @@ class Reactions:
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def stare(self, ctx, user):
+    async def stare(self, ctx, user=None):
         """*Stares*"""
+        if user is None:
+            color, url = await self.weeb.stare()
+            return await ctx.send(embed=discord.Embed(color=color).set_image(url=url))
         await self._weeb_handler(ctx, user, "stare")
 
     @commands.command()
