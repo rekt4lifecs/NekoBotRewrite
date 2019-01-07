@@ -157,7 +157,7 @@ class Marriage:
         for uid in data.get("marriedTo", []):
             cached = await self.get_cached_user(int(uid))
             message += "    - **{}#{}** ({})\n".format(
-                cached["name"], cached["discriminator"], cached["id"]
+                cached["name"].replace("@", "@\u200B"), cached["discriminator"], cached["id"]
             )
 
         await ctx.send(message)
