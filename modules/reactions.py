@@ -5,14 +5,101 @@ import config
 import aiohttp
 from random import choice as randchoice
 
+# key = type
+#   0 = self
+#   1 = other
+texts = {
+    "handholding": [
+        "*%s holds their own hand*",
+        "*%s holds %s's hand* >///<"
+    ],
+    "bang": [
+        "%s banged themself ;w;",
+        "*%s bangs %s*"
+    ],
+    "insult": [
+        "%s insulted themself ;w;",
+        "*%s insulted %s*"
+    ],
+    "hug": [
+        "*%s hugs themself*",
+        "*%s hugs %s* (> ^_^ )>"
+    ],
+    "kiss": [
+        "*%s kisses themself*",
+        "*%s kisses %s* >///<"
+    ],
+    "pat": [
+        "*%s pats themself*",
+        "*%s pats %s*"
+    ],
+    "cuddle": [
+        "*%s cuddles themself*",
+        "*%s cuddles %s* (>^_^)><(^o^<)"
+    ],
+    "tickle": [
+        "*%s tickles themself*",
+        "*%s tickles %s* >_<"
+    ],
+    "bite": [
+        "*%s bites themself*",
+        "*%s bites %s*"
+    ],
+    "slap": [
+        "*%s slaps themself*",
+        "*%s slaps %s*"
+    ],
+    "punch": [
+        "*%s punches themself*",
+        "*%s punches %s*"
+    ],
+    "poke": [
+        "*%s pokes themself*",
+        "*%s pokes %s* >///<"
+    ],
+    "nom": [
+        "*%s noms on themself*",
+        "*%s noms %s*"
+    ],
+    "lick": [
+        "*%s licks themself*",
+        "*%s licks %s*"
+    ],
+    "stare": [
+        "*%s stares at themself* 👀",
+        "*%s stares* 👀"
+    ]
+}
+
 class Reactions:
 
     def __init__(self, bot):
         self.bot = bot
         self.weeb = Weeb(config.weeb, bot)
 
+    # Guild only for all commnds
     async def __local_check(self, ctx):
         return True if ctx.guild else False
+
+    async def _weeb_handler(self, ctx: commands.Context, arg, image: str):
+        color, url = await (getattr(self.weeb, image))()
+        em = discord.Embed()
+        text = texts.get(image, "empty")
+        try:
+            arg = await (commands.MemberConverter()).convert(ctx=ctx, argument=arg)
+        except commands.BadArgument:
+            pass
+        if isinstance(arg, discord.Member) and arg.id == ctx.author.id:
+            em.title = text[0] % (ctx.author.name,)
+        else:
+            if isinstance(arg, discord.Member):
+                name = arg.name
+            else:
+                name = arg[:30]
+            em.title = text[1] % (ctx.author.name, name)
+        em.color = color
+        em.set_image(url=url)
+        await ctx.send(embed=em)
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
@@ -24,28 +111,20 @@ class Reactions:
 
     @commands.command(aliases=["handholding"])
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def handhold(self, ctx, user: discord.Member):
+    async def handhold(self, ctx, user):
         """Handhold >///<"""
-        color, url = await self.weeb.handholding()
-        em = discord.Embed(color=color, title="*%s holds %s's hand* >///<" % (ctx.author.name, user.name,))
-        await ctx.send(embed=em.set_image(url=url))
+        await self._weeb_handler(ctx, user, "handholding")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def bang(self, ctx, user: discord.Member):
-        if user == ctx.author:
-            title = "Banged self ;w;"
-        else:
-            title = "%s banged %s >:)" % (ctx.author.name, user.name,)
-
-        color, url = await self.weeb.bang()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+    async def bang(self, ctx, user):
+        """Bang someone pewpew"""
+        await self._weeb_handler(ctx, user, "bang")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def blush(self, ctx):
-        """>///<"""
+        """ohmy >///<"""
         color, url = await self.weeb.blush()
         em = discord.Embed(color=color, title="%s blushes >///<" % ctx.author.name).set_image(url=url)
         await ctx.send(embed=em)
@@ -68,16 +147,9 @@ class Reactions:
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def insult(self, ctx, user: discord.Member):
-        """Insult someone owo"""
-        if user == ctx.author:
-            title = "%s insulted themself ;w;" % ctx.author.name
-        else:
-            title = "%s insulted %s >:)" % (ctx.author.name, user.name,)
-
-        color, url = await self.weeb.insult()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+    async def insult(self, ctx, user):
+        """Insult someone ;w;"""
+        await self._weeb_handler(ctx, user, "insult")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
@@ -97,6 +169,7 @@ class Reactions:
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
     async def megumin(self, ctx):
+        """EXPLOSION!"""
         color, url = await self.weeb.megumin()
         em = discord.Embed(color=color, title="Explosion!").set_image(url=url)
         await ctx.send(embed=em)
@@ -145,145 +218,68 @@ class Reactions:
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def hug(self, ctx, user: discord.Member):
+    async def hug(self, ctx, user):
         """Hug someone (> ^_^ )>"""
-        if user == ctx.author:
-            title = "*%s hugs themself*" % ctx.author.name
-        else:
-            title = "*%s hugs %s* (> ^_^ )>" % (ctx.author.name, user.name)
-
-        color, url = await self.weeb.hug()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+        await self._weeb_handler(ctx, user, "hug")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def kiss(self, ctx, user: discord.Member):
+    async def kiss(self, ctx, user):
         """Kiss someone >///<"""
-        if user == ctx.author:
-            title = "*%s kisses themself*" % ctx.author.name
-        else:
-            title = "*%s kisses %s* >///<" % (ctx.author.name, user.name)
-
-        color, url = await self.weeb.kiss()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+        await self._weeb_handler(ctx, user, "kiss")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def pat(self, ctx, user: discord.Member):
+    async def pat(self, ctx, user):
         """*pat pat pat*"""
-        if user == ctx.author:
-            title = "*%s pats themself*" % ctx.author.name
-        else:
-            title = "*%s pats %s*" % (ctx.author.name, user.name)
-
-        color, url = await self.weeb.pat()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+        await self._weeb_handler(ctx, user, "pat")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def cuddle(self, ctx, user: discord.Member):
+    async def cuddle(self, ctx, user):
         """Cuddle someone uwuw"""
-        if user == ctx.author:
-            title = "*%s cuddles themself*" % ctx.author.name
-        else:
-            title = "*%s cuddles %s* (>^_^)><(^o^<)" % (ctx.author.name, user.name)
-
-        color, url = await self.weeb.cuddle()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+        await self._weeb_handler(ctx, user, "cuddle")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def tickle(self, ctx, user: discord.Member):
+    async def tickle(self, ctx, user):
         """Tickle someone >_<"""
-        if user == ctx.author:
-            title = "*%s tickles themself*" % ctx.author.name
-        else:
-            title = "*%s tickles %s* >_<" % (ctx.author.name, user.name)
-
-        color, url = await self.weeb.tickle()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+        await self._weeb_handler(ctx, user, "tickle")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def bite(self, ctx, user: discord.Member):
-        if user == ctx.author:
-            title = "*%s bit themself*" % ctx.author.name
-        else:
-            title = "*%s bites %s*" % (ctx.author.name, user.name)
-
-        color, url = await self.weeb.bite()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+    async def bite(self, ctx, user):
+        await self._weeb_handler(ctx, user, "bite")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def slap(self, ctx, user: discord.Member):
+    async def slap(self, ctx, user):
         """Slap someone ;w;"""
-        if user == ctx.author:
-            title = "*%s slaps themself*" % ctx.author.name
-        else:
-            title = "*%s slaps %s*" % (ctx.author.name, user.name)
-
-        color, url = await self.weeb.slap()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+        await self._weeb_handler(ctx, user, "slap")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def punch(self, ctx, user: discord.Member):
+    async def punch(self, ctx, user):
         """Punch someone >_<"""
-        if user == ctx.author:
-            title = "*%s punches themself*" % ctx.author.name
-        else:
-            title = "*%s punches %s* (>^_^)><(^o^<)" % (ctx.author.name, user.name)
-
-        color, url = await self.weeb.punch()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+        await self._weeb_handler(ctx, user, "punch")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def poke(self, ctx, user: discord.Member):
+    async def poke(self, ctx, user):
         """Poke someone >///<"""
-        if user == ctx.author:
-            title = "*%s pokes themself*" % ctx.author.name
-        else:
-            title = "*%s pokes %s* >///<" % (ctx.author.name, user.name)
-
-        color, url = await self.weeb.poke()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+        await self._weeb_handler(ctx, user, "poke")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def nom(self, ctx, user: discord.Member):
+    async def nom(self, ctx, user):
         """Nom!"""
-        if user == ctx.author:
-            title = "*%s noms on themself*" % ctx.author.name
-        else:
-            title = "*%s noms %s*" % (ctx.author.name, user.name)
-
-        color, url = await self.weeb.nom()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+        await self._weeb_handler(ctx, user, "nom")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def lick(self, ctx, user: discord.Member):
+    async def lick(self, ctx, user):
         """*licks* >///<"""
-        if user == ctx.author:
-            title = "*%s licks themself*" % ctx.author.name
-        else:
-            title = "*%s licks %s*" % (ctx.author.name, user.name)
-
-        color, url = await self.weeb.lick()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+        await self._weeb_handler(ctx, user, "lick")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
@@ -339,19 +335,9 @@ class Reactions:
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
-    async def stare(self, ctx, user: discord.Member = None):
+    async def stare(self, ctx, user):
         """*Stares*"""
-        if user:
-            if user == ctx.author:
-                title = "*%s stares at themself* 👀" % ctx.author.name
-            else:
-                title = "*%s stares at %s* 👀" % (ctx.author.name, user.name)
-        else:
-            title = "*%s stares* 👀" % ctx.author.name
-
-        color, url = await self.weeb.stare()
-        em = discord.Embed(color=color, title=title).set_image(url=url)
-        await ctx.send(embed=em)
+        await self._weeb_handler(ctx, user, "stare")
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
