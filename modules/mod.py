@@ -351,8 +351,8 @@ class Moderation:
         if reason is None:
             reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
-        await ctx.guild.unban(member, reason=reason)
-        await ctx.send(_("I have unbanned %s") % member)
+        await ctx.guild.unban(member.user, reason=reason)
+        await ctx.send("I have unbanned %s" % member.user.name)
 
     @commands.command()
     @commands.guild_only()
@@ -595,6 +595,9 @@ class Moderation:
                 self._last_result = ret
                 await ctx.send(f'```py\n{value}{ret}\n```')
 
+    #
+    #   From https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/mod.py#L730
+    #
     @commands.group(aliases=['remove'])
     @commands.guild_only()
     @checks.has_permissions(manage_messages=True)
