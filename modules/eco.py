@@ -237,9 +237,9 @@ class economy:
 
         if await self.__has_account(user.id):
             balance = await self.__get_balance(user.id)
-            await ctx.send("💵 | " + _("Balance: **$%s**") % balance)
+            await ctx.send("💵 | " + _("Balance: **$%s**").replace("$", "￥") % balance)
         else:
-            await ctx.send("💵 | " + _("Balance: **$0**"))
+            await ctx.send("💵 | " + _("Balance: **$0**").replace("$", "￥"))
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -306,7 +306,7 @@ class economy:
                     4: 337, 5: 328, 6: 320,
                     7: 313, 8: 306, 9: 300}[len(str(required_xp))], 139), "%sXP" % required_xp, (140, 140, 140),
                   xp_font)
-        draw.text((210, 175), "${:,}".format(balance), 0, side_font)
+        draw.text((210, 175), "￥{:,}".format(balance), 0, side_font)
         draw.text((210, 203), "%s Reputation" % reputation, 0, side_font)
 
         if married_to:
@@ -580,7 +580,7 @@ class economy:
         if amount < 10:
             return await ctx.send(_("The amount must be higher than 10"))
         elif amount > 10000000:
-            return await ctx.send(_("You can't send more than $10 million at a time."))
+            return await ctx.send(_("You can't send more than $10 million at a time.").replace("$", "￥"))
         if user.bot:
             return await ctx.send(_("You can't send bots money"))
         elif user == ctx.author:
@@ -596,7 +596,7 @@ class economy:
         await self.__update_balance(ctx.author.id, author_balance - amount)
         await self.__post_to_hook("Transfer", ctx.author, "%s to %s (%s)" % (amount, str(user), user.id))
 
-        await ctx.send(_("Successfully sent %s $%s") % (user.name, amount,))
+        await ctx.send(_("Successfully sent %s $%s").replace("$", "￥") % (user.name, amount,))
 
     @commands.command()
     @commands.guild_only()
