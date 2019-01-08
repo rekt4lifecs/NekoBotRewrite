@@ -430,9 +430,9 @@ class economy:
         msg += "Daily Credits\n"
         has_donated = 0
         for key in await r.table("donator").order_by("").run(self.bot.r_conn):
-            t = await self.bot.redis.get(key["id"])
-            has_donated = int(t)
-        if has_donated in range(1, 2):
+            if key["user"] == str(ctx.author.id):
+                has_donated = int((await self.bot.redis.get(key["id"])))
+        if has_donated > 0:
             msg += "You have received **25000** credits!"
             await self.__post_to_hook("Daily (Donate)", ctx.author, 25000)
             await self.__update_payday_time(user.id)
