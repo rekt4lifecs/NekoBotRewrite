@@ -123,7 +123,7 @@ class CardGame:
             await self.__create_account(user)
 
     @commands.group()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 3, commands.BucketType.user)
     async def card(self, ctx: commands.Context):
         """Loli Card Game OwO"""
         _ = await self._get_text(ctx)
