@@ -424,7 +424,7 @@ class CardGame:
 
         cardprice = int(random.randint(10000, 15000) + (((attack * .25) + (defense * .25)) * 1000))
 
-        await ctx.send(_("%s, type `yes` to sell **%s** for %s") % (author.mention, cardname_en, cardprice))
+        await ctx.send(_("%s, type `yes` to sell **%s** for %s") % (author.mention, cardname_en, "￥{}".format(cardprice)))
 
         def check(m):
             return m.channel == ctx.message.channel and m.author == author
@@ -446,7 +446,7 @@ class CardGame:
         economy = await r.table("economy").get(str(author.id)).run(self.bot.r_conn)
         await r.table("economy").get(str(author.id)).update({"balance": economy["balance"] + cardprice}).run(self.bot.r_conn)
 
-        await ctx.send(_("Sold %s for %s") % (cardname_en, cardprice))
+        await ctx.send(_("Sold %s for %s") % (cardname_en, "￥{}".format(cardprice)))
         await self.__post_to_hook("Sold card", author, cardprice)
 
     @card.command(name='list')
