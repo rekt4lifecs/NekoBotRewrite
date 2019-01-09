@@ -10,6 +10,11 @@ import gettext
 from io import BytesIO
 
 list_ = [
+    "Aoba Suzukaze",
+    "Dola Schwi",
+    "Isla",
+    "Rory Mercury",
+    "Sora Ginko",
     "Shiro",
     "Kafuu Chino",
     "Toujou Koneko",
@@ -68,7 +73,6 @@ list_ = [
     # "Hoshimiya Kate",
 
 class CardGame:
-    """Loli Card Gamelol xDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -127,13 +131,7 @@ class CardGame:
         await self.__check_for_user(ctx.author.id)
 
         if ctx.invoked_subcommand is None:
-            return await ctx.send(_("A loli roleplaying card game ofc!\n\n"
-                                    "**Commands**\n"
-                                    "**n!card daily** - Get your daily cards\n"
-                                    "**n!card display** - Display a card of yours\n"
-                                    "**n!card list** - Lists your cards\n"
-                                    "**n!card sell** - Sell a card\n"
-                                    "**n!card transfer** - Transfer Cards"))
+            return await self.bot.send_cmd_help(ctx)
 
     @card.command(name="transfer")
     async def card_transfer(self, ctx, card_number, user:discord.Member):
@@ -150,7 +148,7 @@ class CardGame:
         except:
             return await ctx.send(_("Not a valid number"))
 
-        if card_number > 6 or card_number <= 0:
+        if card_number not in range(1, 13):
             return await ctx.send(_("Not a valid card number."))
 
         await self.__check_for_user(ctx.author.id)
@@ -161,7 +159,7 @@ class CardGame:
         user_data = await r.table("cardgame").get(str(user.id)).run(self.bot.r_conn)
         user_cards = user_data["cards"]
 
-        if len(user_cards) >= 6:
+        if len(user_cards) >= 12:
             return await ctx.send(_("%s has no slots left") % user.mention)
 
         try:
@@ -307,7 +305,7 @@ class CardGame:
             h, m = divmod(m, 60)
             return await ctx.send(_("Wait another %sh %sm before using daily again...") % (h, m,))
 
-        if len(cards) >= 6:
+        if len(cards) >= 12:
             return await ctx.send(_("All of your slots are full ;w;"))
 
         character_loli = str(random.choice(list_)).lower().replace(' ', '_')
@@ -404,7 +402,7 @@ class CardGame:
         _ = await self._get_text(ctx)
 
         await self.__check_for_user(ctx.author.id)
-        if num > 6 or num < 1:
+        if num not in range(1, 13):
             return await ctx.send(_("**Out of card range.**"))
 
         author = ctx.author
@@ -463,17 +461,12 @@ class CardGame:
         table = PrettyTable()
         table.field_names = ["Number", "Card", "Attack", "Defense"]
 
-        cardnum = 0
-        displaynum = 1
-        for x in range(6):
+        for i, x in enumerate(range(12)):
             try:
-                card = cards[cardnum]
-                table.add_row([displaynum, card["name"].replace("_", " ").title(), card["attack"], card["defense"]])
+                card = cards[i]
+                table.add_row([i + 1, card["name"].replace("_", " ").title(), card["attack"], card["defense"]])
             except:
-                table.add_row([displaynum, "Empty", "0", "0"])
-
-            cardnum += 1
-            displaynum += 1
+                table.add_row([i + 1, "Empty", "0", "0"])
 
         await ctx.send("```\n%s\n```" % table)
 
@@ -483,7 +476,7 @@ class CardGame:
         await ctx.trigger_typing()
         _ = await self._get_text(ctx)
         await self.__check_for_user(ctx.author.id)
-        if num > 6 or num < 1:
+        if num not in range(1, 13):
             return await ctx.send(_("**Out of card range.**"))
 
         data = await r.table("cardgame").get(str(ctx.author.id)).run(self.bot.r_conn)
