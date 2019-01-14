@@ -9,6 +9,13 @@ import random
 import config
 import rethinkdb as r
 
+import aiohttp
+from requests import post as requestpost
+requestpost(config.status_smh, json={
+    "content": "i am starting smh"
+})
+del requestpost
+
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;%dm"
@@ -235,9 +242,19 @@ class NekoBot(commands.AutoShardedBot):
         self.redis.close()
         await super().close()
 
+    async def on_shard_ready(self, shard_id):
+        async with aiohttp.ClientSession() as cs:
+            await cs.post(config.status_smh, json={
+                "content": "Shard {} ready, instance {}".format(shard_id, self.instance)
+            })
+
     async def on_ready(self):
         if not hasattr(self, 'uptime'):
             self.uptime = datetime.datetime.utcnow()
+        async with aiohttp.ClientSession() as cs:
+            await cs.post(config.status_smh, json={
+                "content": "instance {} ready smh".format(self.instance)
+            })
         print("             _         _           _   \n"
                                "            | |       | |         | |  \n"
                                "  _ __   ___| | _____ | |__   ___ | |_ \n"
