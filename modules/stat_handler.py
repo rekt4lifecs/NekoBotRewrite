@@ -1,4 +1,4 @@
-import asyncio, config, discord, random, aiohttp
+import asyncio, config, aiohttp
 import logging
 
 from .utils import instance_tools
@@ -12,7 +12,7 @@ statuses = ["OwO whats n!help", "🤔🤔🤔", "👀", "(╯°□°）╯︵ �
           "I-it's not like I like you or anything!", "ばか >_<", "(//・.・//)", "....T-Thanks.....",
           "Hmph"]
 
-class DiscordBotsOrgAPI:
+class StatHandler:
 
     def __init__(self, bot):
         self.bot = bot
@@ -29,8 +29,8 @@ class DiscordBotsOrgAPI:
                 i = instance_tools.InstanceTools(self.bot.instances, self.bot.redis)
                 guilds = await i.get_all_guilds()
 
-                game = discord.Streaming(name=random.choice(statuses), url="https://www.twitch.tv/nekoboat")
-                await self.bot.change_presence(activity=game)
+                # game = discord.Streaming(name=random.choice(statuses), url="https://www.twitch.tv/nekoboat")
+                # await self.bot.change_presence(activity=game)
                 log.info("Servers: %s" % guilds)
                 if self.bot.instance == 0:
 
@@ -71,4 +71,4 @@ class DiscordBotsOrgAPI:
         await self.postloop()
 
 def setup(bot):
-    bot.add_cog(DiscordBotsOrgAPI(bot))
+    bot.add_cog(StatHandler(bot))
