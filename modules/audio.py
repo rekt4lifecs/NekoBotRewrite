@@ -25,7 +25,7 @@ class Audio:
             log.info("Loaded lavalink")
             self.bot.loop.create_task(self.__post_to_hook("Loaded lavalink"))
             lavalink.Client(bot=bot, host=config.lava_host, password=config.lava_pass, loop=bot.loop,
-                            rest_port=2343, ws_port=2344)
+                            rest_port=2343, ws_port=2343)
 
         if not self.bot.lavalink.hooks:
             log.info("Registering hook")
