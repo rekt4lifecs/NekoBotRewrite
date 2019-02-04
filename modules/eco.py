@@ -306,7 +306,7 @@ class economy:
                     4: 337, 5: 328, 6: 320,
                     7: 313, 8: 306, 9: 300}[len(str(required_xp))], 139), "%sXP" % required_xp, (140, 140, 140),
                   xp_font)
-        draw.text((210, 175), "¥{:,}".format(balance), 0, side_font)
+        draw.text((210, 175), "¥{:,}".format(balance), 0, ImageFont.truetype("data/fonts/mplus/mplus-2p-light.ttf", 25))
         draw.text((210, 203), "%s Reputation" % reputation, 0, side_font)
 
         if married_to:
