@@ -19,6 +19,7 @@ import rethinkdb as r
 import magic as pymagic
 import gettext
 import json
+from bs4 import BeautifulSoup
 log = logging.getLogger()
 
 LOWERCASE, UPPERCASE = 'x', 'X'
@@ -49,6 +50,41 @@ def millify(n):
                          int(math.floor(0 if n == 0 else math.log10(abs(n)) / 3))))
 
     return '{:.0f}{}'.format(n / 10 ** (3 * millidx), millnames[millidx])
+
+anilist_query = """
+query ($id: Int, $search: String) {
+  Page(page: 1, perPage: 1) {
+    media(id: $id, search: $search) {
+      id
+      idMal
+      isAdult
+      startDate {
+        year
+        month
+        day
+      }
+      endDate {
+        year
+        month
+        day
+      }
+      status
+      episodes
+      description
+      genres
+      averageScore
+      coverImage {
+        extraLarge
+        color
+      }
+      title {
+        romaji
+        english
+        native
+      }
+    }
+  }
+}"""
 
 class General:
     """General Commands"""
@@ -85,6 +121,41 @@ class General:
             }))
         elif event == "GUILD_DELETE":
             await self.bot.redis.delete("guild:%s:cache" % data.get("guild_id"))
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.cooldown(2, 6, commands.BucketType.user)
+    async def anime(self, ctx, *, search: str):
+        """Get Anime Stats"""
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.post("https://graphql.anilist.co", json={
+                "query": anilist_query,
+                "variables": {
+                    "search": search
+                }
+            }) as res:
+                data = await res.json()
+        media = data["data"]["Page"]["media"]
+        if not media:
+            return await ctx.send("Nothing found.")
+        media = media[0]
+        if media["isAdult"] is True and not ctx.channel.is_nsfw():
+            return await ctx.send("NSFW Anime can't be displayed in non NSFW channels.")
+        em = discord.Embed(color=int(media["coverImage"]["color"].replace("#", ""), 16))
+        em.title = "{} ({})".format(media["title"]["romaji"], media["title"]["english"])
+        em.description = BeautifulSoup(media["description"], "lxml").text
+        em.url = "https://anilist.co/anime/{}".format(media["id"])
+        em.set_thumbnail(url=media["coverImage"]["extraLarge"])
+        em.add_field(name="Status", value=media["status"].title(), inline=True)
+        em.add_field(name="Episodes", value=media["episodes"], inline=True)
+        em.add_field(name="Score", value=str(media["averageScore"]), inline=True)
+        em.add_field(name="Genres", value=", ".join(media["genres"]))
+        dates = "{}/{}/{}".format(media["startDate"]["day"], media["startDate"]["month"], media["startDate"]["year"])
+        if media["endDate"]["year"] is not None:
+            dates += " - {}/{}/{}".format(media["endDate"]["day"], media["endDate"]["month"], media["endDate"]["year"])
+        em.add_field(name="Date", value=dates)
+        await ctx.send(embed=em)
 
     def whatanime_embedbuilder(self, _, doc: dict):
         em = discord.Embed(color=0xDEADBF)

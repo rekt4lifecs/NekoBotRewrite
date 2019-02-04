@@ -80,3 +80,6 @@ rethinkdb
 # NekoBotRewrite\modules\marriage.py: 3
 # NekoBotRewrite\modules\mod.py: 12
 ujson
+
+html5lib
+lxml
