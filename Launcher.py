@@ -29,3 +29,9 @@ if __name__ == "__main__":
         if listen.recv() == 1:
             print("Instance {} Launched".format(instance))
         listen.close()
+
+    try:
+        while True:
+            wait(5)
+    except KeyboardInterrupt:
+        pass
