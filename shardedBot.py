@@ -10,11 +10,6 @@ import config
 import rethinkdb as r
 
 import aiohttp
-from requests import post as requestpost
-requestpost(config.status_smh, json={
-    "content": "i am starting smh"
-})
-del requestpost
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
