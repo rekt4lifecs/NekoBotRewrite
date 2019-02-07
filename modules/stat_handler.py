@@ -67,8 +67,8 @@ class StatHandler:
 
                 await asyncio.sleep(1800)
 
-    async def on_ready(self):
-        await self.postloop()
+    # async def on_ready(self):
+    #     await self.postloop()
 
 def setup(bot):
     bot.add_cog(StatHandler(bot))
