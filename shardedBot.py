@@ -92,7 +92,7 @@ async def _prefix_callable(bot, msg):
 
 class NekoBot(commands.AutoShardedBot):
 
-    def __init__(self, instance, instances, shard_count, shard_ids, **kwargs):
+    def __init__(self, instance, instances, shard_count, shard_ids, pipe, **kwargs):
         super().__init__(command_prefix=_prefix_callable,
                          description="NekoBot",
                          pm_help=None,
@@ -107,6 +107,7 @@ class NekoBot(commands.AutoShardedBot):
         self.command_usage = Counter()
         self.instance = instance
         self.instances = instances
+        self.pipe = pipe
 
         async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
@@ -238,7 +239,9 @@ class NekoBot(commands.AutoShardedBot):
         await super().close()
 
     async def on_ready(self):
-        if not hasattr(self, 'uptime'):
+        self.pipe.send(1)
+        self.pipe.close()
+        if not hasattr(self, "uptime"):
             self.uptime = datetime.datetime.utcnow()
         async with aiohttp.ClientSession() as cs:
             await cs.post(config.status_smh, json={
