@@ -108,7 +108,6 @@ class NekoBot(commands.AutoShardedBot):
         self.instance = instance
         self.instances = instances
         self.pipe = pipe
-        self.run()
 
         async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
@@ -129,6 +128,7 @@ class NekoBot(commands.AutoShardedBot):
                 except:
                     logger.warning("Failed to load {}.".format(name))
                     traceback.print_exc()
+        self.run()
 
     async def get_language(self, ctx):
         data = await self.redis.get("%s-lang" % ctx.author.id)
