@@ -144,7 +144,9 @@ class General:
             return await ctx.send("NSFW Anime can't be displayed in non NSFW channels.")
         em = discord.Embed(color=int(media["coverImage"]["color"].replace("#", ""), 16))
         em.title = "{} ({})".format(media["title"]["romaji"], media["title"]["english"])
-        em.description = BeautifulSoup(media["description"], "lxml").text
+        desc = BeautifulSoup(media["description"], "lxml")
+        if desc:
+            em.description = desc.text
         em.url = "https://anilist.co/anime/{}".format(media["id"])
         em.set_thumbnail(url=media["coverImage"]["extraLarge"])
         em.add_field(name="Status", value=media["status"].title(), inline=True)
