@@ -99,6 +99,7 @@ class General:
         self.languages = ["tsundere", "weeb", "chinese"]
         for x in self.languages:
             self.lang[x] = gettext.translation("general", localedir="locale", languages=[x])
+        self.__shard_counter = 0
 
     async def _get_text(self, ctx):
         lang = await self.bot.get_language(ctx)
@@ -114,6 +115,15 @@ class General:
         event = msg.get("t")
         self.bot.socket_stats[event] += 1
         data = msg.get("d", {})
+
+        if not self.bot.pipe.closed:
+            if event == "READY":
+                self.__shard_counter += 1
+                if self.__shard_counter >= len(self.bot.shard_ids):
+                    del self.__shard_counter
+                    self.bot.pipe.send(1)
+                    self.bot.pipe.close()
+
         if event == "GUILD_CREATE":
             await self.bot.redis.set("guild:%s:cache" % data.get("guild_id"), json.dumps({
                 "id": data.get("guild_id"),

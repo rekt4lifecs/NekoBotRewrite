@@ -108,6 +108,7 @@ class NekoBot(commands.AutoShardedBot):
         self.instance = instance
         self.instances = instances
         self.pipe = pipe
+        self.shard_ids = shard_ids
 
         async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
@@ -240,8 +241,6 @@ class NekoBot(commands.AutoShardedBot):
         await super().close()
 
     async def on_ready(self):
-        self.pipe.send(1)
-        self.pipe.close()
         if not hasattr(self, "uptime"):
             self.uptime = datetime.datetime.utcnow()
         async with aiohttp.ClientSession() as cs:
