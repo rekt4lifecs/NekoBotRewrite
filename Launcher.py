@@ -2,10 +2,13 @@ import shardedBot
 from multiprocessing import Process, Pipe
 import asyncio
 import shutil
+import os
+from signal import SIGKILL
 
 shards = 112
 shards_per_instance = 16
 instances = int(shards / shards_per_instance)
+processes = list()
 
 def wait(delay: int):
     loop.run_until_complete(asyncio.sleep(delay))
@@ -21,10 +24,11 @@ if __name__ == "__main__":
         queue.append([i, ids])
 
     for instance, shard_ids in queue:
-        print("Launching Instance {}".format(instance))
         listen, send = Pipe()
         p = Process(target=shardedBot.NekoBot, args=(instance, instances, shards, shard_ids, send,))
         p.start()
+        print("Launching Instance {} (PID {})".format(instance, p.pid))
+        processes.append(p.pid)
 
         if listen.recv() == 1:
             print("Instance {} Launched".format(instance))
@@ -34,4 +38,7 @@ if __name__ == "__main__":
         while True:
             wait(5)
     except KeyboardInterrupt:
-        pass
+        for process in processes:
+            os.kill(process, SIGKILL)
+            print("Killed {}".format(process))
+        print("Finished")
