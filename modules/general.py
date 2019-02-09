@@ -152,7 +152,8 @@ class General:
         media = media[0]
         if media["isAdult"] is True and not ctx.channel.is_nsfw():
             return await ctx.send("NSFW Anime can't be displayed in non NSFW channels.")
-        em = discord.Embed(color=int(media["coverImage"]["color"].replace("#", ""), 16))
+        color = int(media["coverImage"]["color"].replace("#", ""), 16) if media["coverImage"]["color"] else 0xdeadbf
+        em = discord.Embed(colour=color)
         em.title = "{} ({})".format(media["title"]["romaji"], media["title"]["english"])
         desc = BeautifulSoup(media["description"], "lxml")
         if desc:
