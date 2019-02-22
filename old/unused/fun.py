@@ -414,7 +414,6 @@ class Fun:
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def duck(self, ctx):
         """Gets a duck image /shrug"""
-        self.bot.counter['duck'] += 1
         url = "https://api.random-d.uk/random"
         async with aiohttp.ClientSession() as cs:
             async with cs.get(url) as r:
