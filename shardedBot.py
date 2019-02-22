@@ -99,7 +99,6 @@ class NekoBot(commands.AutoShardedBot):
                          shard_ids=shard_ids,
                          shard_count=shard_count,
                          status=discord.Status.dnd,
-                         activity=discord.Game(name="Restarting..."),
                          fetch_offline_members=False,
                          max_messages=kwargs.get("max_messages", 105),
                          help_attrs={'hidden': True})
