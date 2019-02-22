@@ -155,9 +155,10 @@ class General:
         color = int(media["coverImage"]["color"].replace("#", ""), 16) if media["coverImage"]["color"] else 0xdeadbf
         em = discord.Embed(colour=color)
         em.title = "{} ({})".format(media["title"]["romaji"], media["title"]["english"])
-        desc = BeautifulSoup(media["description"], "lxml")
-        if desc:
-            em.description = desc.text
+        if media["description"]:
+            desc = BeautifulSoup(media["description"], "lxml")
+            if desc:
+                em.description = desc.text
         em.url = "https://anilist.co/anime/{}".format(media["id"])
         em.set_thumbnail(url=media["coverImage"]["extraLarge"])
         em.add_field(name="Status", value=media["status"].title(), inline=True)
