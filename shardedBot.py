@@ -146,7 +146,8 @@ class NekoBot(commands.AutoShardedBot):
 
     async def on_command(self, ctx):
         self.counter["commands_used"] += 1
-        self.command_usage[str(ctx.command)] += 1
+        self.command_usage[ctx.command.name] += 1
+        await self.redis.incr(ctx.command.name)
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
