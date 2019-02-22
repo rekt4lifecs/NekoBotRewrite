@@ -4,6 +4,21 @@ from .utils import checks, chat_formatting, hastebin
 import config
 import json
 import gettext
+from bs4 import BeautifulSoup
+import re
+
+url_rx = re.compile("https?:\/\/(?:www\.)?.+")
+creator_rx = re.compile(r"Creator: <\/strong>([\w\d\s\-_.*()\[\]]*)<br\/>")
+material_rx = re.compile(r"Material: <\/strong>([\w\d\s\-_.*()\[\]]*)<br\/>")
+author_rx = re.compile(r"Author: <\/strong><[\w\s\d=\"\-_\.\/\?:]*>([\w\d\s\-_.*()\[\]]*)<\/a>")
+member_rx = re.compile(r"Member: <\/strong><[\w\s\d=\"\-_\.\/\?:]*>([\w\d\s\-_.*()\[\]]*)<\/a>")
+deviant_art_rx = re.compile(r"[\w]+\.deviantart\.com")
+deviant_source_rx = re.compile(r"deviantart\.com\/view\/")
+pixiv_art_rx = re.compile(r"pixiv\.net\/member\.")
+pixiv_source_rx = re.compile(r"pixiv\.net\/member_illust")
+gelbooru_rx = re.compile(r"gelbooru\.com\/index\.php\?page")
+danbooru_rx = re.compile(r"danbooru\.donmai\.us\/post\/")
+sankaku_rx = re.compile(r"chan\.sankakucomplex\.com\/post")
 
 class NSFW:
     """NSFW Commands OwO"""
@@ -399,6 +414,77 @@ class NSFW:
                 await ctx.send(_("I can't make that channel NSFW or don't have permissions to ;c"))
             except:
                 pass
+
+    @commands.command(aliases=["sauce", "saucenao"])
+    @commands.guild_only()
+    @commands.cooldown(1, 7, commands.BucketType.user)
+    async def source(self, ctx, image_url=None):
+        """Get images sources from SourceNAO"""
+        if not ctx.channel.is_nsfw():
+            return await ctx.send("Please use this in an NSFW channel.", delete_after=5)
+
+        if image_url is None and len(ctx.message.attachments) == 0:
+            await ctx.send("Send me an image to get the source of")
+            try:
+                msg = await self.bot.wait_for("message", timeout=30.0, check=lambda x: x.author.id == ctx.author.id and x.channel.id == ctx.channel.id)
+                if len(msg.attachments) >= 1:
+                    image_url = msg.attachments[0].url
+                else:
+                    image_url = msg.content
+            except:
+                return await ctx.send("Timed out")
+        if len(ctx.message.attachments) >= 1 and image_url is None:
+            image_url = ctx.message.attachments[0].url
+        if not url_rx.match(image_url):
+            return await ctx.send("That's not a valid image.")
+
+        await ctx.trigger_typing()
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("http://saucenao.com/search.php?db=999&url={}".format(image_url)) as res:
+                data = await res.read()
+
+        if b"Problem with remote server..." in data:
+            return await ctx.send("Could not find the source for that image.")
+
+        em = discord.Embed(title="Results", color=0xDEADBF)
+        description = ""
+        soup = BeautifulSoup(data, "html5lib")
+
+        creator = creator_rx.search(str(soup))
+        if creator is not None:
+            description += "Creator: **{}**\n".format(creator.group(1))
+        material = material_rx.search(str(soup))
+        if material is not None:
+            description += "Material: **{}**\n".format(material.group(1))
+        author = author_rx.search(str(soup))
+        if author is not None:
+            description += "Author: **{}**\n".format(author.group(1))
+        member = member_rx.search(str(soup))
+        if member is not None:
+            description += "Member: **{}**\n".format(member.group(1))
+        links = []
+        for link in soup.find_all("a"):
+            href = link.get("href")
+            if deviant_art_rx.search(href) and not [1 for x, y in links if x == "DeviantArt Artist"]:
+                links.append(["DeviantArt Artist", href])
+            if deviant_source_rx.search(href) and not [1 for x, y in links if x == "DeviantArt Source"]:
+                links.append(["DeviantArt Source", href])
+            if pixiv_art_rx.search(href) and not [1 for x, y in links if x == "Pixiv Artist"]:
+                links.append(["Pixiv Artist", href])
+            if pixiv_source_rx.search(href) and not [1 for x, y in links if x == "Pixiv Source"]:
+                links.append(["Pixiv Source", href])
+            if gelbooru_rx.search(href) and not [1 for x, y in links if x == "Gelbooru"]:
+                links.append(["Gelbooru", href])
+            if danbooru_rx.search(href) and not [1 for x, y in links if x == "Danbooru"]:
+                links.append(["Danbooru", href])
+            if sankaku_rx.search(href) and not [1 for x, y in links if x == "Sankaku"]:
+                links.append(["Sankaku", href])
+
+        description += ", ".join(["[{}]({})".format(x, y) for x, y in links])
+
+        em.description = description
+        await ctx.send(embed=em)
+
 
 def setup(bot):
     bot.add_cog(NSFW(bot))
