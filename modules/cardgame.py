@@ -324,7 +324,7 @@ class CardGame:
         await r.table("cardgame").get(str(author.id)).update(newdata).run(self.bot.r_conn)
         await ctx.send(_("Given character **%s!**") % character_loli.replace('_', ' ').title())
 
-    def _generate_card(self, character: str, num: int, attack: int, defense: int):
+    def _generate_card(self, character: str, attack: int, defense: int):
         card_name = f"data/{character}.jpg"
         img = Image.open('data/card.jpg')
         _character = Image.open(card_name).resize((314, 313))
@@ -394,7 +394,10 @@ class CardGame:
         draw.text((344, 550), str(defense), (0, 0, 0), lower_font)
         draw.text((40, 477), textwrap.fill(description, 37), (0, 0, 0), font=desc_font)
 
-        img.save(f"data/cards/{num}.png")  # there is a thing called BytesIO oldme smh todo
+        temp = BytesIO()
+        img.save(temp, format="jepg")
+        temp.seek(0)
+        return temp
 
     @card.command(name='sell')
     async def card_sell(self, ctx, num: int):
@@ -487,20 +490,16 @@ class CardGame:
         except:
             return await ctx.send(_("Empty Slot..."))
 
-        num = ctx.author.id
-
         character_name = card["name"]
         character_name_en = str(character_name).replace('_', ' ').title()
         attack = card["attack"]
         defense = card["defense"]
-        self._generate_card(character_name, num, attack, defense)
 
         embed = discord.Embed(color=0xDEADBF, title=character_name_en)
         embed.add_field(name=_("Attack"), value=str(attack))
         embed.add_field(name=_("Defense"), value=str(defense))
 
-        await ctx.send(file=discord.File(f'data/cards/{num}.png'), embed=embed.set_image(url=f'attachment://{num}.png'))
-        os.remove("data/cards/%s.png" % num)  # smh
+        await ctx.send(file=discord.File(self._generate_card(character_name, attack, defense), filename="image.jpg"), embed=embed.set_image(url="attachment://image.jpg"))
 
     @card.command(name='generate', hidden=True)
     @commands.is_owner()
