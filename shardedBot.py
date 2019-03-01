@@ -159,20 +159,20 @@ class NekoBot(commands.AutoShardedBot):
             for page in pages:
                 await ctx.send(page)
 
-    async def nekopet_check(self, message):
-        if random.randint(1, 200) == 1:
-            data = await r.table("nekopet").get(str(message.author.id)).run(self.r_conn)
-            if data:
-                play_amt = random.randint(1, 20)
-                food_amt = random.randint(1, 20)
-                if (data.get("play") - play_amt) <= 0 or (data.get("food") - food_amt) <= 0:
-                    await r.table("nekopet").get(str(message.author.id)).delete().run(self.r_conn)
-                    logger.info("%s's neko died" % message.author.id)
-                else:
-                    await r.table("nekopet").get(str(message.author.id)).update({
-                        "play": data.get("play") - play_amt,
-                        "food": data.get("food") - food_amt
-                    }).run(self.r_conn)
+    # async def nekopet_check(self, message):
+    #     if random.randint(1, 200) == 1:
+    #         data = await r.table("nekopet").get(str(message.author.id)).run(self.r_conn)
+    #         if data:
+    #             play_amt = random.randint(1, 20)
+    #             food_amt = random.randint(1, 20)
+    #             if (data.get("play") - play_amt) <= 0 or (data.get("food") - food_amt) <= 0:
+    #                 await r.table("nekopet").get(str(message.author.id)).delete().run(self.r_conn)
+    #                 logger.info("%s's neko died" % message.author.id)
+    #             else:
+    #                 await r.table("nekopet").get(str(message.author.id)).update({
+    #                     "play": data.get("play") - play_amt,
+    #                     "food": data.get("food") - food_amt
+    #                 }).run(self.r_conn)
 
     async def __level_handler(self, message):
         if not isinstance(message.channel, discord.TextChannel):
@@ -232,7 +232,7 @@ class NekoBot(commands.AutoShardedBot):
         if message.author.bot:
             return
         await self.process_commands(message)
-        await self.nekopet_check(message)
+        # await self.nekopet_check(message)
         await self.__level_handler(message)
 
     async def close(self):
