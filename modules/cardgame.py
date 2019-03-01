@@ -395,7 +395,7 @@ class CardGame:
         draw.text((40, 477), textwrap.fill(description, 37), (0, 0, 0), font=desc_font)
 
         temp = BytesIO()
-        img.save(temp, format="jepg")
+        img.save(temp, format="jpeg")
         temp.seek(0)
         return temp
 
