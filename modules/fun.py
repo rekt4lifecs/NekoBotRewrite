@@ -482,6 +482,17 @@ class Fun:
         await ctx.send(embed=self.__embed_json(res))
 
     @commands.command()
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def trash(self, ctx, user: discord.Member):
+        """trash smh"""
+        await ctx.trigger_typing()
+        url = user.avatar_url_as(format="jpg")
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://nekobot.xyz/api/imagegen?type=trash&url=%s" % (url,)) as r:
+                res = await r.json()
+        await ctx.send(embed=self.__embed_json(res))
+
+    @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def whowouldwin(self, ctx: commands.Context, user1: discord.Member, user2: discord.Member = None):
         """Who would win"""
