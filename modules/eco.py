@@ -111,11 +111,8 @@ class economy:
             return gettext.gettext
 
     async def __has_donated(self, user:int):
-        all_data = await r.table("donator").order_by("id").run(self.bot.r_conn)
-        users = []
-        for data in all_data:
-            users.append(data["user"])
-        if str(user) in users:
+        data = await self.bot.redis.get("donate:{}".format(user))
+        if data:
             return True
         else:
             return False
@@ -240,6 +237,52 @@ class economy:
             await ctx.send("💵 | " + _("Balance: **$%s**").replace("$", "￥") % balance)
         else:
             await ctx.send("💵 | " + _("Balance: **$0**").replace("$", "￥"))
+
+    # @commands.group(hidden=True)
+    # @commands.guild_only()
+    # async def pachinko(self, ctx):
+    #     if not await r.table("pachinko").get(str(ctx.author.id)).run(self.bot.r_conn):
+    #         await r.table("pachinko").insert({
+    #             "id": str(ctx.author.id),
+    #             "balls": 0
+    #         }).run(self.bot.r_conn)
+    #     if ctx.invoked_subcommand is None:
+    #         return await self.bot.send_cmd_help(ctx)
+    #
+    # @pachinko.command(name="play")
+    # async def pachinko_play(self, ctx, balls: int):
+    #     """Play pachinko"""
+    #     user = await r.table("pachinko").get(str(ctx.author.id)).run(self.bot.r_conn)
+    #     balls = max(1, balls)
+    #     if user["balls"] < balls:
+    #         return await ctx.send("You don't have any balls, you can buy more balls by using `n!pachinko buy`")
+    #     stats = {
+    #         "win": 0,
+    #         "lose": 0
+    #     }
+    #     for x in range(balls):
+    #         chance = round(random.uniform(0.0, 0.1), 3)
+    #         stats[np.random.choice(["lose", "win"], p=np.array([1.0 - chance, chance]))] += 1
+    #     new_balls = (user["balls"] + (stats["win"] * 100)) - stats["lose"]
+    #     await r.table("pachinko").get(str(ctx.author.id)).update({"balls": new_balls}).run(self.bot.r_conn)
+    #     await ctx.send("Wins: {}\nLoses: {}\nBalls Left: {}".format(stats["win"], stats["lose"], new_balls))
+    #
+    # @pachinko.command(name="buy", alises=["purchase"])
+    # async def pachinko_buy(self, ctx, balls: int):
+    #     """Purchase more pachinko balls, 1 ball = ¥75"""
+    #     if not await self.__has_account(ctx.author.id):
+    #         return await ctx.send("You don't have a bank account. Make one with `register`")
+    #     user = await r.table("pachinko").get(str(ctx.author.id)).run(self.bot.r_conn)
+    #     balance = await self.__get_balance(ctx.author.id)
+    #     balls = max(1, balls)
+    #     amount = balls * 75
+    #     if balance < amount:
+    #         return await ctx.send("You don't have enough to purchase {} balls.".format(balls))
+    #     await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) - amount)
+    #     await r.table("pachinko").get(str(ctx.author.id)).update({
+    #         "balls": user["balls"] + balls
+    #     }).run(self.bot.r_conn)
+    #     await ctx.send("Bought {} balls".format(balls))
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -429,9 +472,8 @@ class economy:
         msg = ""
         msg += "Daily Credits\n"
         has_donated = 0
-        for key in await r.table("donator").order_by("").run(self.bot.r_conn):
-            if key["user"] == str(ctx.author.id):
-                has_donated = int((await self.bot.redis.get(key["id"])))
+        if await self.__has_donated(ctx.author.id):
+            has_donated = int((await self.bot.redis.get("donate:{}".format(ctx.author.id))))
         if has_donated > 0:
             msg += "You have received **25000** credits!"
             await self.__post_to_hook("Daily (Donate)", ctx.author, 25000)

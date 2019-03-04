@@ -35,69 +35,22 @@ class Donator:
         else:
             return gettext.gettext
 
-    def id_generator(self, size=7, chars=string.ascii_letters + string.digits):
-        return ''.join(random.choice(chars) for _ in range(size))
-
-    async def __post_to_hook(self, embed:discord.Embed):
-        async with aiohttp.ClientSession() as cs:
-            webhook = discord.Webhook.from_url("https://discordapp.com/api/webhooks/%s/%s" % (webhook_id, webhook_token,),
-                                               adapter=discord.AsyncWebhookAdapter(cs))
-            await webhook.send(embed=embed)
-
     async def __has_donated(self, user:int):
-        all_data = await r.table("donator").order_by("id").run(self.bot.r_conn)
-        users = []
-        for data in all_data:
-            users.append(data.get("user", "none"))
-        if str(user) in users:
+        data = await self.bot.redis.get("donate:{}".format(user))
+        if data:
             return True
         else:
             return False
 
-    async def on_message(self, message):
-        if not message.guild:
-            return
-        if message.guild.id == 221989003400970241 and message.channel.id == 431887286246834178 and len(message.embeds) >= 1:
-            embed = message.embeds[0]
-            if embed.title == "Patreon Update.":
-                user = embed.footer.text
-                if isinstance(user, discord.Embed.Empty):
-                    return
-                fuckingweeb = self.bot.get_user(270133511325876224)
-                if embed.description.startswith("pledges:delete"):
-                    keys = await r.table("donator").order_by("").run(self.bot.r_conn)
-                    keys = [x for x in keys if x.get("user") == str(user)][0]
-                    await r.table("donator").get(str(keys)).delete().run(self.bot.r_conn)
-                    embed = discord.Embed(color=0xff6f3f, title="Token Deleted",
-                                          description=f"```css\n"
-                                                      f"Key: [ {keys} ] \n"
-                                                      f"```")
-                    await self.__post_to_hook(embed)
-                    await fuckingweeb.send("Deleted key for %s" % user)
-                elif embed.description.startswith("pledges:create"):
-                    x1 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
-                    x2 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
-                    x3 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
-                    token = f"{x1}-{x2}-{x3}"
-                    data = {
-                        "id": token,
-                        "user": str(user),
-                        "created_at": int(time.time())
-                    }
-                    await r.table("donator").insert(data).run(self.bot.r_conn)
-                    await fuckingweeb.send("Given key for %s" % user)
-                    user = await self.bot.get_user_info(int(user))
-                    await self.__post_to_hook(discord.Embed(color=0xff6f3f, title="Token Accepted",
-                                                            description="```css\nUser: %s (%s)\nToken [ %s ]\n```" % (user, user.id, token,)))
-                    await user.send("Thank you for donating, perks should now be active for you ❤")
-
     @commands.command(hidden=True)
     @commands.is_owner()
-    async def sendkey(self, ctx, UserID:int, *, key: str):
+    async def setdonate(self, ctx, UserID:int, level: int):
         """Send a user their donation key."""
+        if level == -1:
+            await self.bot.redis.delete("donate:{}".format(UserID))
+        else:
+            await self.bot.redis.set("donate:{}".format(UserID), level)
         await ctx.message.add_reaction("👌")
-        user = await self.bot.get_user_info(UserID)
-        await user.send(f"Your donation key:\n`{key}`")
 
     @commands.command(name='trapcard')
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -117,76 +70,7 @@ class Donator:
                   f"&image={user.avatar_url_as(format='png')}"
             async with session.get(url) as response:
                 t = await response.json()
-                await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=t['message']))
-
-    @commands.command(hidden=True)
-    @commands.is_owner()
-    async def createkey(self, ctx):
-        """Create a key"""
-        await ctx.trigger_typing()
-        x1 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
-        x2 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
-        x3 = self.id_generator(size=4, chars=string.ascii_uppercase + string.digits)
-        token = f"{x1}-{x2}-{x3}"
-        await ctx.send(token)
-        data = {
-            "id": token,
-            "user": "",
-            "created_at": int(time.time())
-        }
-        await r.table("donator").insert(data).run(self.bot.r_conn)
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def redeem(self, ctx, *, key: str):
-        """Redeem your donation key"""
-        await ctx.trigger_typing()
-        _ = await self._get_text(ctx)
-
-        data = await r.table("donator").get(key).run(self.bot.r_conn)
-        if not data:
-            await self.__post_to_hook(discord.Embed(color=0xff6f3f, title="Invalid Token",
-                                                    description="```css\n%s (%s) input an invalid token %s\n```" % (ctx.author, ctx.author.id, key,)))
-            return await ctx.send(_("**Not a valid key...**"))
-
-        if not data["user"]:
-            await self.__post_to_hook(discord.Embed(color=0xff6f3f, title="Token Accepted",
-                                                    description="```css\nUser: %s (%s)\nToken [ %s ]\n```" % (ctx.author, ctx.author.id, key,)))
-            await r.table("donator").get(key).update({"user": str(ctx.author.id)}).run(self.bot.r_conn)
-            await ctx.send(_("**Token Accepted!**"))
-        else:
-            await self.__post_to_hook(discord.Embed(color=0xff6f3f, title="Invalid Token - In use",
-                                                    description="```css\n%s (%s) input an invalid token %s\n```" % (
-                                                    ctx.author, ctx.author.id, key,)))
-            return await ctx.send(_("**Token is already in use.**"))
-
-    @commands.command(hidden=True)
-    @commands.is_owner()
-    async def keys(self, ctx):
-        """View all keys + expiry"""
-        await ctx.trigger_typing()
-        allkeys = await r.table("donator").order_by("id").run(self.bot.r_conn)
-        table = PrettyTable()
-        table.field_names = ["User", "Key"]
-        for key in allkeys:
-            table.add_row([str(key["user"]), str(key["id"])])
-        x = await haste(str(table))
-        await ctx.send(x)
-
-    @commands.command(hidden=True)
-    @commands.is_owner()
-    async def delkey(self, ctx, *, key: str):
-        """Delete a key"""
-        await ctx.trigger_typing()
-
-        await r.table("donator").get(key).delete().run(self.bot.r_conn)
-        embed = discord.Embed(color=0xff6f3f, title="Token Deleted",
-                              description=f"```css\n"
-                                          f"Key: [ {key} ] \n"
-                                          f"```")
-        await self.__post_to_hook(embed)
-
-        await ctx.send("Deleted.")
+                await ctx.send(embed=discord.Embed(color=0xDEADBF).set_image(url=t["message"]))
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
@@ -273,6 +157,7 @@ class Donator:
 
         await r.table("autolooder").get(str(ctx.guild.id)).update({"choices": newchoices}).run(self.bot.r_conn)
         await ctx.send("Toggled option for %s!" % imgtype)
+
 
 def setup(bot):
     bot.add_cog(Donator(bot))
