@@ -2,15 +2,8 @@ from discord.ext import commands
 import discord
 import rethinkdb as r
 import aiohttp
-from prettytable import PrettyTable
-
-import random
-import string
-import time
 import logging
 
-from config import webhook_id, webhook_token
-from .utils.hastebin import post as haste
 import gettext
 
 log = logging.getLogger()
@@ -158,6 +151,98 @@ class Donator:
         await r.table("autolooder").get(str(ctx.guild.id)).update({"choices": newchoices}).run(self.bot.r_conn)
         await ctx.send("Toggled option for %s!" % imgtype)
 
+    @commands.group()
+    @commands.guild_only()
+    @commands.cooldown(2, 5, commands.BucketType.user)
+    async def twitter(self, ctx):
+
+        has_donated = 0
+        d = await self.bot.redis.get("donate:{}".format(ctx.author.id))
+        if d:
+            has_donated = int(d)
+
+        if has_donated <= 0:
+            return await ctx.send("You have not donated")
+
+        if ctx.invoked_subcommand is None:
+            return await self.bot.send_cmd_help(ctx)
+
+    @twitter.command(name="set")
+    async def twitter_set(self, ctx, channel: discord.TextChannel):
+        """Set twitter feed to a channel"""
+        if not channel.is_nsfw():
+            return await ctx.send("The channel must be an NSFW channel.")
+        data = await r.table("twitter2").get(str(ctx.guild.id)).run(self.bot.r_conn)
+        if data:
+            await r.table("twitter2").get(str(ctx.guild.id)).update({
+                "channel": str(channel.id)
+            }).run(self.bot.r_conn)
+            return await ctx.send("Updated channel to {}".format(channel.mention))
+        await r.table("twitter2").insert({
+            "id": str(ctx.guild.id),
+            "channel": str(channel.id),
+            "accounts": [],
+            "user": str(ctx.author.id)
+        }).run(self.bot.r_conn)
+        await ctx.send("Set channel to {}, you can add users with `n!tweet add <username>`".format(channel.mention))
+
+    @twitter.command(name="add")
+    @commands.cooldown(1, 4, commands.BucketType.user)
+    async def twitter_add(self, ctx, username: str):
+        """Add a user to your feed"""
+        guild = await r.table("twitter2").get(str(ctx.guild.id)).run(self.bot.r_conn)
+        if not guild:
+            return await ctx.send("Twitter hasn't been setup for this server, use `n!twitter set <channel>` to set it up.")
+        d = int((await self.bot.redis.get("donate:{}".format(ctx.author.id))))
+        accounts = 0
+        if d == 1:
+            accounts = 5
+        elif d == 2:
+            accounts = 10
+        if accounts <= len(guild["accounts"]):
+            return await ctx.send("You already have set the most you can for this server. You can remove accounts using `n!twitter remove <username>`")
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("http://localhost:8090/gettwitteruser?username={}".format(username.replace("@", ""))) as res:
+                res = await res.json()
+        if not res["results"]:
+            return await ctx.send("No results found for this user.")
+        result = str(res["results"][0][0])
+        if result in guild["accounts"]:
+            return await ctx.send("This account is already set to your feeds")
+        guild["accounts"].append(result)
+        await r.table("twitter2").get(str(ctx.guild.id)).update({"accounts": guild["accounts"]}).run(self.bot.r_conn)
+        await ctx.send("Added {} to your feed".format(res["results"][0][1]))
+
+    @twitter.command(name="remove")
+    async def twitter_remove(self, ctx, username: str):
+        """Remove a user to your feed"""
+        guild = await r.table("twitter2").get(str(ctx.guild.id)).run(self.bot.r_conn)
+        if not guild:
+            return await ctx.send("Twitter hasn't been setup for this server, use `n!twitter set <channel>` to set it up.")
+        username = username.replace("@", "")
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("http://localhost:8090/gettwitteruser?username={}".format(username.replace("@", ""))) as res:
+                res = await res.json()
+        if not res["results"]:
+            return await ctx.send("No results found for this user.")
+        result = str(res["results"][0][0])
+        if result not in guild["accounts"]:
+            return await ctx.send("This user has not been added yet")
+        l = list()
+        for account in guild["accounts"]:
+            if account != result:
+                l.append(account)
+        await r.table("twitter2").get(str(ctx.guild.id)).update({"accounts": l}).run(self.bot.r_conn)
+        await ctx.send("Removed {}".format(res["results"][0][1]))
+
+    @twitter.command(name="clear")
+    async def twitter_clear(self, ctx):
+        """Remove twitter feeds from your server"""
+        guild = await r.table("twitter2").get(str(ctx.guild.id)).run(self.bot.r_conn)
+        if not guild:
+            return await ctx.send("Twitter hasn't been setup for this server.")
+        await r.table("twitter2").get(str(ctx.guild.id)).delete().run(self.bot.r_conn)
+        await ctx.send("Removed Twitter feeds from this server.")
 
 def setup(bot):
     bot.add_cog(Donator(bot))
