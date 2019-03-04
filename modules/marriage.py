@@ -5,6 +5,7 @@ import rethinkdb as r
 from .utils.chat_formatting import bold
 import re
 import base64, json
+import typing
 
 class Marriage:
 
@@ -45,7 +46,7 @@ class Marriage:
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def marry(self, ctx, user : discord.Member):
+    async def marry(self, ctx, user: discord.Member):
         """Marry someone OwO"""
         _ = await self._get_text(ctx)
         if user == ctx.author:
@@ -97,18 +98,19 @@ class Marriage:
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(1, 4, commands.BucketType.user)
-    async def divorce(self, ctx, user):
+    async def divorce(self, ctx, user: typing.Union[discord.User, discord.Member, int]):
         """Divorce somebody that you are married to, can be from an mention, their name or an id"""
         _ = await self._get_text(ctx)
 
-        try:
-            converter = commands.UserConverter()
-            user = await converter.convert(ctx, user)
-        except commands.BadArgument:
-            user_re_match = re.match("[0-9]{12,22}", user)
-            if user_re_match is None:
-                return await self.bot.send_cmd_help(ctx)
-            user = await self.bot.get_user_info(int(user_re_match.group(0)))
+        if isinstance(user, int):
+            try:
+                converter = commands.UserConverter()
+                user = await converter.convert(ctx, str(user))
+            except commands.BadArgument:
+                user_re_match = re.match("[0-9]{12,22}", user)
+                if user_re_match is None:
+                    return await self.bot.send_cmd_help(ctx)
+                user = await self.bot.get_user_info(int(user_re_match.group(0)))
 
         if user.id == ctx.author.id:
             return await ctx.send(_("You can't divorce yourself"))
