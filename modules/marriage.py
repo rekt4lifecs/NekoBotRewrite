@@ -107,7 +107,7 @@ class Marriage:
                 converter = commands.UserConverter()
                 user = await converter.convert(ctx, str(user))
             except commands.BadArgument:
-                user_re_match = re.match("[0-9]{12,22}", user)
+                user_re_match = re.match("[0-9]{12,22}", str(user))
                 if user_re_match is None:
                     return await self.bot.send_cmd_help(ctx)
                 user = await self.bot.get_user_info(int(user_re_match.group(0)))
