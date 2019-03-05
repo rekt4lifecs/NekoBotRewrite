@@ -35,7 +35,7 @@ def get_single():
 def get_top():
     top_amount = int(input("Top: "))
     top_seconds = int(input("Seconds: "))
-    top = r.table("levelSystem").order_by(r.desc("xp")).limit(top_amount).run(r_conn, array_limit=1000000)
+    top = r.table("levelSystem").order_by(r.desc("xp")).limit(top_amount).run(r_conn, array_limit=10000000)
     print("Retrieved Data")
 
     users = []
