@@ -3,6 +3,12 @@ import discord, config, aiohttp
 import base64
 import json
 import gettext
+from PIL import Image, ImageFont, ImageDraw
+from modules.eco import interpolate, get_rgb
+from io import BytesIO
+import time
+import random
+from colorthief import ColorThief
 
 wargaming = {
     "wows": {
@@ -28,6 +34,39 @@ wargaming = {
     }
 }
 
+osu_icons = ["osu", "taiko", "ctb", "mania"]
+__gradients = [
+    ["fad0c4", "ff9a9e"],
+    ["333333", "dd1818"],
+    ["11998e", "38ef7d"],
+    ["108dc7", "ef8e38"],
+    ["FC5C7D", "6A82FB"],
+    ["FC466B", "3F5EFB"],
+    ["c94b4b", "4b134f"],
+    ["23074d", "cc5333"],
+    ["fffbd5", "b20a2c"],
+    ["00b09b", "96c93d"],
+    ["D3CCE3", "E9E4F0"],
+    ["800080", "ffc0cb"],
+    ["00F260", "0575E6"],
+    ["fc4a1a", "f7b733"],
+    ["74ebd5", "ACB6E5"],
+    ["22c1c3", "fdbb2d"],
+    ["ff9966", "ff5e62"],
+    ["7F00FF", "E100FF"],
+    ["d9a7c7", "fffcdc"],
+    ["EF3B36", "FFFFFF"],
+    ["56CCF2", "2F80ED"],
+    ["F2994A", "F2C94C"],
+    ["30E8BF", "FF8235"],
+    ["4568DC", "B06AB3"],
+    ["43C6AC", "F8FFAE"]
+]
+
+def get_random_gradients():
+    a, b = random.choice(__gradients)
+    return get_rgb(a), get_rgb(b)
+
 class Games:
 
     def __init__(self, bot):
@@ -48,56 +87,225 @@ class Games:
         else:
             return gettext.gettext
 
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def osu(self, ctx, username:str):
-        """Get osu stats"""
-        _ = await self._get_text(ctx)
+    @commands.group()
+    async def osu(self, ctx):
+        """osu UwU"""
+        if ctx.invoked_subcommand is None:
+            return await self.bot.send_cmd_help(ctx)
+
+    async def osu_converter(self, ctx: commands.Context, arg: str):
+        converter = commands.UserConverter()
         try:
-            await ctx.trigger_typing()
-            url = "https://osu.ppy.sh/api/get_user?k=%s&u=%s" % (config.osu_key, username,)
+            user = await converter.convert(ctx, arg)
+            data = await self.bot.redis.get("osu:{}".format(user.id))
+            if data is None:
+                raise ValueError("Missing data")
+            return int(data)
+        except:
+            return arg
+
+    async def generate_card(self, data: dict, game: int):
+        # Sweat, messy
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://a.ppy.sh/12202663_{}.png".format(int(time.time()))) as res:
+                avatar = BytesIO((await res.read()))
+
+        img = Image.new("RGBA", (450, 125), (0, 0, 0, 0))
+        front = Image.new("RGBA", (440, 115), (255, 255, 255, 255))
+        draw = ImageDraw.Draw(front)
+        g1, g2 = get_random_gradients()
+        for x, color in enumerate(interpolate(g1, g2, img.size[1] * 5)):
+            draw.line((x, 0, 0, x), tuple(color), 1)
+        avatar = Image.open(avatar).resize((101, 101), Image.ANTIALIAS)
+        triangles = Image.open("data/osu/triangles.png").resize((440, 105), Image.ANTIALIAS)
+        triangles.putalpha(16)
+        front.alpha_composite(triangles, (0, 0))
+        txt = "#{:,}".format(int(data.get("pp_rank", 0)))
+        draw.text((376 - (len(txt) * 10), 20), txt, (255, 255, 255), ImageFont.truetype("data/osu/exo2regular.ttf", 19))
+        draw.text((115, 10), data.get("username", ""), (255, 255, 255),
+                  ImageFont.truetype("data/osu/exo2medium.ttf", 28 if len(data.get("username", "")) <= 8 else 26))
+        back = Image.new("RGBA", (432, 64), (255, 255, 255, 255))
+        draw = ImageDraw.Draw(back)
+        side_num_fnt = ImageFont.truetype("data/osu/exo2bold.ttf", 18)
+        draw.text((110, 5), "Accuracy", (110, 110, 110), ImageFont.truetype("data/osu/exo2regular.ttf", 20))
+        draw.text((110, 27), "Play Count", (110, 110, 110), ImageFont.truetype("data/osu/exo2regular.ttf", 18))
+        draw.text((360, 6), "{}%".format(round(float(data.get("accuracy", 0.0)), 2)), (90, 90, 90), side_num_fnt)
+        txt = "{:,} (lvl{})".format(int(data.get("playcount", 0)), round(float(data.get("level", 0))))
+        draw.text((445 - (len(txt) * 10), 24), txt, (90, 90, 90), side_num_fnt)
+        flag = Image.open("data/osu/flags/{}.png".format(data.get("country", "JP"))).convert("RGBA").resize((24, 16), Image.ANTIALIAS)
+        game = Image.open("data/osu/{}.png".format(osu_icons[game])).resize((16, 16), Image.ANTIALIAS)
+        front.alpha_composite(game, (383, 24))
+        front.alpha_composite(flag, (405, 24))
+        front.alpha_composite(back, (5, 48))
+        front.paste(avatar, (8, 8))
+        img.paste(front, (5, 5))
+        temp = BytesIO()
+        img.save(temp, format="png")
+        temp.seek(0)
+
+        img.close()
+        front.close()
+        avatar.close()
+        triangles.close()
+        back.close()
+        flag.close()
+        game.close()
+
+        return temp
+
+    @osu.command(name="link")
+    @commands.cooldown(1, 3, commands.BucketType.user)
+    async def osu_link(self, ctx):
+        """Link your osu! account to your discord"""
+        data = await self.bot.redis.get("osu:{}".format(ctx.author.id))
+        if data is None:
+            return await ctx.send("You can link your osu! account using this link, <https://osu.nekobot.xyz/>")
+        await ctx.send("Your osu! account is already linked to your discord account, send `yes` if you would like to unlink it.")
+        try:
+            msg = await self.bot.wait_for("message", check=lambda x: x.channel == ctx.message.channel and x.author == ctx.author, timeout=15.0)
+            if msg.content.lower() != "yes":
+                return
+        except:
+            return
+        await self.bot.redis.delete("osu:{}".format(ctx.author.id))
+
+    @osu.command(name="standard")
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def osu_standard(self, ctx, user):
+        """View osu!standard stats of a user"""
+        user = await self.osu_converter(ctx, user)
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://osu.ppy.sh/api/get_user?k={}&u={}&m=0&type={}".format(
+                config.osu_key,
+                user,
+                "id" if isinstance(user, int) else "string"
+            )) as res:
+                res = await res.json()
+        if not res:
+            return await ctx.send("No data found")
+        data = res[0]
+        await ctx.trigger_typing()
+        await ctx.send(file=discord.File((await self.generate_card(data, 0)), "osu.png"))
+
+    @osu.command(name="taiko")
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def osu_taiko(self, ctx, user):
+        """View osu!taiko stats of a user"""
+        user = await self.osu_converter(ctx, user)
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://osu.ppy.sh/api/get_user?k={}&u={}&m=1&type={}".format(
+                    config.osu_key,
+                    user,
+                    "id" if isinstance(user, int) else "string"
+            )) as res:
+                res = await res.json()
+        if not res:
+            return await ctx.send("No data found")
+        data = res[0]
+        await ctx.trigger_typing()
+        await ctx.send(file=discord.File((await self.generate_card(data, 1)), "osu.png"))
+
+    @osu.command(name="ctb")
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def osu_ctb(self, ctx, user):
+        """View osu!ctb stats of a user"""
+        user = await self.osu_converter(ctx, user)
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://osu.ppy.sh/api/get_user?k={}&u={}&m=2&type={}".format(
+                    config.osu_key,
+                    user,
+                    "id" if isinstance(user, int) else "string"
+            )) as res:
+                res = await res.json()
+        if not res:
+            return await ctx.send("No data found")
+        data = res[0]
+        await ctx.trigger_typing()
+        await ctx.send(file=discord.File((await self.generate_card(data, 2)), "osu.png"))
+
+    @osu.command(name="mania")
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def osu_mania(self, ctx, user):
+        """View osu!mania stats of a user"""
+        user = await self.osu_converter(ctx, user)
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://osu.ppy.sh/api/get_user?k={}&u={}&m=3&type={}".format(
+                    config.osu_key,
+                    user,
+                    "id" if isinstance(user, int) else "string"
+            )) as res:
+                res = await res.json()
+        if not res:
+            return await ctx.send("No data found")
+        data = res[0]
+        await ctx.trigger_typing()
+        await ctx.send(file=discord.File((await self.generate_card(data, 3)), "osu.png"))
+
+    async def get_dominant_color(self, url, key):
+        data = await self.bot.redis.get("osu:{}:color".format(key))
+        if data is None:
             async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    data = await r.json()
-            if data == []:
-                return await ctx.send(_("User not found."))
+                async with cs.get(url) as res:
+                    image = await res.read()
+                    r, g, b = ColorThief(BytesIO(image)).get_color()
+                    color = int(format(r << 16 | g << 8 | b, "06" + "x"), 16)
+            await self.bot.redis.set("osu:{}:color".format(key), color)
+            return color
+        return int(data)
 
-            data = data[0]
-            level = float(data["level"])
-            rank = data["pp_rank"]
-            crank = data["pp_country_rank"]
-            accuracy = int(float(data["accuracy"]))
-            pp = int(float(data["pp_raw"]))
+    @osu.command(name="beatmap")
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def osu_beatmap(self, ctx, *, title: str):
+        """Get details about a beatmap"""
+        await ctx.trigger_typing()
+        url = "https://osusearch.com/query/?title={}&statuses=Ranked,Qualified,Loved&query_order=play_count".format(title)
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(url) as res:
+                osusearch = json.loads((await res.read()))
+            if not osusearch["beatmaps"]:
+                return await ctx.send("No beatmaps found.")
+            beatmap = osusearch["beatmaps"][0]
+            async with cs.get("https://osu.ppy.sh/api/get_beatmaps?k={}&b=713935".format(
+                config.osu_key,
+                beatmap["beatmap_id"]
+            )) as res:
+                beatmap_data = await res.json()
+            if not beatmap_data:
+                return await ctx.send("No data found.")
+        beatmap_data = beatmap_data[0]
+        image_url = "https://assets.ppy.sh/beatmaps/{}/covers/card.jpg?{}".format(beatmap_data["beatmapset_id"], int(time.time()))
+        color = await self.get_dominant_color(image_url, beatmap_data["beatmapset_id"])
+        em = discord.Embed(colour=color, title="**{}** - {}".format(beatmap["title"], beatmap["artist"]))
+        em.set_image(url=image_url)
+        em.add_field(name="Length", value="{}s".format(beatmap_data["total_length"]))
+        em.add_field(name="Mode", value=osu_icons[int(beatmap_data["mode"])])
+        em.add_field(name="Creator", value=beatmap_data["creator"])
+        em.add_field(name="BPM", value=beatmap_data["bpm"])
+        em.add_field(name="Max Combo", value=beatmap_data["max_combo"])
+        em.add_field(name="Difficulty", value=str(round(float(beatmap_data["difficultyrating"]))))
+        em.add_field(name="Play Count", value=beatmap_data["playcount"])
+        em.add_field(name="Users Passed", value=beatmap_data["passcount"])
+        await ctx.send(embed=em)
 
-            ss = int(data["count_rank_ss"])
-            ssp = int(data["count_rank_ssh"])
-            s = int(data["count_rank_s"])
-            sp = int(data["count_rank_sh"])
-            a = int(data["count_rank_a"])
-
-            int_level = int(level)
-            next_level = int_level + 1
-
-            score = int((1 - (next_level - level)) * 100)
-            filled_progbar = round(score / 100 * 10)
-            level_graphx = '█' * filled_progbar + '‍ ‍' * (10 - filled_progbar)
-
-            msg = _("OSU! Profile for `%s`\n") % username
-            msg += "```\n"
-            msg += _("Level - %s [ %s ] %s\n") % (int_level, level_graphx, next_level,)
-            msg += _("Rank - %s\n") % rank
-            msg += _("Country Rank - %s\n") % crank
-            msg += _("Accuracy - %s\n") % str(accuracy) + "%"
-            msg += _("PP - %s\n") % pp
-            msg += _("SS - %s (SS+ %s)\n") % (ss, ssp,)
-            msg += _("S  - %s (S+ %s)\n") % (s, sp,)
-            msg += _("A  - %s\n") % a
-            msg += "```"
-
-            await ctx.send(msg)
-
-        except Exception as e:
-            return await ctx.send(_("Failed to fetch data, %s") % e)
+    @osu.command(name="top")
+    @commands.cooldown(1, 7, commands.BucketType.user)
+    async def osu_top(self, ctx, gamemode: str):
+        """Get top users of a gamemode"""
+        if gamemode.lower() not in ["standard", "taiko", "ctb", "mania"]:
+            return await ctx.send("Not a valid gamemode")
+        for i, x, in enumerate(["standard", "taiko", "ctb", "mania"]):
+            if x == gamemode.lower():
+                gamemode = i
+                break
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("https://osustats.ppy.sh/api/getScoreRanking?gamemode={}&page=1&rankMax=25&rankMin=1".format(gamemode)) as res:
+                users = await res.json()
+            async with cs.get("https://osustats.ppy.sh/api/getScoreRanking?gamemode={}&page=2&rankMax=25&rankMin=1".format(gamemode)) as res:
+                users = users + (await res.json())
+        message = "**Top users for osu!{}**\n".format(["standard", "taiko", "ctb", "mania"][gamemode])
+        for i, user in enumerate(users, start=1):
+            message += "**{}.** {}\n".format(i, user["osu_user"]["userName"])
+        await ctx.send(message)
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
