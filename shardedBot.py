@@ -6,6 +6,7 @@ import asyncio, aioredis
 import os, sys, time
 import random
 from multiprocessing import Queue
+from queue import Empty as EmptyQueue
 import json
 
 import config
@@ -150,6 +151,8 @@ class NekoBot(commands.AutoShardedBot):
                     elif data["op"] == "unload":
                         self.unload_extension("modules.{}".format(data["d"]))
                         logger.info("Unloaded {}".format(data["d"]))
+            except EmptyQueue:
+                pass
             except Exception as e:
                 logger.error("IPC Failed, {}".format(e))
             await asyncio.sleep(30)
