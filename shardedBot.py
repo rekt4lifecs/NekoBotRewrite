@@ -131,6 +131,7 @@ class NekoBot(commands.AutoShardedBot):
                 except:
                     logger.warning("Failed to load {}.".format(name))
                     traceback.print_exc()
+        self.loop.create_task(self.ipc())
         self.run()
 
     async def ipc(self):
