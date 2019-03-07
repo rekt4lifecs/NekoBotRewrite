@@ -94,20 +94,26 @@ class Games:
             return await self.bot.send_cmd_help(ctx)
 
     async def osu_converter(self, ctx: commands.Context, arg: str):
-        converter = commands.UserConverter()
+        converter = commands.MemberConverter()
         try:
             user = await converter.convert(ctx, arg)
             data = await self.bot.redis.get("osu:{}".format(user.id))
             if data is None:
                 raise ValueError("Missing data")
-            return int(data)
+            data = int(data)
+            return data
         except:
             return arg
+
+    def NoneRemover(self, arg, value):
+        if arg is None:
+            return value
+        return arg
 
     async def generate_card(self, data: dict, game: int):
         # Sweat, messy
         async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://a.ppy.sh/12202663_{}.png".format(int(time.time()))) as res:
+            async with cs.get("https://a.ppy.sh/{}_{}.png".format(data.get("user_id", ""), int(time.time()))) as res:
                 avatar = BytesIO((await res.read()))
 
         img = Image.new("RGBA", (450, 125), (0, 0, 0, 0))
@@ -120,7 +126,7 @@ class Games:
         triangles = Image.open("data/osu/triangles.png").resize((440, 105), Image.ANTIALIAS)
         triangles.putalpha(16)
         front.alpha_composite(triangles, (0, 0))
-        txt = "#{:,}".format(int(data.get("pp_rank", 0)))
+        txt = "#{:,}".format(int(self.NoneRemover(data.get("pp_rank", 0), 0)))
         draw.text((376 - (len(txt) * 10), 20), txt, (255, 255, 255), ImageFont.truetype("data/osu/exo2regular.ttf", 19))
         draw.text((115, 10), data.get("username", ""), (255, 255, 255),
                   ImageFont.truetype("data/osu/exo2medium.ttf", 28 if len(data.get("username", "")) <= 8 else 26))
@@ -129,8 +135,8 @@ class Games:
         side_num_fnt = ImageFont.truetype("data/osu/exo2bold.ttf", 18)
         draw.text((110, 5), "Accuracy", (110, 110, 110), ImageFont.truetype("data/osu/exo2regular.ttf", 20))
         draw.text((110, 27), "Play Count", (110, 110, 110), ImageFont.truetype("data/osu/exo2regular.ttf", 18))
-        draw.text((360, 6), "{}%".format(round(float(data.get("accuracy", 0.0)), 2)), (90, 90, 90), side_num_fnt)
-        txt = "{:,} (lvl{})".format(int(data.get("playcount", 0)), round(float(data.get("level", 0))))
+        draw.text((360, 6), "{}%".format(round(float(self.NoneRemover(data.get("accuracy", 0.0), 0)), 2)), (90, 90, 90), side_num_fnt)
+        txt = "{:,} (lvl{})".format(int(self.NoneRemover(data.get("playcount", 0), 0)), round(float(self.NoneRemover(data.get("level", 0), 0))))
         draw.text((445 - (len(txt) * 10), 24), txt, (90, 90, 90), side_num_fnt)
         flag = Image.open("data/osu/flags/{}.png".format(data.get("country", "JP"))).convert("RGBA").resize((24, 16), Image.ANTIALIAS)
         game = Image.open("data/osu/{}.png".format(osu_icons[game])).resize((16, 16), Image.ANTIALIAS)
@@ -265,7 +271,7 @@ class Games:
             if not osusearch["beatmaps"]:
                 return await ctx.send("No beatmaps found.")
             beatmap = osusearch["beatmaps"][0]
-            async with cs.get("https://osu.ppy.sh/api/get_beatmaps?k={}&b=713935".format(
+            async with cs.get("https://osu.ppy.sh/api/get_beatmaps?k={}&b={}".format(
                 config.osu_key,
                 beatmap["beatmap_id"]
             )) as res:
