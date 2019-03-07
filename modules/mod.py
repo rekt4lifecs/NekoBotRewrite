@@ -9,7 +9,8 @@ import string
 import time
 import config
 import aiohttp
-import re, gettext, inspect, datetime, collections
+import re, gettext
+import json
 import logging
 import rethinkdb as r
 
@@ -546,6 +547,39 @@ class Moderation:
         actual_poll = await ctx.send(embed=embed)
         for emoji, _ in answers:
             await actual_poll.add_reaction(emoji)
+
+    @commands.group(hidden=True, name="ipc")
+    @commands.is_owner()
+    async def ipc_handle(self, ctx):
+        if ctx.invoked_subcommand is None:
+            return await self.bot.send_cmd_help(ctx)
+
+    @ipc_handle.command(name="reload")
+    async def ipc_reload(self, ctx, *, module: str):
+        for x in range(self.bot.instances):
+            self.bot.ipc_queue.put_nowait(json.dumps({
+                "op": "reload",
+                "d": module
+            }))
+        await ctx.send("Reload added to queue")
+
+    @ipc_handle.command(name="unload")
+    async def ipc_unload(self, ctx, *, module: str):
+        for x in range(self.bot.instances):
+            self.bot.ipc_queue.put_nowait(json.dumps({
+                "op": "unload",
+                "d": module
+            }))
+        await ctx.send("Unload added to queue")
+
+    @ipc_handle.command(name="load")
+    async def ipc_load(self, ctx, *, module: str):
+        for x in range(self.bot.instances):
+            self.bot.ipc_queue.put_nowait(json.dumps({
+                "op": "load",
+                "d": module
+            }))
+        await ctx.send("Load added to queue")
 
     @commands.command(hidden=True, name='eval')
     @commands.is_owner()
