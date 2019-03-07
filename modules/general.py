@@ -124,14 +124,6 @@ class General:
                     self.bot.pipe.send(1)
                     self.bot.pipe.close()
 
-        if event == "GUILD_CREATE":
-            await self.bot.redis.set("guild:%s:cache" % data.get("guild_id"), json.dumps({
-                "id": data.get("guild_id"),
-                "icon": data.get("icon")
-            }))
-        elif event == "GUILD_DELETE":
-            await self.bot.redis.delete("guild:%s:cache" % data.get("guild_id"))
-
     @commands.command()
     @commands.guild_only()
     @commands.cooldown(2, 6, commands.BucketType.user)
