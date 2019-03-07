@@ -5,6 +5,8 @@ import datetime
 import asyncio, aioredis
 import os, sys, time
 import random
+from multiprocessing import Queue
+import json
 
 import config
 import rethinkdb as r
@@ -92,7 +94,7 @@ async def _prefix_callable(bot, msg):
 
 class NekoBot(commands.AutoShardedBot):
 
-    def __init__(self, instance, instances, shard_count, shard_ids, pipe, **kwargs):
+    def __init__(self, instance, instances, shard_count, shard_ids, pipe, ipc_queue: Queue, **kwargs):
         super().__init__(command_prefix=_prefix_callable,
                          description="NekoBot",
                          pm_help=None,
@@ -101,12 +103,13 @@ class NekoBot(commands.AutoShardedBot):
                          status=discord.Status.idle,
                          fetch_offline_members=False,
                          max_messages=kwargs.get("max_messages", 105),
-                         help_attrs={'hidden': True})
+                         help_attrs={"hidden": True})
         self.counter = Counter()
         self.command_usage = Counter()
         self.instance = instance
         self.instances = instances
         self.pipe = pipe
+        self.ipc_queue = ipc_queue
         self.shard_ids = shard_ids
 
         async def _init_redis():
@@ -129,6 +132,26 @@ class NekoBot(commands.AutoShardedBot):
                     logger.warning("Failed to load {}.".format(name))
                     traceback.print_exc()
         self.run()
+
+    async def ipc(self):
+        while True:
+            try:
+                data = self.ipc_queue.get_nowait()
+                if data:
+                    data = json.loads(data)
+                    if data["op"] == "reload":
+                        self.unload_extension("modules.{}".format(data["d"]))
+                        self.load_extension("modules.{}".format(data["d"]))
+                        logger.info("Reloaded {}".format(data["d"]))
+                    elif data["op"] == "load":
+                        self.load_extension("modules.{}".format(data["d"]))
+                        logger.info("Loaded {}".format(data["d"]))
+                    elif data["op"] == "unload":
+                        self.unload_extension("modules.{}".format(data["d"]))
+                        logger.info("Unloaded {}".format(data["d"]))
+            except Exception as e:
+                logger.error("IPC Failed, {}".format(e))
+            await asyncio.sleep(30)
 
     async def get_language(self, ctx):
         data = await self.redis.get("%s-lang" % ctx.author.id)
