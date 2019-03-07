@@ -736,7 +736,7 @@ class economy:
                 if sum(get_amount(author_deck_n, i)) == sum(get_amount(bot_deck_n, i)):
                     em.description = "Nobody won."
                     await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + amount)
-                elif sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, i)) >> 21:
+                elif sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, i)) > 21:
                     em.description = "Nobody won."
                     await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + amount)
                 elif sum(get_amount(author_deck_n, i)) > sum(get_amount(bot_deck_n, i)):
@@ -749,7 +749,7 @@ class economy:
                 return
 
             if sum(get_amount(bot_deck_n, i)) > 21 or sum(get_amount(author_deck_n, i)) > 21:
-                if sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, i)) >> 21:
+                if sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, i)) > 21:
                     em.description = "Nobody won."
                     await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + amount)
                 elif sum(get_amount(author_deck_n, i)) > 21:
