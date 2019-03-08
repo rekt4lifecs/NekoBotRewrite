@@ -576,25 +576,33 @@ class General:
         else:
             await ctx.send(embed=em.set_image(url=user.avatar_url_as(format=type)))
 
+    async def get_dominant_color(self, url, key):
+        data = await self.bot.redis.get("osu:{}:color".format(key))
+        if data is None:
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get(url) as res:
+                    image = await res.read()
+                    r, g, b = ColorThief(BytesIO(image)).get_color()
+                    color = int(format(r << 16 | g << 8 | b, "06" + "x"), 16)
+            await self.bot.redis.set("osu:{}:color".format(key), color)
+            return color
+        return int(data)
+
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def coffee(self, ctx):
         """Coffee owo"""
         _ = await self._get_text(ctx)
 
-        url = "https://coffee.alexflipnote.xyz/random.json"
         await ctx.channel.trigger_typing()
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as r:
-                res = await r.json()
+            async with cs.get("https://nekobot.xyz/api/image?type=coffee") as res:
+                imgdata = await res.json()
             em = discord.Embed()
-            msg = await ctx.send(_("*drinks coffee*"), embed=em.set_image(url=res['file']))
-            async with cs.get(res['file']) as r:
-                data = await r.read()
-            color_thief = ColorThief(BytesIO(data))
-            hexx = int(triplet(color_thief.get_color()), 16)
-            em = discord.Embed(color=hexx)
-            await msg.edit(embed=em.set_image(url=res['file']))
+            msg = await ctx.send(_("*drinks coffee*"), embed=em.set_image(url=imgdata["message"]))
+            color = await self.get_dominant_color(imgdata["message"], imgdata["message"].rpartition("/")[2])
+            em = discord.Embed(color=color)
+            await msg.edit(embed=em.set_image(url=imgdata["message"]))
 
     @commands.command()
     @commands.cooldown(1, 3, commands.BucketType.user)
