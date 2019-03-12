@@ -721,25 +721,42 @@ class economy:
 
         msg = await ctx.send(embed=em)
 
+        bot_val = 2
+        bot_stay = False
         for i, x in enumerate(range(3), start=3):
             move = await self.blackjack_input(ctx)
             em = discord.Embed(color=0xDEADBF, title="Blackjack", description="Type `hit` or `stay`.")
+
+            if not bot_stay:
+                if bot_val == 4:
+                    bot_stay = True
+                elif sum(get_amount(bot_deck_n, bot_val)) <= 16:
+                    bot_val += 1
+                elif sum(get_amount(bot_deck_n, bot_val)) == 21:
+                    bot_stay = True
+                else:
+                    if random.randint(0, 1) == 0:
+                        bot_stay = True
+                    else:
+                        bot_val += 1
+
             if move == 1:
                 i -= 1
                 em.add_field(name="Your Cards ({})".format(sum(get_amount(author_deck_n, i))),
                              value=" | ".join([card_list[x] for x in get_amount(author_deck, i)]),
                              inline=True)
-                em.add_field(name="My Cards ({})".format(sum(get_amount(bot_deck_n, i))),
-                             value=" | ".join([card_list[x] for x in get_amount(bot_deck, i)]),
+                em.add_field(name="My Cards ({})".format(sum(get_amount(bot_deck_n, bot_val))),
+                             value=" | ".join([card_list[x] for x in get_amount(bot_deck, bot_val)]),
                              inline=True)
 
-                if sum(get_amount(author_deck_n, i)) == sum(get_amount(bot_deck_n, i)):
+                if sum(get_amount(author_deck_n, i)) == sum(get_amount(bot_deck_n, bot_val)):
                     em.description = "Nobody won."
                     await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + amount)
-                elif sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, i)) > 21:
+                elif sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, bot_val)) > 21:
                     em.description = "Nobody won."
                     await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + amount)
-                elif sum(get_amount(author_deck_n, i)) > sum(get_amount(bot_deck_n, i)):
+                elif sum(get_amount(author_deck_n, i)) > sum(get_amount(bot_deck_n, bot_val)) or \
+                    sum(get_amount(bot_deck_n, bot_val)) > 21:
                     em.description = "You beat me ;w;"
                     await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + int(amount * 1.75))
                 else:
@@ -748,8 +765,8 @@ class economy:
                 await msg.edit(embed=em)
                 return
 
-            if sum(get_amount(bot_deck_n, i)) > 21 or sum(get_amount(author_deck_n, i)) > 21:
-                if sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, i)) > 21:
+            if sum(get_amount(bot_deck_n, bot_val)) > 21 or sum(get_amount(author_deck_n, i)) > 21:
+                if sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, bot_val)) > 21:
                     em.description = "Nobody won."
                     await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + amount)
                 elif sum(get_amount(author_deck_n, i)) > 21:
@@ -760,8 +777,8 @@ class economy:
                 em.add_field(name="Your Cards ({})".format(sum(get_amount(author_deck_n, i))),
                              value=" | ".join([card_list[x] for x in get_amount(author_deck, i)]),
                              inline=True)
-                em.add_field(name="My Cards ({})".format(sum(get_amount(bot_deck_n, i))),
-                             value=" | ".join([card_list[x] for x in get_amount(bot_deck, i)]),
+                em.add_field(name="My Cards ({})".format(sum(get_amount(bot_deck_n, bot_val))),
+                             value=" | ".join([card_list[x] for x in get_amount(bot_deck, bot_val)]),
                              inline=True)
                 await msg.edit(embed=em)
                 return
@@ -770,11 +787,11 @@ class economy:
                          value=" | ".join([card_list[x] for x in get_amount(author_deck, i)]),
                          inline=True)
             em.add_field(name="My Cards (?)",
-                         value=" | ".join(["?" for x in get_amount(bot_deck, i)]),
+                         value=" | ".join(["?" for x in get_amount(bot_deck, bot_val)]),
                          inline=True)
             await msg.edit(embed=em)
         if sum(get_amount(bot_deck_n, 5)) > 21 or sum(get_amount(author_deck_n, 5)) > 21:
-            if sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, i)) > 21:
+            if sum(get_amount(author_deck_n, i)) > 21 and sum(get_amount(bot_deck_n, bot_val)) > 21:
                 em.description = "Nobody won."
                 await self.__update_balance(ctx.author.id, (await self.__get_balance(ctx.author.id)) + amount)
             elif sum(get_amount(author_deck_n, i)) > 21:
@@ -785,8 +802,8 @@ class economy:
             em.add_field(name="Your Cards ({})".format(sum(get_amount(author_deck_n, i))),
                          value=" | ".join([card_list[x] for x in get_amount(author_deck, i)]),
                          inline=True)
-            em.add_field(name="My Cards ({})".format(sum(get_amount(bot_deck_n, i))),
-                         value=" | ".join([card_list[x] for x in get_amount(bot_deck, i)]),
+            em.add_field(name="My Cards ({})".format(sum(get_amount(bot_deck_n, bot_val))),
+                         value=" | ".join([card_list[x] for x in get_amount(bot_deck, bot_val)]),
                          inline=True)
             await msg.edit(embed=em)
 
