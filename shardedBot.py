@@ -8,6 +8,7 @@ import random
 from multiprocessing import Queue
 from queue import Empty as EmptyQueue
 import json
+import hashlib
 
 import config
 import rethinkdb as r
@@ -80,10 +81,17 @@ console = logging.StreamHandler()
 console.setFormatter(color_formatter)
 logger.addHandler(console)
 
+commandLog = logging.getLogger("commandLog")
+commandLog.setLevel(logging.INFO)
+
 if sys.platform == "linux":
     file = logging.FileHandler(filename=f'logs/{datetime.datetime.utcnow()}.log', encoding='utf-8', mode='w')
     file.setFormatter(color_formatter)
     logger.addHandler(file)
+
+    file = logging.FileHandler(filename="logs/{}-commands.log".format(datetime.datetime.utcnow()), encoding="utf-8", mode="w")
+    file.setFormatter(color_formatter)
+    commandLog.addHandler(file)
 
 async def _prefix_callable(bot, msg):
     prefix = await bot.redis.get(f"{msg.author.id}-prefix")
@@ -171,10 +179,19 @@ class NekoBot(commands.AutoShardedBot):
         if isinstance(exception, commands.CommandNotFound):
             return
 
+    async def on_command_completion(self, ctx):
+        data = await self.redis.get("{}:{}:{}".format(ctx.author.id, ctx.channel.id, ctx.message.id))
+        if data:
+            completion = int(time.time()) - int(data)
+            commandLog.info("{} executed {} in {}s".format(ctx.author.id, ctx.command.name, completion))
+            if completion >= 30:
+                commandLog.warning("{} took over 30 seconds to execute".format(ctx.command.name))
+
     async def on_command(self, ctx):
         self.counter["commands_used"] += 1
         self.command_usage[ctx.command.name] += 1
         await self.redis.incr(ctx.command.name)
+        await self.redis.set("{}:{}:{}".format(ctx.author.id, ctx.channel.id, ctx.message.id), int(time.time()), expire=3600)
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
@@ -185,21 +202,6 @@ class NekoBot(commands.AutoShardedBot):
             pages = await self.formatter.format_help_for(ctx, ctx.command)
             for page in pages:
                 await ctx.send(page)
-
-    # async def nekopet_check(self, message):
-    #     if random.randint(1, 200) == 1:
-    #         data = await r.table("nekopet").get(str(message.author.id)).run(self.r_conn)
-    #         if data:
-    #             play_amt = random.randint(1, 20)
-    #             food_amt = random.randint(1, 20)
-    #             if (data.get("play") - play_amt) <= 0 or (data.get("food") - food_amt) <= 0:
-    #                 await r.table("nekopet").get(str(message.author.id)).delete().run(self.r_conn)
-    #                 logger.info("%s's neko died" % message.author.id)
-    #             else:
-    #                 await r.table("nekopet").get(str(message.author.id)).update({
-    #                     "play": data.get("play") - play_amt,
-    #                     "food": data.get("food") - food_amt
-    #                 }).run(self.r_conn)
 
     async def __level_handler(self, message):
         if not isinstance(message.channel, discord.TextChannel):
@@ -259,7 +261,6 @@ class NekoBot(commands.AutoShardedBot):
         if message.author.bot:
             return
         await self.process_commands(message)
-        # await self.nekopet_check(message)
         await self.__level_handler(message)
 
     async def close(self):
