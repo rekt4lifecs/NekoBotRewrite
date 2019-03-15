@@ -384,7 +384,7 @@ class Economy(commands.Cog):
         if not tl >= 86400:
             i = datetime.timedelta(seconds=86400 - tl)
             d = datetime.datetime(1, 1, 1) + i
-            return await ctx.send("You have `%s` until your next daily.") % d.strftime("%H:%M:%S")
+            return await ctx.send("You have `{}` until your next daily.".format(d.strftime("%H:%M:%S")))
 
         msg = ""
         msg += "Daily Credits\n"
