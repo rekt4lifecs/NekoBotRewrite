@@ -2,9 +2,11 @@ import discord
 from discord.ext import commands
 import logging, sys, time
 import aioredis
+import aiohttp
 import rethinkdb as r
 from datetime import datetime
 import config
+import gettext
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
@@ -99,6 +101,10 @@ class NekoBot(commands.AutoShardedBot):
         self.pipe = pipe
         self.ipc_queue = ipc_queue
         self.__shard_counter = 0
+        self.languages = ["tsundere", "weeb", "chinese"]
+        self.lang = {}
+        for x in self.languages:
+            self.lang[x] = gettext.translation("errors", localedir="locale", languages=[x])
 
         async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
@@ -125,9 +131,15 @@ class NekoBot(commands.AutoShardedBot):
             return None
         return dec
 
-    async def on_command_error(self, context, exception):
-        if isinstance(exception, commands.CommandNotFound):
-            return
+    async def _get_text(self, ctx):
+        lang = await self.get_language(ctx)
+        if lang:
+            if lang in self.languages:
+                return self.lang[lang].gettext
+            else:
+                return gettext.gettext
+        else:
+            return gettext.gettext
 
     async def on_command(self, ctx):
         logger.info("{} executed {}".format(ctx.author.id, ctx.command.name))
@@ -169,3 +181,49 @@ class NekoBot(commands.AutoShardedBot):
 
     def run(self, token = config.token):
         super().run(token)
+
+    async def on_command_error(self, ctx, exception):
+
+        error = getattr(exception, "original", exception)
+        if isinstance(error, discord.NotFound):
+            return
+        elif isinstance(error, discord.Forbidden):
+            return
+        elif isinstance(error, discord.HTTPException) or isinstance(error, aiohttp.ClientConnectionError):
+            return await ctx.send((await self._get_text(ctx))("Failed to get data."))
+        if isinstance(exception, commands.NoPrivateMessage):
+            return
+        elif isinstance(exception, commands.DisabledCommand):
+            return
+        elif isinstance(exception, commands.CommandInvokeError):
+            async with aiohttp.ClientSession() as cs:
+                await cs.post(
+                    f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
+                    json={
+                        "embeds": [
+                            {
+                                "title": f"Command: {ctx.command.qualified_name}, Instance: {self.instance}",
+                                "description": f"```py\n{exception}\n```\n By `{ctx.author}` (`{ctx.author.id}`)",
+                                "color": 16740159
+                            }
+                        ]
+                    })
+            em = discord.Embed(color=0xDEADBF,
+                               title="Error",
+                               description=f"Error in command {ctx.command.qualified_name}, "
+                                           f"[Support Server](https://discord.gg/q98qeYN).\n`{exception}`")
+            await ctx.send(embed=em)
+            logger.warning('In {}:'.format(ctx.command.qualified_name))
+            logger.warning('{}: {}'.format(exception.original.__class__.__name__, exception.original))
+        elif isinstance(exception, commands.BadArgument):
+            await self.send_cmd_help(ctx)
+        elif isinstance(exception, commands.MissingRequiredArgument):
+            await self.send_cmd_help(ctx)
+        elif isinstance(exception, commands.CheckFailure):
+            await ctx.send((await self._get_text(ctx))("You are not allowed to use that command."), delete_after=5)
+        elif isinstance(exception, commands.CommandOnCooldown):
+            await ctx.send((await self._get_text(ctx))("Command is on cooldown... {:.2f}s left").format(exception.retry_after), delete_after=5)
+        elif isinstance(exception, commands.CommandNotFound):
+            return
+        else:
+            return
