@@ -219,7 +219,7 @@ class Economy(commands.Cog):
 
         if await self.__has_account(user.id):
             balance = await self.__get_balance(user.id)
-            await ctx.send("💵 | " + "Balance: **$%s**".replace("$", "￥") % balance)
+            await ctx.send("💵 | " + "Balance: **${}**".format(balance).replace("$", "￥"))
         else:
             await ctx.send("💵 | " + "Balance: **$0**".replace("$", "￥"))
 
@@ -427,15 +427,15 @@ class Economy(commands.Cog):
                 data = await r.json()
 
             if data['status'] == 200:
-                await ctx.send("**%s has given %s 1 reputation point!**") % (ctx.author.name.replace("@", "@\u200B"),
-                                                                            user.mention,)
+                await ctx.send("**%s has given %s 1 reputation point!**" % (ctx.author.name.replace("@", "@\u200B"),
+                                                                            user.mention,))
             else:
                 async with cs.get("https://api.weeb.sh/reputation/310039170792030211/%s" % ctx.author.id,
                                    headers=auth) as r:
                     repdata = await r.json()
                 nextrep = repdata["user"]["nextAvailableReputations"][0]
                 timeleft = (datetime.datetime(1, 1, 1) + datetime.timedelta(milliseconds=nextrep)).strftime("%H:%M:%S")
-                await ctx.send("**%s, you can give more reputation in `%s`**") % (ctx.author.mention, timeleft,)
+                await ctx.send("**%s, you can give more reputation in `%s`**" % (ctx.author.mention, timeleft,))
 
     @commands.command()
     @commands.cooldown(1, 7, commands.BucketType.user)
@@ -546,7 +546,7 @@ class Economy(commands.Cog):
         await self.__update_balance(user.id, user_balance + amount)
         await self.__update_balance(ctx.author.id, author_balance - amount)
 
-        await ctx.send("Successfully sent %s $%s".replace("$", "￥") % (user.name, amount,))
+        await ctx.send("Successfully sent %s $%s".replace("$", "￥" % (user.name, amount,)))
 
     @commands.command()
     @commands.guild_only()
