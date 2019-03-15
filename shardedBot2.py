@@ -102,10 +102,6 @@ class NekoBot(commands.AutoShardedBot):
         self.pipe = pipe
         self.ipc_queue = ipc_queue
         self.__shard_counter = 0
-        self.languages = ["tsundere", "weeb", "chinese"]
-        self.lang = {}
-        for x in self.languages:
-            self.lang[x] = gettext.translation("errors", localedir="locale", languages=[x])
 
         async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
@@ -130,26 +126,6 @@ class NekoBot(commands.AutoShardedBot):
                     traceback.print_exc()
 
         self.run()
-
-    async def get_language(self, ctx):
-        data = await self.redis.get("%s-lang" % ctx.author.id)
-        if not data:
-            return None
-        dec = data.decode("utf8")
-        if dec == "english":
-            await self.redis.delete("%s-lang" % ctx.author.id)
-            return None
-        return dec
-
-    async def _get_text(self, ctx):
-        lang = await self.get_language(ctx)
-        if lang:
-            if lang in self.languages:
-                return self.lang[lang].gettext
-            else:
-                return gettext.gettext
-        else:
-            return gettext.gettext
 
     async def on_command(self, ctx):
         logger.info("{} executed {}".format(ctx.author.id, ctx.command.name))
@@ -200,7 +176,7 @@ class NekoBot(commands.AutoShardedBot):
         elif isinstance(error, discord.Forbidden):
             return
         elif isinstance(error, discord.HTTPException) or isinstance(error, aiohttp.ClientConnectionError):
-            return await ctx.send((await self._get_text(ctx))("Failed to get data."))
+            return await ctx.send("Failed to get data.")
         if isinstance(exception, commands.NoPrivateMessage):
             return
         elif isinstance(exception, commands.DisabledCommand):
@@ -230,9 +206,9 @@ class NekoBot(commands.AutoShardedBot):
         elif isinstance(exception, commands.MissingRequiredArgument):
             await self.send_cmd_help(ctx)
         elif isinstance(exception, commands.CheckFailure):
-            await ctx.send((await self._get_text(ctx))("You are not allowed to use that command."), delete_after=5)
+            await ctx.send("You are not allowed to use that command.", delete_after=5)
         elif isinstance(exception, commands.CommandOnCooldown):
-            await ctx.send((await self._get_text(ctx))("Command is on cooldown... {:.2f}s left").format(exception.retry_after), delete_after=5)
+            await ctx.send("Command is on cooldown... {:.2f}s left".format(exception.retry_after), delete_after=5)
         elif isinstance(exception, commands.CommandNotFound):
             return
         else:
