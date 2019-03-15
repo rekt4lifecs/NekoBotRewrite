@@ -214,8 +214,7 @@ class Fun(commands.Cog):
     async def toxicity(self, ctx, *, text: str):
         """Get text toxicity levels"""
         try:
-            API_KEY = "AIzaSyAc49LROgPF9IEiLDavWqwb2z8UndUUbcM"
-            url = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=" + API_KEY
+            url = "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=" + config.googlekey
             analyze_request = {
                 'comment': {'text': f'{text}'},
                 'requestedAttributes': {'TOXICITY': {},
