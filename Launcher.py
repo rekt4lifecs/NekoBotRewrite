@@ -46,7 +46,7 @@ if __name__ == "__main__":
         while True:
             try:
                 for powo in processes_owo:
-                    proc = processes_owo[p].get("process")
+                    proc = processes_owo[powo].get("process")
                     if not proc.is_alive():
                         listen, send = Pipe()
                         p = Process(target=shardedBot2.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
