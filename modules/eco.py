@@ -14,6 +14,8 @@ from PIL import Image, ImageDraw, ImageFont
 import textwrap
 from io import BytesIO
 
+from .utils import helpers
+
 auth = {"Authorization": "Wolke " + weeb,
         "User-Agent": "NekoBot/4.2.0"}
 
@@ -546,7 +548,7 @@ class Economy(commands.Cog):
         await self.__update_balance(user.id, user_balance + amount)
         await self.__update_balance(ctx.author.id, author_balance - amount)
 
-        await ctx.send("Successfully sent %s $%s".replace("$", "￥" % (user.name, amount,)))
+        await ctx.send("Successfully sent {} ￥{}".format(helpers.clean_text(user.name), amount))
 
     @commands.command()
     @commands.guild_only()
