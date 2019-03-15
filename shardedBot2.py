@@ -165,7 +165,7 @@ class NekoBot(commands.AutoShardedBot):
         if not hasattr(self, "uptime"):
             self.uptime = datetime.utcnow()
 
-        logger.info("READY, Instance {}/{}, Shards {}".format(self.instance, len(self.instances), self.shard_count))
+        logger.info("READY, Instance {}/{}, Shards {}".format(self.instance, self.instances, self.shard_count))
 
     def run(self):
         super().run(config.token)
