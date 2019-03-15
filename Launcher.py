@@ -1,4 +1,4 @@
-import shardedBot
+import shardedBot2
 from multiprocessing import Process, Pipe, Queue
 import asyncio
 import shutil
@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     for instance, shard_ids in queue:
         listen, send = Pipe()
-        p = Process(target=shardedBot.NekoBot, args=(instance, instances, shards, shard_ids, send, ipc_queue))
+        p = Process(target=shardedBot2.NekoBot, args=(instance, instances, shards, shard_ids, send, ipc_queue))
         p.start()
         print("Launching Instance {} (PID {})".format(instance, p.pid))
         processes.append(p.pid)
