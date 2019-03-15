@@ -28,16 +28,14 @@ if __name__ == "__main__":
             "process": None
         }
 
-    print(processes_owo)
-
     ipc_queue = Queue()
 
-    for p in processes_owo:
+    for powo in processes_owo:
         listen, send = Pipe()
-        p = Process(target=shardedBot2.NekoBot, args=(int(p), instances, shards, processes_owo[p]["ids"], send, ipc_queue))
+        p = Process(target=shardedBot2.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
         p.start()
-        processes_owo[p]["process"] = p
-        print("Launching Instance {} (PID {})".format(p, p.pid))
+        processes_owo[powo]["process"] = p
+        print("Launching Instance {} (PID {})".format(powo, p.pid))
         processes.append(p.pid)
 
         if listen.recv() == 1:
@@ -47,14 +45,14 @@ if __name__ == "__main__":
     try:
         while True:
             try:
-                for p in processes_owo:
+                for powo in processes_owo:
                     proc = processes_owo[p].get("process")
                     if not proc.is_alive():
                         listen, send = Pipe()
-                        p = Process(target=shardedBot2.NekoBot, args=(int(p), instances, shards, processes_owo[p]["ids"], send, ipc_queue))
+                        p = Process(target=shardedBot2.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
                         p.start()
-                        processes_owo[p]["process"] = p
-                        print("Relaunched {}".format(p))
+                        processes_owo[powo]["process"] = p
+                        print("Relaunched {}".format(powo))
                         processes.append(p.pid)
 
                         if listen.recv() == 1:
