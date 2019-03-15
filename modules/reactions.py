@@ -78,7 +78,7 @@ class Reactions(commands.Cog):
         self.weeb = Weeb(config.weeb, bot)
 
     # Guild only for all commnds
-    async def __local_check(self, ctx):
+    async def cog_check(self, ctx):
         return True if ctx.guild else False
 
     async def _weeb_handler(self, ctx: commands.Context, arg, image: str):
