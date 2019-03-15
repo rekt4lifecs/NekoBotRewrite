@@ -4,6 +4,7 @@ import logging, sys, time
 import aioredis
 import rethinkdb as r
 from datetime import datetime
+import config
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
@@ -166,3 +167,6 @@ class NekoBot(commands.AutoShardedBot):
             self.uptime = datetime.utcnow()
 
         logger.info("READY, Instance {}/{}, Shards {}".format(self.instance, len(self.instances), self.shard_count))
+
+    def run(self):
+        super().run(config.token)
