@@ -196,6 +196,10 @@ class NekoBot(commands.AutoShardedBot):
     async def on_ready(self):
         if not hasattr(self, "uptime"):
             self.uptime = datetime.utcnow()
+        async with aiohttp.ClientSession() as cs:
+            await cs.post(config.status_smh, json={
+                "content": "instance {} ready smh".format(self.instance)
+            })
 
         logger.info("READY, Instance {}/{}, Shards {}".format(self.instance, self.instances, self.shard_count))
 
