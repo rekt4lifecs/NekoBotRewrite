@@ -5,9 +5,14 @@ import traceback
 from datetime import datetime
 import config
 import gettext
+
+import asyncio
 import aioredis
 import aiohttp
 import rethinkdb as r
+
+import json
+from queue import Empty as EmptyQueue
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
@@ -125,7 +130,30 @@ class NekoBot(commands.AutoShardedBot):
                     logger.warning("Failed to load {}.".format(name))
                     traceback.print_exc()
 
+        self.loop.create_task(self.start_loop())
         self.run()
+
+    async def start_loop(self):
+        while True:
+            try:
+                data = self.ipc_queue.get_nowait()
+                if data:
+                    data = json.loads(data)
+                    if data["op"] == "reload":
+                        self.unload_extension("modules.{}".format(data["d"]))
+                        self.load_extension("modules.{}".format(data["d"]))
+                        logger.info("Reloaded {}".format(data["d"]))
+                    elif data["op"] == "load":
+                        self.load_extension("modules.{}".format(data["d"]))
+                        logger.info("Loaded {}".format(data["d"]))
+                    elif data["op"] == "unload":
+                        self.unload_extension("modules.{}".format(data["d"]))
+                        logger.info("Unloaded {}".format(data["d"]))
+            except EmptyQueue:
+                pass
+            except Exception as e:
+                logger.error("IPC Failed, {}".format(e))
+            await asyncio.sleep(240)
 
     async def on_command(self, ctx):
         logger.info("{} executed {}".format(ctx.author.id, ctx.command.name))
@@ -211,5 +239,4 @@ class NekoBot(commands.AutoShardedBot):
             await ctx.send("Command is on cooldown... {:.2f}s left".format(exception.retry_after), delete_after=5)
         elif isinstance(exception, commands.CommandNotFound):
             return
-        else:
-            return
+        return
