@@ -82,7 +82,7 @@ async def _prefix_callable(bot, msg):
 
 class NekoBot(commands.AutoShardedBot):
 
-    def __init__(self, instance, instances, shard_count, shard_ids, pipe, ipc_queue: Queue, **kwargs):
+    def __init__(self, instance, instances, shard_count, shard_ids, pipe, ipc_queue, **kwargs):
         super().__init__(
             command_prefix=_prefix_callable,
             description="NekoBot",
