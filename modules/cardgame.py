@@ -92,18 +92,6 @@ class CardGame:
         else:
             return gettext.gettext
 
-    async def __post_to_hook(self, action:str, user:discord.Member, amount):
-        try:
-            async with aiohttp.ClientSession() as cs:
-                await cs.post("http://localhost:1241", json={
-                    "user": str(user.id),
-                    "action": action,
-                    "amount": amount,
-                    "time": str(int(time.time()))
-                })
-        except:
-            pass
-
     async def __has_account(self, user:int):
         if await r.table("cardgame").get(str(user)).run(self.bot.r_conn):
             return True
@@ -442,7 +430,6 @@ class CardGame:
 
         after_check = await r.table("cardgame").get(str(author.id)).run(self.bot.r_conn)
         if after_check != data:
-            await self.__post_to_hook("Card Sell Fail 😤😤", author, 0)
             return await ctx.send(_("Card has already been sold"))
 
         await r.table("cardgame").get(str(author.id)).update({"cards": r.row["cards"].delete_at(num-1)}).run(self.bot.r_conn)
@@ -450,7 +437,6 @@ class CardGame:
         await r.table("economy").get(str(author.id)).update({"balance": economy["balance"] + cardprice}).run(self.bot.r_conn)
 
         await ctx.send(_("Sold %s for %s") % (cardname_en, "￥{:,}".format(cardprice)))
-        await self.__post_to_hook("Sold card", author, cardprice)
 
     @card.command(name='list')
     async def card_list(self, ctx):
