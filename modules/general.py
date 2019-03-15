@@ -662,7 +662,7 @@ class General(commands.Cog):
             other += "`imgwelcome`, "
             other += ", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Marriage"])
             embed = discord.Embed(color=0xDEADBF, title="NekoBot Help")
-            c = ["General"]
+            c = [cog for cog in self.bot.cogs]
             c.sort()
             for x in c:
                 if x == "NSFW" and isinstance(ctx.channel, discord.TextChannel) and not ctx.channel.is_nsfw():
