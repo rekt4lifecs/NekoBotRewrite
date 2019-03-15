@@ -188,7 +188,6 @@ class General(commands.Cog):
         servers = await i.get_all_guilds()
         members = await i.get_all_users()
         channels = await i.get_all_channels()
-        messages = await i.get_all_messages()
 
         if isinstance(ctx.channel, discord.TextChannel):
             thisShard = ctx.guild.shard_id
@@ -197,7 +196,7 @@ class General(commands.Cog):
 
         # len(self.bot.lavalink.players.find_all(lambda p: p.is_playing))
         info = discord.Embed(color=0xDEADBF, title="**Info**")
-        info.description = "Servers: **{} ({})**\nMembers: **{}**\nBot Commands: **{}**\nChannels: **{}**\nShards: **{}**\nThis Shard: **{}**\nBot in voice channel(s): **{}**\nUptime: **{}**\nMessages Read (Since Restart): **{}**\n".format(
+        info.description = "Servers: **{} ({})**\nMembers: **{}**\nBot Commands: **{}**\nChannels: **{}**\nShards: **{}**\nThis Shard: **{}**\nBot in voice channel(s): **{}**\nUptime: **{}**\n".format(
             helpers.millify(servers), servers,
             helpers.millify(members),
             str(len(self.bot.commands)),
@@ -205,8 +204,7 @@ class General(commands.Cog):
             self.bot.shard_count,
             thisShard,
             0,
-            self.get_bot_uptime(),
-            helpers.millify(messages)
+            self.get_bot_uptime()
         )
         info.add_field(name="Links",
                        value="[GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) | "

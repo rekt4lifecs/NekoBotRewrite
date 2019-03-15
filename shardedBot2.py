@@ -153,6 +153,12 @@ class NekoBot(commands.AutoShardedBot):
                 pass
             except Exception as e:
                 logger.error("IPC Failed, {}".format(e))
+            try:
+                await self.redis.set("instance%s-guilds" % self.instance, len(self.guilds))
+                await self.redis.set("instance%s-users" % self.instance, sum([x.member_count for x in self.guilds]))
+                await self.redis.set("instance%s-channels" % self.instance, len(set(self.get_all_channels())))
+            except:
+                logger.error("Redis update failed")
             await asyncio.sleep(240)
 
     async def on_command(self, ctx):
