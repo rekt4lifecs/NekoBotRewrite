@@ -167,5 +167,5 @@ class NekoBot(commands.AutoShardedBot):
 
         logger.info("READY, Instance {}/{}, Shards {}".format(self.instance, self.instances, self.shard_count))
 
-    def run(self):
-        super().run(config.token)
+    def run(self, token = config.token):
+        super().run(token)
