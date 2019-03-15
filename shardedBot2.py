@@ -1,12 +1,13 @@
 import discord
 from discord.ext import commands
-import logging, sys, time
-import aioredis
-import aiohttp
-import rethinkdb as r
+import logging, sys, time, os
+import traceback
 from datetime import datetime
 import config
 import gettext
+import aioredis
+import aiohttp
+import rethinkdb as r
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
@@ -118,6 +119,15 @@ class NekoBot(commands.AutoShardedBot):
         self.loop.create_task(_init_redis())
 
         self.remove_command("help")
+
+        for file in os.listdir("modules"):
+            if file.endswith(".py"):
+                name = file[:-3]
+                try:
+                    self.load_extension(f"modules.{name}")
+                except:
+                    logger.warning("Failed to load {}.".format(name))
+                    traceback.print_exc()
 
         self.run()
 
