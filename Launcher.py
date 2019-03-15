@@ -13,6 +13,8 @@ processes = list()
 def wait(delay: int):
     loop.run_until_complete(asyncio.sleep(delay))
 
+processes_owo = {}
+
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     executable = str(shutil.which("python3.6") or shutil.which("py")).split("/")[-1]
@@ -21,23 +23,45 @@ if __name__ == "__main__":
         start = i * shards_per_instance
         last = min(start + shards_per_instance, shards)
         ids = list(range(start, last))
-        queue.append([i, ids])
+        processes_owo[str(i)] = {
+            "ids": ids,
+            "process": None
+        }
+
+    print(processes_owo)
 
     ipc_queue = Queue()
 
-    for instance, shard_ids in queue:
+    for p in processes_owo:
         listen, send = Pipe()
-        p = Process(target=shardedBot2.NekoBot, args=(instance, instances, shards, shard_ids, send, ipc_queue))
+        p = Process(target=shardedBot2.NekoBot, args=(int(p), instances, shards, processes_owo[p]["ids"], send, ipc_queue))
         p.start()
-        print("Launching Instance {} (PID {})".format(instance, p.pid))
+        processes_owo[p]["process"] = p
+        print("Launching Instance {} (PID {})".format(p, p.pid))
         processes.append(p.pid)
 
         if listen.recv() == 1:
-            print("Instance {} Launched".format(instance))
+            print("Instance {} Launched".format(p))
         listen.close()
 
     try:
         while True:
+            try:
+                for p in processes_owo:
+                    proc = processes_owo[p].get("process")
+                    if not proc.is_alive():
+                        listen, send = Pipe()
+                        p = Process(target=shardedBot2.NekoBot, args=(int(p), instances, shards, processes_owo[p]["ids"], send, ipc_queue))
+                        p.start()
+                        processes_owo[p]["process"] = p
+                        print("Relaunched {}".format(p))
+                        processes.append(p.pid)
+
+                        if listen.recv() == 1:
+                            print("Instance {} Launched".format(p))
+                        listen.close()
+            except Exception as e:
+                print("Failed to restart process, {}".format(e))
             wait(5)
     except KeyboardInterrupt:
         for process in processes:
