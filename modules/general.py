@@ -62,7 +62,7 @@ class General(commands.Cog):
     def whatanime_embedbuilder(self, doc: dict):
         em = discord.Embed(color=0xDEADBF)
         em.title = doc["title_romaji"]
-        em.url = "https://myanimelist.net/anime/%s" % doc["mal_id"]
+        em.url = "https://myanimelist.net/anime/{}".format(doc["mal_id"])
         em.add_field(name="Episode", value=str(doc["episode"]))
         em.add_field(name="At", value=str(doc["at"]))
         em.add_field(name="Matching %", value=str(round(doc["similarity"] * 100, 2)))
@@ -137,14 +137,13 @@ class General(commands.Cog):
             async with aiohttp.ClientSession() as cs:
                 async with cs.get(self.whatanime_prefbuilder(doc)) as r:
                     imres = await r.read()
-            # filetype = magic.from_buffer(imres).rpartition("/")[2]
-            # file = discord.File(imres, filename="file.%s" % filetype)
-            # em.set_image(url="attachment://file.%s" % filetype)
+            file = discord.File(imres, filename="file.gif")
+            em.set_image(url="attachment://file.gif")
         except:
             file = None
             em.set_image(url="https://nekobot.xyz/placeholder.png")
 
-        # await ctx.send(embed=em, file=file)
+        await ctx.send(embed=em, file=file)
 
     @commands.command()
     async def cookie(self, ctx, user: discord.Member):
