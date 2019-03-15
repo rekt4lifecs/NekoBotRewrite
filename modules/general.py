@@ -660,7 +660,7 @@ class General(commands.Cog):
             other += "`pet`, "
             other += "`card`, "
             other += "`imgwelcome`, "
-            other += ", ".join([f"`{i.name}`" for i in self.bot.commands if i.cog_name == "Marriage"])
+            # other += ", ".join([f"`{i.name}`" for i in self.bot.cogs["Marriage"]])
             embed = discord.Embed(color=0xDEADBF, title="NekoBot Help")
             c = [cog for cog in self.bot.cogs]
             c.sort()
@@ -672,8 +672,7 @@ class General(commands.Cog):
                 else:
                     try:
                         embed.add_field(name=x.title(),
-                                        value=", ".join([f"`{i.name}`" for i in self.bot.commands if
-                                                         i.cog_name == x and not i.hidden]),
+                                        value=", ".join(["`{}`".format(cmd.name) for cmd in self.bot.cogs[x].get_commands() if not cmd.hidden]),
                                         inline=False)
                     except:
                         pass
