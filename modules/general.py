@@ -659,9 +659,9 @@ class General(commands.Cog):
             other += "`pet`, "
             other += "`card`, "
             other += "`imgwelcome`, "
-            # other += ", ".join([f"`{i.name}`" for i in self.bot.cogs["Marriage"]])
+            other += ", ".join([f"`{i.name}`" for i in self.bot.cogs["Marriage"].get_commands()])
             embed = discord.Embed(color=0xDEADBF, title="NekoBot Help")
-            c = [cog for cog in self.bot.cogs if cog not in ["Pet", "Card", "IMGWelcome", "Marriage"]]
+            c = [cog for cog in self.bot.cogs if cog not in ["Pet", "CardGame", "IMGWelcome", "Marriage"]]
             c.sort()
             for x in c:
                 if x == "NSFW" and isinstance(ctx.channel, discord.TextChannel) and not ctx.channel.is_nsfw():
@@ -679,8 +679,6 @@ class General(commands.Cog):
             await ctx.send(embed=embed)
         except discord.HTTPException:
             return await ctx.send("**I can't send embeds.**")
-        except:
-            pass
         try:
             emoji = self.bot.get_emoji(462373594555613214)
             await ctx.message.add_reaction(emoji)
