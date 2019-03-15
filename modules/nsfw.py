@@ -417,7 +417,7 @@ class NSFW(commands.Cog):
 
         em = discord.Embed(title="Results", color=0xDEADBF)
         description = ""
-        soup = BeautifulSoup(data, "html5lib")
+        soup = BeautifulSoup(data, "html.parser")
 
         creator = creator_rx.search(str(soup))
         if creator is not None:
