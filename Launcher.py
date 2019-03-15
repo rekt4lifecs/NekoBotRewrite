@@ -39,7 +39,7 @@ if __name__ == "__main__":
         processes.append(p.pid)
 
         if listen.recv() == 1:
-            print("Instance {} Launched".format(p))
+            print("Instance {} Launched".format(powo))
         listen.close()
 
     try:
