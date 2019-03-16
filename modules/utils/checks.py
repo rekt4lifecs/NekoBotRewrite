@@ -11,3 +11,12 @@ def has_permissions(**perms):
                 return await func(ctx, args)
         return wrapped
     return wrapper
+
+def is_owner():
+    def wrapper(func):
+        @wraps(func)
+        async def wrapped(ctx, args):
+            if ctx.author.id == 270133511325876224:
+                return await func(ctx, args)
+        return wrapped
+    return wrapper
