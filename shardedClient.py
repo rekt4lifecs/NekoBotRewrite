@@ -3,6 +3,7 @@ import config
 import os, sys
 import importlib
 import models
+import aiohttp
 import aioredis
 import re
 
@@ -24,8 +25,6 @@ class NekoBot(discord.AutoShardedClient):
         self.commands = {}
         self.register_commands()
 
-        print(self.commands)
-
         self.redis = None
 
         # self.run()
@@ -41,7 +40,12 @@ class NekoBot(discord.AutoShardedClient):
         message.content = message.content[len(prefix):]
         args = arg_re.split(message.content)
         if args[0] in self.get_all_commands():
-            return await self.get_command(args[0]).invoke(models.Context(self, message), args)
+            command = self.get_command(args[0])
+            ctx = models.Context(self, message, command)
+            try:
+                await command.invoke(ctx, args)
+            except Exception as e:
+                await self.handle_error(ctx, e)
 
     async def on_ready(self):
         print("READY, Instance {}/{}, Shards {}, Commands {}".format(
@@ -50,6 +54,26 @@ class NekoBot(discord.AutoShardedClient):
             self.shard_count,
             len(self.get_all_commands())
         ))
+
+    async def handle_error(self, ctx: models.Context, e: Exception):
+        async with aiohttp.ClientSession() as cs:
+            await cs.post(
+                f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
+                json={
+                    "embeds": [{
+                        "title": f"Command: {ctx.command.name}, Instance: {self.instance}",
+                        "description": f"```py\n{e}\n```\n By `{ctx.author}` (`{ctx.author.id}`)",
+                        "color": 16740159
+                    }]
+                }
+            )
+        em = discord.Embed(
+            color=0xDEADBF,
+            title="Error",
+            description=f"Error in command {ctx.command.name}, "
+            f"[Support Server](https://discord.gg/q98qeYN).\n`{e}`"
+        )
+        await ctx.send(embed=em)
 
     def register_commands(self):
         for file in os.listdir("modules"):
