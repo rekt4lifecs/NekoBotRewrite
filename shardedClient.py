@@ -103,4 +103,4 @@ class NekoBot(discord.AutoShardedClient):
         super().run(token)
 
 if __name__ == "__main__":
-    NekoBot(0, 1, 1, [0])#.run(config.testtoken)
+    NekoBot(0, 1, 1, [0]).run(config.testtoken)
