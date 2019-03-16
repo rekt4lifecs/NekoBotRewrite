@@ -1,4 +1,4 @@
-import shardedBot2
+import shardedClient
 from multiprocessing import Process, Pipe, Queue
 import asyncio
 import shutil
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     for powo in processes_owo:
         listen, send = Pipe()
-        p = Process(target=shardedBot2.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
+        p = Process(target=shardedClient.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
         p.start()
         processes_owo[powo]["process"] = p
         print("Launching Instance {} (PID {})".format(powo, p.pid))
@@ -49,7 +49,7 @@ if __name__ == "__main__":
                     proc = processes_owo[powo].get("process")
                     if not proc.is_alive():
                         listen, send = Pipe()
-                        p = Process(target=shardedBot2.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
+                        p = Process(target=shardedClient.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
                         p.start()
                         processes_owo[powo]["process"] = p
                         print("Relaunched {}".format(powo))
