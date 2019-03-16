@@ -98,6 +98,8 @@ class NekoBot(commands.AutoShardedBot):
             pm_help=None,
             shard_ids=shard_ids,
             shard_count=shard_count,
+            status=discord.Status.idle,
+            game=discord.Game("tests"),
             fetch_offline_members=False,
             max_messages=kwargs.get("max_messages", 105),
             help_attrs={"hidden": True}
@@ -113,22 +115,21 @@ class NekoBot(commands.AutoShardedBot):
 
         async def _init_rethink():
             r.set_loop_type("asyncio")
-            self.r_conn = await r.connect(host="localhost",
-                                          db="nekobot")
+            self.r_conn = await r.connect(host="localhost", db="nekobot")
 
         self.loop.create_task(_init_rethink())
         self.loop.create_task(_init_redis())
 
         self.remove_command("help")
 
-        for file in os.listdir("modules"):
-            if file.endswith(".py"):
-                name = file[:-3]
-                try:
-                    self.load_extension(f"modules.{name}")
-                except:
-                    logger.warning("Failed to load {}.".format(name))
-                    traceback.print_exc()
+        # for file in os.listdir("modules"):
+        #     if file.endswith(".py"):
+        #         name = file[:-3]
+        #         try:
+        #             self.load_extension(f"modules.{name}")
+        #         except:
+        #             logger.warning("Failed to load {}.".format(name))
+        #             traceback.print_exc()
 
         self.loop.create_task(self.start_loop())
         self.run()
