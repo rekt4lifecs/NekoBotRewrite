@@ -24,6 +24,8 @@ class NekoBot(discord.AutoShardedClient):
         self.commands = {}
         self.register_commands()
 
+        print(self.commands)
+
         self.redis = None
 
         # self.run()
@@ -59,14 +61,14 @@ class NekoBot(discord.AutoShardedClient):
         cmds = list()
         for category in self.commands:
             for cmd in self.commands[category]:
-                cmds.append(cmd)
+                cmds.append(cmd.name)
         return cmds
 
     def get_command(self, command):
         for category in self.commands:
             for cmd in self.commands[category]:
-                if cmd == command:
-                    return self.commands[category][cmd]
+                if cmd.name == command:
+                    return cmd
 
     def load_extension(self, name):
         if name in list(self.commands):
@@ -77,10 +79,7 @@ class NekoBot(discord.AutoShardedClient):
             del sys.modules["modules.{}".format(name)]
             print("{} is missing commands var")
         else:
-            d = {}
-            for x in getattr(lib, "commands"):
-                d[x] = models.Command(getattr(lib, "commands")[x])
-            self.commands[name] = d
+            self.commands[name] = [models.Command(x) if not isinstance(x, models.Command) else x for x in getattr(lib, "commands")]
             print("Loaded {}".format(name))
 
     def unload_extension(self, name):
