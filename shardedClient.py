@@ -1,5 +1,7 @@
 import discord
 import config
+import os, sys
+import importlib
 
 class NekoBot(discord.AutoShardedClient):
 
@@ -14,13 +16,31 @@ class NekoBot(discord.AutoShardedClient):
         self.instance = instance
         self.instances = instances
 
+        self.commands = {}
+        self.register_commands()
+
         # self.run()
 
-    async def on_message(self, msg):
-        pass
+    async def on_message(self, message: discord.Message):
+        if message.author.bot:
+            return
+        print(message)
 
     async def on_ready(self):
         print("READY")
+        print(self.commands)
+
+    def register_commands(self):
+        for file in os.listdir("modules"):
+            if file.endswith(".py"):
+                file = file.replace(".py", "")
+                lib = importlib.import_module("modules.{}".format(file))
+                if not hasattr(lib, "commands"):
+                    del lib
+                    del sys.modules["modules.{}".format(file)]
+                    print("{} is missing commands var")
+                else:
+                    self.commands[file] = getattr(lib, "commands")
 
     def run(self, token: str = config.token):
         super().run(token)
