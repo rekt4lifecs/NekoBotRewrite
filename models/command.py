@@ -1,5 +1,4 @@
 from .context import Context
-from inspect import getfullargspec
 
 class Command:
 
@@ -8,7 +7,6 @@ class Command:
         self.help = cmd.__doc__
         self.hidden = hidden
         self.cmd = cmd
-        self.required_arguments = getfullargspec(cmd).args
 
     async def invoke(self, ctx: Context, args):
         args.pop(0)
