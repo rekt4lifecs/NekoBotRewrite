@@ -7,7 +7,7 @@ def Cooldown(cooldown_time: int):
         async def wrapped(ctx, args):
             data = await ctx.bot.redis.get("cooldown:{}:{}".format(ctx.command.name, ctx.author.id))
             if data is not None:
-                raise ValueError("Command is on cooldown, try again in {}s".format(int(data) - int(time())))
+                raise ValueError("Command is on cooldown... {}s left".format(int(data) - int(time())))
             await ctx.bot.redis.set("cooldown:{}:{}".format(ctx.command.name, ctx.author.id), int(time() + cooldown_time), expire=cooldown_time)
             return await func(ctx, args)
         return wrapped
