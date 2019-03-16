@@ -1,11 +1,12 @@
 class Context:
 
-    def __init__(self, bot, message):
+    def __init__(self, bot, message, command):
         self.message = message
         self.author = message.author
         self.channel = message.channel
         self.guild = message.guild
         self.bot = bot
+        self.command = command
 
     async def send(self, *args, **kwargs):
         return await self.channel.send(*args, **kwargs)
