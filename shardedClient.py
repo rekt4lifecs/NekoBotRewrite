@@ -6,6 +6,7 @@ import models
 import aiohttp
 import aioredis
 import re
+import inspect
 
 arg_re = re.compile("\s+")
 
@@ -35,6 +36,14 @@ class NekoBot(discord.AutoShardedClient):
         for prefix in await self.get_prefix(message.author.id):
             if message.content.startswith(prefix):
                 return await self.process_message(message, prefix)
+
+    async def send_cmd_help(self, ctx: models.Context, arguments: str):
+        msg = "```\n"
+        msg += "n!{} {}\n\n".format(ctx.command.name, arguments)
+        if ctx.command.help:
+            msg += ctx.command.help
+        msg += "\n```"
+        await ctx.send(msg)
 
     async def process_message(self, message: discord.Message, prefix: str):
         message.content = message.content[len(prefix):]
