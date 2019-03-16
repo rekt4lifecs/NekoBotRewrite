@@ -1,9 +1,10 @@
 import discord
 from models import Context
 
-async def help(ctx: Context, args):
+async def _help(ctx: Context, args):
+    """View the bots help"""
     await ctx.send("owo")
 
-commands = [
-
-]
+commands = {
+    "help": _help
+}
