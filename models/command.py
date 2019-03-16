@@ -2,9 +2,10 @@ from .context import Context
 
 class Command:
 
-    def __init__(self, cmd, *, hidden: bool = False, name: str = None):
+    def __init__(self, cmd, *, hidden: bool = False, name: str = None, aliases: list = list()):
         self.name = cmd.__name__ if name is None else name
         self.help = cmd.__doc__
+        self.aliases = aliases
         self.hidden = hidden
         self.cmd = cmd
 

@@ -97,12 +97,14 @@ class NekoBot(discord.AutoShardedClient):
         for category in self.commands:
             for cmd in self.commands[category]:
                 cmds.append(cmd.name)
+                for alias in cmd.aliases:
+                    cmds.append(alias)
         return cmds
 
     def get_command(self, command):
         for category in self.commands:
             for cmd in self.commands[category]:
-                if cmd.name == command:
+                if cmd.name == command or command in cmd.aliases:
                     return cmd
 
     def load_extension(self, name):
