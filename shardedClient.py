@@ -44,6 +44,8 @@ class NekoBot(discord.AutoShardedClient):
             ctx = models.Context(self, message, command)
             try:
                 await command.invoke(ctx, args)
+            except ValueError as e:
+                await ctx.send(e)
             except Exception as e:
                 await self.handle_error(ctx, e)
 
