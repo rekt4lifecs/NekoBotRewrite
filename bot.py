@@ -113,14 +113,22 @@ class NekoBot(commands.AutoShardedBot):
 
         self.remove_command("help")
 
+        for module in os.listdir("modules"):
+            if module.endswith(".py"):
+                try:
+                    self.load_extension("modules.{}".format(module[:-3]))
+                    logger.info("Loaded {}".format(module))
+                except Exception as e:
+                    logger.error("Failed to load {}, {}".format(module, e))
+
+        #self.run()
+
     async def on_ready(self):
         async with aiohttp.ClientSession() as cs:
             await cs.post(config.status_smh, json={
                 "content": "instance {} ready smh".format(self.instance)
             })
         logger.info("READY")
-        self.pipe.send(1)
-        self.pipe.close()
 
     async def on_command(self, ctx):
         logger.info("{} executed {}".format(ctx.author.id, ctx.command.name))
