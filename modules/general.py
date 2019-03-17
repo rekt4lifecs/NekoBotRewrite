@@ -34,6 +34,8 @@ class General(commands.Cog):
                 }
             }) as res:
                 data = await res.json()
+        if data.get("errors", []):
+            return await ctx.send("Error getting data from anilist: {}".format(data["errors"][0]["message"]))
         media = data["data"]["Page"]["media"]
         if not media:
             return await ctx.send("Nothing found.")
