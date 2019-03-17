@@ -5,9 +5,10 @@ import asyncio, aiohttp
 import lavalink
 import config
 import logging, re
-import gettext
 
 import rethinkdb as r
+
+from .utils.helpers import clean_text
 
 log = logging.getLogger()
 url_rx = re.compile("https?:\/\/(?:www\.)?.+")
@@ -148,19 +149,19 @@ class Audio:
                 if not track["info"]["length"] > 3600000:
                     player.add(requester=ctx.author.id, track=track)
 
-            await ctx.send("Added playlist **%s**" % results["playlistInfo"]["name"].replace("@", "@\u200B"))
+            await ctx.send("Added playlist **%s**" % clean_text(results["playlistInfo"]["name"]))
         else:
             if len(results["tracks"]) < 2:
                 track = results["tracks"][0]
                 if track["info"]["length"] > 3600000:
                     return await ctx.send("Thats too long for me to play baka")
-                await ctx.send("Added **%s** to queue" % track["info"]["title"].replace("@", "@\u200B"))
+                await ctx.send("Added **%s** to queue" % clean_text(track["info"]["title"]))
                 player.add(requester=ctx.author.id, track=track)
             else:
                 tracks = results["tracks"][:5]
                 msg = "Type a number of a track to play.```\n"
                 for i, track in enumerate(tracks, start=1):
-                    msg += "%s. %s\n" % (i, track["info"]["title"].replace("@", "@\u200B"))
+                    msg += "%s. %s\n" % (i, clean_text(track["info"]["title"]))
                 msg += "```"
                 msg = await ctx.send(msg)
 
@@ -187,7 +188,7 @@ class Audio:
                 if track["info"]["length"] > 3600000:
                     return await ctx.send("Thats too long for me to play baka")
 
-                await ctx.send("Added **%s** to queue" % track["info"]["title"].replace("@", "@\u200B"))
+                await ctx.send("Added **%s** to queue" % clean_text(track["info"]["title"]))
                 player.add(requester=ctx.author.id, track=track)
 
             if not player.is_playing:
@@ -268,12 +269,12 @@ class Audio:
         desc = ""
         if player.current:
             em.set_thumbnail(url=player.current.thumbnail)
-            desc += "🔊 **%s**\n" % player.current.title.replace("@", "@\u200B")
+            desc += "🔊 **%s**\n" % clean_text(player.current.title)
         for i, song in enumerate(player.queue):
             i += 1
             if i > 10:
                 break
-            desc += "%s. **%s**\n" % (i, song.title.replace("@", "@\u200B"))
+            desc += "%s. **%s**\n" % (i, clean_text(song.title))
         if desc == "":
             desc += "🔉 Nothing..."
 
@@ -294,7 +295,7 @@ class Audio:
         if not ctx.author.voice or ctx.author.voice.channel.id != int(player.channel_id):
             return await ctx.send("You're not in my voice channel >_<")
 
-        await ctx.send("Skipped **%s**" % player.current.title.replace("@", "@\u200B"))
+        await ctx.send("Skipped **%s**" % clean_text(player.current.title))
         await player.skip()
 
     @commands.group(aliases=["playlists"])
@@ -340,7 +341,7 @@ class Audio:
                 if not track["info"]["length"] > 3600000:
                     playlist.append(track)
 
-            await ctx.send("Added **%s** to the playlist" % results["playlistInfo"]["name"].replace("@", "@\u200B"))
+            await ctx.send("Added **%s** to the playlist" % clean_text(results["playlistInfo"]["name"]))
             await r.table("playlists").get(str(ctx.author.id)).update({"playlists": {playlist_name: playlist}}).run(
                 self.bot.r_conn)
         else:
@@ -350,7 +351,7 @@ class Audio:
                     return await ctx.send("I can't add streams to playlists")
                 if track["info"]["length"] > 3600000:
                     return await ctx.send("That song is too long for me to play ;w;")
-                await ctx.send("Added **%s** to playlist" % track["info"]["title"].replace("@", "@\u200B"))
+                await ctx.send("Added **%s** to playlist" % clean_text(track["info"]["title"]))
                 playlist.append(track)
                 await r.table("playlists").get(str(ctx.author.id)).update({"playlists": {playlist_name: playlist}}).run(
                     self.bot.r_conn)
@@ -358,7 +359,7 @@ class Audio:
                 tracks = results["tracks"][:5]
                 msg = "Type a number of a track to play.```\n"
                 for i, track in enumerate(tracks, start=1):
-                    msg += "%s. %s\n" % (i, track["info"]["title"].replace("@", "@\u200B"))
+                    msg += "%s. %s\n" % (i, clean_text(track["info"]["title"]))
                 msg += "```"
                 msg = await ctx.send(msg)
 
@@ -388,7 +389,7 @@ class Audio:
                 if track["info"]["length"] > 3600000:
                     return await ctx.send("That song is too long for me to play ;w;")
 
-                await ctx.send("Added **%s** to playlist" % track["info"]["title"].replace("@", "@\u200B"))
+                await ctx.send("Added **%s** to playlist" % clean_text(track["info"]["title"]))
                 playlist.append(track)
                 await r.table("playlists").get(str(ctx.author.id)).update({"playlists": {playlist_name: playlist}}).run(
                     self.bot.r_conn)
@@ -445,7 +446,7 @@ class Audio:
                     pass
                 if i > 15:
                     break
-                msg += "**%s.** %s\n" % (i, track["info"]["title"].replace("@", "@\u200B"))
+                msg += "**%s.** %s\n" % (i, clean_text(track["info"]["title"]))
 
             await ctx.send(msg)
         else:
@@ -453,7 +454,7 @@ class Audio:
             for i, playlist in enumerate(playlists, start=1):
                 if url_rx.match(playlist):
                     pass
-                msg += "**%s.** %s\n" % (i, playlist.replace("@", "@\u200B"))
+                msg += "**%s.** %s\n" % (i, clean_text(playlist))
 
             await ctx.send(msg)
 
@@ -467,7 +468,7 @@ class Audio:
 
         msg = "**Type the number of a song to remove:**```\n"
         for i, track in enumerate(playlist, start=1):
-            msg += "%s. %s\n" % (i, track["info"]["title"].replace("@", "@\u200B"))
+            msg += "%s. %s\n" % (i, clean_text(track["info"]["title"]))
         msg += "```"
 
         await ctx.send(msg)
