@@ -2,9 +2,10 @@ from discord.ext import commands
 import discord
 import config
 import logging
-import sys, time
+import sys, time, os
 import rethinkdb as r
 import aioredis
+import aiohttp
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
@@ -113,12 +114,84 @@ class NekoBot(commands.AutoShardedBot):
         self.remove_command("help")
 
     async def on_ready(self):
+        async with aiohttp.ClientSession() as cs:
+            await cs.post(config.status_smh, json={
+                "content": "instance {} ready smh".format(self.instance)
+            })
         logger.info("READY")
         self.pipe.send(1)
         self.pipe.close()
 
+    async def on_command(self, ctx):
+        logger.info("{} executed {}".format(ctx.author.id, ctx.command.name))
+
+    async def send_cmd_help(self, ctx):
+        if ctx.invoked_subcommand:
+            pages = await self.formatter.format_help_for(ctx, ctx.invoked_subcommand)
+            for page in pages:
+                await ctx.send(page)
+        else:
+            pages = await self.formatter.format_help_for(ctx, ctx.command)
+            for page in pages:
+                await ctx.send(page)
+
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+        await self.process_commands(message)
+
+    async def close(self):
+        self.r_conn.close()
+        self.redis.close()
+        await super().close()
+
     def run(self, token: str = config.token):
         super().run(token)
+
+    async def on_command_error(self, ctx, exception):
+
+        error = getattr(exception, "original", exception)
+        if isinstance(error, discord.NotFound):
+            return
+        elif isinstance(error, discord.Forbidden):
+            return
+        elif isinstance(error, discord.HTTPException) or isinstance(error, aiohttp.ClientConnectionError):
+            return await ctx.send("Failed to get data.")
+        if isinstance(exception, commands.NoPrivateMessage):
+            return
+        elif isinstance(exception, commands.DisabledCommand):
+            return
+        elif isinstance(exception, commands.CommandInvokeError):
+            async with aiohttp.ClientSession() as cs:
+                await cs.post(
+                    f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}",
+                    json={
+                        "embeds": [
+                            {
+                                "title": f"Command: {ctx.command.qualified_name}, Instance: {self.instance}",
+                                "description": f"```py\n{exception}\n```\n By `{ctx.author}` (`{ctx.author.id}`)",
+                                "color": 16740159
+                            }
+                        ]
+                    })
+            em = discord.Embed(color=0xDEADBF,
+                               title="Error",
+                               description=f"Error in command {ctx.command.qualified_name}, "
+                               f"[Support Server](https://discord.gg/q98qeYN).\n`{exception}`")
+            await ctx.send(embed=em)
+            logger.warning('In {}:'.format(ctx.command.qualified_name))
+            logger.warning('{}: {}'.format(exception.original.__class__.__name__, exception.original))
+        elif isinstance(exception, commands.BadArgument):
+            await self.send_cmd_help(ctx)
+        elif isinstance(exception, commands.MissingRequiredArgument):
+            await self.send_cmd_help(ctx)
+        elif isinstance(exception, commands.CheckFailure):
+            await ctx.send("You are not allowed to use that command.", delete_after=5)
+        elif isinstance(exception, commands.CommandOnCooldown):
+            await ctx.send("Command is on cooldown... {:.2f}s left".format(exception.retry_after), delete_after=5)
+        elif isinstance(exception, commands.CommandNotFound):
+            return
+        return
 
 if __name__ == "__main__":
     NekoBot(0, 1, 1, [0], None).run(config.testtoken)
