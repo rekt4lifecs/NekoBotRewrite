@@ -5,8 +5,8 @@ import shutil
 import os
 from signal import SIGKILL
 
-shards = 96
-shards_per_instance = 24
+shards = 80
+shards_per_instance = 20
 instances = int(shards / shards_per_instance)
 processes = list()
 
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     for powo in processes_owo:
         listen, send = Pipe()
-        p = Process(target=bot.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send))
+        p = Process(target=bot.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
         p.start()
         processes_owo[powo]["process"] = p
         print("Launching Instance {} (PID {})".format(powo, p.pid))
