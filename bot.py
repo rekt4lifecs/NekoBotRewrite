@@ -8,6 +8,8 @@ import aioredis
 import aiohttp
 import asyncio
 from datetime import datetime
+from queue import Empty as EmptyQueue
+import json
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
@@ -129,6 +131,24 @@ class NekoBot(commands.AutoShardedBot):
 
     async def start_loop(self):
         while True:
+            try:
+                data = self.ipc_queue.get_nowait()
+                if data:
+                    data = json.loads(data)
+                    if data["op"] == "reload":
+                        self.unload_extension("modules.{}".format(data["d"]))
+                        self.load_extension("modules.{}".format(data["d"]))
+                        logger.info("Reloaded {}".format(data["d"]))
+                    elif data["op"] == "load":
+                        self.load_extension("modules.{}".format(data["d"]))
+                        logger.info("Loaded {}".format(data["d"]))
+                    elif data["op"] == "unload":
+                        self.unload_extension("modules.{}".format(data["d"]))
+                        logger.info("Unloaded {}".format(data["d"]))
+            except EmptyQueue:
+                pass
+            except Exception as e:
+                logger.error("IPC Failed, {}".format(e))
             try:
                 await self.redis.set("instance%s-guilds" % self.instance, len(self.guilds))
                 await self.redis.set("instance%s-users" % self.instance, sum([x.member_count for x in self.guilds]))
