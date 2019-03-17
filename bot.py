@@ -6,7 +6,8 @@ import sys, time, os
 import rethinkdb as r
 import aioredis
 import aiohttp
-import traceback
+import asyncio
+from datetime import datetime
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
@@ -85,7 +86,7 @@ async def _prefix_callable(bot, msg):
 
 class NekoBot(commands.AutoShardedBot):
 
-    def __init__(self, instance, instances, shard_count, shard_ids, pipe, **kwargs):
+    def __init__(self, instance, instances, shard_count, shard_ids, pipe, ipc_queue, **kwargs):
         super().__init__(
             command_prefix=_prefix_callable,
             description="NekoBot",
@@ -101,6 +102,7 @@ class NekoBot(commands.AutoShardedBot):
         self.instance = instance
         self.instances = instances
         self.pipe = pipe
+        self.ipc_queue = ipc_queue
 
         async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
@@ -122,9 +124,22 @@ class NekoBot(commands.AutoShardedBot):
                 except Exception as e:
                     logger.error("Failed to load {}, {}".format(module, e))
 
+        self.loop.create_task(self.start_loop())
         self.run()
 
+    async def start_loop(self):
+        while True:
+            try:
+                await self.redis.set("instance%s-guilds" % self.instance, len(self.guilds))
+                await self.redis.set("instance%s-users" % self.instance, sum([x.member_count for x in self.guilds]))
+                await self.redis.set("instance%s-channels" % self.instance, len(set(self.get_all_channels())))
+            except:
+                logger.error("Redis update failed")
+            await asyncio.sleep(240)
+
     async def on_ready(self):
+        if not hasattr(self, "uptime"):
+            self.uptime = datetime.utcnow()
         async with aiohttp.ClientSession() as cs:
             await cs.post(config.status_smh, json={
                 "content": "instance {} ready smh".format(self.instance)
