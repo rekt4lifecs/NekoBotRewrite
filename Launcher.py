@@ -1,4 +1,4 @@
-import shardedBot2
+import bot
 from multiprocessing import Process, Pipe, Queue
 import asyncio
 import shutil
