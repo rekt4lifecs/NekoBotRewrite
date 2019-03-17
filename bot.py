@@ -143,7 +143,6 @@ class NekoBot(commands.AutoShardedBot):
             await formatter.send_group_help(ctx.command)
         else:
             await formatter.send_command_help(ctx.command)
-            formatter.send_bot_help()
 
     async def on_message(self, message):
         if message.author.bot:
