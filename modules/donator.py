@@ -190,7 +190,7 @@ class Donator(commands.Cog):
             return await ctx.send("This account is already set to your feeds")
         guild["accounts"].append(result)
         await r.table("twitter2").get(str(ctx.guild.id)).update({"accounts": guild["accounts"]}).run(self.bot.r_conn)
-        await ctx.send("Added {} to your feed".format(res["results"][0][1]))
+        await ctx.send("That user has been added to your feed")
 
     @twitter.command(name="remove")
     async def twitter_remove(self, ctx, username: str):
@@ -212,7 +212,7 @@ class Donator(commands.Cog):
             if account != result:
                 l.append(account)
         await r.table("twitter2").get(str(ctx.guild.id)).update({"accounts": l}).run(self.bot.r_conn)
-        await ctx.send("Removed {}".format(res["results"][0][1]))
+        await ctx.send("Removed user")
 
     @twitter.command(name="clear")
     async def twitter_clear(self, ctx):
