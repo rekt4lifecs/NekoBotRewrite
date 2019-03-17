@@ -185,7 +185,7 @@ class Donator(commands.Cog):
                 res = await res.json()
         if not res["results"]:
             return await ctx.send("No results found for this user.")
-        result = str(res["results"][0][0])
+        result = str(res["results"][0])
         if result in guild["accounts"]:
             return await ctx.send("This account is already set to your feeds")
         guild["accounts"].append(result)
@@ -204,7 +204,7 @@ class Donator(commands.Cog):
                 res = await res.json()
         if not res["results"]:
             return await ctx.send("No results found for this user.")
-        result = str(res["results"][0][0])
+        result = str(res["results"][0])
         if result not in guild["accounts"]:
             return await ctx.send("This user has not been added yet")
         l = list()
