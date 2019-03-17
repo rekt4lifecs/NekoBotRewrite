@@ -221,9 +221,9 @@ class Economy(commands.Cog):
 
         if await self.__has_account(user.id):
             balance = await self.__get_balance(user.id)
-            await ctx.send("💵 | " + "Balance: **${}**".format(balance).replace("$", "￥"))
+            await ctx.send("💵 | Balance: **¥{}**".format(balance))
         else:
-            await ctx.send("💵 | " + "Balance: **$0**".replace("$", "￥"))
+            await ctx.send("💵 | Balance: **¥0**")
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -429,7 +429,7 @@ class Economy(commands.Cog):
                 data = await res.json()
 
             if data['status'] == 200:
-                await ctx.send("**{} has given {} 1 reputation point!**".format(ctx.author.name.replace("@", "@\u200B"),
+                await ctx.send("**{} has given {} 1 reputation point!**".format(helpers.clean_text(ctx.author.name),
                                                                             user.mention,))
             else:
                 async with cs.get("https://api.weeb.sh/reputation/310039170792030211/{}".format(ctx.author.id),
@@ -531,9 +531,9 @@ class Economy(commands.Cog):
             return await ctx.send("The user you are sending to has a frozen account.")
 
         if amount < 10:
-            return await ctx.send("The amount must be higher than 10")
+            return await ctx.send("The amount must be higher than ¥10")
         elif amount > 10000000:
-            return await ctx.send("You can't send more than $10 million at a time.".replace("$", "￥"))
+            return await ctx.send("You can't send more than ¥10 million at a time.")
         if user.bot:
             return await ctx.send("You can't send bots money")
         elif user == ctx.author:
@@ -548,7 +548,7 @@ class Economy(commands.Cog):
         await self.__update_balance(user.id, user_balance + amount)
         await self.__update_balance(ctx.author.id, author_balance - amount)
 
-        await ctx.send("Successfully sent {} ￥{}".format(helpers.clean_text(user.name), amount))
+        await ctx.send("Successfully sent {} ¥{}".format(helpers.clean_text(user.name), amount))
 
     @commands.command()
     @commands.guild_only()
