@@ -6,6 +6,7 @@ import sys, time, os
 import rethinkdb as r
 import aioredis
 import aiohttp
+import traceback
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
@@ -95,8 +96,7 @@ class NekoBot(commands.AutoShardedBot):
             game=discord.Game("tests"),
             fetch_offline_members=False,
             max_messages=kwargs.get("max_messages", 105),
-            help_attrs={"hidden": True},
-            formatter=commands.HelpFormatter(show_hidden=True)
+            help_attrs={"hidden": True}
         )
         self.instance = instance
         self.instances = instances
@@ -137,14 +137,13 @@ class NekoBot(commands.AutoShardedBot):
         logger.info("{} executed {}".format(ctx.author.id, ctx.command.name))
 
     async def send_cmd_help(self, ctx):
-        if ctx.invoked_subcommand:
-            pages = await self.formatter.format_help_for(ctx, ctx.invoked_subcommand)
-            for page in pages:
-                await ctx.send(page)
+        formatter = commands.DefaultHelpCommand(show_hidden=True)
+        formatter.context = ctx
+        if hasattr(ctx.command, "group"):
+            await formatter.send_group_help(ctx.command)
         else:
-            pages = await self.formatter.format_help_for(ctx, ctx.command)
-            for page in pages:
-                await ctx.send(page)
+            await formatter.send_command_help(ctx.command)
+            formatter.send_bot_help()
 
     async def on_message(self, message):
         if message.author.bot:
@@ -160,7 +159,6 @@ class NekoBot(commands.AutoShardedBot):
         super().run(token)
 
     async def on_command_error(self, ctx, exception):
-
         error = getattr(exception, "original", exception)
         if isinstance(error, discord.NotFound):
             return
