@@ -122,7 +122,7 @@ class NekoBot(commands.AutoShardedBot):
                 except Exception as e:
                     logger.error("Failed to load {}, {}".format(module, e))
 
-        #self.run()
+        self.run()
 
     async def on_ready(self):
         async with aiohttp.ClientSession() as cs:
@@ -130,6 +130,8 @@ class NekoBot(commands.AutoShardedBot):
                 "content": "instance {} ready smh".format(self.instance)
             })
         logger.info("READY")
+        self.pipe.send(1)
+        self.pipe.close()
 
     async def on_command(self, ctx):
         logger.info("{} executed {}".format(ctx.author.id, ctx.command.name))
