@@ -95,7 +95,8 @@ class NekoBot(commands.AutoShardedBot):
             game=discord.Game("tests"),
             fetch_offline_members=False,
             max_messages=kwargs.get("max_messages", 105),
-            help_attrs={"hidden": True}
+            help_attrs={"hidden": True},
+            formatter=commands.HelpFormatter(show_hidden=True)
         )
         self.instance = instance
         self.instances = instances
