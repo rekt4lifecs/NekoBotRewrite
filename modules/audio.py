@@ -17,7 +17,7 @@ ll_headers = {
     "Authorization": config.lavalink_token
 }
 
-class Audio:
+class Audio(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -43,7 +43,7 @@ class Audio:
                 }]
             })
 
-    def __unload(self):
+    def cog_unload(self):
         log.info("Unloading audio")
         self.bot.loop.create_task(self.__post_to_hook("Unloaded"))
         for guild_id, player in self.bot.lavalink.players:
