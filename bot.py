@@ -3,7 +3,8 @@ import discord
 import config
 import logging
 import sys, time
-
+import rethinkdb as r
+import aioredis
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
@@ -72,13 +73,52 @@ if sys.platform == "linux":
     file.setFormatter(color_formatter)
     logger.addHandler(file)
 
+async def _prefix_callable(bot, msg):
+    prefix = await bot.redis.get(f"{msg.author.id}-prefix")
+    if not prefix:
+        prefix = ["n!", "N!"]
+    else:
+        prefix = [prefix.decode("utf8"), "n!", "N!"]
+    return commands.when_mentioned_or(*prefix)(bot, msg)
+
 class NekoBot(commands.AutoShardedBot):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, instance, instances, shard_count, shard_ids, pipe, **kwargs):
+        super().__init__(
+            command_prefix=_prefix_callable,
+            description="NekoBot",
+            pm_help=None,
+            shard_ids=shard_ids,
+            shard_count=shard_count,
+            status=discord.Status.idle,
+            game=discord.Game("tests"),
+            fetch_offline_members=False,
+            max_messages=kwargs.get("max_messages", 105),
+            help_attrs={"hidden": True}
+        )
+        self.instance = instance
+        self.instances = instances
+        self.pipe = pipe
+
+        async def _init_redis():
+            self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
+
+        async def _init_rethink():
+            r.set_loop_type("asyncio")
+            self.r_conn = await r.connect(host="localhost", db="nekobot")
+
+        self.loop.create_task(_init_rethink())
+        self.loop.create_task(_init_redis())
+
+        self.remove_command("help")
+
+    async def on_ready(self):
+        logger.info("READY")
+        self.pipe.send(1)
+        self.pipe.close()
 
     def run(self, token: str = config.token):
         super().run(token)
 
 if __name__ == "__main__":
-    NekoBot().run()
+    NekoBot(0, 1, 1, [0], None).run(config.testtoken)
