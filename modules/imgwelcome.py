@@ -122,6 +122,7 @@ class IMGWelcome(commands.Cog):
             border_size.append(circle_img_size[0] + 8)
         return tuple(border_size)
 
+    @commands.Cog.listener()
     async def on_member_join(self, member):
         guild = member.guild
 
