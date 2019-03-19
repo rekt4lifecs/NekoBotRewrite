@@ -157,6 +157,15 @@ class NekoBot(commands.AutoShardedBot):
                 logger.error("Redis update failed")
             await asyncio.sleep(240)
 
+    async def on_socket_response(self, msg):
+        if not self.pipe.closed:
+            if msg.get("t") == "READY":
+                self.__shard_counter += 1
+                if self.__shard_counter >= len(self.shard_ids):
+                    del self.__shard_counter
+                    self.pipe.send(1)
+                    self.pipe.close()
+
     async def on_ready(self):
         if not hasattr(self, "uptime"):
             self.uptime = datetime.utcnow()
@@ -165,8 +174,9 @@ class NekoBot(commands.AutoShardedBot):
                 "content": "instance {} ready smh".format(self.instance)
             })
         logger.info("READY")
-        self.pipe.send(1)
-        self.pipe.close()
+        if not self.pipe.closed:
+            self.pipe.send(1)
+            self.pipe.close()
 
     async def on_command(self, ctx):
         logger.info("{} executed {}".format(ctx.author.id, ctx.command.name))

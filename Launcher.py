@@ -5,8 +5,8 @@ import shutil
 import os
 from signal import SIGKILL
 
-shards = 80
-shards_per_instance = 20
+shards = 96
+shards_per_instance = 16
 instances = int(shards / shards_per_instance)
 processes = list()
 
