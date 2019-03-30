@@ -209,7 +209,7 @@ class General(commands.Cog):
             self.get_bot_uptime()
         )
         info.add_field(name="Links",
-                       value="[GitHub](https://github.com/rekt4lifecs/NekoBotRewrite/) | "
+                       value="[GitHub](https://github.com/hibikidesu/NekoBotRewrite/) | "
                                "[Support Server](https://discord.gg/q98qeYN) | "
                                "[Patreon](https://www.patreon.com/NekoBot)")
         info.set_thumbnail(url=self.bot.user.avatar_url_as(format="png"))
@@ -640,6 +640,15 @@ class General(commands.Cog):
         """Delete or reset your prefix"""
         await self.bot.redis.delete(f"{ctx.author.id}-prefix")
         await ctx.send("Deleted your prefix and reset it back to the default `n!`")
+
+    @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
+    async def setprefix(self, ctx, prefix: str):
+        """Set your custom prefix, use quotation marks like "baka " for spaces."""
+        if len(prefix) >= 12:
+            return await ctx.send("Your prefix is over 12 characters.")
+        await self.bot.redis.set(f"{ctx.author.id}-prefix", prefix)
+        await ctx.send("Set **your** custom prefix to `{}`, you can remove it by pinging me and using delprefix.".format(helpers.clean_text(prefix)))
 
     @commands.command()
     @commands.cooldown(2, 10, commands.BucketType.guild)
