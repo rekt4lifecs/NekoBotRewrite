@@ -564,6 +564,8 @@ class Fun(commands.Cog):
                     js = x
                     f = True
                     break
+        else:
+            f = js
         if not f:
             return await ctx.send("Nothing found")
         embed = discord.Embed(color=0xDEADBF,
