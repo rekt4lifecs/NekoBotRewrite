@@ -105,6 +105,7 @@ class NekoBot(commands.AutoShardedBot):
         self.instances = instances
         self.pipe = pipe
         self.ipc_queue = ipc_queue
+        self.__shard_counter = 0
 
         async def _init_redis():
             self.redis = await aioredis.create_redis(address=("localhost", 6379), loop=self.loop)
