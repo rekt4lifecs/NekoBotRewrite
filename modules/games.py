@@ -122,7 +122,10 @@ class Games(commands.Cog):
         draw.text((360, 6), "{}%".format(round(float(self.NoneRemover(data.get("accuracy", 0.0), 0)), 2)), (90, 90, 90), side_num_fnt)
         txt = "{:,} (lvl{})".format(int(self.NoneRemover(data.get("playcount", 0), 0)), round(float(self.NoneRemover(data.get("level", 0), 0))))
         draw.text((445 - (len(txt) * 10), 24), txt, (90, 90, 90), side_num_fnt)
-        flag = Image.open("data/osu/flags/{}.png".format(data.get("country", "JP"))).convert("RGBA").resize((24, 16), Image.ANTIALIAS)
+        try:
+            flag = Image.open("data/osu/flags/{}.png".format(data.get("country", "JP"))).convert("RGBA").resize((24, 16), Image.ANTIALIAS)
+        except:
+            flag = Image.open("data/osu/flags/{}.png".format("JP")).convert("RGBA").resize((24, 16), Image.ANTIALIAS)
         game = Image.open("data/osu/{}.png".format(osu_icons[game])).resize((16, 16), Image.ANTIALIAS)
         front.alpha_composite(game, (383, 24))
         front.alpha_composite(flag, (405, 24))
