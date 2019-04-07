@@ -7,7 +7,6 @@ from modules.eco import interpolate, get_rgb
 from io import BytesIO
 import time
 import random
-from colorthief import ColorThief
 
 wargaming = {
     "wows": {
@@ -237,13 +236,14 @@ class Games(commands.Cog):
     async def get_dominant_color(self, url, key):
         data = await self.bot.redis.get("osu:{}:color".format(key))
         if data is None:
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as res:
-                    image = await res.read()
-                    r, g, b = ColorThief(BytesIO(image)).get_color()
-                    color = int(format(r << 16 | g << 8 | b, "06" + "x"), 16)
-            await self.bot.redis.set("osu:{}:color".format(key), color)
-            return color
+            return 0xDEADBF
+        #     async with aiohttp.ClientSession() as cs:
+        #         async with cs.get(url) as res:
+        #             image = await res.read()
+        #             r, g, b = ColorThief(BytesIO(image)).get_color()
+        #             color = int(format(r << 16 | g << 8 | b, "06" + "x"), 16)
+        #     await self.bot.redis.set("osu:{}:color".format(key), color)
+        #     return color
         return int(data)
 
     @osu.command(name="beatmap")

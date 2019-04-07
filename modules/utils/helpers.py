@@ -1,6 +1,5 @@
 from math import floor, log10
 import re
-from colorthief import ColorThief
 import aiohttp
 from io import BytesIO
 
@@ -53,13 +52,14 @@ def clean_text(text: str):
 async def get_dominant_color(bot, url, key, expire: int):
     data = await bot.redis.get("color:{}".format(key))
     if data is None:
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url) as res:
-                image = await res.read()
-                r, g, b = ColorThief(BytesIO(image)).get_color()
-                color = int(format(r << 16 | g << 8 | b, "06" + "x"), 16)
-        await bot.redis.set("color:{}".format(key), color, expire=expire)
-        return color
+        return 0xDEADBF
+    #     async with aiohttp.ClientSession() as cs:
+    #         async with cs.get(url) as res:
+    #             image = await res.read()
+    #             r, g, b = ColorThief(BytesIO(image)).get_color()
+    #             color = int(format(r << 16 | g << 8 | b, "06" + "x"), 16)
+    #     await bot.redis.set("color:{}".format(key), color, expire=expire)
+    #     return color
     return int(data)
 
 def to_emoji(c):

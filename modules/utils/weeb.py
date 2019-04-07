@@ -1,7 +1,6 @@
 import aiohttp
 import logging
 from io import BytesIO
-from colorthief import ColorThief
 
 log = logging.getLogger()
 
@@ -17,20 +16,20 @@ class Weeb:
 
         self.endpoint = "https://api.weeb.sh/images/"
 
-    async def set_dominant_color(self, url: str):
-        try:
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(url) as r:
-                    res = await r.read()
-
-            name = url.rpartition("/")[2]
-            r, g, b = ColorThief(BytesIO(res)).get_color()
-            color = format(r << 16 | g << 8 | b, '06' + "x")
-            color = int(color, 16)
-            await self.bot.redis.set(name, str(color))
-            log.info("Set dominant color for %s" % name)
-        except Exception as e:
-            log.error("Failed to set dominant color, %s" % e)
+    # async def set_dominant_color(self, url: str):
+    #     try:
+    #         async with aiohttp.ClientSession() as cs:
+    #             async with cs.get(url) as r:
+    #                 res = await r.read()
+    #
+    #         name = url.rpartition("/")[2]
+    #         r, g, b = ColorThief(BytesIO(res)).get_color()
+    #         color = format(r << 16 | g << 8 | b, '06' + "x")
+    #         color = int(color, 16)
+    #         await self.bot.redis.set(name, str(color))
+    #         log.info("Set dominant color for %s" % name)
+    #     except Exception as e:
+    #         log.error("Failed to set dominant color, %s" % e)
 
     async def get_dominant_color(self, url: str):
         try:
@@ -39,7 +38,6 @@ class Weeb:
             if data:
                 return int(data.decode("utf8"))
             else:
-                await self.set_dominant_color(url)
                 return 14593471
         except Exception as e:
             log.error("Failed to get dominant color, %s" % e)
