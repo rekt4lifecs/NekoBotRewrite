@@ -1,7 +1,8 @@
 from math import floor, log10
 import re
 import aiohttp
-from io import BytesIO
+import base64
+from urllib.parse import urlencode
 
 invite_re = re.compile("discord(?:app\.com|\.gg)[\/invite\/]?(?:(?!.*[Ii10OolL]).[a-zA-Z0-9]{5,6}|[a-zA-Z0-9\-]{2,32})")
 
@@ -49,17 +50,16 @@ def millify(n):
 def clean_text(text: str):
     return invite_re.sub("[INVITE]", text.replace("@", "@\u200B"))
 
-async def get_dominant_color(bot, url, key, expire: int):
-    data = await bot.redis.get("color:{}".format(key))
+async def get_dominant_color(bot, url):
+    data = await bot.redis.get("color:{}".format(base64.b64encode(url.encode("utf8")).decode("utf8")))
     if data is None:
-        return 0xDEADBF
-    #     async with aiohttp.ClientSession() as cs:
-    #         async with cs.get(url) as res:
-    #             image = await res.read()
-    #             r, g, b = ColorThief(BytesIO(image)).get_color()
-    #             color = int(format(r << 16 | g << 8 | b, "06" + "x"), 16)
-    #     await bot.redis.set("color:{}".format(key), color, expire=expire)
-    #     return color
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get("http://localhost:8096/dominant?{}".format(urlencode({"url": url}))) as res:
+                image = await res.read()
+        try:
+            data = int(image)
+        except:
+            return 0xDEADBF
     return int(data)
 
 def to_emoji(c):
