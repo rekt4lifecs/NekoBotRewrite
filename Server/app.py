@@ -24,7 +24,7 @@ def dominant():
         return str(default_color)
     r, g, b = ColorThief(data).get_color()
     color = int(format(r << 16 | g << 8 | b, "06" + "x"), 16)
-    db.set("color:{}".format(base64.b64encode(url.encode("utf8")).decode("utf8")), color)
+    db.set("color:{}".format(base64.b64encode(url.encode("utf8")).decode("utf8")), color, ex=604800)
     return str(color)
 
 if __name__ == "__main__":
