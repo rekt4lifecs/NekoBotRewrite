@@ -365,7 +365,7 @@ class General(commands.Cog):
         if user is None:
             user = ctx.message.author
         try:
-            color = await helpers.get_dominant_color(self.bot, user.avatar_url_as(format="png"), "avatar:{}".format(ctx.author.id), 3600)
+            color = await helpers.get_dominant_color(self.bot, user.avatar_url_as(format="png"))
         except:
             color = 0xDEADBF
         em = discord.Embed(color=color, title="{}'s Avatar".format(user.name))
@@ -384,7 +384,7 @@ class General(commands.Cog):
                 imgdata = await res.json()
             em = discord.Embed()
             msg = await ctx.send("*drinks coffee*", embed=em.set_image(url=imgdata["message"]))
-            color = await helpers.get_dominant_color(self.bot, imgdata["message"], imgdata["message"].rpartition("/")[2], 10000)
+            color = await helpers.get_dominant_color(self.bot, imgdata["message"])
             em = discord.Embed(color=color)
             await msg.edit(embed=em.set_image(url=imgdata["message"]))
 
@@ -396,7 +396,7 @@ class General(commands.Cog):
             async with cs.get("https://nekobot.xyz/api/v2/image/animepic") as r:
                 res = await r.json()
         image = res["message"]
-        color = await helpers.get_dominant_color(self.bot, image, image.rpartition("/")[2], 10000)
+        color = await helpers.get_dominant_color(self.bot, image)
         em = discord.Embed(color=color)
         await ctx.send(embed=em.set_image(url=image))
 
