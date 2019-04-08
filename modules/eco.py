@@ -357,8 +357,10 @@ class Economy(commands.Cog):
             married = []
 
         temp = BytesIO()
-        (await self._generate_profile(int(xp), user.name, info, int(balance), married, rep)).save(temp, format="png")
+        img = await self._generate_profile(int(xp), user.name, info, int(balance), married, rep)
+        img.save(temp, format="png")
         temp.seek(0)
+        img.close()
 
         await ctx.send(file=discord.File(fp=temp, filename="profile.png"))
 
