@@ -2,11 +2,8 @@ import discord, random, time, datetime, asyncio
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
-import aiohttp
 import rethinkdb as r
-import os
 from prettytable import PrettyTable
-import gettext
 from io import BytesIO
 
 list_ = [
@@ -261,6 +258,8 @@ class CardGame(commands.Cog):
         temp = BytesIO()
         img.save(temp, format="jpeg")
         temp.seek(0)
+
+        img.close()
         return temp
 
     @card.command(name='sell')
