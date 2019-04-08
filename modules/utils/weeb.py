@@ -16,21 +16,6 @@ class Weeb:
 
         self.endpoint = "https://api.weeb.sh/images/"
 
-    # async def set_dominant_color(self, url: str):
-    #     try:
-    #         async with aiohttp.ClientSession() as cs:
-    #             async with cs.get(url) as r:
-    #                 res = await r.read()
-    #
-    #         name = url.rpartition("/")[2]
-    #         r, g, b = ColorThief(BytesIO(res)).get_color()
-    #         color = format(r << 16 | g << 8 | b, '06' + "x")
-    #         color = int(color, 16)
-    #         await self.bot.redis.set(name, str(color))
-    #         log.info("Set dominant color for %s" % name)
-    #     except Exception as e:
-    #         log.error("Failed to set dominant color, %s" % e)
-
     async def get_dominant_color(self, url: str):
         try:
             name = url.rpartition("/")[2]
