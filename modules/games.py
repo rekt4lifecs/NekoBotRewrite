@@ -7,6 +7,7 @@ from modules.eco import interpolate, get_rgb
 from io import BytesIO
 import time
 import random
+from .utils.helpers import get_dominant_color
 
 wargaming = {
     "wows": {
@@ -233,19 +234,6 @@ class Games(commands.Cog):
         await ctx.trigger_typing()
         await ctx.send(file=discord.File((await self.generate_card(data, 3)), "osu.png"))
 
-    async def get_dominant_color(self, url, key):
-        data = await self.bot.redis.get("osu:{}:color".format(key))
-        if data is None:
-            return 0xDEADBF
-        #     async with aiohttp.ClientSession() as cs:
-        #         async with cs.get(url) as res:
-        #             image = await res.read()
-        #             r, g, b = ColorThief(BytesIO(image)).get_color()
-        #             color = int(format(r << 16 | g << 8 | b, "06" + "x"), 16)
-        #     await self.bot.redis.set("osu:{}:color".format(key), color)
-        #     return color
-        return int(data)
-
     @osu.command(name="beatmap")
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def osu_beatmap(self, ctx, *, title: str):
@@ -267,7 +255,7 @@ class Games(commands.Cog):
                 return await ctx.send("No data found.")
         beatmap_data = beatmap_data[0]
         image_url = "https://assets.ppy.sh/beatmaps/{}/covers/card.jpg?{}".format(beatmap_data["beatmapset_id"], int(time.time()))
-        color = await self.get_dominant_color(image_url, beatmap_data["beatmapset_id"])
+        color = await get_dominant_color(self.bot, image_url)
         em = discord.Embed(colour=color, title="**{}** - {}".format(beatmap["title"], beatmap["artist"]))
         em.set_image(url=image_url)
         em.add_field(name="Length", value="{}s".format(beatmap_data["total_length"]))
