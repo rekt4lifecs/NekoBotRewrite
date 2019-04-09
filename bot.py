@@ -10,6 +10,7 @@ import asyncio
 from datetime import datetime
 from queue import Empty as EmptyQueue
 import json
+from modules.utils import instance_tools
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
@@ -157,6 +158,15 @@ class NekoBot(commands.AutoShardedBot):
             except:
                 logger.error("Redis update failed")
             await asyncio.sleep(240)
+
+    async def post_stats(self):
+        if self.instance == 0:
+            i = instance_tools.InstanceTools(self.instances, self.redis)
+            async with aiohttp.ClientSession() as cs:
+                await cs.post("https://www.carbonitex.net/discord/data/botdata.php", json={
+                    "key": config.carbon,
+                    "servercount": await i.get_all_guilds()
+                })
 
     async def on_socket_response(self, msg):
         if not self.pipe.closed:
