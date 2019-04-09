@@ -157,6 +157,10 @@ class NekoBot(commands.AutoShardedBot):
                 await self.redis.set("instance%s-channels" % self.instance, len(set(self.get_all_channels())))
             except:
                 logger.error("Redis update failed")
+            try:
+                await self.post_stats()
+            except:
+                logger.error("Failed to post stats")
             await asyncio.sleep(240)
 
     async def post_stats(self):
