@@ -6,7 +6,7 @@ import os
 from signal import SIGKILL
 
 shards = 96
-shards_per_instance = 16
+shards_per_instance = 32
 instances = int(shards / shards_per_instance)
 processes = list()
 
@@ -48,6 +48,7 @@ if __name__ == "__main__":
                 for powo in processes_owo:
                     proc = processes_owo[powo].get("process")
                     if not proc.is_alive():
+                        wait(20)
                         listen, send = Pipe()
                         p = Process(target=bot.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
                         p.start()
