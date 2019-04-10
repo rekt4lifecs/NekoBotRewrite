@@ -85,3 +85,4 @@ html5lib
 lxml
 rethinkdb==2.3.0.post6
 opencv-python
+lavalink
