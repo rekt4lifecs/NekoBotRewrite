@@ -33,7 +33,7 @@ aioredis
 beautifulsoup4
 
 # Used for heccin literally everything with discord
-git+https://github.com/Rapptz/discord.py@rewrite
+git+https://github.com/Rapptz/discord.py
 
 # NekoBotRewrite\modules\nsfw.py: 7
 nekobot
