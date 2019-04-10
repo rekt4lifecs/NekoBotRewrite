@@ -158,7 +158,7 @@ class General(commands.Cog):
     async def choose(self, ctx, *items):
         """Choose between multiple options"""
         if not items:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
         await ctx.send("I chose: **{}**!".format(helpers.clean_text(random.choice(items))))
 
     def get_bot_uptime(self, *, brief=False):
@@ -488,7 +488,7 @@ class General(commands.Cog):
     async def config(self, ctx):
         """Configuration"""
         if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
 
     @config.command(name="addbalance", hidden=True)
     @commands.is_owner()

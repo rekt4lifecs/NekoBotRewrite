@@ -75,7 +75,7 @@ class Games(commands.Cog):
     async def osu(self, ctx):
         """osu UwU"""
         if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
 
     async def osu_converter(self, ctx: commands.Context, arg: str):
         converter = commands.MemberConverter()
@@ -337,7 +337,7 @@ class Games(commands.Cog):
     async def wows(self, ctx):
         """World of Warships"""
         if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
 
     @wows.command(name="ships")
     async def wows_ships(self, ctx, username: str, region: str = "na"):

@@ -23,7 +23,7 @@ class IMGWelcome(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def imgwelcome(self, ctx):
         if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
 
     @imgwelcome.command(name="toggle")
     async def imgwelcome_toggle(self, ctx):
@@ -150,7 +150,7 @@ class IMGWelcome(commands.Cog):
             background = Image.open("data/imgwelcome/transparent.png")
 
         async with aiohttp.ClientSession() as cs:
-            async with cs.get(member.avatar_url_as(format="png")) as res:
+            async with cs.get(str(member.avatar_url_as(format="png"))) as res:
                 imgdata = await res.read()
 
         welcome_picture = ImageOps.fit(background, (500, 150), centering=(0.5, 0.5))

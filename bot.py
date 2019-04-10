@@ -197,12 +197,7 @@ class NekoBot(commands.AutoShardedBot):
         logger.info("{} executed {}".format(ctx.author.id, ctx.command.name))
 
     async def send_cmd_help(self, ctx):
-        formatter = commands.DefaultHelpCommand(show_hidden=True)
-        formatter.context = ctx
-        if hasattr(ctx.command, "group"):
-            await formatter.send_group_help(ctx.command)
-        else:
-            await formatter.send_command_help(ctx.command)
+        return await ctx.send_help(ctx.command)
 
     async def on_message(self, message):
         if message.author.bot:

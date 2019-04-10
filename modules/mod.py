@@ -84,7 +84,7 @@ class Moderation(commands.Cog):
     @commands.group(aliases=["customrole", "role"])
     async def customroles(self, ctx):
         if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
 
     @customroles.command(name="join")
     async def __join(self, ctx, *, role: discord.Role = None):
@@ -431,7 +431,7 @@ class Moderation(commands.Cog):
     @commands.is_owner()
     async def ipc_handle(self, ctx):
         if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
 
     @ipc_handle.command(name="reload")
     async def ipc_reload(self, ctx, *, module: str):
@@ -518,7 +518,7 @@ class Moderation(commands.Cog):
         """Removes messages that meet a criteria."""
 
         if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
 
     async def do_removal(self, ctx, limit, predicate, *, before=None, after=None):
 
@@ -743,7 +743,7 @@ class Moderation(commands.Cog):
                 await r.table("autorole").get(str(guild.id)).delete().run(self.bot.r_conn)
                 return await ctx.send("Reset Autorole.")
             else:
-                return await self.bot.send_cmd_help(ctx)
+                return await ctx.send_help(ctx.command)
         else:
             data = {
                 "id": str(guild.id),

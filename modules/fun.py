@@ -59,9 +59,9 @@ class Fun(commands.Cog):
     async def __get_image(self, ctx, user=None):
         if user:
             if user.is_avatar_animated():
-                return user.avatar_url_as(format="gif")
+                return str(user.avatar_url_as(format="gif"))
             else:
-                return user.avatar_url_as(format="png")
+                return str(user.avatar_url_as(format="png"))
 
         await ctx.trigger_typing()
 

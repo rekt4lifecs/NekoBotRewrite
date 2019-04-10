@@ -98,7 +98,7 @@ class CardGame(commands.Cog):
         await self.__check_for_user(ctx.author.id)
 
         if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
 
     @card.command(name="transfer")
     async def card_transfer(self, ctx, card_number, user:discord.Member):

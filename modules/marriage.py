@@ -94,7 +94,7 @@ class Marriage(commands.Cog):
             except commands.BadArgument:
                 user_re_match = re.match("[0-9]{12,22}", str(user))
                 if user_re_match is None:
-                    return await self.bot.send_cmd_help(ctx)
+                    return await ctx.send_help(ctx.command)
                 user = await self.bot.fetch_user(int(user_re_match.group(0)))
 
         if user.id == ctx.author.id:

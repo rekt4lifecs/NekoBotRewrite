@@ -77,7 +77,7 @@ class Donator(commands.Cog):
             return await ctx.send("You have not donated :c, you can donate at <https://www.patreon.com/NekoBot> <:AwooHappy:471598416238215179>")
 
         if not channel:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
 
         data = {
             "id": str(ctx.guild.id),
@@ -144,7 +144,7 @@ class Donator(commands.Cog):
             return await ctx.send("You have not donated")
 
         if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
 
     @twitter.command(name="set")
     async def twitter_set(self, ctx, channel: discord.TextChannel):

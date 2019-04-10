@@ -307,7 +307,7 @@ class Audio(commands.Cog):
                 "playlists": {}
             }).run(self.bot.r_conn)
         if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
 
     @playlist.command(name="add")
     async def playlist_add(self, ctx, playlist_name, *, song):

@@ -3,7 +3,7 @@ import discord, random, math, logging
 from PIL import Image, ImageFont, ImageDraw
 import rethinkdb as r
 from io import BytesIO
-
+import traceback
 log = logging.getLogger()
 
 class NekoPet(commands.Cog):
@@ -39,10 +39,10 @@ class NekoPet(commands.Cog):
     @commands.group()
     @commands.guild_only()
     @commands.cooldown(1, 7, commands.BucketType.user)
-    async def pet(self, ctx):
+    async def pet(self, ctx: commands.Context):
         """Neko pet owo"""
         if ctx.invoked_subcommand is None:
-            return await self.bot.send_cmd_help(ctx)
+            return await ctx.send_help(ctx.command)
 
     @pet.command(name="play")
     async def neko_play(self, ctx):
