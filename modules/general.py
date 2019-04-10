@@ -580,7 +580,7 @@ class General(commands.Cog):
     async def getuser(self, ctx, userid: int):
         """Get user from id"""
         try:
-            user = await self.bot.get_user_info(userid)
+            user = await self.bot.fetch_user(userid)
             created_at = user.created_at.strftime("%d %b %Y %H:%M")
             bank = await r.table("economy").get(str(userid)).run(self.bot.r_conn)
             level = await r.table("levelSystem").get(str(userid)).run(self.bot.r_conn)

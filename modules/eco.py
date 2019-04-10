@@ -99,7 +99,7 @@ class Economy(commands.Cog):
     async def get_cached_user(self, user_id: int):
         cache = await self.bot.redis.get("user_cache:{}".format(user_id))
         if cache is None:
-            cache = await self.bot.get_user_info(user_id)
+            cache = await self.bot.fetch_user(user_id)
             cache = {
                 "name": cache.name,
                 "id": cache.id,

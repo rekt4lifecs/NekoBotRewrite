@@ -16,7 +16,7 @@ class Marriage(commands.Cog):
     async def get_cached_user(self, user_id: int):
         cache = await self.bot.redis.get("user_cache:{}".format(user_id))
         if cache is None:
-            cache = await self.bot.get_user_info(user_id)
+            cache = await self.bot.fetch_user(user_id)
             cache = {
                 "name": cache.name,
                 "id": cache.id,
@@ -95,7 +95,7 @@ class Marriage(commands.Cog):
                 user_re_match = re.match("[0-9]{12,22}", str(user))
                 if user_re_match is None:
                     return await self.bot.send_cmd_help(ctx)
-                user = await self.bot.get_user_info(int(user_re_match.group(0)))
+                user = await self.bot.fetch_user(int(user_re_match.group(0)))
 
         if user.id == ctx.author.id:
             return await ctx.send("You can't divorce yourself")
