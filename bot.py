@@ -88,6 +88,12 @@ async def _prefix_callable(bot, msg):
         prefix = [prefix.decode("utf8"), "n!", "N!"]
     return commands.when_mentioned_or(*prefix)(bot, msg)
 
+def justrunpls(instance, instances, shard_count, shard_ids, pipe, ipc_queue):
+    _globals = globals()
+    _locals = locals()
+    _globals["NekoBot"] = NekoBot
+    cProfile.runctx("NekoBot(instance, instances, shard_count, shard_ids, pipe, ipc_queue)", globals=_globals, locals=_locals, filename="profile:{}:{}".format(int(time.time()), instance))
+
 class NekoBot(commands.AutoShardedBot):
 
     def __init__(self, instance, instances, shard_count, shard_ids, pipe, ipc_queue, **kwargs):
@@ -211,9 +217,7 @@ class NekoBot(commands.AutoShardedBot):
         await super().close()
 
     def run(self, token: str = config.token):
-        _globals = globals()
-        _globals["run"] = super().run
-        cProfile.runctx("run(token)", globals=_globals, locals=locals(), filename="profile:{}:{}".format(int(time.time()), self.instance))
+        super().run(token)
 
     async def on_command_error(self, ctx, exception):
         error = getattr(exception, "original", exception)

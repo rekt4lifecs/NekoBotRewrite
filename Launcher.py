@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     for powo in processes_owo:
         listen, send = Pipe()
-        p = Process(target=bot.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
+        p = Process(target=bot.justrunpls, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
         p.start()
         processes_owo[powo]["process"] = p
         print("Launching Instance {} (PID {})".format(powo, p.pid))
@@ -50,7 +50,7 @@ if __name__ == "__main__":
                     if not proc.is_alive():
                         wait(20)
                         listen, send = Pipe()
-                        p = Process(target=bot.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
+                        p = Process(target=bot.justrunpls, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
                         p.start()
                         processes_owo[powo]["process"] = p
                         print("Relaunched {}".format(powo))
