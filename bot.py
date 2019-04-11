@@ -211,8 +211,9 @@ class NekoBot(commands.AutoShardedBot):
         await super().close()
 
     def run(self, token: str = config.token):
-        tsk = super().run
-        cProfile.run("tsk(token)", "profile:{}:{}".format(int(time.time()), self.instance))
+        _globals = globals()
+        _globals["run"] = super().run
+        cProfile.runctx("run(token)", globals=_globals, locals=locals(), filename="profile:{}:{}".format(int(time.time()), self.instance))
 
     async def on_command_error(self, ctx, exception):
         error = getattr(exception, "original", exception)
