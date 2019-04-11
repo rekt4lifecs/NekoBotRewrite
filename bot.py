@@ -92,7 +92,7 @@ def justrunpls(instance, instances, shard_count, shard_ids, pipe, ipc_queue):
     _globals = globals()
     _locals = locals()
     _globals["NekoBot"] = NekoBot
-    cProfile.runctx("NekoBot(instance, instances, shard_count, shard_ids, pipe, ipc_queue)", globals=_globals, locals=_locals, filename="profile:{}:{}".format(int(time.time()), instance))
+    cProfile.runctx("NekoBot(instance, instances, shard_count, shard_ids, pipe, ipc_queue).run()", globals=_globals, locals=_locals, filename="profile:{}:{}".format(int(time.time()), instance))
 
 class NekoBot(commands.AutoShardedBot):
 
@@ -136,7 +136,6 @@ class NekoBot(commands.AutoShardedBot):
                     logger.error("Failed to load {}, {}".format(module, e))
 
         self.loop.create_task(self.start_loop())
-        self.run()
 
     async def start_loop(self):
         while True:
