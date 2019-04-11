@@ -11,6 +11,7 @@ from datetime import datetime
 from queue import Empty as EmptyQueue
 import json
 from modules.utils import instance_tools
+import cProfile
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 RESET_SEQ = "\033[0m"
@@ -210,7 +211,7 @@ class NekoBot(commands.AutoShardedBot):
         await super().close()
 
     def run(self, token: str = config.token):
-        super().run(token)
+        cProfile.run("super().run(token)", "profile:{}:{}".format(int(time.time()), self.instance))
 
     async def on_command_error(self, ctx, exception):
         error = getattr(exception, "original", exception)
