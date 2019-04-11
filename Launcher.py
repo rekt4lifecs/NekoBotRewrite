@@ -4,6 +4,8 @@ import asyncio
 import shutil
 import os
 from signal import SIGKILL
+import cProfile
+import time
 
 shards = 96
 shards_per_instance = 32
@@ -33,7 +35,7 @@ if __name__ == "__main__":
     for powo in processes_owo:
         listen, send = Pipe()
         p = Process(target=bot.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
-        p.start()
+        cProfile.run("p.start()", "profile:{}:{}".format(int(time.time()), powo))
         processes_owo[powo]["process"] = p
         print("Launching Instance {} (PID {})".format(powo, p.pid))
         processes.append(p.pid)
@@ -51,7 +53,7 @@ if __name__ == "__main__":
                         wait(20)
                         listen, send = Pipe()
                         p = Process(target=bot.NekoBot, args=(int(powo), instances, shards, processes_owo[powo]["ids"], send, ipc_queue))
-                        p.start()
+                        cProfile.run("p.start()", "profile:{}:{}".format(int(time.time()), powo))
                         processes_owo[powo]["process"] = p
                         print("Relaunched {}".format(powo))
                         processes.append(p.pid)
