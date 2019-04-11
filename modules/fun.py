@@ -588,7 +588,7 @@ class Fun(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def cat(self, ctx):
-        async with self.session.get('https://api.weeb.sh/images/random?type=animal_cat') as r:
+        async with self.session.get('https://api.weeb.sh/images/random?type=animal_cat', headers=auth) as r:
             res = await r.json()
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=res["url"])
@@ -597,7 +597,7 @@ class Fun(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def dog(self, ctx):
-        async with self.session.get('https://api.weeb.sh/images/random?type=animal_dog') as r:
+        async with self.session.get('https://api.weeb.sh/images/random?type=animal_dog', headers=auth) as r:
             res = await r.json()
         em = discord.Embed(color=0xDEADBF)
         em.set_image(url=res["url"])
