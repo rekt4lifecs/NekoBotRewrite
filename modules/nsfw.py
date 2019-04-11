@@ -24,38 +24,40 @@ class NSFW(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.session = aiohttp.ClientSession()
+
+    def cog_unload(self):
+        self.session.close()
+        del self.session
 
     async def log_error(self, error:str):
         webhook_url = f"https://discordapp.com/api/webhooks/{config.webhook_id}/{config.webhook_token}"
-        async with aiohttp.ClientSession() as cs:
-            webhook = discord.Webhook.from_url(webhook_url, adapter=discord.AsyncWebhookAdapter(cs))
+        webhook = discord.Webhook.from_url(webhook_url, adapter=discord.AsyncWebhookAdapter(self.session))
 
-            em = discord.Embed(color=0xff6f3f)
-            em.title = "Error"
-            em.description = chat_formatting.box(error, "python")
-            em.set_footer(text="Instance %s" % self.bot.instance)
+        em = discord.Embed(color=0xff6f3f)
+        em.title = "Error"
+        em.description = chat_formatting.box(error, "python")
+        em.set_footer(text="Instance %s" % self.bot.instance)
 
-            await webhook.send(embed=em)
+        await webhook.send(embed=em)
 
     async def nekobot(self, imgtype: str):
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://nekobot.xyz/api/image?type=%s" % imgtype) as res:
-                res = await res.json()
+        async with self.session.get("https://nekobot.xyz/api/image?type=%s" % imgtype) as res:
+            res = await res.json()
         return res.get("message")
 
     async def boobbot(self, imgtype:str):
         auth = {"key": config.boobbot["key"]}
         url = "https://nekobot.xyz/placeholder.png"
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(config.boobbot["base"] + imgtype, headers=auth) as res:
-                try:
-                    x = await res.json()
-                    url = x.get("url")
-                except:
-                    content = await res.text()
-                    status = res.status
-                    content = await hastebin.post(str(content))
-                    await self.log_error(f"Content Type Error:\n({status}) {content}")
+        async with self.session.get(config.boobbot["base"] + imgtype, headers=auth) as res:
+            try:
+                x = await res.json()
+                url = x.get("url")
+            except:
+                content = await res.text()
+                status = res.status
+                content = await hastebin.post(str(content))
+                await self.log_error(f"Content Type Error:\n({status}) {content}")
         return url
 
     @commands.command()
@@ -128,18 +130,17 @@ class NSFW(commands.Cog):
             return
         else:
             query = ("https://yande.re/post.json?limit=100&tags=" + tag)
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(query) as res:
-                    res = await res.json()
-            if res != []:
-                img = random.choice(res)
-                if "loli" in img["tags"] or "shota" in img["tags"]:
-                    return await ctx.send("Loli or shota was found in this post.")
-                em = discord.Embed(color=0xDEADBF)
-                em.set_image(url=img['jpeg_url'])
-                await ctx.send(embed=em)
-            else:
-                await ctx.send("No tags found.")
+            async with self.session.get(query) as res:
+                res = await res.json()
+        if res != []:
+            img = random.choice(res)
+            if "loli" in img["tags"] or "shota" in img["tags"]:
+                return await ctx.send("Loli or shota was found in this post.")
+            em = discord.Embed(color=0xDEADBF)
+            em.set_image(url=img['jpeg_url'])
+            await ctx.send(embed=em)
+        else:
+            await ctx.send("No tags found.")
 
     @commands.command()
     @commands.guild_only()
@@ -166,9 +167,8 @@ class NSFW(commands.Cog):
             return
         headers = {"Authorization": f"Client-ID {config.imgur}"}
         url = f'https://api.imgur.com/3/gallery/r/bodyperfection/hot/{random.randint(1, 5)}'
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url, headers=headers) as res:
-                res =  await res.json()
+        async with self.session.get(url, headers=headers) as res:
+            res =  await res.json()
         if res["status"] == 429:
             return await ctx.send("**Ratelimited, try again later.**")
         data = res['data']
@@ -190,9 +190,8 @@ class NSFW(commands.Cog):
         sub = random.choice(["bigboobs", "BigBoobsGW"])
         headers = {"Authorization": f"Client-ID {config.imgur}"}
         url = f'https://api.imgur.com/3/gallery/r/{sub}/hot/{random.randint(1, 5)}'
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(url, headers=headers) as res:
-                res = await res.json()
+        async with self.session.get(url, headers=headers) as res:
+            res = await res.json()
         if res["status"] == 429:
             return await ctx.send("**Ratelimited, try again later.**")
         x = random.choice(res['data'])
@@ -237,9 +236,8 @@ class NSFW(commands.Cog):
         if not ctx.message.channel.is_nsfw():
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("https://nekobot.xyz/api/v2/image/thighs") as res:
-                res = await res.json()
+        async with self.session.get("https://nekobot.xyz/api/v2/image/thighs") as res:
+            res = await res.json()
         image = res["message"]
         em = discord.Embed(color=await helpers.get_dominant_color(self.bot, image))
         em.set_image(url=image)
@@ -284,9 +282,8 @@ class NSFW(commands.Cog):
             await ctx.send("This is not a NSFW Channel <:deadStare:417437129501835279>")
             return
         else:
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get("http://nhentai.net/random/") as res:
-                    res = res.url
+            async with self.session.get("http://nhentai.net/random/") as res:
+                res = res.url
             await ctx.send(embed=discord.Embed(color=0xDEADBF,
                                                title="Random Doujin",
                                                description=str(res)))
@@ -325,9 +322,8 @@ class NSFW(commands.Cog):
         if not ctx.message.channel.is_nsfw():
             return await ctx.send("This is not an NSFW channel...", delete_after=5)
         try:
-            async with aiohttp.ClientSession() as cs:
-                async with cs.get(f"https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags={tag}") as res:
-                    data = json.loads(await res.text())
+            async with self.session.get(f"https://rule34.xxx/index.php?page=dapi&s=post&q=index&json=1&tags={tag}") as res:
+                data = json.loads(await res.text())
             non_loli = list(filter(lambda x: 'loli' not in x['tags'] and 'shota' not in x['tags'], data))
             if len(non_loli) == 0:
                 em = discord.Embed(color=0xff6f3f, title="Warning", description="Loli/Shota in search.")
@@ -350,10 +346,9 @@ class NSFW(commands.Cog):
         try:
             ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:62.0) Gecko/20100101 Firefox/62.0"
             async with ctx.typing():
-                async with aiohttp.ClientSession() as cs:
-                    async with cs.get(f"https://e621.net/post/index.json?limit=15&tags={tag}",
-                                      headers={"User-Agent": ua}) as res:
-                        res = await res.json()
+                async with self.session.get(f"https://e621.net/post/index.json?limit=15&tags={tag}",
+                                  headers={"User-Agent": ua}) as res:
+                    res = await res.json()
                 data = random.choice(res)
                 if data == []:
                     return await ctx.send("**No images found**")
@@ -432,9 +427,8 @@ class NSFW(commands.Cog):
             return await ctx.send("That's not a valid image.")
 
         await ctx.trigger_typing()
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get("http://saucenao.com/search.php?db=999&url={}".format(image_url)) as res:
-                data = await res.read()
+        async with self.session.get("http://saucenao.com/search.php?db=999&url={}".format(image_url)) as res:
+            data = await res.read()
 
         if b"Problem with remote server..." in data:
             return await ctx.send("Could not find the source for that image.")
